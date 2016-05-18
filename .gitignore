@@ -1,0 +1,8 @@
+*.el
+*\#*
+pkg/
+.env
+.idea/
+.vagrant/
+.git_index
+/tmp

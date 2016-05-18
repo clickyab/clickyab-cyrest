@@ -1,0 +1,18 @@
+name: "docker"
+windows:
+- name: tasks
+  layout: tiled
+  panes:
+  - commands:
+    - /etc/init.d/postgresql start
+    - /etc/init.d/redis-server start
+    - /etc/init.d/php5-fpm start
+    - /etc/init.d/nginx start
+    - mailcatcher --http-ip 0.0.0.0
+    - sleep 2  # Wait all other start then allow ssh from vagrant
+    - /etc/init.d/ssh start
+    focus: true
+    root: ~
+  - commands:
+    - htop
+    root: ~

@@ -1,0 +1,330 @@
+{
+	"version": 0,
+	"dependencies": [
+		{
+			"importpath": "git.eclipse.org/gitroot/paho/org.eclipse.paho.mqtt.golang.git",
+			"repository": "https://git.eclipse.org/gitroot/paho/org.eclipse.paho.mqtt.golang.git",
+			"revision": "617c801af238c3af2d9e72c5d4a0f02edad03ce5",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/BurntSushi/toml",
+			"repository": "https://github.com/BurntSushi/toml",
+			"revision": "f0aeabca5a127c4078abb8c8d64298b147264b55",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/PuerkitoBio/goquery",
+			"repository": "https://github.com/PuerkitoBio/goquery",
+			"revision": "2e29ea41f0d13f4a303c75553f4eeadddc7a4c56",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/Shyp/go-dberror",
+			"repository": "https://github.com/Shyp/go-dberror",
+			"revision": "92eb70dfc8085d97ba843c5cdb8c62086e35e344",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/Sirupsen/logrus",
+			"repository": "https://github.com/Sirupsen/logrus",
+			"revision": "cd7d1bbe41066b6c1f19780f895901052150a575",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/andybalholm/cascadia",
+			"repository": "https://github.com/andybalholm/cascadia",
+			"revision": "3ad29d1ad1c4f2023e355603324348cf1f4b2d48",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/aymerick/douceur/css",
+			"repository": "https://github.com/aymerick/douceur",
+			"revision": "7176f146738114e7386d4f915a0bbf55945e22c9",
+			"branch": "master",
+			"path": "/css"
+		},
+		{
+			"importpath": "github.com/aymerick/douceur/inliner",
+			"repository": "https://github.com/aymerick/douceur",
+			"revision": "7176f146738114e7386d4f915a0bbf55945e22c9",
+			"branch": "master",
+			"path": "/inliner"
+		},
+		{
+			"importpath": "github.com/aymerick/douceur/parser",
+			"repository": "https://github.com/aymerick/douceur",
+			"revision": "7176f146738114e7386d4f915a0bbf55945e22c9",
+			"branch": "master",
+			"path": "/parser"
+		},
+		{
+			"importpath": "github.com/denisenkom/go-mssqldb",
+			"repository": "https://github.com/denisenkom/go-mssqldb",
+			"revision": "2a223b1644106bc7ca456c12cde55a80185813ef",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/disintegration/imaging",
+			"repository": "https://github.com/disintegration/imaging",
+			"revision": "d8bbae1de109b518dabc98c6c1633eb358c148a4",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/dustin/go-broadcast",
+			"repository": "https://github.com/dustin/go-broadcast",
+			"revision": "3bdf6d4a7164a50bc19d5f230e2981d87d2584f1",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/fzerorubigd/block",
+			"repository": "https://github.com/fzerorubigd/block",
+			"revision": "1770753b8e8019759df1a6f8ef2789e0dfa3f4de",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/fzerorubigd/expand",
+			"repository": "https://github.com/fzerorubigd/expand",
+			"revision": "fd359294116f3987dc04c5987782f845e99e9f42",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/fzerorubigd/go-redmine",
+			"repository": "https://github.com/fzerorubigd/go-redmine",
+			"revision": "05bb0a08b5c20b45765553ca33aea5a2aea9f3a8",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/garyburd/redigo",
+			"repository": "https://github.com/garyburd/redigo",
+			"revision": "8873b2f1995f59d4bcdd2b0dc9858e2cb9bf0c13",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/gin-gonic/gin",
+			"repository": "https://github.com/gin-gonic/gin",
+			"revision": "542be2fe77724f800fcab7eb6c01a4e597fb8506",
+			"branch": "develop"
+		},
+		{
+			"importpath": "github.com/go-gomail/gomail",
+			"repository": "https://github.com/go-gomail/gomail",
+			"revision": "81ebce5c23dfd25c6c67194b37d3dd3f338c98b1",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/go-sql-driver/mysql",
+			"repository": "https://github.com/go-sql-driver/mysql",
+			"revision": "7ebe0a500653eeb1859664bed5e48dec1e164e73",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/golang/glog",
+			"repository": "https://github.com/golang/glog",
+			"revision": "23def4e6c14b4da8ac2ed8007337bc5eb5007998",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/golang/protobuf",
+			"repository": "https://github.com/golang/protobuf",
+			"revision": "cd85f19845cc96cc6e5269c894d8cd3c67e9ed83",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/golang/protobuf/proto",
+			"repository": "https://github.com/golang/protobuf",
+			"revision": "cd85f19845cc96cc6e5269c894d8cd3c67e9ed83",
+			"branch": "master",
+			"path": "/proto"
+		},
+		{
+			"importpath": "github.com/golang/protobuf/proto/testdata",
+			"repository": "https://github.com/golang/protobuf",
+			"revision": "cd85f19845cc96cc6e5269c894d8cd3c67e9ed83",
+			"branch": "master",
+			"path": "/proto/testdata"
+		},
+		{
+			"importpath": "github.com/golang/protobuf/ptypes/any",
+			"repository": "https://github.com/golang/protobuf",
+			"revision": "cd85f19845cc96cc6e5269c894d8cd3c67e9ed83",
+			"branch": "master",
+			"path": "/ptypes/any"
+		},
+		{
+			"importpath": "github.com/goraz/humanize",
+			"repository": "https://github.com/goraz/humanize",
+			"revision": "c228c1160e27f8a6fa8d47a8cd42848333431523",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/gorilla/css/scanner",
+			"repository": "https://github.com/gorilla/css",
+			"revision": "a80e24ada2699166544311f07c26ef37eaf64012",
+			"branch": "master",
+			"path": "/scanner"
+		},
+		{
+			"importpath": "github.com/jinzhu/inflection",
+			"repository": "https://github.com/jinzhu/inflection",
+			"revision": "3272df6c21d04180007eb3349844c89a3856bc25",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/kisielk/errcheck",
+			"repository": "https://github.com/kisielk/errcheck",
+			"revision": "8e25ad9d46f6c5d4e994edf82c57eb773a9aa73d",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/kisielk/gotool",
+			"repository": "https://github.com/kisielk/gotool",
+			"revision": "58a7a198f2ec6ea7af221fd216e7f559d663ce02",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/lib/pq",
+			"repository": "https://github.com/lib/pq",
+			"revision": "ee1442bda7bd1b6a84e913bdb421cb1874ec629d",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/manucorporat/sse",
+			"repository": "https://github.com/manucorporat/sse",
+			"revision": "ee05b128a739a0fb76c7ebd3ae4810c1de808d6d",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/manucorporat/stats",
+			"repository": "https://github.com/manucorporat/stats",
+			"revision": "8f2d6ace262eba462e9beb552382c98be51d807b",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/ogier/pflag",
+			"repository": "https://github.com/ogier/pflag",
+			"revision": "45c278ab3607870051a2ea9040bb85fcb8557481",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/olebedev/emitter",
+			"repository": "https://github.com/olebedev/emitter",
+			"revision": "3e7ff9ab9e1ca04c4bd78354ca4c2bc5f6725f90",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/rubenv/sql-migrate",
+			"repository": "https://github.com/rubenv/sql-migrate",
+			"revision": "969836b11ea791ff8335d8142eb96904db12d593",
+			"branch": "master"
+		},
+		{
+			"importpath": "golang.org/x/crypto",
+			"repository": "https://go.googlesource.com/crypto",
+			"revision": "5bcd134fee4dd1475da17714aac19c0aa0142e2f",
+			"branch": "master"
+		},
+		{
+			"importpath": "golang.org/x/image/bmp",
+			"repository": "https://go.googlesource.com/image",
+			"revision": "f551d3a6b7fc11df315ad9e18b404280680f8bec",
+			"branch": "master",
+			"path": "/bmp"
+		},
+		{
+			"importpath": "golang.org/x/image/tiff",
+			"repository": "https://go.googlesource.com/image",
+			"revision": "f551d3a6b7fc11df315ad9e18b404280680f8bec",
+			"branch": "master",
+			"path": "/tiff"
+		},
+		{
+			"importpath": "golang.org/x/net",
+			"repository": "https://go.googlesource.com/net",
+			"revision": "8a52c78636f6b7be1b1e5cb58b01a85f1e082659",
+			"branch": "master"
+		},
+		{
+			"importpath": "golang.org/x/net/websocket",
+			"repository": "https://go.googlesource.com/net",
+			"revision": "5916dcb167ed985a5b9e6871fbfd74848a4c170b",
+			"branch": "master",
+			"path": "/websocket"
+		},
+		{
+			"importpath": "golang.org/x/oauth2",
+			"repository": "https://go.googlesource.com/oauth2",
+			"revision": "e86e2718db89775a4604abc10a5d3a5672e7336e",
+			"branch": "master"
+		},
+		{
+			"importpath": "golang.org/x/tools",
+			"repository": "https://go.googlesource.com/tools",
+			"revision": "9ae4729fba20b3533d829a9c6ba8195b068f2abc",
+			"branch": "master"
+		},
+		{
+			"importpath": "golang.org/x/tools/go/loader",
+			"repository": "https://go.googlesource.com/tools",
+			"revision": "9ae4729fba20b3533d829a9c6ba8195b068f2abc",
+			"branch": "master",
+			"path": "/go/loader"
+		},
+		{
+			"importpath": "google.golang.org/cloud/compute/metadata",
+			"repository": "https://code.googlesource.com/gocloud",
+			"revision": "4f2a141928415b2748b2277f2a673da68863fb5c",
+			"branch": "master",
+			"path": "/compute/metadata"
+		},
+		{
+			"importpath": "google.golang.org/cloud/internal",
+			"repository": "https://code.googlesource.com/gocloud",
+			"revision": "4f2a141928415b2748b2277f2a673da68863fb5c",
+			"branch": "master",
+			"path": "/internal"
+		},
+		{
+			"importpath": "google.golang.org/grpc",
+			"repository": "https://github.com/grpc/grpc-go",
+			"revision": "b0b7afa173ab8030774fdf383cac027c3c5077d2",
+			"branch": "master"
+		},
+		{
+			"importpath": "gopkg.in/airbrake/gobrake.v2",
+			"repository": "https://gopkg.in/airbrake/gobrake.v2",
+			"revision": "31c8ff1fb8b79a6947e6565e9a6df535f98a6b94",
+			"branch": "master"
+		},
+		{
+			"importpath": "gopkg.in/fzerorubigd/onion.v2",
+			"repository": "https://gopkg.in/fzerorubigd/onion.v2",
+			"revision": "e687b557954d44e2b5c3b4b52bb9ffa8572d9cb0",
+			"branch": "v2"
+		},
+		{
+			"importpath": "gopkg.in/gemnasium/logrus-airbrake-hook.v2",
+			"repository": "https://gopkg.in/gemnasium/logrus-airbrake-hook.v2",
+			"revision": "31e6fd4bd5a98d8ee7673d24bc54ec73c31810dd",
+			"branch": "master"
+		},
+		{
+			"importpath": "gopkg.in/go-playground/validator.v8",
+			"repository": "https://gopkg.in/go-playground/validator.v8",
+			"revision": "014792cf3e266caff1e916876be12282b33059e0",
+			"branch": "master"
+		},
+		{
+			"importpath": "gopkg.in/gorp.v1",
+			"repository": "https://gopkg.in/gorp.v1",
+			"revision": "c87af80f3cc5036b55b83d77171e156791085e2e",
+			"branch": "master"
+		},
+		{
+			"importpath": "gopkg.in/yaml.v2",
+			"repository": "https://gopkg.in/yaml.v2",
+			"revision": "a83829b6f1293c91addabc89d0571c246397bbf4",
+			"branch": "v2"
+		}
+	]
+}
