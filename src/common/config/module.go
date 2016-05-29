@@ -33,14 +33,14 @@ func Initialize() {
 		logrus.Warn(err)
 	}
 
-	if err = o.AddLayer(onion.NewFileLayer("/etc/" + appName + "/phoenix.yaml")); err == nil {
-		logrus.Infof("loading config from %s", "/etc/"+appName+"/phoenix.yaml")
+	if err = o.AddLayer(onion.NewFileLayer("/etc/" + appName + "/helium.yaml")); err == nil {
+		logrus.Infof("loading config from %s", "/etc/"+appName+"/helium.yaml")
 	}
-	if err = o.AddLayer(onion.NewFileLayer(usr.HomeDir + "/." + appName + "/phoenix.yaml")); err == nil {
-		logrus.Infof("loading config from %s", usr.HomeDir+"/."+appName+"/phoenix.yaml")
+	if err = o.AddLayer(onion.NewFileLayer(usr.HomeDir + "/." + appName + "/helium.yaml")); err == nil {
+		logrus.Infof("loading config from %s", usr.HomeDir+"/."+appName+"/helium.yaml")
 	}
-	if err = o.AddLayer(onion.NewFileLayer(dir + "/configs/phoenix.yaml")); err == nil {
-		logrus.Infof("loading config from %s", dir+"/configs/phoenix.yaml")
+	if err = o.AddLayer(onion.NewFileLayer(dir + "/configs/helium.yaml")); err == nil {
+		logrus.Infof("loading config from %s", dir+"/configs/helium.yaml")
 	}
 
 	for i := range all {
@@ -50,7 +50,7 @@ func Initialize() {
 		}
 	}
 
-	o.AddLazyLayer(extraenv.NewExtraEnvLayer("phoenix"))
+	o.AddLazyLayer(extraenv.NewExtraEnvLayer("helium"))
 
 	o.GetStruct("", &Config)
 

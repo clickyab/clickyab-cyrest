@@ -1,4 +1,5 @@
 #@IgnoreInspection BashAddShebang
+export APPNAME=helium
 export DEFAULT_PASS=bita123
 export GO=$(shell which go)
 export GIT:=$(shell which git)
@@ -14,8 +15,8 @@ export BUILDDATE=$(shell date| sed -e "s/ /-/g")
 export FLAGS="-X shared/config.hash=$(LONGHASH) -X shared/config.short=$(SHORTHASH) -X shared/config.date=$(COMMITDATE) -X shared/config.count=$(COMMITCOUNT) -X shared/config.build=$(BUILDDATE)"
 export LDARG=-ldflags $(FLAGS)
 export DBPASS?=$(DEFAULT_PASS)
-export POSTGRES_USER?=helium
-export RUSER?=helium
+export POSTGRES_USER?=$(APPNAME)
+export RUSER?=$(APPNAME)
 export RPASS?=$(DEFAULT_PASS)
 
 
@@ -39,6 +40,16 @@ clean:
 
 $(BIN)/gb: notroot
 	@[ -f $(BIN)/gb ] || make gb
+
+
+server:
+	$(BIN)/gb build $(LDARG) server
+
+run-server: server
+	$(BIN)/server
+
+watch-server:
+	make watch WATCH=server
 
 #
 # Tools
@@ -199,5 +210,5 @@ lint: goimports all errcheck vet golint gotype ineffassign
 
 postgres-setup: needroot
 	sudo -u postgres psql -U postgres -d postgres -c "CREATE USER $(POSTGRES_USER) WITH PASSWORD '$(DBPASS)';" || sudo -u postgres psql -U postgres -d postgres -c "ALTER USER $(POSTGRES_USER) WITH PASSWORD '$(DBPASS)';"
-	sudo -u postgres psql -U postgres -c "CREATE DATABASE helium;" || echo "Database helium is already there?"
-	sudo -u postgres psql -U postgres -c "GRANT ALL ON DATABASE helium TO $(POSTGRES_USER);"
+	sudo -u postgres psql -U postgres -c "CREATE DATABASE $(APPNAME);" || echo "Database $(APPNAME) is already there?"
+	sudo -u postgres psql -U postgres -c "GRANT ALL ON DATABASE $(APPNAME) TO $(POSTGRES_USER);"

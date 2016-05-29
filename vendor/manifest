@@ -59,6 +59,18 @@
 			"path": "/parser"
 		},
 		{
+			"importpath": "github.com/codegangsta/inject",
+			"repository": "https://github.com/codegangsta/inject",
+			"revision": "33e0aa1cb7c019ccc3fbe049a8262a6403d30504",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/codeskyblue/go-sh",
+			"repository": "https://github.com/codeskyblue/go-sh",
+			"revision": "ceb46ec4630a726eeed51d0a70066c9e1102c48f",
+			"branch": "master"
+		},
+		{
 			"importpath": "github.com/denisenkom/go-mssqldb",
 			"repository": "https://github.com/denisenkom/go-mssqldb",
 			"revision": "2a223b1644106bc7ca456c12cde55a80185813ef",
@@ -119,6 +131,12 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "github.com/gobuild/log",
+			"repository": "https://github.com/gobuild/log",
+			"revision": "f1f03dc733eb8acf247f889dd103ee1de1a06caa",
+			"branch": "master"
+		},
+		{
 			"importpath": "github.com/golang/glog",
 			"repository": "https://github.com/golang/glog",
 			"revision": "23def4e6c14b4da8ac2ed8007337bc5eb5007998",
@@ -163,6 +181,12 @@
 			"revision": "a80e24ada2699166544311f07c26ef37eaf64012",
 			"branch": "master",
 			"path": "/scanner"
+		},
+		{
+			"importpath": "github.com/howeyc/fsnotify",
+			"repository": "https://github.com/howeyc/fsnotify",
+			"revision": "f0c08ee9c60704c1879025f2ae0ff3e000082c13",
+			"branch": "master"
 		},
 		{
 			"importpath": "github.com/jinzhu/inflection",

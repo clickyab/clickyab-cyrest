@@ -9,7 +9,7 @@ import (
 	_ "gopkg.in/fzerorubigd/onion.v2/yamlloader"
 )
 
-const appName = "phoenix"
+const appName = "helium"
 
 //Config is the global application config instance
 var Config AppConfig
@@ -69,7 +69,7 @@ type AppConfig struct {
 func init() {
 	var err error
 
-	Config.Site = "phoenix.loc"
+	Config.Site = "helium.loc"
 	Config.MountPoint = "/api"
 	Config.DevelMode = true
 	Config.CORS = true
@@ -86,7 +86,7 @@ func init() {
 	Config.Redis.Address = ":6379"
 	//Config.Redis.Password = ""
 
-	Config.Postgres.DSN = "postgres://postgres:bita123@localhost/phoenix?sslmode=disable"
+	Config.Postgres.DSN = "postgres://postgres:bita123@localhost/helium?sslmode=disable"
 	Config.Postgres.MaxConnection = 100
 	Config.Postgres.MaxIdleConnection = 10
 	Config.Page.PerPage = 10
