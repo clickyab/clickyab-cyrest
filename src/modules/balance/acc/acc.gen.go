@@ -10,13 +10,6 @@ import (
 // AUTO GENERATED CODE. DO NOT EDIT!
 
 const (
-	// UserTagsSchema is the UserTags module schema
-	UserTagsSchema = "acc"
-	// UserTagsTable is the UserTags table name
-	UserTagsTable = "user_tags"
-	// UserTagsTableFull is the UserTags table name with schema
-	UserTagsTableFull = UserTagsSchema + "." + UserTagsTable
-
 	// AccountSchema is the Account module schema
 	AccountSchema = "acc"
 	// AccountTable is the Account table name
@@ -37,6 +30,13 @@ const (
 	TransactionTable = "transactions"
 	// TransactionTableFull is the Transaction table name with schema
 	TransactionTableFull = TransactionSchema + "." + TransactionTable
+
+	// UserTagsSchema is the UserTags module schema
+	UserTagsSchema = "acc"
+	// UserTagsTable is the UserTags table name
+	UserTagsTable = "user_tags"
+	// UserTagsTableFull is the UserTags table name with schema
+	UserTagsTableFull = UserTagsSchema + "." + UserTagsTable
 )
 
 // Manager is the model manager for acc package
@@ -64,15 +64,6 @@ func NewAccManagerFromTransaction(tx gorp.SqlExecutor) (*Manager, error) {
 func (m *Manager) Initialize() {
 
 	m.AddTableWithNameAndSchema(
-		UserTags{},
-		UserTagsSchema,
-		UserTagsTable,
-	).SetKeys(
-		true,
-		"ID",
-	)
-
-	m.AddTableWithNameAndSchema(
 		Account{},
 		AccountSchema,
 		AccountTable,
@@ -94,6 +85,15 @@ func (m *Manager) Initialize() {
 		Transaction{},
 		TransactionSchema,
 		TransactionTable,
+	).SetKeys(
+		true,
+		"ID",
+	)
+
+	m.AddTableWithNameAndSchema(
+		UserTags{},
+		UserTagsSchema,
+		UserTagsTable,
 	).SetKeys(
 		true,
 		"ID",

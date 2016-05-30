@@ -195,6 +195,19 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "github.com/jteeuwen/go-bindata",
+			"repository": "https://github.com/jteeuwen/go-bindata",
+			"revision": "a0ff2567cfb70903282db057e799fd826784d41d",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/jteeuwen/go-bindata/go-bindata",
+			"repository": "https://github.com/jteeuwen/go-bindata",
+			"revision": "a0ff2567cfb70903282db057e799fd826784d41d",
+			"branch": "master",
+			"path": "/go-bindata"
+		},
+		{
 			"importpath": "github.com/kisielk/errcheck",
 			"repository": "https://github.com/kisielk/errcheck",
 			"revision": "8e25ad9d46f6c5d4e994edf82c57eb773a9aa73d",

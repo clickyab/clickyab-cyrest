@@ -18,6 +18,7 @@ export DBPASS?=$(DEFAULT_PASS)
 export POSTGRES_USER?=$(APPNAME)
 export RUSER?=$(APPNAME)
 export RPASS?=$(DEFAULT_PASS)
+export WORK_DIR=$(ROOT)/tmp
 
 
 .PHONY: all gb clean tools-fswatch hello
@@ -66,9 +67,6 @@ tools-golint: $(BIN)/gb
 tools-govet: $(BIN)/gb
 	$(BIN)/gb build $(LDARG) golang.org/x/tools/cmd/vet
 
-tools-migrate: $(BIN)/gb
-	$(BIN)/gb build $(LDARG) apps/migrate
-
 tools-gerrithook: $(BIN)/gb
 	$(BIN)/gb build $(LDARG) tools/gerrithook
 
@@ -99,6 +97,9 @@ tools-codegen: $(BIN)/gb
 tools-errcheck: $(BIN)/gb
 	$(BIN)/gb build $(LDARG) github.com/kisielk/errcheck
 
+tools-gobindata: $(BIN)/gb
+	$(BIN)/gb build $(LDARG) github.com/jteeuwen/go-bindata/go-bindata
+
 godoc: tools-godoc
 	#open localhost:6060 for doc, Ctrl+C to stop
 	$(BIN)/godoc -http=:6060
@@ -124,22 +125,33 @@ install-protobuf: needroot
 #
 
 migup: tools-migrate
-	$(BIN)/migrate --action=up --folder=$(ROOT)/db/migrations
+	$(BIN)/migration -action=up
 
 migdown: tools-migrate
-	$(BIN)/migrate --action=down --folder=$(ROOT)/db/migrations
+	$(BIN)/migration -action=down
 
 migdown-all: tools-migrate
-	$(BIN)/migrate --action=down-all --folder=$(ROOT)/db/migrations
+	$(BIN)/migration -action=down-all
 
 migredo: tools-migrate
-	$(BIN)/migrate --action=redo --folder=$(ROOT)/db/migrations
+	$(BIN)/migration -action=redo
 
 miglist: tools-migrate
-	$(BIN)/migrate --action=list --folder=$(ROOT)/db/migrations
+	$(BIN)/migration -action=list
 
 migcreate:
-	/bin/bash $(BIN)/create_migration.sh
+	@/bin/bash $(BIN)/create_migration.sh
+
+migcp:
+	@mkdir -p $(ROOT)/db/migrations
+	@cd $(ROOT)/db/migrations && rm -f *.sql
+	@cp $(ROOT)/src/modules/*/migrations/*.sql $(ROOT)/db/migrations
+
+migration: migcp tools-gobindata
+	@cd $(ROOT) && $(BIN)/go-bindata -o ./src/migration/migration.go -nomemcopy=true -pkg=main ./db/migrations/...
+
+tools-migrate: $(BIN)/gb
+	@$(BUILD) migration
 
 goimports: tools-goimports
 	$(BIN)/goimports -w $(ROOT)/src
@@ -177,11 +189,11 @@ swagger-cleaner:
 	@rm -f $(WORK_DIR)/swagger/*.yaml
 
 swagger-client: tools-swagger
-	GOPATH=$(ROOT) cd $(ROOT)/src && $(BIN)/swagger generate client -f $(ROOT)/3rd/swagger/phoenix.yaml
+	GOPATH=$(ROOT) cd $(ROOT)/src && $(BIN)/swagger generate client -f $(ROOT)/3rd/swagger/helium.yaml
 
 codegen: swagger-cleaner codegen-user codegen-audit codegen-balance codegen-misc
-	@cp $(WORK_DIR)/swagger/phoenix.yaml $(ROOT)/3rd/swagger
-	@cp $(WORK_DIR)/swagger/phoenix.json $(ROOT)/3rd/swagger
+	@cp $(WORK_DIR)/swagger/helium.yaml $(ROOT)/3rd/swagger
+	@cp $(WORK_DIR)/swagger/helium.json $(ROOT)/3rd/swagger
 	@echo "Done"
 
 #

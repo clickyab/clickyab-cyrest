@@ -7,9 +7,6 @@ ENV['VAGRANT_DEFAULT_PROVIDER'] = 'docker'
 VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  config.vm.box = 'dummy'
-  config.vm.box_url = 'http://bit.ly/vagrant-docker-dummy'
-
   config.ssh.username = "develop"
   config.ssh.password = "bita123"
 
@@ -19,12 +16,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
   config.vm.network "forwarded_port", guest: 80,    host: 80    # nginx
+  config.vm.network "forwarded_port", guest: 8025,  host: 8025  # MailHog
   config.vm.network "forwarded_port", guest: 5432,  host: 5432  # postgres
 
   config.vm.synced_folder ".", "/home/develop/helium", owner: "develop", group: "develop", create: true
 
   config.vm.provider "docker" do |d|
-    d.image = "docker.azmoona.com/vada/sdp-box"
+    d.image = "helium/baseimage"
     d.has_ssh = true
     d.cmd = ["/bin/bash", "/home/develop/helium/bin/init.sh"]
     d.expose= [5432]

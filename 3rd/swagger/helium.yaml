@@ -1,0 +1,1113 @@
+swagger: "2.0"
+info:
+  version: 1.0.0
+  title: The Helium API
+  description: Auto genertaed Helium API
+host: helium.rubi.gd
+basePath: /api
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+paths:
+  /balance/accounts/{account}/:
+    delete:
+      description: deleteAccount delete the account in system
+      responses:
+        "200":
+          description: ""
+          produce: application/json
+          schema:
+            $ref: '#/definitions/balance_deleteAccountResponse'
+        "400":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_ErrorResponseSimple'
+        "401":
+          description: you are not authorized
+          schema:
+            properties:
+              error:
+                type: string
+            title: not_authorized
+            type: object
+        "403":
+          description: forbidden, you have no access here
+          schema:
+            properties:
+              error:
+                type: string
+            title: forbidden
+            type: object
+      parameters:
+      - name: account
+        type: integer
+        description: the account id
+        in: path
+        required: true
+      - name: token
+        type: string
+        description: the security token, get it from login route
+        in: header
+        required: true
+      tags:
+      - balance
+    get:
+      description: getAccount get a single account
+      responses:
+        "200":
+          description: ""
+          produce: application/json
+          schema:
+            $ref: '#/definitions/acc_Account'
+        "400":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_ErrorResponseSimple'
+        "401":
+          description: you are not authorized
+          schema:
+            properties:
+              error:
+                type: string
+            title: not_authorized
+            type: object
+        "403":
+          description: forbidden, you have no access here
+          schema:
+            properties:
+              error:
+                type: string
+            title: forbidden
+            type: object
+      parameters:
+      - name: account
+        type: integer
+        description: the account id
+        in: path
+        required: true
+      - name: token
+        type: string
+        description: the security token, get it from login route
+        in: header
+        required: true
+      tags:
+      - balance
+    put:
+      description: editAccount edit the account in system
+      responses:
+        "200":
+          description: ""
+          produce: application/json
+          schema:
+            $ref: '#/definitions/base_NormalResponse'
+        "400":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_ErrorResponseSimple'
+        "401":
+          description: you are not authorized
+          schema:
+            properties:
+              error:
+                type: string
+            title: not_authorized
+            type: object
+        "403":
+          description: forbidden, you have no access here
+          schema:
+            properties:
+              error:
+                type: string
+            title: forbidden
+            type: object
+      parameters:
+      - name: account
+        type: integer
+        description: the account id
+        in: path
+        required: true
+      - name: token
+        type: string
+        description: the security token, get it from login route
+        in: header
+        required: true
+      - name: payload_data
+        schema:
+          $ref: '#/definitions/balance_theAccountPayload'
+        description: ""
+        in: body
+        required: false
+      tags:
+      - balance
+  /balance/accounts/{account}/transaction/{transaction_id}:
+    get:
+      description: getTransaction get transaction
+      responses:
+        "200":
+          description: ""
+          produce: application/json
+          schema:
+            $ref: '#/definitions/acc_Transaction'
+        "401":
+          description: you are not authorized
+          schema:
+            properties:
+              error:
+                type: string
+            title: not_authorized
+            type: object
+        "403":
+          description: forbidden, you have no access here
+          schema:
+            properties:
+              error:
+                type: string
+            title: forbidden
+            type: object
+        "404":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_ErrorResponseSimple'
+      parameters:
+      - name: account
+        type: integer
+        description: the account id
+        in: path
+        required: true
+      - name: transaction_id
+        type: integer
+        description: ' the transaction id'
+        in: path
+        required: true
+      - name: token
+        type: string
+        description: the security token, get it from login route
+        in: header
+        required: true
+      tags:
+      - balance
+  /balance/accounts/{account}/transactions:
+    post:
+      description: addTransaction add transaction into system from a user (async)
+      responses:
+        "200":
+          description: ""
+          produce: application/json
+          schema:
+            $ref: '#/definitions/balance_transactionMultiResponse'
+        "401":
+          description: you are not authorized
+          schema:
+            properties:
+              error:
+                type: string
+            title: not_authorized
+            type: object
+        "403":
+          description: forbidden, you have no access here
+          schema:
+            properties:
+              error:
+                type: string
+            title: forbidden
+            type: object
+      parameters:
+      - name: account
+        type: integer
+        description: the account id
+        in: path
+        required: true
+      - name: token
+        type: string
+        description: the security token, get it from login route
+        in: header
+        required: true
+      - name: payload_data
+        schema:
+          $ref: '#/definitions/balance_transactionMultiPayload'
+        description: ""
+        in: body
+        required: false
+      tags:
+      - balance
+  /balance/add/account:
+    post:
+      description: addAccount add new account to the system
+      responses:
+        "200":
+          description: ""
+          produce: application/json
+          schema:
+            $ref: '#/definitions/balance_addAccountResponse'
+        "400":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_ErrorResponseSimple'
+        "401":
+          description: you are not authorized
+          schema:
+            properties:
+              error:
+                type: string
+            title: not_authorized
+            type: object
+        "403":
+          description: forbidden, you have no access here
+          schema:
+            properties:
+              error:
+                type: string
+            title: forbidden
+            type: object
+      parameters:
+      - name: token
+        type: string
+        description: the security token, get it from login route
+        in: header
+        required: true
+      - name: payload_data
+        schema:
+          $ref: '#/definitions/balance_addAccountPayload'
+        description: ""
+        in: body
+        required: false
+      tags:
+      - balance
+  /balance/list/accounts:
+    get:
+      description: listAccounts list accounts in the units
+      responses:
+        "200":
+          description: ""
+          produce: application/json
+          schema:
+            $ref: '#/definitions/balance_listAccountResponse'
+        "400":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_ErrorResponseSimple'
+        "401":
+          description: you are not authorized
+          schema:
+            properties:
+              error:
+                type: string
+            title: not_authorized
+            type: object
+        "403":
+          description: forbidden, you have no access here
+          schema:
+            properties:
+              error:
+                type: string
+            title: forbidden
+            type: object
+      parameters:
+      - name: dis
+        type: integer
+        description: show disabled account too
+        in: query
+        required: false
+      - name: p
+        type: integer
+        description: ' the page number'
+        in: query
+        required: false
+      - name: c
+        type: integer
+        description: ' per page item'
+        in: query
+        required: false
+      - name: all
+        type: integer
+        description: show all data with no pagination
+        in: query
+        required: false
+      - name: token
+        type: string
+        description: the security token, get it from login route
+        in: header
+        required: true
+      tags:
+      - balance
+  /balance/list/transactions:
+    get:
+      description: listTransactions list all transaction belong to accounts in the
+        list
+      responses:
+        "200":
+          description: ""
+          produce: application/json
+          schema:
+            $ref: '#/definitions/balance_transactionsResponse'
+        "400":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_ErrorResponseSimple'
+        "401":
+          description: you are not authorized
+          schema:
+            properties:
+              error:
+                type: string
+            title: not_authorized
+            type: object
+        "403":
+          description: forbidden, you have no access here
+          schema:
+            properties:
+              error:
+                type: string
+            title: forbidden
+            type: object
+      parameters:
+      - name: p
+        type: integer
+        description: ' the page number'
+        in: query
+        required: false
+      - name: accounts
+        type: string
+        description: ' comma separated list of id of accounts to get. empty means
+          all accounts'
+        in: query
+        required: false
+      - name: c
+        type: integer
+        description: ' per page item'
+        in: query
+        required: false
+      - name: token
+        type: string
+        description: the security token, get it from login route
+        in: header
+        required: true
+      tags:
+      - balance
+  /misc/version:
+    get:
+      description: getVersion get the version information
+      responses:
+        "200":
+          description: ""
+          produce: application/json
+          schema:
+            $ref: '#/definitions/version_Version'
+      tags:
+      - misc
+  /user/avatar/{user_id}/{size}/avatar.png:
+    get:
+      description: getAvatar get the avatar from the system. default is the gravatar
+        image
+      responses:
+        "200":
+          description: ""
+          produce: image/png
+          schema:
+            $ref: '#/definitions/base_NormalResponse'
+        "404":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_ErrorResponseSimple'
+      parameters:
+      - name: user_id
+        type: integer
+        description: ' the user id to get the avatar'
+        in: path
+        required: true
+      - name: size
+        type: integer
+        description: ' size of the image'
+        in: path
+        required: true
+      tags:
+      - user
+  /user/challenge:
+    post:
+      description: reserveUser is the route for reserve a email/phone for registration
+      responses:
+        "200":
+          description: ""
+          produce: application/json
+          schema:
+            $ref: '#/definitions/user_reservedTokenResponse'
+        "400":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_ErrorResponseSimple'
+      parameters:
+      - name: payload_data
+        schema:
+          $ref: '#/definitions/user_reserveUserPayload'
+        description: ""
+        in: body
+        required: false
+      tags:
+      - user
+  /user/login:
+    post:
+      description: Login is the login route for REST requests
+      responses:
+        "200":
+          description: ""
+          produce: application/json
+          schema:
+            $ref: '#/definitions/user_responseLoginOK'
+        "400":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_ErrorResponseSimple'
+      parameters:
+      - name: payload_data
+        schema:
+          $ref: '#/definitions/user_payloadLoginData'
+        description: ""
+        in: body
+        required: false
+      tags:
+      - user
+  /user/logout:
+    get:
+      description: logout is for the logout from the system
+      responses:
+        "200":
+          description: ""
+          produce: application/json
+          schema:
+            $ref: '#/definitions/base_NormalResponse'
+        "401":
+          description: you are not authorized
+          schema:
+            properties:
+              error:
+                type: string
+            title: not_authorized
+            type: object
+        "403":
+          description: forbidden, you have no access here
+          schema:
+            properties:
+              error:
+                type: string
+            title: forbidden
+            type: object
+      parameters:
+      - name: token
+        type: string
+        description: the security token, get it from login route
+        in: header
+        required: true
+      tags:
+      - user
+  /user/register:
+    post:
+      description: registerUser register user in system
+      responses:
+        "200":
+          description: ""
+          produce: application/json
+          schema:
+            $ref: '#/definitions/user_responseLoginOK'
+        "400":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_ErrorResponseSimple'
+      parameters:
+      - name: payload_data
+        schema:
+          $ref: '#/definitions/user_registrationPayload'
+        description: ""
+        in: body
+        required: false
+      tags:
+      - user
+  /user/role:
+    post:
+      description: createRole is for creating a role in system
+      responses:
+        "200":
+          description: ""
+          produce: application/json
+          schema:
+            $ref: '#/definitions/user_createRoleResponse'
+        "400":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_ErrorResponseSimple'
+        "401":
+          description: you are not authorized
+          schema:
+            properties:
+              error:
+                type: string
+            title: not_authorized
+            type: object
+        "403":
+          description: forbidden, you have no access here
+          schema:
+            properties:
+              error:
+                type: string
+            title: forbidden
+            type: object
+      parameters:
+      - name: token
+        type: string
+        description: the security token, get it from login route
+        in: header
+        required: true
+      - name: payload_data
+        schema:
+          $ref: '#/definitions/user_createRolePayload'
+        description: ""
+        in: body
+        required: false
+      tags:
+      - user
+  /user/role/{id}:
+    delete:
+      description: removeRole remove a role from database
+      responses:
+        "200":
+          description: ""
+          produce: application/json
+          schema:
+            $ref: '#/definitions/base_NormalResponse'
+        "400":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_ErrorResponseSimple'
+        "401":
+          description: you are not authorized
+          schema:
+            properties:
+              error:
+                type: string
+            title: not_authorized
+            type: object
+        "403":
+          description: forbidden, you have no access here
+          schema:
+            properties:
+              error:
+                type: string
+            title: forbidden
+            type: object
+      parameters:
+      - name: id
+        type: string
+        description: ""
+        in: path
+        required: true
+      - name: token
+        type: string
+        description: the security token, get it from login route
+        in: header
+        required: true
+      tags:
+      - user
+    put:
+      description: updateRole is for changing a role in system
+      responses:
+        "200":
+          description: ""
+          produce: application/json
+          schema:
+            $ref: '#/definitions/base_NormalResponse'
+        "400":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_ErrorResponseSimple'
+        "401":
+          description: you are not authorized
+          schema:
+            properties:
+              error:
+                type: string
+            title: not_authorized
+            type: object
+        "403":
+          description: forbidden, you have no access here
+          schema:
+            properties:
+              error:
+                type: string
+            title: forbidden
+            type: object
+      parameters:
+      - name: id
+        type: string
+        description: ""
+        in: path
+        required: true
+      - name: token
+        type: string
+        description: the security token, get it from login route
+        in: header
+        required: true
+      - name: payload_data
+        schema:
+          $ref: '#/definitions/user_createRolePayload'
+        description: ""
+        in: body
+        required: false
+      tags:
+      - user
+  /user/roles:
+    get:
+      description: listRoles list all roles in system, no pagination
+      responses:
+        "200":
+          description: ""
+          produce: application/json
+          schema:
+            $ref: '#/definitions/user_roles'
+        "400":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_ErrorResponseSimple'
+        "401":
+          description: you are not authorized
+          schema:
+            properties:
+              error:
+                type: string
+            title: not_authorized
+            type: object
+        "403":
+          description: forbidden, you have no access here
+          schema:
+            properties:
+              error:
+                type: string
+            title: forbidden
+            type: object
+      parameters:
+      - name: token
+        type: string
+        description: the security token, get it from login route
+        in: header
+        required: true
+      tags:
+      - user
+  /user/state/{user_id}:
+    post:
+      description: changeState change user state, ban or verify. admin actions
+      responses:
+        "200":
+          description: ""
+          produce: application/json
+          schema:
+            $ref: '#/definitions/base_NormalResponse'
+        "400":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_ErrorResponseSimple'
+        "401":
+          description: you are not authorized
+          schema:
+            properties:
+              error:
+                type: string
+            title: not_authorized
+            type: object
+        "403":
+          description: forbidden, you have no access here
+          schema:
+            properties:
+              error:
+                type: string
+            title: forbidden
+            type: object
+      parameters:
+      - name: user_id
+        type: string
+        description: ""
+        in: path
+        required: true
+      - name: token
+        type: string
+        description: the security token, get it from login route
+        in: header
+        required: true
+      - name: payload_data
+        schema:
+          $ref: '#/definitions/user_changeStatePayload'
+        description: ""
+        in: body
+        required: false
+      tags:
+      - user
+  /user/test:
+    post:
+      description: testFunction test code generator functionality
+      responses:
+        "200":
+          description: ""
+          produce: application/json
+          schema:
+            $ref: '#/definitions/user_tmpArray'
+        "400":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_ErrorResponseSimple'
+      parameters:
+      - name: payload_data
+        schema:
+          $ref: '#/definitions/user_tmp'
+        description: ""
+        in: body
+        required: false
+      tags:
+      - user
+  /user/users:
+    get:
+      description: listUsers list all users in site
+      responses:
+        "200":
+          description: ""
+          produce: application/json
+          schema:
+            $ref: '#/definitions/user_userListResponse'
+        "401":
+          description: you are not authorized
+          schema:
+            properties:
+              error:
+                type: string
+            title: not_authorized
+            type: object
+        "403":
+          description: forbidden, you have no access here
+          schema:
+            properties:
+              error:
+                type: string
+            title: forbidden
+            type: object
+      parameters:
+      - name: username
+        type: string
+        description: ' the username filter'
+        in: query
+        required: false
+      - name: status
+        type: string
+        description: ' the status filter'
+        in: query
+        required: false
+      - name: p
+        type: integer
+        description: ' the page number'
+        in: query
+        required: false
+      - name: c
+        type: integer
+        description: ' per page item'
+        in: query
+        required: false
+      - name: token
+        type: string
+        description: the security token, get it from login route
+        in: header
+        required: true
+      tags:
+      - user
+definitions:
+  aaa_Role:
+    properties:
+      created_at:
+        format: dateTime
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      resources:
+        items:
+          type: string
+        type: array
+      updated_at:
+        format: dateTime
+        type: string
+    type: object
+  aaa_User:
+    properties:
+      attributes:
+        additionalProperties:
+          type: string
+        type: object
+      contact:
+        type: string
+      created_at:
+        format: dateTime
+        type: string
+      id:
+        type: integer
+      last_login:
+        format: dateTime
+        type: string
+      status:
+        type: string
+      updated_at:
+        format: dateTime
+        type: string
+      username:
+        type: string
+    type: object
+  acc_Account:
+    properties:
+      attributes:
+        additionalProperties:
+          type: string
+        type: object
+      created_at:
+        format: dateTime
+        type: string
+      current:
+        type: integer
+      description:
+        type: string
+      disabled:
+        type: boolean
+      id:
+        type: integer
+      owner_id:
+        type: integer
+      title:
+        type: string
+      updated_at:
+        format: dateTime
+        type: string
+    type: object
+  acc_Transaction:
+    properties:
+      account_id:
+        type: integer
+      amount:
+        type: integer
+      created_at:
+        format: dateTime
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      updated_at:
+        format: dateTime
+        type: string
+      user_id:
+        type: integer
+    type: object
+  balance_addAccountPayload:
+    properties:
+      description:
+        type: string
+      disabled:
+        type: boolean
+      initial:
+        type: integer
+      title:
+        type: string
+    type: object
+  balance_addAccountResponse:
+    properties:
+      account_id:
+        type: integer
+    type: object
+  balance_deleteAccountResponse:
+    properties:
+      delete:
+        type: boolean
+    type: object
+  balance_listAccountResponse:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/acc_Account'
+        type: array
+      total:
+        type: integer
+    type: object
+  balance_theAccountPayload:
+    properties:
+      description:
+        type: string
+      disabled:
+        type: boolean
+      title:
+        type: string
+    type: object
+  balance_transactionMultiPayload:
+    properties:
+      transactions:
+        items:
+          $ref: '#/definitions/balance_transactionSinglePayload'
+        type: array
+    type: object
+  balance_transactionMultiResponse:
+    items:
+      $ref: '#/definitions/balance_transactionSingleResponse'
+    type: array
+  balance_transactionSinglePayload:
+    properties:
+      account_id:
+        type: integer
+      amount:
+        type: integer
+      correlation_id:
+        type: string
+      created_at:
+        format: dateTime
+        type: string
+      desciption:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+    type: object
+  balance_transactionSingleResponse:
+    properties:
+      correlation_id:
+        type: string
+      error:
+        type: string
+      transaction_id:
+        type: integer
+    type: object
+  balance_transactionsResponse:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/acc_Transaction'
+        type: array
+      total:
+        type: integer
+    type: object
+  base_ErrorResponseSimple:
+    properties:
+      error:
+        type: string
+    type: object
+  base_NormalResponse:
+    properties: {}
+    type: object
+  user_changeStatePayload:
+    properties:
+      status:
+        type: string
+    type: object
+  user_createRolePayload:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      resources:
+        items:
+          type: string
+        type: array
+    type: object
+  user_createRoleResponse:
+    properties:
+      id:
+        type: integer
+    type: object
+  user_payloadLoginData:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  user_registrationPayload:
+    properties:
+      contact:
+        type: string
+      password:
+        type: string
+      token:
+        type: string
+      username:
+        type: string
+    type: object
+  user_reserveUserPayload:
+    properties:
+      contact:
+        type: string
+    type: object
+  user_reservedTokenResponse:
+    properties:
+      old_token:
+        type: boolean
+    type: object
+  user_responseLoginOK:
+    properties:
+      contact:
+        type: string
+      resources:
+        items:
+          type: string
+        type: array
+      token:
+        type: string
+      user_id:
+        type: integer
+      username:
+        type: string
+    type: object
+  user_roles:
+    items:
+      $ref: '#/definitions/aaa_Role'
+    type: array
+  user_tmp:
+    properties:
+      data:
+        items:
+          type: string
+        type: array
+      id:
+        type: integer
+      list:
+        items:
+          $ref: '#/definitions/aaa_User'
+        type: array
+      text:
+        type: string
+      total:
+        type: integer
+    type: object
+  user_tmpArray:
+    items:
+      $ref: '#/definitions/user_tmp'
+    type: array
+  user_userListResponse:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/aaa_User'
+        type: array
+      total:
+        type: integer
+    type: object
+  version_Version:
+    properties:
+      build_date:
+        format: dateTime
+        type: string
+      build_number:
+        type: integer
+      commit_date:
+        format: dateTime
+        type: string
+      hash:
+        type: string
+      short_hash:
+        type: string
+    type: object

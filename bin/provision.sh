@@ -3,11 +3,6 @@ set -euo pipefail
 
 SCRIPT_DIR=$(readlink -f $(dirname ${BASH_SOURCE[0]}))
 
-# Add correct group for nginx access, its not a big deal here
-usermod -aG develop www-data
-chown -R develop:develop /srv/http/
-
-
 echo "export GOPATH=/home/develop/go" >> /home/develop/.zshrc
 echo "export GOPATH=/home/develop/go" >> /etc/environment
 echo "export PATH=$PATH:/usr/local/go/bin:/home/develop/go/bin" >> /home/develop/.zshrc
