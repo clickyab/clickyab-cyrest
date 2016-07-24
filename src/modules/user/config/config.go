@@ -28,6 +28,11 @@ type Config struct {
 		Password string
 		Send     bool
 	} `onion:"sms"`
+
+	OAuth struct {
+		ClientID     string `onion:"client_id"`
+		ClientSecret string `onion:"client_secret"`
+	} `onion:"oauth"`
 }
 
 type configLoader struct {
@@ -50,6 +55,9 @@ func (c *configLoader) Initialize(o *onion.Onion) []onion.Layer {
 	_ = def.SetDefault("sms.user", "dev@azmoona.com")
 	_ = def.SetDefault("sms.password", "bita123*")
 
+	_ = def.SetDefault("oauth.client_id", "975262007411-1nk67l3s49ua2lt41pr805flr5a8c1n5.apps.googleusercontent.com")
+	_ = def.SetDefault("oauth.client_secret", "kxddsIpmuSWJ3iAo1Ghs_uR6")
+
 	return []onion.Layer{def}
 }
 
@@ -58,6 +66,7 @@ func (c *configLoader) Loaded() {
 	Cfg.TokenTimeout = c.o.GetDurationDefault("user.token_timeout", 48*time.Hour)
 	c.o.GetStruct("sms", &Cfg.SMS)
 	c.o.GetStruct("smtp", &Cfg.SMTP)
+	c.o.GetStruct("oauth", &Cfg.OAuth)
 }
 
 func init() {

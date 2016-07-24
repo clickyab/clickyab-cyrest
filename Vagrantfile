@@ -22,7 +22,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.synced_folder ".", "/home/develop/helium", owner: "develop", group: "develop", create: true
 
   config.vm.provider "docker" do |d|
-    d.image = "helium/baseimage"
+    d.image = "docker.clickyab.com/helium/baseimage"
     d.has_ssh = true
     d.cmd = ["/bin/bash", "/home/develop/helium/bin/init.sh"]
     d.expose= [5432]

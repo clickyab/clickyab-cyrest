@@ -47,6 +47,7 @@ server:
 	$(BIN)/gb build $(LDARG) server
 
 run-server: server
+	sudo setcap cap_net_bind_service=+ep $(BIN)/server
 	$(BIN)/server
 
 watch-server:
@@ -224,3 +225,6 @@ postgres-setup: needroot
 	sudo -u postgres psql -U postgres -d postgres -c "CREATE USER $(POSTGRES_USER) WITH PASSWORD '$(DBPASS)';" || sudo -u postgres psql -U postgres -d postgres -c "ALTER USER $(POSTGRES_USER) WITH PASSWORD '$(DBPASS)';"
 	sudo -u postgres psql -U postgres -c "CREATE DATABASE $(APPNAME);" || echo "Database $(APPNAME) is already there?"
 	sudo -u postgres psql -U postgres -c "GRANT ALL ON DATABASE $(APPNAME) TO $(POSTGRES_USER);"
+
+setcap: $(BIN)/server needroot
+	setcap cap_net_bind_service=+ep $(BIN)/server

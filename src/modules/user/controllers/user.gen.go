@@ -110,34 +110,48 @@ func (u *Controller) Routes(r *gin.Engine, mountPoint string) {
 	group.GET("/logout", m8...)
 	// End route {/logout GET Controller.logout user [authz.Authenticate]  Controller u  } with key 8
 
-	// Route {/register POST Controller.registerUser user []  Controller u registrationPayload } with key 9
+	// Route {/authenticate GET Controller.oauthInit user []  Controller u  } with key 9
 	m9 := gin.HandlersChain{}
 
-	// Make sure payload is the last middleware
-	m9 = append(m9, middlewares.PayloadUnMarshallerGenerator(registrationPayload{}))
-	m9 = append(m9, u.registerUser)
-	group.POST("/register", m9...)
-	// End route {/register POST Controller.registerUser user []  Controller u registrationPayload } with key 9
+	m9 = append(m9, u.oauthInit)
+	group.GET("/authenticate", m9...)
+	// End route {/authenticate GET Controller.oauthInit user []  Controller u  } with key 9
 
-	// Route {/role/:id DELETE Controller.removeRole user [authz.Authenticate]  Controller u  create_role} with key 10
-	m10 := gin.HandlersChain{
-		authz.Authenticate,
-	}
+	// Route {/oauth/callback GET Controller.oauthCallback user []  Controller u  } with key 10
+	m10 := gin.HandlersChain{}
 
-	m10 = append(m10, authz.AuthorizeGenerator("create_role"))
+	m10 = append(m10, u.oauthCallback)
+	group.GET("/oauth/callback", m10...)
+	// End route {/oauth/callback GET Controller.oauthCallback user []  Controller u  } with key 10
 
-	m10 = append(m10, u.removeRole)
-	group.DELETE("/role/:id", m10...)
-	// End route {/role/:id DELETE Controller.removeRole user [authz.Authenticate]  Controller u  create_role} with key 10
-
-	// Route {/test POST Controller.testFunction user []  Controller u tmp } with key 11
+	// Route {/register POST Controller.registerUser user []  Controller u registrationPayload } with key 11
 	m11 := gin.HandlersChain{}
 
 	// Make sure payload is the last middleware
-	m11 = append(m11, middlewares.PayloadUnMarshallerGenerator(tmp{}))
-	m11 = append(m11, u.testFunction)
-	group.POST("/test", m11...)
-	// End route {/test POST Controller.testFunction user []  Controller u tmp } with key 11
+	m11 = append(m11, middlewares.PayloadUnMarshallerGenerator(registrationPayload{}))
+	m11 = append(m11, u.registerUser)
+	group.POST("/register", m11...)
+	// End route {/register POST Controller.registerUser user []  Controller u registrationPayload } with key 11
+
+	// Route {/role/:id DELETE Controller.removeRole user [authz.Authenticate]  Controller u  create_role} with key 12
+	m12 := gin.HandlersChain{
+		authz.Authenticate,
+	}
+
+	m12 = append(m12, authz.AuthorizeGenerator("create_role"))
+
+	m12 = append(m12, u.removeRole)
+	group.DELETE("/role/:id", m12...)
+	// End route {/role/:id DELETE Controller.removeRole user [authz.Authenticate]  Controller u  create_role} with key 12
+
+	// Route {/test POST Controller.testFunction user []  Controller u tmp } with key 13
+	m13 := gin.HandlersChain{}
+
+	// Make sure payload is the last middleware
+	m13 = append(m13, middlewares.PayloadUnMarshallerGenerator(tmp{}))
+	m13 = append(m13, u.testFunction)
+	group.POST("/test", m13...)
+	// End route {/test POST Controller.testFunction user []  Controller u tmp } with key 13
 
 	utils.DoInitialize(u)
 }
