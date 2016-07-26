@@ -4,6 +4,8 @@
 
 CREATE SCHEMA aaa;
 
+CREATE SEQUENCE aaa.anon_user START 1001;
+
 CREATE TYPE aaa.user_status AS
 ENUM ('registered','verified','banned');
 

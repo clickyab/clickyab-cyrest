@@ -63,6 +63,7 @@ type CreateUserHook func(gorp.SqlExecutor, *User) error
 // From the bcrypt package
 const (
 	minHashSize = 59
+	noPassString = "NO" // Size must be less than 6 character
 )
 
 var (
@@ -121,7 +122,7 @@ func (u *User) Initialize() {
 	}
 
 	// TODO : Watch it if this creepy code is dangerous :)
-	if len(u.Password) < minHashSize || !isBcrypt.MatchString(u.Password) {
+	if (len(u.Password) < minHashSize || !isBcrypt.MatchString(u.Password)) && u.Password != noPassString {
 		p, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 		assert.Nil(err)
 		u.Password = string(p)
@@ -131,6 +132,11 @@ func (u *User) Initialize() {
 // VerifyPassword try to verify password for given hash
 func (u *User) VerifyPassword(password string) bool {
 	return bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password)) == nil
+}
+
+// HasPassword check if user set password or not
+func (u *User) HasPassword() bool {
+	return u.Password != noPassString
 }
 
 // PostInsert is a gorp hook. need to add any other manager to use this hook,
@@ -209,14 +215,28 @@ func (m *Manager) LoginUserByPassword(username, password string) (string, *User,
 	}
 
 	if u.Status == UserStatusBanned {
-		return "", nil, fmt.Errorf("sorry, but you are banned")
+		return "", nil, errors.New("sorry, but you are banned")
 	}
 
 	if u.VerifyPassword(password) {
 		return m.GetNewToken(u.Token), u, nil
 	}
 
-	return "", nil, fmt.Errorf("wrong password")
+	return "", nil, errors.New("wrong password")
+}
+
+// LoginUserByPassword try to login user with username and password
+func (m *Manager) LoginUserByOAuth(email string) (string, *User, error) {
+	u, err := m.FindUserByContact(email)
+	if err != nil {
+		return "", nil, err
+	}
+	
+	if u.Status == UserStatusBanned {
+		return "", nil, errors.New("sorry, but you are banned")
+	}
+	
+	return m.GetNewToken(u.Token), u, nil
 }
 
 // FindUserByIndirectToken try to find a user by its indirect token in database
@@ -241,7 +261,7 @@ func (m *Manager) UpdateLastLogin(u *User) error {
 	return m.UpdateUser(u)
 }
 
-// RegisterUserByToken is try for the user registration
+// RegisterUser is try for the user registration
 func (m *Manager) RegisterUser(contact, username, password string) (u *User, err error) {
 	u = &User{
 		Contact:         contact,
@@ -251,6 +271,57 @@ func (m *Manager) RegisterUser(contact, username, password string) (u *User, err
 		Status:          UserStatusRegistered,
 		updateLastLogin: true, // in this case, we need to update it since it means a login
 	}
+	err = m.Begin()
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if err != nil {
+			assert.Nil(m.Rollback())
+		} else {
+			err = m.Commit()
+		}
+		
+		if err != nil {
+			u = nil
+		}
+	}()
+	err = m.CreateUser(u)
+	if err != nil {
+		u = nil
+	}
+	return
+}
+
+// RegisterUser is try for the user registration
+func (m *Manager) RegisterUserByContact(contact string) (u *User, err error) {
+	anonUser, err := m.GetDbMap().SelectInt("SELECT nextval('aaa.anon_user')")
+	if err != nil {
+		return nil, err
+	}
+	u = &User{
+		Contact:         contact,
+		Username:        fmt.Sprintf("user_%d",anonUser),
+		Password:        noPassString,
+		Attributes:      make(common.GenericJSONField),
+		Status:          UserStatusRegistered,
+		updateLastLogin: true, // in this case, we need to update it since it means a login
+	}
+	err = m.Begin()
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if err != nil {
+			assert.Nil(m.Rollback())
+		} else {
+			err = m.Commit()
+		}
+		
+		if err != nil {
+			u = nil
+		}
+	}()
 	err = m.CreateUser(u)
 	if err != nil {
 		u = nil

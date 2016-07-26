@@ -32,6 +32,9 @@ type Config struct {
 	OAuth struct {
 		ClientID     string `onion:"client_id"`
 		ClientSecret string `onion:"client_secret"`
+		RedirectURI  string `onion:"redirect_uri"`
+		LoginRedirect string `onion:"login_redirect"`
+		RegisterRedirect string `onion:"register_redirect"`
 	} `onion:"oauth"`
 }
 
@@ -57,6 +60,9 @@ func (c *configLoader) Initialize(o *onion.Onion) []onion.Layer {
 
 	_ = def.SetDefault("oauth.client_id", "975262007411-1nk67l3s49ua2lt41pr805flr5a8c1n5.apps.googleusercontent.com")
 	_ = def.SetDefault("oauth.client_secret", "kxddsIpmuSWJ3iAo1Ghs_uR6")
+	_ = def.SetDefault("oauth.redirect_uri", "http://home.rubi.gd/api/user/oauth/callback")
+	_ = def.SetDefault("oauth.login_redirect", "/login")
+	_ = def.SetDefault("oauth.register_redirect", "/register")
 
 	return []onion.Layer{def}
 }

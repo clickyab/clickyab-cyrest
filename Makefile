@@ -12,8 +12,9 @@ export SHORTHASH=$(shell git log -n1 --pretty="format:%h"| cat)
 export COMMITDATE=$(shell git log -n1 --pretty="format:%cd"| sed -e "s/ /-/g")
 export COMMITCOUNT=$(shell git rev-list HEAD --count| cat)
 export BUILDDATE=$(shell date| sed -e "s/ /-/g")
-export FLAGS="-X shared/config.hash=$(LONGHASH) -X shared/config.short=$(SHORTHASH) -X shared/config.date=$(COMMITDATE) -X shared/config.count=$(COMMITCOUNT) -X shared/config.build=$(BUILDDATE)"
+export FLAGS="-X common/version.hash=$(LONGHASH) -X common/version.short=$(SHORTHASH) -X common/version.date=$(COMMITDATE) -X common/version.count=$(COMMITCOUNT) -X common/version.build=$(BUILDDATE)"
 export LDARG=-ldflags $(FLAGS)
+export BUILD=$(BIN)/gb build $(LDARG)
 export DBPASS?=$(DEFAULT_PASS)
 export POSTGRES_USER?=$(APPNAME)
 export RUSER?=$(APPNAME)
@@ -152,7 +153,7 @@ migration: migcp tools-gobindata
 	@cd $(ROOT) && $(BIN)/go-bindata -o ./src/migration/migration.go -nomemcopy=true -pkg=main ./db/migrations/...
 
 tools-migrate: $(BIN)/gb
-	@$(BUILD) migration
+	$(BUILD) migration
 
 goimports: tools-goimports
 	$(BIN)/goimports -w $(ROOT)/src
@@ -181,10 +182,6 @@ codegen-misc: tools-codegen
 	@$(BIN)/codegen -p modules/misc/controllers
 	@$(BIN)/codegen -p modules/misc/t9n
 
-codegen-balance: tools-codegen
-	@$(BIN)/codegen -p modules/balance/acc
-	@$(BIN)/codegen -p modules/balance/controllers
-
 swagger-cleaner:
 	@rm -f $(WORK_DIR)/swagger/*.json
 	@rm -f $(WORK_DIR)/swagger/*.yaml
@@ -192,7 +189,7 @@ swagger-cleaner:
 swagger-client: tools-swagger
 	GOPATH=$(ROOT) cd $(ROOT)/src && $(BIN)/swagger generate client -f $(ROOT)/3rd/swagger/helium.yaml
 
-codegen: swagger-cleaner codegen-user codegen-audit codegen-balance codegen-misc
+codegen: swagger-cleaner codegen-user codegen-audit codegen-misc
 	@cp $(WORK_DIR)/swagger/helium.yaml $(ROOT)/3rd/swagger
 	@cp $(WORK_DIR)/swagger/helium.json $(ROOT)/3rd/swagger
 	@echo "Done"

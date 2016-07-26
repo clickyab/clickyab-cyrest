@@ -1,6 +1,7 @@
 package trans
 
 import (
+	"errors"
 	"modules/misc/t9n"
 	"sync"
 
@@ -41,4 +42,9 @@ func T(translationID string, args ...interface{}) string {
 	}
 	logrus.Debugf("NOT TRANSLATED : %s ", translationID)
 	return translationID
+}
+
+// E is the error version of the T
+func E(translationID string, args ...interface{}) error {
+	return errors.New(T(translationID, args...))
 }
