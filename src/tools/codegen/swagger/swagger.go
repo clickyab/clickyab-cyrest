@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	ginImportPath = "github.com/gin-gonic/gin"
+	ginImportPath = "github.com/labstack/echo"
 )
 
 type swaggerType map[string]interface{}
@@ -667,7 +667,7 @@ func getDoc(d humanize.Docs) string {
 }
 
 func isMatched(gin string, f humanize.Function) bool {
-	if len(f.Type.Results) != 0 {
+	if len(f.Type.Results) != 1 {
 		return false
 	}
 
@@ -679,7 +679,11 @@ func isMatched(gin string, f humanize.Function) bool {
 		return false
 	}
 
-	if f.Type.Parameters[0].Type.GetDefinition() != fmt.Sprintf("*%s.Context", gin) {
+	if f.Type.Parameters[0].Type.GetDefinition() != fmt.Sprintf("%s.Context", gin) {
+		return false
+	}
+
+	if f.Type.Results[0].Type.GetDefinition() != "error" {
 		return false
 	}
 

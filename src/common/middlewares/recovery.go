@@ -5,39 +5,39 @@ import (
 	"common/utils"
 	"fmt"
 	"net/http"
-	"net/http/httputil"
 	"runtime/debug"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo"
 )
 
 // Recovery is the middleware to prevent the panic to crash the app
-func Recovery(ctx *gin.Context) {
-	defer func() {
-		if err := recover(); err != nil {
-			ctx.JSON(
-				http.StatusInternalServerError,
-				struct {
-					Error string `json:"error"`
-				}{
-					Error: http.StatusText(http.StatusInternalServerError),
-				},
-			)
-			ctx.Abort()
-			stack := debug.Stack()
-			dump, _ := httputil.DumpRequest(ctx.Request, true)
-			data := fmt.Sprintf("Request : \n %s \n\nStack : \n %s", dump, stack)
-			logrus.WithField("error", err).Warn(err, data)
-			if config.Config.Redmine.Active {
-				go utils.RedmineDoError(err, []byte(data))
-			}
+func Recovery(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(ctx echo.Context) error {
+		defer func() {
+			if err := recover(); err != nil {
+				ctx.JSON(
+					http.StatusInternalServerError,
+					struct {
+						Error string `json:"error"`
+					}{
+						Error: http.StatusText(http.StatusInternalServerError),
+					},
+				)
+				stack := debug.Stack()
+				dump := "TODO: create dump" //httputil.DumpRequest(ctx.Request(), true)
+				data := fmt.Sprintf("Request : \n %s \n\nStack : \n %s", dump, stack)
+				logrus.WithField("error", err).Warn(err, data)
+				if config.Config.Redmine.Active {
+					go utils.RedmineDoError(err, []byte(data))
+				}
 
-			if config.Config.Slack.Active {
-				go utils.SlackDoMessage(err, ":shit:", utils.SlackAttachment{Text: data, Color: "#AA3939"})
+				if config.Config.Slack.Active {
+					go utils.SlackDoMessage(err, ":shit:", utils.SlackAttachment{Text: data, Color: "#AA3939"})
+				}
 			}
-		}
-	}()
+		}()
 
-	ctx.Next()
+		return next(ctx)
+	}
 }

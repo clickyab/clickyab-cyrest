@@ -12,17 +12,6 @@ consumes:
 produces:
 - application/json
 paths:
-  /misc/version:
-    get:
-      description: getVersion get the version information
-      responses:
-        "200":
-          description: ""
-          produce: application/json
-          schema:
-            $ref: '#/definitions/version_Version'
-      tags:
-      - misc
   /user/authenticate/{action}:
     get:
       description: reserveUser is the route for reserve a email/phone for registration
@@ -493,9 +482,9 @@ paths:
             title: forbidden
             type: object
       parameters:
-      - name: status
+      - name: username
         type: string
-        description: ' the status filter'
+        description: ' the username filter'
         in: query
         required: false
       - name: p
@@ -503,14 +492,14 @@ paths:
         description: ' the page number'
         in: query
         required: false
+      - name: status
+        type: string
+        description: ' the status filter'
+        in: query
+        required: false
       - name: c
         type: integer
         description: ' per page item'
-        in: query
-        required: false
-      - name: username
-        type: string
-        description: ' the username filter'
         in: query
         required: false
       - name: token
@@ -676,19 +665,4 @@ definitions:
         type: array
       total:
         type: integer
-    type: object
-  version_Version:
-    properties:
-      build_date:
-        format: dateTime
-        type: string
-      build_number:
-        type: integer
-      commit_date:
-        format: dateTime
-        type: string
-      hash:
-        type: string
-      short_hash:
-        type: string
     type: object

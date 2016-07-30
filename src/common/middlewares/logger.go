@@ -4,33 +4,45 @@ import (
 	"net/http"
 	"time"
 
+	"net"
+
 	"github.com/Sirupsen/logrus"
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo"
 )
 
 // Logger is the middleware for log system
-func Logger(c *gin.Context) {
-	// Start timer
-	start := time.Now()
-	path := c.Request.URL.Path
+func Logger(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		// Start timer
+		start := time.Now()
+		path := c.Request().URL().Path
 
-	// Process request
-	c.Next()
+		// Process request
+		err := next(c)
 
-	latency := time.Since(start)
+		latency := time.Since(start)
 
-	clientIP := c.ClientIP()
-	method := c.Request.Method
-	statusCode := c.Writer.Status()
-	comment := c.Errors.ByType(gin.ErrorTypePrivate).String()
-	logrus.WithFields(
-		logrus.Fields{
-			"Method":   method,
-			"Path":     path,
-			"Latency":  latency,
-			"ClientIP": clientIP,
-			"Status":   statusCode,
-			"Comment":  comment,
-		},
-	).Info(http.StatusText(statusCode))
+		clientIP := c.Request().RemoteAddress()
+		if ip := c.Request().Header().Get(echo.HeaderXRealIP); ip != "" {
+			clientIP = ip
+		} else if ip = c.Request().Header().Get(echo.HeaderXForwardedFor); ip != "" {
+			clientIP = ip
+		} else {
+			clientIP, _, _ = net.SplitHostPort(clientIP)
+		}
+		method := c.Request().Method
+		statusCode := c.Response().Status()
+		logrus.WithFields(
+			logrus.Fields{
+				"Method":   method,
+				"Path":     path,
+				"Latency":  latency,
+				"ClientIP": clientIP,
+				"Status":   statusCode,
+				"Err":      err,
+			},
+		).Info(http.StatusText(statusCode))
+
+		return err
+	}
 }

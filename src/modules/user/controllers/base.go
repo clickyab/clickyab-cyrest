@@ -6,7 +6,7 @@ import (
 	"modules/user/aaa"
 	"modules/user/middlewares"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo"
 )
 
 type BaseController struct {
@@ -14,7 +14,7 @@ type BaseController struct {
 }
 
 // GetUser try to get back the user to system
-func (c BaseController) MustGetUser(ctx *gin.Context) *aaa.User {
+func (c BaseController) MustGetUser(ctx echo.Context) *aaa.User {
 	u, ok := authz.GetUser(ctx)
 	assert.True(ok, "[BUG] user is not in the context")
 

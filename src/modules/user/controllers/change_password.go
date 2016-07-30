@@ -5,7 +5,7 @@ import (
 
 	"modules/misc/trans"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo"
 )
 
 type changePasswordPayload struct {
@@ -13,7 +13,7 @@ type changePasswordPayload struct {
 	NewPass string `json:"new_pass"`
 }
 
-func (p *changePasswordPayload) Validate(ctx *gin.Context) (fail bool, res map[string]string) {
+func (p *changePasswordPayload) Validate(ctx echo.Context) (fail bool, res map[string]string) {
 	res = make(map[string]string)
 
 	if len(p.NewPass) < 6 {
@@ -33,23 +33,21 @@ func (p *changePasswordPayload) Validate(ctx *gin.Context) (fail bool, res map[s
 //      200 = base.NormalResponse
 //      400 = base.ErrorResponseSimple
 // }
-func (u *Controller) changePassword(ctx *gin.Context) {
+func (u *Controller) changePassword(ctx echo.Context) error {
 	password := u.MustGetPayload(ctx).(*changePasswordPayload)
 	usr := u.MustGetUser(ctx)
 
 	if usr.HasPassword() {
 		if !usr.VerifyPassword(password.OldPass) {
-			u.BadResponse(ctx, trans.E("old password is invalid"))
-			return
+			return u.BadResponse(ctx, trans.E("old password is invalid"))
 		}
 	}
 	usr.Password = password.NewPass
 	m := aaa.NewAaaManager()
 	err := m.UpdateUser(usr)
 	if err != nil {
-		u.BadResponse(ctx, err)
-		return
+		return u.BadResponse(ctx, err)
 	}
 
-	u.OKResponse(ctx, nil)
+	return u.OKResponse(ctx, nil)
 }

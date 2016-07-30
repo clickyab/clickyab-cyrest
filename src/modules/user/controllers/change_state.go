@@ -5,14 +5,14 @@ import (
 	"modules/user/aaa"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo"
 )
 
 type changeStatePayload struct {
 	Status aaa.UserStatus `json:"status"`
 }
 
-func (csp *changeStatePayload) Validate(ctx *gin.Context) (bool, map[string]string) {
+func (csp *changeStatePayload) Validate(ctx echo.Context) (bool, map[string]string) {
 	if !csp.Status.IsValid() {
 		return false, map[string]string{"status": fmt.Sprintf("invaid status, valids are : %s, %s, %s", aaa.UserStatusBanned, aaa.UserStatusRegistered, aaa.UserStatusVerified)}
 	}
@@ -29,24 +29,24 @@ func (csp *changeStatePayload) Validate(ctx *gin.Context) (bool, map[string]stri
 //      200 = base.NormalResponse
 //      400 = base.ErrorResponseSimple
 // }
-func (u *Controller) changeState(ctx *gin.Context) {
+func (u *Controller) changeState(ctx echo.Context) error {
 	status := u.MustGetPayload(ctx).(*changeStatePayload)
 	uID, err := strconv.ParseInt(ctx.Param("user_id"), 10, 0)
 	if err != nil {
-		u.NotFoundResponse(ctx, err)
-		return
+		return u.NotFoundResponse(ctx, err)
+
 	}
 	m := aaa.NewAaaManager()
 	usr, err := m.FindUserByID(uID)
 	if err != nil {
-		u.NotFoundResponse(ctx, err)
-		return
+		return u.NotFoundResponse(ctx, err)
+
 	}
 
 	usr.Status = status.Status
 	if m.UpdateUser(usr) != nil {
-		u.BadResponse(ctx, err)
-		return
+		return u.BadResponse(ctx, err)
+
 	}
-	u.OKResponse(ctx, nil)
+	return u.OKResponse(ctx, nil)
 }

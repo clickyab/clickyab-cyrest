@@ -234,7 +234,7 @@ func (this *gowatch) drainExec() {
 		if msg = <-this.sig; msg == "EXIT" {
 			os.Exit(1)
 		}
-		SKIP_WAITING:
+	SKIP_WAITING:
 		if this.RestartInterval > 0 {
 			log.Infof("restart after %s", this.RestartInterval)
 		}

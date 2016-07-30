@@ -4,8 +4,10 @@ import (
 	"common/utils"
 	"net/http"
 
+	"errors"
+
 	"github.com/Sirupsen/logrus"
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo"
 )
 
 const (
@@ -14,40 +16,40 @@ const (
 
 // AuthorizeGenerator create a middleware for check authorize request, must use it after authenticate
 // or else this block the request
-func AuthorizeGenerator(resource string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		u, ok := GetUser(c)
-		if !ok {
-			st := struct {
-				Error string `json:"error"`
-			}{
-				Error: http.StatusText(http.StatusForbidden),
+func AuthorizeGenerator(resource string) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			u, ok := GetUser(c)
+			if !ok {
+				st := struct {
+					Error string `json:"error"`
+				}{
+					Error: http.StatusText(http.StatusForbidden),
+				}
+				c.Response().Header().Set("error", st.Error)
+				c.JSON(
+					http.StatusForbidden,
+					st,
+				)
+				return errors.New(st.Error)
 			}
-			c.Header("error", st.Error)
-			c.JSON(
-				http.StatusForbidden,
-				st,
-			)
-			c.Abort()
-			return
-		}
-		m := u.GetResources()
-		if !utils.StringInArray(resource, m...) && !utils.StringInArray(godResource, m...) {
-			st := struct {
-				Error string `json:"error"`
-			}{
-				Error: http.StatusText(http.StatusForbidden),
+			m := u.GetResources()
+			if !utils.StringInArray(resource, m...) && !utils.StringInArray(godResource, m...) {
+				st := struct {
+					Error string `json:"error"`
+				}{
+					Error: http.StatusText(http.StatusForbidden),
+				}
+				c.Response().Header().Set("error", st.Error)
+				c.JSON(
+					http.StatusForbidden,
+					st,
+				)
+				logrus.Infof("forbidden since the %s is not available", resource)
+				return errors.New(st.Error)
 			}
-			c.Header("error", st.Error)
-			c.JSON(
-				http.StatusForbidden,
-				st,
-			)
-			logrus.Infof("forbidden since the %s is not available", resource)
-			c.Abort()
-			return
-		}
 
-		c.Next()
+			return next(c)
+		}
 	}
 }

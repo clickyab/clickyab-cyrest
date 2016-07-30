@@ -11,7 +11,7 @@ import (
 	"modules/user/utils/sms"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo"
 )
 
 type reserveUserPayload struct {
@@ -31,13 +31,12 @@ type reservedTokenResponse struct {
 //      200 = reservedTokenResponse
 //      400 = base.ErrorResponseSimple
 // }
-func (u *Controller) challengeCreate(ctx *gin.Context) {
+func (u *Controller) challengeCreate(ctx echo.Context) error {
 	pl := u.MustGetPayload(ctx).(*reserveUserPayload)
 	m := aaa.NewAaaManager()
 	token, old, err := m.ReserveToken(pl.Contact)
 	if err != nil {
-		u.BadResponse(ctx, err)
-		return
+		return  u.BadResponse(ctx, err)
 	}
 	// its time to send the message to user
 	// TODO : better function for handling this transparent
@@ -70,7 +69,7 @@ func (u *Controller) challengeCreate(ctx *gin.Context) {
 		}()
 	}
 
-	u.OKResponse(
+	return u.OKResponse(
 		ctx,
 		reservedTokenResponse{
 			//Token:    token.Token,

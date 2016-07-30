@@ -59,14 +59,14 @@ package {{ .GroupPkg }}
 // AUTO GENERATED CODE. DO NOT EDIT!
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo"
 )
 
 
 // Routes return the route registered with this
-func ({{ .GroupRec }} *{{ .StructName }}) Routes(r *gin.Engine, mountPoint string) {
+func ({{ .GroupRec }} *{{ .StructName }}) Routes(r *echo.Echo, mountPoint string) {
 	{{ if .Full }}
-	groupMiddleware := gin.HandlersChain{
+	groupMiddleware :=  []echo.MiddlewareFunc{
 		{{ range $gm := .GroupMiddleware }}{{ $gm }},
 		{{end}}
 	}
@@ -77,7 +77,7 @@ func ({{ .GroupRec }} *{{ .StructName }}) Routes(r *gin.Engine, mountPoint strin
 
 	{{ range $key ,$route := .Routes }}
 	// Route {{ $route }} with key {{ $key }}
-	m{{ $key }} := gin.HandlersChain{
+	m{{ $key }} :=  []echo.MiddlewareFunc{
 	{{ range $rm := .RouteMiddleware }}{{ $rm }},
 		{{end}}
 	}
@@ -87,8 +87,7 @@ func ({{ .GroupRec }} *{{ .StructName }}) Routes(r *gin.Engine, mountPoint strin
 	m{{ $key }} = append(m{{ $key }}, {{ $.GroupRec }}.{{ $route.RouteFuncMiddleware|strip_type }}()...){{ end }}
 	{{ if $route.Payload }} // Make sure payload is the last middleware
 	m{{ $key }} = append(m{{ $key }}, middlewares.PayloadUnMarshallerGenerator({{$route.Payload}}{})){{ end }}
-	m{{ $key }} = append(m{{ $key }}, {{ $.GroupRec }}.{{ $route.Function|strip_type }})
-	group.{{ $route.Method }}("{{ $route.Route }}", m{{ $key }}...)
+	group.{{ $route.Method }}("{{ $route.Route }}",{{ $.GroupRec }}.{{ $route.Function|strip_type }}, m{{ $key }}...)
 	// End route {{ $route }} with key {{ $key }}
 	{{ end }}
 	{{ end }}
@@ -98,9 +97,9 @@ func ({{ .GroupRec }} *{{ .StructName }}) Routes(r *gin.Engine, mountPoint strin
 `
 
 var (
-	ginImportPath = "github.com/gin-gonic/gin"
-	validMethod   = []string{"GET", "POST", "PUT", "PATCH", "HEAD", "OPTIONS", "DELETE", "CONNECT", "TRACE"}
-	fMap          = template.FuncMap{
+	echoImportPath = "github.com/labstack/echo"
+	validMethod    = []string{"GET", "POST", "PUT", "PATCH", "HEAD", "OPTIONS", "DELETE", "CONNECT", "TRACE"}
+	fMap           = template.FuncMap{
 		"ucfirst":    ucFirst,
 		"md5":        md5Sum,
 		"strip_type": stripType,
@@ -372,11 +371,11 @@ func findFunction(p humanize.Package, t string) (*humanize.File, *humanize.Funct
 }
 
 func isValidMiddleware(file humanize.File, fn humanize.Function) bool {
-	gin, ok := findGinImport(file)
+	gin, ok := findEchoImport(file)
 	if !ok {
 		return false
 	}
-	if len(fn.Type.Parameters) != 0 {
+	if len(fn.Type.Parameters) != 1 {
 		return false
 	}
 
@@ -385,15 +384,19 @@ func isValidMiddleware(file humanize.File, fn humanize.Function) bool {
 	}
 
 	typ := fn.Type.Results[0].Type
-	if typ.GetDefinition() == gin+".HandlersChain" || typ.GetDefinition() == "[]"+gin+".HandlerFunc" {
-		return true
+	if typ.GetDefinition() != gin+".HandlerFunc" {
+		return false
+	}
+	typ = fn.Type.Parameters[0].Type
+	if typ.GetDefinition() != gin+".HandlerFunc" {
+		return false
 	}
 
-	return false
+	return true
 }
 
 func isMatched(gin string, f humanize.Function) bool {
-	if len(f.Type.Results) != 0 {
+	if len(f.Type.Results) != 1 {
 		return false
 	}
 
@@ -405,16 +408,19 @@ func isMatched(gin string, f humanize.Function) bool {
 		return false
 	}
 
-	if f.Type.Parameters[0].Type.GetDefinition() != fmt.Sprintf("*%s.Context", gin) {
+	if f.Type.Parameters[0].Type.GetDefinition() != fmt.Sprintf("%s.Context", gin) {
+		return false
+	}
+
+	if f.Type.Results[0].Type.GetDefinition() != "error" {
 		return false
 	}
 
 	return true
 }
-
-func findGinImport(f humanize.File) (string, bool) {
+func findEchoImport(f humanize.File) (string, bool) {
 	for i := range f.Imports {
-		if f.Imports[i].Path == ginImportPath {
+		if f.Imports[i].Path == echoImportPath {
 			return f.Imports[i].Name, true
 		}
 	}
@@ -423,7 +429,7 @@ func findGinImport(f humanize.File) (string, bool) {
 }
 
 func (r *routerPlugin) FunctionIsSupported(file humanize.File, fn humanize.Function) bool {
-	str, b := findGinImport(file)
+	str, b := findEchoImport(file)
 	if !b {
 		return false
 	}

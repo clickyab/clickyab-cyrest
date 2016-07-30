@@ -241,28 +241,6 @@
 				}
 			},
 			"type": "object"
-		},
-		"version_Version": {
-			"properties": {
-				"build_date": {
-					"format": "dateTime",
-					"type": "string"
-				},
-				"build_number": {
-					"type": "integer"
-				},
-				"commit_date": {
-					"format": "dateTime",
-					"type": "string"
-				},
-				"hash": {
-					"type": "string"
-				},
-				"short_hash": {
-					"type": "string"
-				}
-			},
-			"type": "object"
 		}
 	},
 	"host": "helium.rubi.gd",
@@ -272,23 +250,6 @@
 		"version": "1.0.0"
 	},
 	"paths": {
-		"/misc/version": {
-			"get": {
-				"description": "getVersion get the version information",
-				"responses": {
-					"200": {
-						"description": "",
-						"produce": "application/json",
-						"schema": {
-							"$ref": "#/definitions/version_Version"
-						}
-					}
-				},
-				"tags": [
-					"misc"
-				]
-			}
-		},
 		"/user/authenticate/{action}": {
 			"get": {
 				"description": "reserveUser is the route for reserve a email/phone for registration",
@@ -965,9 +926,9 @@
 				"description": "listUsers list all users in site",
 				"parameters": [
 					{
-						"description": " the status filter",
+						"description": " the username filter",
 						"in": "query",
-						"name": "status",
+						"name": "username",
 						"required": false,
 						"type": "string"
 					},
@@ -979,18 +940,18 @@
 						"type": "integer"
 					},
 					{
+						"description": " the status filter",
+						"in": "query",
+						"name": "status",
+						"required": false,
+						"type": "string"
+					},
+					{
 						"description": " per page item",
 						"in": "query",
 						"name": "c",
 						"required": false,
 						"type": "integer"
-					},
-					{
-						"description": " the username filter",
-						"in": "query",
-						"name": "username",
-						"required": false,
-						"type": "string"
 					},
 					{
 						"description": "the security token, get it from login route",

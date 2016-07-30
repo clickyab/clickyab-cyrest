@@ -3,11 +3,12 @@ package base
 import (
 	"common/assert"
 	"common/middlewares"
+	"errors"
 	"net/http"
 
 	"common/try"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo"
 )
 
 // NormalResponse is for 2X responses
@@ -30,34 +31,40 @@ type Controller struct {
 }
 
 // BadResponse is 400 request
-func (c Controller) BadResponse(ctx *gin.Context, err error) {
+func (c Controller) BadResponse(ctx echo.Context, err error) error {
 	err = try.Try(err)
-	ctx.Header("error", err.Error())
+	ctx.Response().Header().Add("error", err.Error())
 	ctx.JSON(http.StatusBadRequest, ErrorResponseSimple{Error: err.Error()})
+
+	return err
 }
 
 // NotFoundResponse is 404 request
-func (c Controller) NotFoundResponse(ctx *gin.Context, err error) {
+func (c Controller) NotFoundResponse(ctx echo.Context, err error) error {
 	var res = ErrorResponseSimple{}
 	if err != nil {
 		res.Error = try.Try(err).Error()
 	} else {
 		res.Error = http.StatusText(http.StatusNotFound)
 	}
-	ctx.Header("error", res.Error)
+	ctx.Response().Header().Add("error", res.Error)
 	ctx.JSON(http.StatusNotFound, res)
+
+	return errors.New(res.Error)
 }
 
 // OKResponse is 200 request
-func (c Controller) OKResponse(ctx *gin.Context, res interface{}) {
+func (c Controller) OKResponse(ctx echo.Context, res interface{}) error {
 	if res == nil {
 		res = NormalResponse{}
 	}
 	ctx.JSON(http.StatusOK, res)
+
+	return nil
 }
 
 // MustGetPayload is for payload middleware
-func (c Controller) MustGetPayload(ctx *gin.Context) interface{} {
+func (c Controller) MustGetPayload(ctx echo.Context) interface{} {
 	obj, ok := middlewares.GetPayload(ctx)
 	assert.True(ok, "[BUG] payload un-marshaller failed")
 

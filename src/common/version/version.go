@@ -3,6 +3,7 @@ package version
 import (
 	"strconv"
 	"time"
+	"fmt"
 )
 
 // The following variables, are for compile time set, do not edit
@@ -25,12 +26,13 @@ type Version struct {
 
 // GetVersion return the application version in detail
 func GetVersion() Version {
+	fmt.Print(build)
 	c := Version{}
 	c.Count, _ = strconv.ParseInt(count, 10, 64)
-	c.Date, _ = time.Parse("Mon-Jan-2-15:04:05-2006", date)
+	c.Date, _ = time.Parse("2006-01-02", date)
 	c.Hash = hash
 	c.Short = short
-	c.BuildDate, _ = time.Parse("2006-01-02-15:04:05Z07:00", build)
+	c.BuildDate, _ = time.Parse("01-02-06", build)
 
 	return c
 }

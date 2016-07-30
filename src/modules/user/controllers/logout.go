@@ -5,7 +5,7 @@ import (
 	"modules/user/aaa"
 	"modules/user/middlewares"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo"
 )
 
 // logout is for the logout from the system
@@ -15,10 +15,10 @@ import (
 //		middleware = authz.Authenticate
 //      200 = base.NormalResponse
 // }
-func (u *Controller) logout(ctx *gin.Context) {
-	token, ok := ctx.Get(authz.ContextToken)
+func (u *Controller) logout(ctx echo.Context) error {
+	token, ok := ctx.Get(authz.ContextToken).(string)
 	assert.True(ok, "[BUG] no token on logout route")
 	m := aaa.NewAaaManager()
-	assert.Nil(m.EraseToken(token.(string)))
-	u.OKResponse(ctx, nil)
+	assert.Nil(m.EraseToken(token))
+	return u.OKResponse(ctx, nil)
 }

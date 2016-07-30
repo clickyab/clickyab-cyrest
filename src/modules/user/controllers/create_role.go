@@ -6,7 +6,7 @@ import (
 	"modules/user/aaa"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo"
 )
 
 type (
@@ -30,7 +30,7 @@ type (
 //      200 = createRoleResponse
 //      400 = base.ErrorResponseSimple
 // }
-func (u *Controller) createRole(ctx *gin.Context) {
+func (u *Controller) createRole(ctx echo.Context) error {
 	payload := u.MustGetPayload(ctx).(*createRolePayload)
 	role := aaa.Role{
 		Name:        payload.Name,
@@ -41,10 +41,9 @@ func (u *Controller) createRole(ctx *gin.Context) {
 
 	err := m.CreateRole(&role)
 	if err != nil {
-		u.BadResponse(ctx, errors.New(trans.T("can not create role")))
-		return
+		return u.BadResponse(ctx, errors.New(trans.T("can not create role")))
 	}
-	u.OKResponse(
+	return u.OKResponse(
 		ctx,
 		createRoleResponse{
 			ID: role.ID,
@@ -62,18 +61,17 @@ func (u *Controller) createRole(ctx *gin.Context) {
 //      200 = base.NormalResponse
 //      400 = base.ErrorResponseSimple
 // }
-func (u *Controller) updateRole(ctx *gin.Context) {
+func (u *Controller) updateRole(ctx echo.Context) error {
 	m := aaa.NewAaaManager()
 	idStr := ctx.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		u.NotFoundResponse(ctx, err)
-		return
+		return u.NotFoundResponse(ctx, err)
 	}
 	role, err := m.FindRoleByID(id)
 	if err != nil {
-		u.NotFoundResponse(ctx, nil)
-		return
+		return u.NotFoundResponse(ctx, nil)
+
 	}
 	payload := u.MustGetPayload(ctx).(*createRolePayload)
 
@@ -82,10 +80,10 @@ func (u *Controller) updateRole(ctx *gin.Context) {
 	role.Resources = append([]string{}, payload.Resources...)
 	err = m.UpdateRole(role)
 	if err != nil {
-		u.BadResponse(ctx, errors.New(trans.T("can not update role")))
-		return
+		return u.BadResponse(ctx, errors.New(trans.T("can not update role")))
+
 	}
-	u.OKResponse(
+	return u.OKResponse(
 		ctx,
 		nil,
 	)

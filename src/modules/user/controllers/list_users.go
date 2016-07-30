@@ -5,7 +5,7 @@ import (
 	"modules/user/aaa"
 	"strings"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo"
 )
 
 type userListResponse struct {
@@ -25,14 +25,14 @@ type userListResponse struct {
 //		_c_ = integer, per page item
 //      200 = userListResponse
 // }
-func (u *Controller) listUsers(ctx *gin.Context) {
-	o, c := utils.GetPageAndCount(ctx.Request, true)
+func (u *Controller) listUsers(ctx echo.Context) error {
+	o, c := utils.GetPageAndCount(ctx.Request(), true)
 
-	username := strings.Trim(ctx.Request.URL.Query().Get("username"), " ")
-	status := aaa.UserStatus(ctx.Request.URL.Query().Get("status"))
+	username := strings.Trim(ctx.Request().URL().QueryParam("username"), " ")
+	status := aaa.UserStatus(ctx.Request().URL().QueryParam("status"))
 
 	res := &userListResponse{}
 	res.List, res.Total = aaa.NewAaaManager().ListUserFilterByUsername(o, c, username, status)
 
-	u.OKResponse(ctx, res)
+	return u.OKResponse(ctx, res)
 }

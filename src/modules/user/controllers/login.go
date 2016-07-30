@@ -6,7 +6,7 @@ import (
 	"modules/user/aaa"
 	"strings"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo"
 )
 
 type payloadLoginData struct {
@@ -30,19 +30,19 @@ type responseLoginOK struct {
 //      200 = responseLoginOK
 //      400 = base.ErrorResponseSimple
 // }
-func (u *Controller) login(ctx *gin.Context) {
+func (u *Controller) login(ctx echo.Context) error {
 	payload := u.MustGetPayload(ctx).(*payloadLoginData)
 	m := aaa.NewAaaManager()
 	token, user, err := m.LoginUserByPassword(strings.ToLower(payload.UserName), payload.Password)
 	if err != nil {
 		audit(payload.UserName, "LoginFail", "error", err)
-		u.BadResponse(ctx, errors.New(trans.T("invalid username/password")))
-		return
+		return u.BadResponse(ctx, errors.New(trans.T("invalid username/password")))
+		
 	}
 	// Ignore the result, not a big deal
 	_ = m.UpdateLastLogin(user)
 	audit(user.Username, "LoginOK", "success", err)
-	u.OKResponse(
+	return u.OKResponse(
 		ctx,
 		responseLoginOK{
 			UserID:    user.ID,

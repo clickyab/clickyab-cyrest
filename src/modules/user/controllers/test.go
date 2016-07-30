@@ -1,8 +1,6 @@
 package user
 
-import (
-	"github.com/gin-gonic/gin"
-)
+import "github.com/labstack/echo"
 
 type (
 	tmp struct {
@@ -24,6 +22,6 @@ type (
 //      200 = tmpArray
 //      400 = base.ErrorResponseSimple
 // }
-func (u *Controller) testFunction(ctx *gin.Context) {
-
+func (u *Controller) testFunction(ctx echo.Context) error {
+	return nil
 }

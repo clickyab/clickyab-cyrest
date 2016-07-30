@@ -5,22 +5,11 @@ package misc
 import (
 	"common/utils"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo"
 )
 
 // Routes return the route registered with this
-func (u *Controller) Routes(r *gin.Engine, mountPoint string) {
+func (ctrl *Controller) Routes(r *echo.Echo, mountPoint string) {
 
-	groupMiddleware := gin.HandlersChain{}
-
-	group := r.Group(mountPoint+"/misc", groupMiddleware...)
-
-	// Route {/version GET Controller.getVersion misc []  Controller u  } with key 0
-	m0 := gin.HandlersChain{}
-
-	m0 = append(m0, u.getVersion)
-	group.GET("/version", m0...)
-	// End route {/version GET Controller.getVersion misc []  Controller u  } with key 0
-
-	utils.DoInitialize(u)
+	utils.DoInitialize(ctrl)
 }

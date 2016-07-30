@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/engine/fasthttp"
 )
 
 func main() {
@@ -22,7 +22,6 @@ func main() {
 	} else {
 		logrus.SetFormatter(&logrus.TextFormatter{ForceColors: false, DisableColors: true})
 		logrus.SetLevel(logrus.WarnLevel)
-		gin.SetMode(gin.ReleaseMode)
 	}
 
 	numcpu := config.Config.MaxCPUAvailable
@@ -49,5 +48,6 @@ func main() {
 			"Build date":        ver.BuildDate.Format(time.RFC3339),
 		},
 	).Infof("Application started")
-	logrus.Fatal(base.Initialize(config.Config.MountPoint).Run(config.Config.Port))
+
+	base.Initialize(config.Config.MountPoint).Run(fasthttp.New(config.Config.Port))
 }

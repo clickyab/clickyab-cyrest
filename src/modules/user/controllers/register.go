@@ -6,7 +6,7 @@ import (
 	"modules/user/utils"
 	"regexp"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo"
 )
 
 type registrationPayload struct {
@@ -21,7 +21,7 @@ var (
 	usernameValidator = regexp.MustCompile("^[a-zA-Z][A-Za-z0-9._%@-]+$")
 )
 
-func (r *registrationPayload) Validate(ctx *gin.Context) (bool, map[string]string) {
+func (r *registrationPayload) Validate(ctx echo.Context) (bool, map[string]string) {
 	_, err := utils.DetectContactType(r.Contact)
 	var res = make(map[string]string)
 	var fail bool
@@ -54,17 +54,17 @@ func (r *registrationPayload) Validate(ctx *gin.Context) (bool, map[string]strin
 //      200 = responseLoginOK
 //      400 = base.ErrorResponseSimple
 // }
-func (u *Controller) registerUser(ctx *gin.Context) {
+func (u *Controller) registerUser(ctx echo.Context) error {
 	pl := u.MustGetPayload(ctx).(*registrationPayload)
 	m := aaa.NewAaaManager()
 	user, err := m.RegisterUserByToken(pl.Token, pl.Contact, pl.Username, pl.Password)
 	if err != nil {
-		u.BadResponse(ctx, err)
-		return
+		return u.BadResponse(ctx, err)
+		
 	}
 
 	token := m.GetNewToken(user.Token)
-	u.OKResponse(
+	return u.OKResponse(
 		ctx,
 		responseLoginOK{
 			UserID:    user.ID,

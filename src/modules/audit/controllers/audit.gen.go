@@ -5,11 +5,11 @@ package controllers
 import (
 	"common/utils"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo"
 )
 
 // Routes return the route registered with this
-func (ctrl *Controller) Routes(r *gin.Engine, mountPoint string) {
+func (ctrl *Controller) Routes(r *echo.Echo, mountPoint string) {
 
 	utils.DoInitialize(ctrl)
 }

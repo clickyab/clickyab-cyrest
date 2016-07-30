@@ -10,7 +10,7 @@ import (
 	"modules/user/aaa"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 )
@@ -55,18 +55,17 @@ func getConfig() *oauth2.Config {
 //		200 = base.NormalResponse
 //		400 = base.ErrorResponseSimple
 // }
-func (u *Controller) oauthInit(ctx *gin.Context) {
+func (u *Controller) oauthInit(ctx echo.Context) error {
 	// Check the action, valid ones are login/register
 	state := ctx.Param("action")
 	if state != "login" && state != "register" {
-		u.NotFoundResponse(ctx, nil)
-		return
+		return u.NotFoundResponse(ctx, nil)
 	}
 	oauthCfg := getConfig()
 	url := oauthCfg.AuthCodeURL(state)
 	fmt.Print(oauthCfg)
 	//redirect user to that page
-	ctx.Redirect(http.StatusFound, url)
+	return ctx.Redirect(http.StatusFound, url)
 }
 
 // reserveUser is the route for reserve a email/phone for registration
@@ -76,8 +75,8 @@ func (u *Controller) oauthInit(ctx *gin.Context) {
 //		200 = base.NormalResponse
 //		400 = base.ErrorResponseSimple
 // }
-func (u *Controller) oauthCallback(ctx *gin.Context) {
-	state := ctx.Request.FormValue("state")
+func (u *Controller) oauthCallback(ctx echo.Context) error {
+	state := ctx.Request().FormValue("state")
 	var redirect string
 	switch state {
 	case "login":
@@ -85,30 +84,29 @@ func (u *Controller) oauthCallback(ctx *gin.Context) {
 	case "register":
 		redirect = ucfg.Cfg.OAuth.RegisterRedirect
 	default:
-		u.NotFoundResponse(ctx, nil)
-		return
+		return u.NotFoundResponse(ctx, nil)
 	}
-	eString := ctx.Request.FormValue("error")
+	eString := ctx.Request().FormValue("error")
 	if eString != "" {
 		// the request is canceled
-		ctx.Redirect(http.StatusFound, redirect+"?error=unauthorized")
-		return
+		return ctx.Redirect(http.StatusFound, redirect+"?error=unauthorized")
+
 	}
 
 	oauthCfg := getConfig()
 	//Get the code from the response
-	code := ctx.Request.FormValue("code")
+	code := ctx.Request().FormValue("code")
 	t, err := oauthCfg.Exchange(oauth2.NoContext, code)
 	if err != nil {
-		ctx.Redirect(http.StatusFound, redirect+"?error="+err.Error())
-		return
+		return ctx.Redirect(http.StatusFound, redirect+"?error="+err.Error())
+
 	}
 	client := oauthCfg.Client(oauth2.NoContext, t)
 	//now get user data based on the Transport which has the token
 	resp, err := client.Get("https://www.googleapis.com/oauth2/v2/userinfo")
 	if err != nil {
-		ctx.Redirect(http.StatusFound, redirect+"?error="+err.Error())
-		return
+		return ctx.Redirect(http.StatusFound, redirect+"?error="+err.Error())
+
 	}
 	gp := googleResponse{}
 	decoder := json.NewDecoder(resp.Body)
@@ -127,18 +125,19 @@ func (u *Controller) oauthCallback(ctx *gin.Context) {
 		var token string
 		token, usr, err = m.LoginUserByOAuth(gp.Email)
 		if err != nil {
-			ctx.Redirect(http.StatusFound, redirect+"?error="+err.Error())
-			return
+			return ctx.Redirect(http.StatusFound, redirect+"?error="+err.Error())
+
 		}
 		ctx.Redirect(http.StatusFound, redirect+"?token="+token)
 	case "register":
 		usr, err = m.RegisterUserByContact(gp.Email)
 		if err != nil {
-			ctx.Redirect(http.StatusFound, redirect+"?error=already_regsitered")
-			return
+			return ctx.Redirect(http.StatusFound, redirect+"?error=already_regsitered")
+
 		}
 		token := m.GetNewToken(usr.Token)
-		ctx.Redirect(http.StatusFound, redirect+"?token="+token)
+		return ctx.Redirect(http.StatusFound, redirect+"?token="+token)
 	}
 
+	return nil
 }

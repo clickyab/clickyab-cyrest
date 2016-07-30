@@ -11,7 +11,7 @@ import (
 	"modules/user/aaa"
 
 	"github.com/disintegration/imaging"
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo"
 )
 
 // getAvatar get the avatar from the system. default is the gravatar image
@@ -26,16 +26,14 @@ import (
 //      200 = base.NormalResponse
 //      404 = base.ErrorResponseSimple
 // }
-func (u *Controller) getAvatar(ctx *gin.Context) {
+func (u *Controller) getAvatar(ctx echo.Context) error {
 	UserID, err := strconv.ParseInt(ctx.Param("user_id"), 10, 0)
 	if err != nil {
-		u.NotFoundResponse(ctx, nil)
-		return
+		return u.NotFoundResponse(ctx, nil)
 	}
 	_, err = aaa.NewAaaManager().FindUserByID(UserID)
 	if err != nil {
-		u.NotFoundResponse(ctx, nil)
-		return
+		return u.NotFoundResponse(ctx, nil)
 	}
 
 	size, err := strconv.ParseInt(ctx.Param("size"), 10, 0)
@@ -43,8 +41,7 @@ func (u *Controller) getAvatar(ctx *gin.Context) {
 		size = 512
 	}
 	if size != 16 && size != 32 && size != 64 && size != 128 && size != 256 && size != 512 {
-		u.NotFoundResponse(ctx, nil)
-		return
+		return u.NotFoundResponse(ctx, nil)
 	}
 	data, err := assets.Asset("data/default.png")
 	assert.Nil(err)
@@ -57,6 +54,7 @@ func (u *Controller) getAvatar(ctx *gin.Context) {
 	buffer.Reset()
 
 	_ = png.Encode(buffer, dst)
-	ctx.Header("Content-Type", "image/png")
-	_, _ = ctx.Writer.Write(buffer.Bytes())
+	ctx.Request().Header().Set("Content-Type", "image/png")
+	_, _ = ctx.Response().Write(buffer.Bytes())
+	return nil
 }

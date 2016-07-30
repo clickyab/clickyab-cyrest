@@ -1,22 +1,22 @@
 package base
 
 import (
+	"common/config"
 	"common/middlewares"
 	"sync"
 
-	"common/config"
-
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 )
 
 // Routes the base rote structure
 type Routes interface {
 	// Routes is for adding new controller
-	Routes(r *gin.Engine, mountPoint string)
+	Routes(r *echo.Echo, mountPoint string)
 }
 
 var (
-	engine *gin.Engine
+	engine *echo.Echo
 	all    []Routes
 	once   = &sync.Once{}
 )
@@ -27,18 +27,19 @@ func Register(c ...Routes) {
 }
 
 // Initialize the controller
-func Initialize(mountPoint string) *gin.Engine {
+func Initialize(mountPoint string) *echo.Echo {
 	once.Do(func() {
-		engine = gin.New()
-		mid := []gin.HandlerFunc{middlewares.Recovery, middlewares.Logger}
+		engine = echo.New()
+		mid := []echo.MiddlewareFunc{middlewares.Recovery, middlewares.Logger}
 		if config.Config.CORS {
-			mid = append(mid, middlewares.CORSMiddlewareGenerator())
+			mid = append(mid, middleware.CORS())
 		}
 		engine.Use(mid...)
 		for i := range all {
 			all[i].Routes(engine, mountPoint)
 		}
 	})
-
+	//engine.SetLogLevel(log.DEBUG)
+	engine.SetLogger(NewLogger())
 	return engine
 }

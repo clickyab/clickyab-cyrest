@@ -62,7 +62,7 @@ type CreateUserHook func(gorp.SqlExecutor, *User) error
 
 // From the bcrypt package
 const (
-	minHashSize = 59
+	minHashSize  = 59
 	noPassString = "NO" // Size must be less than 6 character
 )
 
@@ -231,11 +231,11 @@ func (m *Manager) LoginUserByOAuth(email string) (string, *User, error) {
 	if err != nil {
 		return "", nil, err
 	}
-	
+
 	if u.Status == UserStatusBanned {
 		return "", nil, errors.New("sorry, but you are banned")
 	}
-	
+
 	return m.GetNewToken(u.Token), u, nil
 }
 
@@ -281,7 +281,7 @@ func (m *Manager) RegisterUser(contact, username, password string) (u *User, err
 		} else {
 			err = m.Commit()
 		}
-		
+
 		if err != nil {
 			u = nil
 		}
@@ -301,7 +301,7 @@ func (m *Manager) RegisterUserByContact(contact string) (u *User, err error) {
 	}
 	u = &User{
 		Contact:         contact,
-		Username:        fmt.Sprintf("user_%d",anonUser),
+		Username:        fmt.Sprintf("user_%d", anonUser),
 		Password:        noPassString,
 		Attributes:      make(common.GenericJSONField),
 		Status:          UserStatusRegistered,
@@ -317,7 +317,7 @@ func (m *Manager) RegisterUserByContact(contact string) (u *User, err error) {
 		} else {
 			err = m.Commit()
 		}
-		
+
 		if err != nil {
 			u = nil
 		}

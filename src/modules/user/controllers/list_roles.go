@@ -3,7 +3,7 @@ package user
 import (
 	"modules/user/aaa"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo"
 )
 
 // listRoles list all roles in system, no pagination
@@ -16,8 +16,8 @@ import (
 //      200 = roles
 //      400 = base.ErrorResponseSimple
 // }
-func (u *Controller) listRoles(ctx *gin.Context) {
+func (u *Controller) listRoles(ctx echo.Context) error {
 	m := aaa.NewAaaManager()
 
-	u.OKResponse(ctx, m.ListRoles())
+	return u.OKResponse(ctx, m.ListRoles())
 }

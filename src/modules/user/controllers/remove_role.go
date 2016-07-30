@@ -5,7 +5,7 @@ import (
 	"modules/user/aaa"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo"
 )
 
 // removeRole remove a role from database
@@ -18,31 +18,30 @@ import (
 //      200 = base.NormalResponse
 //      400 = base.ErrorResponseSimple
 // }
-func (u *Controller) removeRole(ctx *gin.Context) {
+func (u *Controller) removeRole(ctx echo.Context) error {
 	m := aaa.NewAaaManager()
 	idStr := ctx.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		u.NotFoundResponse(ctx, err)
-		return
+		return u.NotFoundResponse(ctx, err)
+
 	}
 	role, err := m.FindRoleByID(id)
 	if err != nil {
-		u.NotFoundResponse(ctx, nil)
-		return
+		return u.NotFoundResponse(ctx, nil)
 	}
 
 	cnt := m.CountRoleUsers(role)
 	if cnt > 0 {
-		u.BadResponse(ctx, fmt.Errorf("there is %d user in this role, can not remove it", cnt))
-		return
+		return u.BadResponse(ctx, fmt.Errorf("there is %d user in this role, can not remove it", cnt))
+
 	}
 
 	_, err = m.GetDbMap().Delete(role)
 	if err != nil {
-		u.BadResponse(ctx, err)
-		return
+		return u.BadResponse(ctx, err)
+
 	}
 
-	u.OKResponse(ctx, nil)
+	return u.OKResponse(ctx, nil)
 }

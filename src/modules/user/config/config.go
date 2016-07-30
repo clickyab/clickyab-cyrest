@@ -30,10 +30,10 @@ type Config struct {
 	} `onion:"sms"`
 
 	OAuth struct {
-		ClientID     string `onion:"client_id"`
-		ClientSecret string `onion:"client_secret"`
-		RedirectURI  string `onion:"redirect_uri"`
-		LoginRedirect string `onion:"login_redirect"`
+		ClientID         string `onion:"client_id"`
+		ClientSecret     string `onion:"client_secret"`
+		RedirectURI      string `onion:"redirect_uri"`
+		LoginRedirect    string `onion:"login_redirect"`
 		RegisterRedirect string `onion:"register_redirect"`
 	} `onion:"oauth"`
 }
