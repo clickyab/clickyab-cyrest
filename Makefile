@@ -9,9 +9,9 @@ export GOPATH=$(ROOT):$(ROOT)/vendor
 export WATCH?=hello
 export LONGHASH=$(shell git log -n1 --pretty="format:%H" | cat)
 export SHORTHASH=$(shell git log -n1 --pretty="format:%h"| cat)
-export COMMITDATE=$(shell git log -n1 --date=short --pretty="format:%cd"| sed -e "s/ /-/g")
+export COMMITDATE=$(shell git log -n1 --date="format:%D-%H-%I-%S" --pretty="format:%cd"| sed -e "s/\//-/g")
 export COMMITCOUNT=$(shell git rev-list HEAD --count| cat)
-export BUILDDATE=$(shell date +%D| sed -e "s/\//-/g")
+export BUILDDATE=$(shell date "+%D/%H/%I/%S"| sed -e "s/\//-/g")
 export FLAGS="-X common/version.hash=$(LONGHASH) -X common/version.short=$(SHORTHASH) -X common/version.date=$(COMMITDATE) -X common/version.count=$(COMMITCOUNT) -X common/version.build=$(BUILDDATE)"
 export LDARG=-ldflags $(FLAGS)
 export BUILD=$(BIN)/gb build $(LDARG)
