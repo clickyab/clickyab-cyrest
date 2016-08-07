@@ -1,9 +1,9 @@
 swagger: "2.0"
 info:
   version: 1.0.0
-  title: The Helium API
-  description: Auto genertaed Helium API
-host: helium.rubi.gd
+  title: The cyrest API
+  description: Auto genertaed cyrest API
+host: cyrest.rubi.gd
 basePath: /api
 schemes:
 - https

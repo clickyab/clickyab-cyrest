@@ -243,10 +243,10 @@
 			"type": "object"
 		}
 	},
-	"host": "helium.rubi.gd",
+	"host": "cyrest.rubi.gd",
 	"info": {
-		"description": "Auto genertaed Helium API",
-		"title": "The Helium API",
+		"description": "Auto genertaed cyrest API",
+		"title": "The cyrest API",
 		"version": "1.0.0"
 	},
 	"paths": {

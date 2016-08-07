@@ -84,7 +84,7 @@ var (
 	typeCache  = make(map[string]swaggerType)
 	parameters = regexp.MustCompile("/:([^/]+)")
 	query      = regexp.MustCompile("^_([a-zA-Z0-9]+)_$")
-	//protected  = []string{"helium_custom_schema"}
+	//protected  = []string{"cyrest_custom_schema"}
 )
 
 func ucFirst(s string) string {
@@ -259,10 +259,10 @@ func (rg *swaggerGenerator) mix() error {
 			Description string
 		}{
 			Version:     "1.0.0",
-			Title:       "The Helium API",
-			Description: "Auto genertaed Helium API",
+			Title:       "The cyrest API",
+			Description: "Auto genertaed cyrest API",
 		},
-		Host:        "helium.rubi.gd",
+		Host:        "cyrest.rubi.gd",
 		BasePath:    "/api",
 		Schemes:     []string{"https"},
 		Consumes:    []string{"application/json"},
@@ -288,11 +288,11 @@ func (rg *swaggerGenerator) mix() error {
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(filepath.Join(rg.workDir, "helium.json"), jsonData, 0644)
+	err = ioutil.WriteFile(filepath.Join(rg.workDir, "cyrest.json"), jsonData, 0644)
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(filepath.Join(rg.workDir, "helium.yaml"), data, 0644)
+	return ioutil.WriteFile(filepath.Join(rg.workDir, "cyrest.yaml"), data, 0644)
 }
 
 // FunctionIsSupported check for a function signature and if the function is supported in this

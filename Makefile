@@ -1,5 +1,5 @@
 #@IgnoreInspection BashAddShebang
-export APPNAME=helium
+export APPNAME=cyrest
 export DEFAULT_PASS=bita123
 export GO=$(shell which go)
 export GIT:=$(shell which git)
@@ -187,11 +187,11 @@ swagger-cleaner:
 	@rm -f $(WORK_DIR)/swagger/*.yaml
 
 swagger-client: tools-swagger
-	GOPATH=$(ROOT) cd $(ROOT)/src && $(BIN)/swagger generate client -f $(ROOT)/3rd/swagger/helium.yaml
+	GOPATH=$(ROOT) cd $(ROOT)/src && $(BIN)/swagger generate client -f $(ROOT)/3rd/swagger/cyrest.yaml
 
 codegen: swagger-cleaner codegen-user codegen-audit codegen-misc
-	@cp $(WORK_DIR)/swagger/helium.yaml $(ROOT)/3rd/swagger
-	@cp $(WORK_DIR)/swagger/helium.json $(ROOT)/3rd/swagger
+	@cp $(WORK_DIR)/swagger/cyrest.yaml $(ROOT)/3rd/swagger
+	@cp $(WORK_DIR)/swagger/cyrest.json $(ROOT)/3rd/swagger
 	@echo "Done"
 
 #
