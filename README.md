@@ -1,4 +1,5 @@
 # Click yab Rest
+================
 
 Description
 
@@ -18,9 +19,14 @@ Go
 
 ### Installing
 
-A step by step series of examples that tell you have to get a development env running
+1. clone the repository
+        git clone https://github.com/clickyab/clickyab-cyrest
 
-Stay what the step will be
+2.Install and configure Docker
+You must install Docker.
+        https://docs.docker.com/engine/installation/
+3. install and configure vagrant
+
 
 ```
 Give the example
