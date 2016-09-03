@@ -144,14 +144,14 @@ migcreate:
 	@/bin/bash $(BIN)/create_migration.sh
 
 migcp:
-	@mkdir -p $(ROOT)/db/migrations
-	@cd $(ROOT)/db/migrations && rm -f *.sql
-	@cp $(ROOT)/src/modules/*/migrations/*.sql $(ROOT)/db/migrations
+	mkdir -p $(ROOT)/db/migrations
+	cd $(ROOT)/db/migrations && rm -f *.sql
+	cp $(ROOT)/src/modules/*/migrations/*.sql $(ROOT)/db/migrations
 
 migration: migcp tools-gobindata
-	@cd $(ROOT) && $(BIN)/go-bindata -o ./src/migration/migration.go -nomemcopy=true -pkg=main ./db/migrations/...
+	cd $(ROOT) && $(BIN)/go-bindata -o ./src/migration/migration.go -nomemcopy=true -pkg=main ./db/migrations/...
 
-tools-migrate: $(BIN)/gb
+tools-migrate: $(BIN)/gb migration
 	$(BUILD) migration
 
 goimports: tools-goimports

@@ -4,5 +4,5 @@ import (
 	_ "modules/user/aaa"         // Models
 	_ "modules/user/config"      // Configs
 	_ "modules/user/controllers" // Controllers
-	_ "modules/user/middlewares" // Middlewares
+	//_ "modules/user/middlewares" // Middlewares
 )

@@ -10,18 +10,6 @@ import (
 // AUTO GENERATED CODE. DO NOT EDIT!
 
 const (
-	// MessageLogTableFull is the MessageLog table name
-	MessageLogTableFull = "message_logs"
-
-	// ReservedUserTableFull is the ReservedUser table name
-	ReservedUserTableFull = "reserved_users"
-
-	// RoleTableFull is the Role table name
-	RoleTableFull = "roles"
-
-	// UserRoleTableFull is the UserRole table name
-	UserRoleTableFull = "user_roles"
-
 	// UserTableFull is the User table name
 	UserTableFull = "users"
 )
@@ -49,39 +37,6 @@ func NewAaaManagerFromTransaction(tx gorp.SqlExecutor) (*Manager, error) {
 
 // Initialize aaa package
 func (m *Manager) Initialize() {
-
-	m.AddTableWithName(
-		MessageLog{},
-		MessageLogTableFull,
-	).SetKeys(
-		true,
-		"ID",
-	)
-
-	m.AddTableWithName(
-		ReservedUser{},
-		ReservedUserTableFull,
-	).SetKeys(
-		true,
-		"ID",
-	)
-
-	m.AddTableWithName(
-		Role{},
-		RoleTableFull,
-	).SetKeys(
-		true,
-		"ID",
-	)
-
-	m.AddTableWithName(
-		UserRole{},
-		UserRoleTableFull,
-	).SetKeys(
-		false,
-		"UserID",
-		"RoleID",
-	)
 
 	m.AddTableWithName(
 		User{},

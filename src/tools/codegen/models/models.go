@@ -185,7 +185,7 @@ func (m* Manager) Find{{ $m.StructName }}By{{ $by.Name }}({{ $by.DB|getvar }} {{
 	var res {{ $m.StructName }}
 	err := m.GetDbMap().SelectOne(
 		&res,
-		fmt.Sprintf("SELECT * FROM %s WHERE {{ $by.DB }}=$1", {{ $m.StructName }}TableFull),
+		fmt.Sprintf("SELECT * FROM %s WHERE {{ $by.DB }}=?", {{ $m.StructName }}TableFull),
 		{{ $by.DB|getvar }},
 	)
 
@@ -202,7 +202,7 @@ func (m *Manager) Filter{{ $m.StructName|plural }}By{{ $by.Name }}({{ $by.DB|get
 	var res []{{ $m.StructName }}
 	_, err := m.GetDbMap().Select(
 		&res,
-		fmt.Sprintf("SELECT * FROM %s WHERE {{ $by.DB }}=$1", {{ $m.StructName }}TableFull),
+		fmt.Sprintf("SELECT * FROM %s WHERE {{ $by.DB }}=?", {{ $m.StructName }}TableFull),
 		{{ $by.DB|getvar }},
 	)
 	assert.Nil(err)
@@ -250,7 +250,7 @@ func (m *Manager) Get{{ .St2|base }}{{ .St1|plural }}({{ .St2|getvar }} *{{ .St2
 func (m *Manager) Count{{ .St1|base }}{{ .St2|plural }}({{ .St1|getvar }} *{{ .St1 }}) int64 {
 	res, err := m.GetDbMap().SelectInt(
 		fmt.Sprintf(
-			"SELECT COUNT(*) FROM %s WHERE {{ .Field1.DB }}=$1",
+			"SELECT COUNT(*) FROM %s WHERE {{ .Field1.DB }}=?",
 			{{ .Base  }}TableFull,
 		),
 		{{ .St1|getvar }}.ID,
@@ -264,7 +264,7 @@ func (m *Manager) Count{{ .St1|base }}{{ .St2|plural }}({{ .St1|getvar }} *{{ .S
 func (m *Manager) Count{{ .St2|base }}{{ .St1|plural }}({{ .St2|getvar }} *{{ .St2 }}) int64 {
 	res, err := m.GetDbMap().SelectInt(
 		fmt.Sprintf(
-			"SELECT COUNT(*) FROM %s WHERE {{ .Field2.DB }}=$1",
+			"SELECT COUNT(*) FROM %s WHERE {{ .Field2.DB }}=?",
 			{{ .Base  }}TableFull,
 		),
 		{{ .St2|getvar }}.ID,
@@ -282,7 +282,7 @@ func (m *Manager) Get{{ .St|base }}{{ .Base|plural }}({{ .St|getvar }} *{{ .St }
 	_, err := m.GetDbMap().Select(
 		&res,
 		fmt.Sprintf(
-			"SELECT * FROM %s WHERE {{ .Field.DB }}=$1",
+			"SELECT * FROM %s WHERE {{ .Field.DB }}=?",
 			{{ .Base }}TableFull,
 		),
 		{{.St|getvar}}.{{ .Target }},
@@ -296,7 +296,7 @@ func (m *Manager) Get{{ .St|base }}{{ .Base|plural }}({{ .St|getvar }} *{{ .St }
 func (m *Manager) Count{{ .St|base }}{{ .Base|plural }}({{ .St|getvar }} *{{ .St }}) int64 {
 	res, err := m.GetDbMap().SelectInt(
 		fmt.Sprintf(
-			"SELECT COUNT(*) FROM %s WHERE {{ .Field.DB }}=$1",
+			"SELECT COUNT(*) FROM %s WHERE {{ .Field.DB }}=?",
 			{{ .Base }}TableFull,
 		),
 		{{.St|getvar}}.{{ .Target }},
@@ -314,7 +314,7 @@ func (m *Manager) Get{{ .Base|base }}{{ .St|plural }}({{ .Base|getvar }} *{{ .Ba
 	_, err := m.GetDbMap().Select(
 		&res,
 		fmt.Sprintf(
-			"SELECT * FROM %s WHERE {{ .Field.DB }}=$1",
+			"SELECT * FROM %s WHERE {{ .Field.DB }}=?",
 			{{ .St }}TableFull,
 		),
 		{{.Base|getvar}}.ID,

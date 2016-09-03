@@ -86,8 +86,9 @@ func init() {
 	Config.Redis.Address = ":6379"
 	//Config.Redis.Password = ""
 
+	// TODO : make sure ?parseTime=true is always set!
 	//[username[:password]@][protocol[(address)]]/dbname[?param1=value1&...&paramN=valueN]
-	Config.Mysql.DSN = "root:bita123@/cyrest"
+	Config.Mysql.DSN = "root:bita123@/cyrest?parseTime=true"
 	Config.Mysql.MaxConnection = 100
 	Config.Mysql.MaxIdleConnection = 10
 	Config.Page.PerPage = 10

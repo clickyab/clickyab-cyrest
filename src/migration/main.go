@@ -43,9 +43,9 @@ func doMigration(dir migrate.MigrationDirection, max int) error {
 }
 
 func main() {
+	flag.Parse()
 	config.Initialize()
 	models.Initialize()
-	flag.Parse()
 	var err error
 	if *action == "up" {
 		err = doMigration(migrate.Up, 0)
@@ -76,6 +76,6 @@ func main() {
 	}
 
 	if err != nil {
-		logrus.Fatal(err)
+		logrus.Panic(err)
 	}
 }

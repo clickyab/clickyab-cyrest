@@ -14,6 +14,8 @@ var (
 )
 
 func T(translationID string, args ...interface{}) string {
+	return translationID
+
 	lock.RLock()
 	if translations == nil {
 		lock.RUnlock()

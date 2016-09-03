@@ -113,7 +113,7 @@ func (m *Manager) FindUserByID(id int64) (*User, error) {
 	var res User
 	err := m.GetDbMap().SelectOne(
 		&res,
-		fmt.Sprintf("SELECT * FROM %s WHERE id=$1", UserTableFull),
+		fmt.Sprintf("SELECT * FROM %s WHERE id=?", UserTableFull),
 		id,
 	)
 
@@ -124,13 +124,13 @@ func (m *Manager) FindUserByID(id int64) (*User, error) {
 	return &res, nil
 }
 
-// FindUserByUsername return the User base on its username
-func (m *Manager) FindUserByUsername(u string) (*User, error) {
+// FindUserByEmail return the User base on its email
+func (m *Manager) FindUserByEmail(e string) (*User, error) {
 	var res User
 	err := m.GetDbMap().SelectOne(
 		&res,
-		fmt.Sprintf("SELECT * FROM %s WHERE username=$1", UserTableFull),
-		u,
+		fmt.Sprintf("SELECT * FROM %s WHERE email=?", UserTableFull),
+		e,
 	)
 
 	if err != nil {
@@ -140,29 +140,13 @@ func (m *Manager) FindUserByUsername(u string) (*User, error) {
 	return &res, nil
 }
 
-// FindUserByToken return the User base on its token
-func (m *Manager) FindUserByToken(t string) (*User, error) {
+// FindUserByAccessToken return the User base on its access_token
+func (m *Manager) FindUserByAccessToken(at string) (*User, error) {
 	var res User
 	err := m.GetDbMap().SelectOne(
 		&res,
-		fmt.Sprintf("SELECT * FROM %s WHERE token=$1", UserTableFull),
-		t,
-	)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &res, nil
-}
-
-// FindUserByContact return the User base on its contact
-func (m *Manager) FindUserByContact(c string) (*User, error) {
-	var res User
-	err := m.GetDbMap().SelectOne(
-		&res,
-		fmt.Sprintf("SELECT * FROM %s WHERE contact=$1", UserTableFull),
-		c,
+		fmt.Sprintf("SELECT * FROM %s WHERE access_token=?", UserTableFull),
+		at,
 	)
 
 	if err != nil {

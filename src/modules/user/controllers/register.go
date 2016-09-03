@@ -1,42 +1,28 @@
 package user
 
 import (
-	"modules/misc/trans"
 	"modules/user/aaa"
-	"modules/user/utils"
-	"regexp"
 
 	"github.com/labstack/echo"
 )
 
-type registrationPayload struct {
-	Token    string `json:"token"`
-	Contact  string `json:"contact"`
-	Username string `json:"username"`
-	Password string `json:"password"`
+type responseLoginOK struct {
+	UserID      int64  `json:"user_id"`
+	Email       string `json:"email"`
+	AccessToken string `json:"Accesstoken"`
 }
 
-var (
-	// UsernameValidator is a simple regexp to validate user names
-	usernameValidator = regexp.MustCompile("^[a-zA-Z][A-Za-z0-9._%@-]+$")
-)
+type registrationPayload struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Personal bool   `json:"personal"`
+}
 
 func (r *registrationPayload) Validate(ctx echo.Context) (bool, map[string]string) {
-	_, err := utils.DetectContactType(r.Contact)
 	var res = make(map[string]string)
 	var fail bool
-	if err != nil {
-		res["contact"] = trans.T("only accept email and phone number")
-		fail = true
-	}
-
 	if len(r.Password) < 6 {
-		res["password"] = trans.T("password is invalid")
-		fail = true
-	}
-
-	if !usernameValidator.MatchString(r.Username) {
-		res["username"] = trans.T("only a-z and 0-9 is allowed")
+		res["password"] = "password is invalid"
 		fail = true
 	}
 
@@ -57,21 +43,20 @@ func (r *registrationPayload) Validate(ctx echo.Context) (bool, map[string]strin
 func (u *Controller) registerUser(ctx echo.Context) error {
 	pl := u.MustGetPayload(ctx).(*registrationPayload)
 	m := aaa.NewAaaManager()
-	user, err := m.RegisterUserByToken(pl.Token, pl.Contact, pl.Username, pl.Password)
+
+	user, err := m.RegisterUser(pl.Email, pl.Password, pl.Personal)
 	if err != nil {
 		return u.BadResponse(ctx, err)
 
 	}
 
-	token := m.GetNewToken(user.Token)
+	token := m.GetNewToken(user.AccessToken)
 	return u.OKResponse(
 		ctx,
 		responseLoginOK{
-			UserID:    user.ID,
-			Username:  user.Username,
-			Contact:   user.Contact,
-			Token:     token,
-			Resources: user.GetResources(),
+			UserID:      user.ID,
+			Email:       user.Email,
+			AccessToken: token,
 		},
 	)
 }
