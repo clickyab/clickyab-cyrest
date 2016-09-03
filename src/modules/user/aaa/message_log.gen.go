@@ -87,7 +87,7 @@ func (m *Manager) ListMessageLogsWithPaginationFilter(offset, perPage int, filte
 		filter = "WHERE " + filter
 	}
 
-	filter += fmt.Sprintf(" OFFSET $%d LIMIT $%d", len(params)+1, len(params)+2)
+	filter += " LIMIT ?, ? "
 	params = append(params, offset, perPage)
 
 	// TODO : better pagination without offset and limit

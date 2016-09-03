@@ -60,7 +60,7 @@ func (u *Controller) registerUser(ctx echo.Context) error {
 	user, err := m.RegisterUserByToken(pl.Token, pl.Contact, pl.Username, pl.Password)
 	if err != nil {
 		return u.BadResponse(ctx, err)
-		
+
 	}
 
 	token := m.GetNewToken(user.Token)

@@ -36,7 +36,7 @@ func (u *Controller) challengeCreate(ctx echo.Context) error {
 	m := aaa.NewAaaManager()
 	token, old, err := m.ReserveToken(pl.Contact)
 	if err != nil {
-		return  u.BadResponse(ctx, err)
+		return u.BadResponse(ctx, err)
 	}
 	// its time to send the message to user
 	// TODO : better function for handling this transparent

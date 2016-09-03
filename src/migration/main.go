@@ -31,9 +31,9 @@ func doMigration(dir migrate.MigrationDirection, max int) error {
 	var err error
 	m := common.Manager{}
 	if max == 0 {
-		n, err = migrate.Exec(m.GetSQLDB(), "postgres", migrations, dir)
+		n, err = migrate.Exec(m.GetSQLDB(), "mysql", migrations, dir)
 	} else {
-		n, err = migrate.ExecMax(m.GetSQLDB(), "postgres", migrations, dir, max)
+		n, err = migrate.ExecMax(m.GetSQLDB(), "mysql", migrations, dir, max)
 	}
 	if err != nil {
 		return err
@@ -66,7 +66,7 @@ func main() {
 	} else if *action == "list" {
 		var mig []*migrate.MigrationRecord
 		m := common.Manager{}
-		mig, err = migrate.GetMigrationRecords(m.GetSQLDB(), "postgres")
+		mig, err = migrate.GetMigrationRecords(m.GetSQLDB(), "mysql")
 		w := tabwriter.NewWriter(os.Stdout, 0, 8, 0, '\t', 0)
 		fmt.Fprintln(w, "|ID\t|Applied at\t|")
 		for i := range mig {

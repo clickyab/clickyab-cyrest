@@ -4,9 +4,9 @@ cat >>/etc/my_init.d/services <<-EOGO
 #!/bin/bash
 dpkg-reconfigure openssh-server
 
-/etc/init.d/postgresql start
+/etc/init.d/mysql start
 /etc/init.d/redis-server start
-#mailcatcher --http-ip 0.0.0.0
+/usr/local/bin/MailHog &
 /etc/init.d/ssh start
 EOGO
 chmod a+x /etc/my_init.d/services

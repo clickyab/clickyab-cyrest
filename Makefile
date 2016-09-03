@@ -16,13 +16,11 @@ export FLAGS="-X common/version.hash=$(LONGHASH) -X common/version.short=$(SHORT
 export LDARG=-ldflags $(FLAGS)
 export BUILD=$(BIN)/gb build $(LDARG)
 export DBPASS?=$(DEFAULT_PASS)
-export POSTGRES_USER?=$(APPNAME)
+export DB_USER?=root
 export RUSER?=$(APPNAME)
 export RPASS?=$(DEFAULT_PASS)
 export WORK_DIR=$(ROOT)/tmp
 
-
-.PHONY: all gb clean tools-fswatch hello
 
 all:  $(BIN)/gb
 	$(BIN)/gb build $(LDARG)
@@ -39,13 +37,14 @@ gb: notroot
 clean:
 	rm -rf $(ROOT)/pkg $(ROOT)/vendor/pkg
 	cd $(ROOT) && git clean -fX ./bin
+	@echo "Done"
 
 $(BIN)/gb: notroot
-	@[ -f $(BIN)/gb ] || make gb
+	[ -f $(BIN)/gb ] || make gb
 
 
 server:
-	$(BIN)/gb build $(LDARG) server
+	$(BUILD) server
 
 run-server: server
 	sudo setcap cap_net_bind_service=+ep $(BIN)/server
@@ -161,11 +160,6 @@ goimports: tools-goimports
 watch: $(WATCH) tools-fswatch
 	$(BIN)/fswatch -d 10 -ext go make run-$(WATCH)
 
-build-protobuf:
-	protoc --go_out $(ROOT)/src/gen -I $(ROOT)/src/proto/ $(ROOT)/src/proto/*.proto
-
-#	protoc --java_out $(ROOT)/src/dummy -I $(ROOT)/src/proto/ $(ROOT)/src/proto/*.proto
-
 #
 # Codegen
 #
@@ -218,10 +212,12 @@ ineffassign: tools-ineffassign tools-fgt
 lint: goimports all errcheck vet golint gotype ineffassign
 	@echo "All done"
 
-postgres-setup: needroot
-	sudo -u postgres psql -U postgres -d postgres -c "CREATE USER $(POSTGRES_USER) WITH PASSWORD '$(DBPASS)';" || sudo -u postgres psql -U postgres -d postgres -c "ALTER USER $(POSTGRES_USER) WITH PASSWORD '$(DBPASS)';"
-	sudo -u postgres psql -U postgres -c "CREATE DATABASE $(APPNAME);" || echo "Database $(APPNAME) is already there?"
-	sudo -u postgres psql -U postgres -c "GRANT ALL ON DATABASE $(APPNAME) TO $(POSTGRES_USER);"
+mysql-setup: needroot
+	echo 'UPDATE user SET plugin="";' | mysql mysql
+	echo 'UPDATE user SET password=PASSWORD("$(DBPASS)") WHERE user="$(DB_USER)";' | mysql mysql
+	echo 'FLUSH PRIVILEGES;' | mysql mysql
+	echo 'CREATE DATABASE cyrest;' | mysql -u $(DB_USER) -p$(DBPASS)
+
 
 setcap: $(BIN)/server needroot
 	setcap cap_net_bind_service=+ep $(BIN)/server

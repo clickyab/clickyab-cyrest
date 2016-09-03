@@ -37,7 +37,7 @@ func (u *Controller) login(ctx echo.Context) error {
 	if err != nil {
 		audit(payload.UserName, "LoginFail", "error", err)
 		return u.BadResponse(ctx, errors.New(trans.T("invalid username/password")))
-		
+
 	}
 	// Ignore the result, not a big deal
 	_ = m.UpdateLastLogin(user)

@@ -10,40 +10,20 @@ import (
 // AUTO GENERATED CODE. DO NOT EDIT!
 
 const (
-	// MessageLogSchema is the MessageLog module schema
-	MessageLogSchema = "aaa"
-	// MessageLogTable is the MessageLog table name
-	MessageLogTable = "message_logs"
-	// MessageLogTableFull is the MessageLog table name with schema
-	MessageLogTableFull = MessageLogSchema + "." + MessageLogTable
+	// MessageLogTableFull is the MessageLog table name
+	MessageLogTableFull = "message_logs"
 
-	// ReservedUserSchema is the ReservedUser module schema
-	ReservedUserSchema = "aaa"
-	// ReservedUserTable is the ReservedUser table name
-	ReservedUserTable = "reserved_users"
-	// ReservedUserTableFull is the ReservedUser table name with schema
-	ReservedUserTableFull = ReservedUserSchema + "." + ReservedUserTable
+	// ReservedUserTableFull is the ReservedUser table name
+	ReservedUserTableFull = "reserved_users"
 
-	// RoleSchema is the Role module schema
-	RoleSchema = "aaa"
-	// RoleTable is the Role table name
-	RoleTable = "roles"
-	// RoleTableFull is the Role table name with schema
-	RoleTableFull = RoleSchema + "." + RoleTable
+	// RoleTableFull is the Role table name
+	RoleTableFull = "roles"
 
-	// UserRoleSchema is the UserRole module schema
-	UserRoleSchema = "aaa"
-	// UserRoleTable is the UserRole table name
-	UserRoleTable = "user_roles"
-	// UserRoleTableFull is the UserRole table name with schema
-	UserRoleTableFull = UserRoleSchema + "." + UserRoleTable
+	// UserRoleTableFull is the UserRole table name
+	UserRoleTableFull = "user_roles"
 
-	// UserSchema is the User module schema
-	UserSchema = "aaa"
-	// UserTable is the User table name
-	UserTable = "users"
-	// UserTableFull is the User table name with schema
-	UserTableFull = UserSchema + "." + UserTable
+	// UserTableFull is the User table name
+	UserTableFull = "users"
 )
 
 // Manager is the model manager for aaa package
@@ -70,47 +50,42 @@ func NewAaaManagerFromTransaction(tx gorp.SqlExecutor) (*Manager, error) {
 // Initialize aaa package
 func (m *Manager) Initialize() {
 
-	m.AddTableWithNameAndSchema(
+	m.AddTableWithName(
 		MessageLog{},
-		MessageLogSchema,
-		MessageLogTable,
+		MessageLogTableFull,
 	).SetKeys(
 		true,
 		"ID",
 	)
 
-	m.AddTableWithNameAndSchema(
+	m.AddTableWithName(
 		ReservedUser{},
-		ReservedUserSchema,
-		ReservedUserTable,
+		ReservedUserTableFull,
 	).SetKeys(
 		true,
 		"ID",
 	)
 
-	m.AddTableWithNameAndSchema(
+	m.AddTableWithName(
 		Role{},
-		RoleSchema,
-		RoleTable,
+		RoleTableFull,
 	).SetKeys(
 		true,
 		"ID",
 	)
 
-	m.AddTableWithNameAndSchema(
+	m.AddTableWithName(
 		UserRole{},
-		UserRoleSchema,
-		UserRoleTable,
+		UserRoleTableFull,
 	).SetKeys(
 		false,
 		"UserID",
 		"RoleID",
 	)
 
-	m.AddTableWithNameAndSchema(
+	m.AddTableWithName(
 		User{},
-		UserSchema,
-		UserTable,
+		UserTableFull,
 	).SetKeys(
 		true,
 		"ID",

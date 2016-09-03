@@ -48,7 +48,6 @@ type hasMany struct {
 }
 
 type dataModel struct {
-	Schema      string
 	Table       string
 	StructName  string
 	FileName    string
@@ -161,7 +160,7 @@ func (m *Manager) List{{ $m.StructName|plural }}WithPaginationFilter(offset, per
 		filter = "WHERE " + filter
 	}
 
-	filter += fmt.Sprintf(" OFFSET $%d LIMIT $%d", len(params)+1, len(params) +2)
+	filter += " LIMIT ?, ? "
 	params = append(params, offset, perPage)
 
 	// TODO : better pagination without offset and limit
@@ -346,12 +345,8 @@ package {{ .PackageName }}
 // AUTO GENERATED CODE. DO NOT EDIT!
 
 const ({{ range $m := .Data }}
-	// {{ $m.StructName }}Schema is the {{ $m.StructName }} module schema
-	{{ $m.StructName }}Schema = "{{ $m.Schema }}"
-	// {{ $m.StructName }}Table is the {{ $m.StructName }} table name
-	{{ $m.StructName }}Table = "{{ $m.Table }}"
-	// {{ $m.StructName }}TableFull is the {{ $m.StructName }} table name with schema
-	{{ $m.StructName }}TableFull = {{ $m.StructName }}Schema + "." + {{ $m.StructName }}Table
+	// {{ $m.StructName }}TableFull is the {{ $m.StructName }} table name
+	{{ $m.StructName }}TableFull = "{{ $m.Table }}"
 {{ end }})
 
 // Manager is the model manager for {{ .PackageName }} package
@@ -378,10 +373,9 @@ func New{{ .PackageName|ucfirst }}ManagerFromTransaction(tx gorp.SqlExecutor) (*
 // Initialize {{ .PackageName }} package
 func (m *Manager) Initialize() {
 {{ range $m := .Data }}
-	m.AddTableWithNameAndSchema(
+	m.AddTableWithName(
 				{{ $m.StructName }}{},
-				{{ $m.StructName }}Schema,
-				{{ $m.StructName }}Table,
+				{{ $m.StructName }}TableFull,
 			){{ if $m.Primaries }}.SetKeys(
 				{{ $m.AutoIncr }},
 				{{ range $p := $m.Primaries }} "{{ $p }}",
@@ -417,10 +411,7 @@ func (a dataModels) Swap(i, j int) {
 	a[i], a[j] = a[j], a[i]
 }
 func (a dataModels) Less(i, j int) bool {
-	in := strings.Compare(a[i].Schema, a[j].Schema)
-	if in == 0 {
-		in = strings.Compare(a[i].Table, a[j].Table)
-	}
+	in := strings.Compare(a[i].Table, a[j].Table)
 	return in < 0
 }
 
@@ -656,10 +647,6 @@ func (r *modelsPlugin) ProcessStructure(
 
 	data := dataModel{}
 	var ok bool
-	data.Schema, ok = a.Items["schema"]
-	if !ok {
-		return returnErr("@Model.schema")
-	}
 
 	data.Table, ok = a.Items["table"]
 	if !ok {

@@ -87,7 +87,7 @@ func (m *Manager) ListTranslationsWithPaginationFilter(offset, perPage int, filt
 		filter = "WHERE " + filter
 	}
 
-	filter += fmt.Sprintf(" OFFSET $%d LIMIT $%d", len(params)+1, len(params)+2)
+	filter += " LIMIT ?, ? "
 	params = append(params, offset, perPage)
 
 	// TODO : better pagination without offset and limit

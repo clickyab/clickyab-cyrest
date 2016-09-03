@@ -2,12 +2,10 @@ package common
 
 import (
 	"database/sql"
-	"strings"
-
-	"fmt"
+	"errors"
 
 	"github.com/Sirupsen/logrus"
-	_ "github.com/lib/pq" // Make sure postgres is included in any build
+	_ "github.com/go-sql-driver/mysql" // Make sure postgres is included in any build
 	"gopkg.in/gorp.v1"
 )
 
@@ -100,11 +98,11 @@ func (m *Manager) GetSQLDB() *sql.DB {
 // Hijack try to hijack into a transaction
 func (m *Manager) Hijack(ts gorp.SqlExecutor) error {
 	if m.transaction {
-		return fmt.Errorf("already in transaction")
+		return errors.New("already in transaction")
 	}
 	t, ok := ts.(*gorp.Transaction)
 	if !ok {
-		return fmt.Errorf("there is no transaction to hijack")
+		return errors.New("there is no transaction to hijack")
 	}
 
 	m.transaction = true
@@ -140,16 +138,9 @@ func (m *Manager) AddTableWithNameAndSchema(i interface{}, schema string, name s
 }
 
 // TruncateTables try to truncate tables , useful for tests
-func (m *Manager) TruncateTables(cascade, resetIdentity bool, tbl ...string) error {
+func (m *Manager) TruncateTables(tbl string) error {
 	m.sureDbMap()
-	q := "TRUNCATE " + strings.Join(tbl, " , ")
-	if resetIdentity {
-		q += " RESTART IDENTITY "
-	}
-	if cascade {
-		q += " CASCADE "
-	}
-
+	q := "TRUNCATE " + tbl
 	_, err := m.dbmap.Exec(q)
 	return err
 }

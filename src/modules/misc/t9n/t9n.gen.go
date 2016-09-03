@@ -10,12 +10,8 @@ import (
 // AUTO GENERATED CODE. DO NOT EDIT!
 
 const (
-	// TranslationSchema is the Translation module schema
-	TranslationSchema = "t9n"
-	// TranslationTable is the Translation table name
-	TranslationTable = "translations"
-	// TranslationTableFull is the Translation table name with schema
-	TranslationTableFull = TranslationSchema + "." + TranslationTable
+	// TranslationTableFull is the Translation table name
+	TranslationTableFull = "translations"
 )
 
 // Manager is the model manager for t9n package
@@ -42,10 +38,9 @@ func NewT9nManagerFromTransaction(tx gorp.SqlExecutor) (*Manager, error) {
 // Initialize t9n package
 func (m *Manager) Initialize() {
 
-	m.AddTableWithNameAndSchema(
+	m.AddTableWithName(
 		Translation{},
-		TranslationSchema,
-		TranslationTable,
+		TranslationTableFull,
 	).SetKeys(
 		true,
 		"ID",

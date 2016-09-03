@@ -20,12 +20,6 @@
 			"branch": "master"
 		},
 		{
-			"importpath": "github.com/Shyp/go-dberror",
-			"repository": "https://github.com/Shyp/go-dberror",
-			"revision": "92eb70dfc8085d97ba843c5cdb8c62086e35e344",
-			"branch": "master"
-		},
-		{
 			"importpath": "github.com/Sirupsen/logrus",
 			"repository": "https://github.com/Sirupsen/logrus",
 			"revision": "cd7d1bbe41066b6c1f19780f895901052150a575",
@@ -204,7 +198,7 @@
 		{
 			"importpath": "github.com/goraz/humanize",
 			"repository": "https://github.com/goraz/humanize",
-			"revision": "c228c1160e27f8a6fa8d47a8cd42848333431523",
+			"revision": "7a00a10f705d6499896ef6e37f34e6dc7b82b95c",
 			"branch": "master"
 		},
 		{
@@ -317,12 +311,6 @@
 			"revision": "445cf40e6de4cbef35daf3285ff5212c91e78262",
 			"branch": "master",
 			"path": "/random"
-		},
-		{
-			"importpath": "github.com/lib/pq",
-			"repository": "https://github.com/lib/pq",
-			"revision": "ee1442bda7bd1b6a84e913bdb421cb1874ec629d",
-			"branch": "master"
 		},
 		{
 			"importpath": "github.com/manucorporat/sse",

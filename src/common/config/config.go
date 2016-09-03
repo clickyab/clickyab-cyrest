@@ -38,7 +38,7 @@ type AppConfig struct {
 		Password string
 	}
 
-	Postgres struct {
+	Mysql struct {
 		DSN               string `onion:"dsn"`
 		MaxConnection     int    `onion:"max_connection"`
 		MaxIdleConnection int    `onion:"max_idle_connection"`
@@ -86,9 +86,10 @@ func init() {
 	Config.Redis.Address = ":6379"
 	//Config.Redis.Password = ""
 
-	Config.Postgres.DSN = "postgres://postgres:bita123@localhost/cyrest?sslmode=disable"
-	Config.Postgres.MaxConnection = 100
-	Config.Postgres.MaxIdleConnection = 10
+	//[username[:password]@][protocol[(address)]]/dbname[?param1=value1&...&paramN=valueN]
+	Config.Mysql.DSN = "root:bita123@/cyrest"
+	Config.Mysql.MaxConnection = 100
+	Config.Mysql.MaxIdleConnection = 10
 	Config.Page.PerPage = 10
 	Config.Page.MaxPerPage = 100
 	Config.Page.MinPerPage = 1

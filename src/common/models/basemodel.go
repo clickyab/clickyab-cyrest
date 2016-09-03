@@ -13,9 +13,7 @@ import (
 
 	"strings"
 
-	"github.com/Shyp/go-dberror"
 	"github.com/Sirupsen/logrus"
-	_ "github.com/lib/pq" // Make sure postgres is included in any build
 	"gopkg.in/gorp.v1"
 )
 
@@ -43,11 +41,11 @@ func (g gorpLogger) Printf(format string, v ...interface{}) {
 func Initialize() {
 	once.Do(func() {
 		var err error
-		db, err = sql.Open("postgres", config.Config.Postgres.DSN)
+		db, err = sql.Open("mysql", config.Config.Mysql.DSN)
 		assert.Nil(err)
 
-		db.SetMaxIdleConns(config.Config.Postgres.MaxIdleConnection)
-		db.SetMaxOpenConns(config.Config.Postgres.MaxConnection)
+		db.SetMaxIdleConns(config.Config.Mysql.MaxIdleConnection)
+		db.SetMaxOpenConns(config.Config.Mysql.MaxConnection)
 		err = db.Ping()
 		assert.Nil(err)
 
@@ -80,7 +78,7 @@ func Initialize() {
 				// this is not correct
 				logrus.Panic(err)
 			}
-			return dberror.GetError(err)
+			return err
 		})
 	})
 }

@@ -8,7 +8,6 @@ import (
 // Role model
 // @Model {
 //		table = roles
-//		schema = aaa
 //		primary = true, id
 //		find_by = id,name
 //		list = yes
