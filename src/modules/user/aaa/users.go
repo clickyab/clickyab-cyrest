@@ -2,9 +2,6 @@ package aaa
 
 import (
 	"common/utils"
-	"database/sql/driver"
-	"errors"
-	"fmt"
 	"regexp"
 	"time"
 
@@ -25,24 +22,31 @@ import (
 
 // UserStatus is the registered user type
 type (
+	// TODO : Support for Enum{}
+	// @Enum{
+	// }
 	UserStatus string
+	// @Enum{
+	// }
 	UserSource string
-	UserType   string
+	// @Enum{
+	// }
+	UserType string
 )
 
 const (
 	// UserStatusRegistered is the registered user, normal one
 	UserStatusRegistered UserStatus = "registered"
 	// UserStatusVerified for verified users
-	UserStatusVerified = "verified"
+	UserStatusVerified UserStatus = "verified"
 	// UserStatusBanned for banned user
-	UserStatusBlocked = "blocked"
+	UserStatusBlocked UserStatus = "blocked"
 
 	UserSourceCRM      UserSource = "crm"
-	UserSourceClickyab            = "clickyab"
+	UserSourceClickyab UserSource = "clickyab"
 
 	UserTypePersonal    UserType = "personal"
-	UserTypeCorporation          = "corpartion"
+	UserTypeCorporation UserType = "corpartion"
 )
 
 // User model
@@ -84,39 +88,6 @@ var (
 	hooks    []CreateUserHook
 	lock     = &sync.RWMutex{}
 )
-
-// IsValid try to validate enum value on ths type
-func (is UserStatus) IsValid() bool {
-	return utils.StringInArray(string(is), string(UserStatusBlocked), string(UserStatusVerified), string(UserStatusRegistered))
-}
-
-// Scan convert the json array ino string slice
-func (is *UserStatus) Scan(src interface{}) error {
-	var b []byte
-	switch src.(type) {
-	case []byte:
-		b = src.([]byte)
-	case string:
-		b = []byte(src.(string))
-	case nil:
-		b = make([]byte, 0)
-	default:
-		return errors.New("unsupported type")
-	}
-	if !UserStatus(b).IsValid() {
-		return fmt.Errorf("invaid status, valids are : %s, %s, %s", UserStatusBlocked, UserStatusRegistered, UserStatusVerified)
-	}
-	*is = UserStatus(b)
-	return nil
-}
-
-// Value try to get the string slice representation in database
-func (is UserStatus) Value() (driver.Value, error) {
-	if !is.IsValid() {
-		return nil, fmt.Errorf("invaid status, valids are : %s, %s, %s", UserStatusBlocked, UserStatusRegistered, UserStatusVerified)
-	}
-	return string(is), nil
-}
 
 // Initialize the user on save
 func (u *User) Initialize() {

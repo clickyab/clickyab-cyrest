@@ -46,6 +46,19 @@ type AnnotationStruct interface {
 	ProcessStructure(interface{}, humanize.Package, humanize.File, humanize.TypeName, annotate.Annotate) (interface{}, error)
 }
 
+// AnnotationStruct is the plugin for the struct types
+type AnnotationType interface {
+	AnnotationPlug
+	// StructureIsSupported check for a function signature and if the function is supported in this
+	// interface
+	TypeIsSupported(humanize.File, humanize.TypeName) bool
+	// ProcessStructure the structure with its annotation. any error here means to stop the
+	// all process
+	// the first argument is the context. if its nil, means its the first run for this package.
+	// the result of this function is passed to the plugin next time for the next function
+	ProcessType(interface{}, humanize.Package, humanize.File, humanize.TypeName, annotate.Annotate) (interface{}, error)
+}
+
 var (
 	plugins []struct {
 		p       AnnotationPlug
@@ -63,6 +76,7 @@ func Register(p AnnotationPlug) {
 	switch p.(type) {
 	case AnnotationFunction:
 	case AnnotationStruct:
+	case AnnotationType:
 	default:
 		logrus.Panic("Plugin type is not supported")
 	}
@@ -99,6 +113,14 @@ func ProcessPackage(p humanize.Package) error {
 				if err != nil {
 					return err
 				}
+			}
+			a, err := annotate.LoadFromComment(strings.Join(p.Files[f].Types[t].Docs, "\n"))
+			if err != nil {
+				return err
+			}
+			err = processTypes(p, p.Files[f], *p.Files[f].Types[t], a)
+			if err != nil {
+				return err
 			}
 		}
 		for fn := range p.Files[f].Functions {
@@ -155,6 +177,35 @@ func processStructure(pkg humanize.Package, p humanize.File, f humanize.TypeName
 			case AnnotationStruct:
 				if inArray(item.Name, plug.GetType()...) && plug.StructureIsSupported(p, f) {
 					c, err := plug.ProcessStructure(
+						plugins[i].context,
+						pkg,
+						p,
+						f,
+						item,
+					)
+					if err != nil {
+						return err
+					}
+					plugins[i].context = c
+					plugins[i].called = true
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+// Process all plugins against this type
+func processTypes(pkg humanize.Package, p humanize.File, f humanize.TypeName, a annotate.AnnotateGroup) error {
+	lock.Lock()
+	defer lock.Unlock()
+	for _, item := range a {
+		for i := range plugins {
+			switch plug := plugins[i].p.(type) {
+			case AnnotationType:
+				if inArray(item.Name, plug.GetType()...) && plug.TypeIsSupported(p, f) {
+					c, err := plug.ProcessType(
 						plugins[i].context,
 						pkg,
 						p,

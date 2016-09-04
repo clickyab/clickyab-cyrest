@@ -5,6 +5,7 @@ import (
 	_ "tools/codegen/models" // Models plugin
 	"tools/codegen/plugins"
 	_ "tools/codegen/swagger" // Raml plugin
+	_ "tools/codegen/enum" // ENUM plugin
 
 	"github.com/Sirupsen/logrus"
 	"github.com/goraz/humanize"
