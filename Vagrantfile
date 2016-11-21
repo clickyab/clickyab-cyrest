@@ -16,8 +16,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
   config.vm.network "forwarded_port", guest: 80,    host: 80    # nginx
-  config.vm.network "forwarded_port", guest: 8025,  host: 8025  # MailHog
-  config.vm.network "forwarded_port", guest: 5432,  host: 5432  # postgres
+  config.vm.network "forwarded_port", guest: 3306,  host: 3306  # Mysql
 
   config.vm.synced_folder ".", "/home/develop/cyrest", owner: "develop", group: "develop", create: true
 
@@ -25,6 +24,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     d.image = "docker.clickyab.com/clickyab/baseimage-go"
     d.has_ssh = true
     d.cmd = ["/bin/bash", "/home/develop/cyrest/bin/init.sh"]
-    d.expose= [5432]
+    d.expose= [3306]
   end
 end
