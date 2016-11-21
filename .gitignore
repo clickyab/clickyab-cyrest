@@ -6,3 +6,4 @@ pkg/
 .vagrant/
 .git_index
 /tmp
+clickyab-cyrest.iml
