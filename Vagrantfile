@@ -15,9 +15,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     s.args   = [%x(ip addr | grep inet | grep docker0 | awk -F" " '{print $2}'| sed -e 's/\\/.*$//')]
   end
 
-  config.vm.network "forwarded_port", guest: 80,    host: 80    # nginx
-  config.vm.network "forwarded_port", guest: 8025,  host: 8025  # MailHog
-  config.vm.network "forwarded_port", guest: 5432,  host: 5432  # postgres
+  config.vm.network "forwarded_port", guest: 80,     host: 80    # nginx
+ # config.vm.network "forwarded_port", guest: 3306,  host: 3306  # MySQL
 
   config.vm.synced_folder ".", "/home/develop/cyrest", owner: "develop", group: "develop", create: true
 

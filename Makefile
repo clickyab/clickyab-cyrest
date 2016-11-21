@@ -32,7 +32,7 @@ notroot :
 	@[ "$(shell id -u)" != "0" ] || exit 1
 
 gb: notroot
-	GOPATH=$(ROOT)/tmp GOBIN=$(ROOT)/bin $(GO) get -u -v github.com/constabulary/gb/...
+	GOPATH=$(ROOT)/tmp GOBIN=$(ROOT)/bin $(GO) get -v github.com/constabulary/gb/...
 
 clean:
 	rm -rf $(ROOT)/pkg $(ROOT)/vendor/pkg

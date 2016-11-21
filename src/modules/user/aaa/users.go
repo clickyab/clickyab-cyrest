@@ -42,6 +42,7 @@ const (
 	// UserStatusBanned for banned user
 	UserStatusBlocked UserStatus = "blocked"
 
+
 	UserSourceCRM      UserSource = "crm"
 	UserSourceClickyab UserSource = "clickyab"
 
@@ -253,7 +254,15 @@ func (m *Manager) RegisterUser(email, password string, personal bool) (u *User, 
 	u = &User{
 		Email:    email,
 		Password: sql.NullString{String: password, Valid: true},
-		Status:   UserStatusRegistered,
+		OldPassword: sql.NullString{String: password, Valid: true},
+		Status:UserStatusRegistered,
+		Source: UserSourceCRM,
+		Type: UserTypePersonal,
+
+
+
+
+
 		//updateLastLogin: true, // in this case, we need to update it since it means a login
 	}
 	err = m.Begin()
