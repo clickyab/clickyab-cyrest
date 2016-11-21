@@ -20,6 +20,13 @@ export DB_USER?=root
 export RUSER?=$(APPNAME)
 export RPASS?=$(DEFAULT_PASS)
 export WORK_DIR=$(ROOT)/tmp
+export LINTER=$(BIN)/gometalinter -e ".*src/modules/user/templates/mail.go.*" --cyclo-over=15 --line-length=120 --deadline=100s --disable-all --enable=structcheck --enable=aligncheck --enable=deadcode --enable=gocyclo --enable=ineffassign --enable=golint --enable=goimports --enable=errcheck --enable=varcheck --enable=interfacer --enable=goconst --enable=gosimple --enable=staticcheck --enable=unused --enable=misspell --enable=lll
+
+ifdef UPDATEGB
+export UPDATE=-u
+else
+export UPDATE=
+endif
 
 
 all:  $(BIN)/gb
@@ -32,7 +39,7 @@ notroot :
 	@[ "$(shell id -u)" != "0" ] || exit 1
 
 gb: notroot
-	GOPATH=$(ROOT)/tmp GOBIN=$(ROOT)/bin $(GO) get -v github.com/constabulary/gb/...
+	GOPATH=$(ROOT)/tmp GOBIN=$(ROOT)/bin $(GO) get $(UPDATE) -v github.com/constabulary/gb/...
 
 clean:
 	rm -rf $(ROOT)/pkg $(ROOT)/vendor/pkg
@@ -59,44 +66,8 @@ watch-server:
 tools-fswatch: $(BIN)/gb
 	$(BIN)/gb build $(LDARG) tools/fswatch
 
-tools-godebug: $(BIN)/gb
-	$(BIN)/gb build $(LDARG) github.com/mailgun/godebug
-
-tools-golint: $(BIN)/gb
-	$(BIN)/gb build $(LDARG) github.com/golang/lint/golint
-
-tools-govet: $(BIN)/gb
-	$(BIN)/gb build $(LDARG) golang.org/x/tools/cmd/vet
-
-tools-gerrithook: $(BIN)/gb
-	$(BIN)/gb build $(LDARG) tools/gerrithook
-
-tools-goimports: $(BIN)/gb
-	$(BIN)/gb build $(LDARG) golang.org/x/tools/cmd/goimports
-
-tools-gotype: $(BIN)/gb
-	$(BIN)/gb build $(LDARG) golang.org/x/tools/cmd/gotype
-
-tools-godoc: $(BIN)/gb
-	$(BIN)/gb build $(LDARG) golang.org/x/tools/cmd/godoc
-
-tools-fgt: $(BIN)/gb
-	$(BIN)/gb build $(LDARG) tools/fgt
-
-tools-deadcode: $(BIN)/gb
-	$(BIN)/gb build $(LDARG) tools/deadcode
-
-tools-ineffassign: $(BIN)/gb
-	$(BIN)/gb build $(LDARG) tools/ineffassign
-
-tools-goconvey: $(BIN)/gb
-	$(BIN)/gb build $(LDARG) github.com/smartystreets/goconvey/
-
 tools-codegen: $(BIN)/gb
 	$(BIN)/gb build $(LDARG) tools/codegen
-
-tools-errcheck: $(BIN)/gb
-	$(BIN)/gb build $(LDARG) github.com/kisielk/errcheck
 
 tools-gobindata: $(BIN)/gb
 	$(BIN)/gb build $(LDARG) github.com/jteeuwen/go-bindata/go-bindata
@@ -108,19 +79,6 @@ godoc: tools-godoc
 errcheck: tools-errcheck
 	find ./src/apps/* -type d | sed 's|./src/||' | grep -v sdpctl | xargs $(BIN)/errcheck
 
-protobuf-go:
-	$(BIN)/gb build $(LDARG) github.com/golang/protobuf/protoc-gen-go
-
-
-protobuf: notroot
-	wget -c -O $(ROOT)/tmp/protobuf-beta3.zip https://github.com/google/protobuf/archive/v3.0.0-beta-3.zip
-	cd $(ROOT)/tmp && unzip -o $(ROOT)/tmp/protobuf-beta3.zip
-	cd $(ROOT)/tmp/protobuf-3.0.0-beta-3/ && ./autogen.sh
-	cd $(ROOT)/tmp/protobuf-3.0.0-beta-3/ && ./configure --prefix=/usr
-	cd $(ROOT)/tmp/protobuf-3.0.0-beta-3/ && make
-
-install-protobuf: needroot
-	cd $(ROOT)/tmp/protobuf-3.0.0-beta-3/ && make install
 #
 # Migration
 #
@@ -153,9 +111,6 @@ migration: migcp tools-gobindata
 
 tools-migrate: $(BIN)/gb migration
 	$(BUILD) migration
-
-goimports: tools-goimports
-	$(BIN)/goimports -w $(ROOT)/src
 
 watch: $(WATCH) tools-fswatch
 	$(BIN)/fswatch -d 10 -ext go make run-$(WATCH)
@@ -191,33 +146,31 @@ codegen: swagger-cleaner codegen-user codegen-audit codegen-misc
 #
 # Lint
 #
+metalinter: notroot
+	GOPATH=$(ROOT)/tmp GOBIN=$(ROOT)/bin $(GO) get $(UPDATE) -v github.com/alecthomas/gometalinter
+	GOPATH=$(ROOT)/tmp GOBIN=$(ROOT)/bin $(ROOT)/bin/gometalinter --install
 
-vet: tools-govet tools-fgt
-	@$(BIN)/fgt $(BIN)/vet $(ROOT)/src
-	@$(BIN)/fgt $(BIN)/vet --shadow $(ROOT)/src
-	@echo "vet is done"
+$(BIN)/gometalinter: notroot
+	@[ -f $(BIN)/gometalinter ] || make metalinter
 
-golint: tools-golint tools-fgt
-	@$(BIN)/fgt $(BIN)/golint $(ROOT)/src
-	@echo "lint is done"
+lint-common: $(BIN)/gometalinter
+	$(LINTER) $(ROOT)/src/common/...
 
-gotype: tools-gotype tools-fgt
-	@$(BIN)/fgt $(BIN)/gotype $(ROOT)/src
-	@echo "type is done"
+lint-modules: $(BIN)/gometalinter
+	$(LINTER) $(ROOT)/src/modules/...
 
-ineffassign: tools-ineffassign tools-fgt
-	@$(BIN)/fgt $(BIN)/ineffassign $(ROOT)/src
-	@echo "inefassign is done"
+lint-mains: $(BIN)/gometalinter
+	$(LINTER) $(ROOT)/src/server/...
 
-lint: goimports all errcheck vet golint gotype ineffassign
-	@echo "All done"
+lint: lint-common lint-modules lint-mains
+	@echo "Done"
+
 
 mysql-setup: needroot
 	echo 'UPDATE user SET plugin="";' | mysql mysql
 	echo 'UPDATE user SET password=PASSWORD("$(DBPASS)") WHERE user="$(DB_USER)";' | mysql mysql
 	echo 'FLUSH PRIVILEGES;' | mysql mysql
 	echo 'CREATE DATABASE cyrest;' | mysql -u $(DB_USER) -p$(DBPASS)
-
 
 setcap: $(BIN)/server needroot
 	setcap cap_net_bind_service=+ep $(BIN)/server

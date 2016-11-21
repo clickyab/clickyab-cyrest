@@ -5,8 +5,6 @@ import (
 	"regexp"
 	"time"
 
-	"sync"
-
 	"database/sql"
 
 	"common/assert"
@@ -22,13 +20,15 @@ import (
 
 // UserStatus is the registered user type
 type (
-	// TODO : Support for Enum{}
+	// UserStatus is the user status for a single use
 	// @Enum{
 	// }
 	UserStatus string
+	// UserSource is the source of user
 	// @Enum{
 	// }
 	UserSource string
+	// UserType is the type of user
 	// @Enum{
 	// }
 	UserType string
@@ -39,14 +39,17 @@ const (
 	UserStatusRegistered UserStatus = "registered"
 	// UserStatusVerified for verified users
 	UserStatusVerified UserStatus = "verified"
-	// UserStatusBanned for banned user
+	// UserStatusBlocked for banned user
 	UserStatusBlocked UserStatus = "blocked"
 
-
-	UserSourceCRM      UserSource = "crm"
+	// UserSourceCRM is the crm source
+	UserSourceCRM UserSource = "crm"
+	// UserSourceClickyab is the clickyab source
 	UserSourceClickyab UserSource = "clickyab"
 
-	UserTypePersonal    UserType = "personal"
+	// UserTypePersonal is the personal profile
+	UserTypePersonal UserType = "personal"
+	// UserTypeCorporation is the corp profile
 	UserTypeCorporation UserType = "corpartion"
 )
 
@@ -76,6 +79,7 @@ type User struct {
 	refreshToken bool `db:"-"`
 }
 
+// CreateUserHook is the hook for create a user
 type CreateUserHook func(gorp.SqlExecutor, *User) error
 
 // From the bcrypt package
@@ -86,8 +90,8 @@ const (
 
 var (
 	isBcrypt = regexp.MustCompile(`^\$[^$]+\$[0-9]+\$`)
-	hooks    []CreateUserHook
-	lock     = &sync.RWMutex{}
+	//hooks    []CreateUserHook
+	//lock     = &sync.RWMutex{}
 )
 
 // Initialize the user on save
@@ -107,7 +111,9 @@ func (u *User) Initialize() {
 	//}
 
 	// TODO : Watch it if this creepy code is dangerous :)
-	if (len(u.Password.String) < minHashSize || !isBcrypt.MatchString(u.Password.String)) && u.Password.String != noPassString {
+	if (len(u.Password.String) < minHashSize ||
+		!isBcrypt.MatchString(u.Password.String)) &&
+		u.Password.String != noPassString {
 		p, err := bcrypt.GenerateFromPassword([]byte(u.Password.String), bcrypt.DefaultCost)
 		assert.Nil(err)
 		u.Password.String = string(p)
@@ -175,6 +181,7 @@ func (u *User) Initialize() {
 //	hooks = append(hooks, f...)
 //}
 //
+
 // GetNewToken try to create a time base token in redis
 func (m *Manager) GetNewToken(baseToken string) string {
 	t := <-utils.ID
@@ -249,6 +256,7 @@ func (m *Manager) GetNewToken(baseToken string) string {
 //	return m.UpdateUser(u)
 //}
 //
+
 // RegisterUser is try for the user registration
 func (m *Manager) RegisterUser(email, password string, personal bool) (u *User, err error) {
 	u = &User{

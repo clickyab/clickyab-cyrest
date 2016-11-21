@@ -9,7 +9,17 @@ import (
 )
 
 // Routes return the route registered with this
-func (ctrl *Controller) Routes(r *echo.Echo, mountPoint string) {
+func (u *Controller) Routes(r *echo.Echo, mountPoint string) {
 
-	utils.DoInitialize(ctrl)
+	groupMiddleware := []echo.MiddlewareFunc{}
+
+	group := r.Group(mountPoint+"/misc", groupMiddleware...)
+
+	// Route {/version GET Controller.getVersion misc []  Controller u  } with key 0
+	m0 := []echo.MiddlewareFunc{}
+
+	group.GET("/version", u.getVersion, m0...)
+	// End route {/version GET Controller.getVersion misc []  Controller u  } with key 0
+
+	utils.DoInitialize(u)
 }

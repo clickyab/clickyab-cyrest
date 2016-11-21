@@ -5,6 +5,8 @@ import (
 	"modules/misc/t9n"
 	"sync"
 
+	"fmt"
+
 	"github.com/Sirupsen/logrus"
 )
 
@@ -13,6 +15,7 @@ var (
 	lock         = &sync.RWMutex{}
 )
 
+// T is the translate function
 func T(translationID string, args ...interface{}) string {
 	return translationID
 
@@ -40,10 +43,10 @@ func T(translationID string, args ...interface{}) string {
 	}
 
 	if tt.Single.Valid {
-		return tt.Single.String
+		return fmt.Sprintf(tt.Single.String, args...)
 	}
 	logrus.Debugf("NOT TRANSLATED : %s ", translationID)
-	return translationID
+	return fmt.Sprintf(translationID, args...)
 }
 
 // E is the error version of the T

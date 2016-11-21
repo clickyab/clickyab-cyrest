@@ -11,6 +11,8 @@ import (
 	"time"
 )
 
+const sqlNull = "null"
+
 // Initializer is for model when the have need extra initialize on save/update
 type Initializer interface {
 	// Initialize is the method to call att save/update
@@ -35,6 +37,7 @@ type NullInt64 struct {
 	Valid bool // Valid is true if Int64 is not NULL
 }
 
+// NullString is the json friendly of sql.NullString
 type NullString struct {
 	Valid  bool
 	String string
@@ -106,7 +109,7 @@ func (nt NullTime) MarshalJSON() ([]byte, error) {
 		return nt.Time.MarshalJSON()
 	}
 
-	return []byte("null"), nil
+	return []byte(sqlNull), nil
 }
 
 // Scan implements the Scanner interface.
@@ -126,7 +129,7 @@ func (nt NullTime) Value() (driver.Value, error) {
 // UnmarshalJSON try to unmarshal dae from input
 func (nt *NullTime) UnmarshalJSON(b []byte) error {
 	text := strings.ToLower(string(b))
-	if text == "null" {
+	if text == sqlNull {
 		nt.Valid = false
 		nt.Time = time.Time{}
 		return nil
@@ -147,13 +150,13 @@ func (nt NullInt64) MarshalJSON() ([]byte, error) {
 		return []byte(fmt.Sprintf(`%d`, nt.Int64)), nil
 	}
 
-	return []byte("null"), nil
+	return []byte(sqlNull), nil
 }
 
 // UnmarshalJSON try to unmarshal dae from input
 func (nt *NullInt64) UnmarshalJSON(b []byte) error {
 	text := strings.ToLower(string(b))
-	if text == "null" {
+	if text == sqlNull {
 		nt.Valid = false
 
 		return nil
@@ -181,11 +184,11 @@ func (nt *NullInt64) Scan(value interface{}) error {
 }
 
 // Value implements the driver Valuer interface.
-func (n NullInt64) Value() (driver.Value, error) {
-	if !n.Valid {
+func (nt NullInt64) Value() (driver.Value, error) {
+	if !nt.Valid {
 		return nil, nil
 	}
-	return n.Int64, nil
+	return nt.Int64, nil
 }
 
 // Scan convert the json array ino string slice
@@ -264,7 +267,7 @@ func (ns NullString) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON try to unmarshal dae from input
 func (ns NullString) UnmarshalJSON(b []byte) error {
 	text := strings.ToLower(string(b))
-	if text == "null" {
+	if text == sqlNull {
 		ns.Valid = false
 		ns.String = ""
 		return nil

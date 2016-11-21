@@ -1,3 +1,5 @@
 package misc
 
-import _ "modules/misc/controllers" // the controllers
+import (
+	_ "modules/misc/controllers" // the controllers
+)

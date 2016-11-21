@@ -104,7 +104,7 @@ func dbMigrations20160117193701_user_baseSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "db/migrations/20160117193701_user_base.sql", size: 7486, mode: os.FileMode(420), modTime: time.Unix(1472906893, 0)}
+	info := bindataFileInfo{name: "db/migrations/20160117193701_user_base.sql", size: 7486, mode: os.FileMode(420), modTime: time.Unix(1479711197, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -161,7 +161,7 @@ func AssetNames() []string {
 
 // _bindata is a table, holding each asset generator, mapped to its name.
 var _bindata = map[string]func() (*asset, error){
-	"db/migrations/.gitignore":                   dbMigrationsGitignore,
+	"db/migrations/.gitignore": dbMigrationsGitignore,
 	"db/migrations/20160117193701_user_base.sql": dbMigrations20160117193701_user_baseSql,
 }
 
@@ -204,11 +204,10 @@ type bintree struct {
 	Func     func() (*asset, error)
 	Children map[string]*bintree
 }
-
 var _bintree = &bintree{nil, map[string]*bintree{
 	"db": &bintree{nil, map[string]*bintree{
 		"migrations": &bintree{nil, map[string]*bintree{
-			".gitignore":                   &bintree{dbMigrationsGitignore, map[string]*bintree{}},
+			".gitignore": &bintree{dbMigrationsGitignore, map[string]*bintree{}},
 			"20160117193701_user_base.sql": &bintree{dbMigrations20160117193701_user_baseSql, map[string]*bintree{}},
 		}},
 	}},
@@ -260,3 +259,4 @@ func _filePath(dir, name string) string {
 	cannonicalName := strings.Replace(name, "\\", "/", -1)
 	return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
 }
+

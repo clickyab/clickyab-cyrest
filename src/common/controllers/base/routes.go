@@ -40,6 +40,9 @@ func Initialize(mountPoint string) *echo.Echo {
 		}
 	})
 	//engine.SetLogLevel(log.DEBUG)
+	if config.Config.DevelMode {
+		engine.Static("/swagger", config.Config.SwaggerRoot)
+	}
 	engine.SetLogger(NewLogger())
 	return engine
 }
