@@ -9,7 +9,7 @@ func Try(err error) error {
 	return try.Try(err)
 }
 
-// Catch register a global catcher
+// CatchHook register a global catcher
 func CatchHook(f interface{}) {
 	try.Catch(f)
 }

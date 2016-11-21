@@ -34,7 +34,10 @@ package {{ .PackageName }}
 {{ range $m := .Data }}
 // IsValid try to validate enum value on ths type
 func (e {{ $m.Type.Name }})IsValid() bool {
-	return utils.StringInArray(string(e), {{ range $v := $m.Vars }} string({{$v}}), {{ end }})
+	return utils.StringInArray(
+		string(e),
+		{{ range $v := $m.Vars }} string({{$v}}),
+		{{ end }})
 }
 
 // Scan convert the json array ino string slice

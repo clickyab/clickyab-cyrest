@@ -3,10 +3,12 @@ package config
 import (
 	"runtime"
 
-	"github.com/Sirupsen/logrus"
+	"common/assert"
+	"path/filepath"
+
 	"github.com/fzerorubigd/expand"
 	"gopkg.in/fzerorubigd/onion.v2"
-	_ "gopkg.in/fzerorubigd/onion.v2/yamlloader"
+	_ "gopkg.in/fzerorubigd/onion.v2/yamlloader" // for loading yaml files
 )
 
 const appName = "cyrest"
@@ -26,10 +28,10 @@ type AppConfig struct {
 	Site  string
 	Proto string
 
-	Port       string
-	StaticRoot string `onion:"static_root"`
-
-	TimeZone string `onion:"time_zone"`
+	Port        string
+	StaticRoot  string `onion:"static_root"`
+	SwaggerRoot string `onion:"swagger_root"`
+	TimeZone    string `onion:"time_zone"`
 
 	Redis struct {
 		Size     int
@@ -66,45 +68,39 @@ type AppConfig struct {
 	}
 }
 
-func init() {
-	var err error
+func defaultLayer() onion.DefaultLayer {
+	res := onion.NewDefaultLayer()
+	assert.Nil(res.SetDefault("site", "cyrest.loc"))
+	assert.Nil(res.SetDefault("mount_point", "/api"))
+	assert.Nil(res.SetDefault("devel_mode", true))
+	assert.Nil(res.SetDefault("cors", true))
+	assert.Nil(res.SetDefault("max_cpu_available", runtime.NumCPU()))
+	assert.Nil(res.SetDefault("proto", "http"))
+	assert.Nil(res.SetDefault("port", ":80"))
 
-	Config.Site = "cyrest.loc"
-	Config.MountPoint = "/api"
-	Config.DevelMode = true
-	Config.CORS = true
-	Config.MaxCPUAvailable = runtime.NumCPU()
-	Config.Proto = "http"
-	Config.Port = ":80"
-	Config.StaticRoot, err = expand.Path("/statics")
-	if err != nil {
-		logrus.Panic(err)
-	}
+	path, err := expand.Path("$PWD/statics")
+	assert.Nil(err)
+	assert.Nil(res.SetDefault("static_root", path))
+	path, err = expand.Path("$PWD/../3rd/swagger/")
+	assert.Nil(err)
+	path, err = filepath.Abs(path)
+	assert.Nil(err)
+	assert.Nil(res.SetDefault("swagger_root", path))
 
-	Config.Redis.Size = 10
-	Config.Redis.Network = "tcp"
-	Config.Redis.Address = ":6379"
-	//Config.Redis.Password = ""
+	assert.Nil(res.SetDefault("redis.size", 10))
+	assert.Nil(res.SetDefault("redis.network", "tcp"))
+	assert.Nil(res.SetDefault("redis.address", ":6379"))
+	assert.Nil(res.SetDefault("redis.password", ""))
 
-	// TODO : make sure ?parseTime=true is always set!
-	//[username[:password]@][protocol[(address)]]/dbname[?param1=value1&...&paramN=valueN]
-	Config.Mysql.DSN = "root:bita123@/cyrest?parseTime=true"
-	Config.Mysql.MaxConnection = 100
-	Config.Mysql.MaxIdleConnection = 10
-	Config.Page.PerPage = 10
-	Config.Page.MaxPerPage = 100
-	Config.Page.MinPerPage = 1
+	assert.Nil(res.SetDefault("mysql.dsn", "root:bita123@/cyrest?parseTime=true"))
+	assert.Nil(res.SetDefault("mysql.max_connection", 100))
+	assert.Nil(res.SetDefault("mysql.max_idle_connection", 10))
 
-	Config.TimeZone = "Asia/Tehran"
+	assert.Nil(res.SetDefault("page.per_Page", 10))
+	assert.Nil(res.SetDefault("page.max_per_page", 100))
+	assert.Nil(res.SetDefault("page.min_per_Page", 1))
 
-	Config.Redmine.APIKey = "5d29e2039762e19fbfe3db72b013bf356b3ed072"
-	Config.Redmine.URL = "https://redmine.azmoona.com/"
-	Config.Redmine.ProjectID = 1
-	Config.Redmine.Active = false
-	Config.Redmine.NewIssueTypeID = 4
+	assert.Nil(res.SetDefault("time_zone", "Asia/Tehran"))
 
-	Config.Slack.Channel = "#app"
-	Config.Slack.Username = "azmoona"
-	Config.Slack.WebHookURL = "https://hooks.slack.com/services/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"
-	Config.Slack.Active = false
+	return res
 }

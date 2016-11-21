@@ -10,7 +10,12 @@ import (
 
 // IsValid try to validate enum value on ths type
 func (e UserStatus) IsValid() bool {
-	return utils.StringInArray(string(e), string(UserStatusRegistered), string(UserStatusVerified), string(UserStatusBlocked))
+	return utils.StringInArray(
+		string(e),
+		string(UserStatusRegistered),
+		string(UserStatusVerified),
+		string(UserStatusBlocked),
+	)
 }
 
 // Scan convert the json array ino string slice
@@ -43,7 +48,11 @@ func (e UserStatus) Value() (driver.Value, error) {
 
 // IsValid try to validate enum value on ths type
 func (e UserSource) IsValid() bool {
-	return utils.StringInArray(string(e), string(UserSourceCRM), string(UserSourceClickyab))
+	return utils.StringInArray(
+		string(e),
+		string(UserSourceCRM),
+		string(UserSourceClickyab),
+	)
 }
 
 // Scan convert the json array ino string slice
@@ -76,7 +85,11 @@ func (e UserSource) Value() (driver.Value, error) {
 
 // IsValid try to validate enum value on ths type
 func (e UserType) IsValid() bool {
-	return utils.StringInArray(string(e), string(UserTypePersonal), string(UserTypeCorporation))
+	return utils.StringInArray(
+		string(e),
+		string(UserTypePersonal),
+		string(UserTypeCorporation),
+	)
 }
 
 // Scan convert the json array ino string slice
