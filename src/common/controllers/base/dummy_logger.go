@@ -117,6 +117,7 @@ func (m *myLogger) Fatalf(s string, args ...interface{}) {
 	m.logger.Fatalf(s, args...)
 }
 
+// NewLogger return a new logger for echo
 func NewLogger() ll.Logger {
 	return &myLogger{logger: logrus.New()}
 }

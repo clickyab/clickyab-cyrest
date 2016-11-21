@@ -39,7 +39,7 @@ func (m *Manager) UpdateUser(u *User) error {
 	return err
 }
 
-// ListUsers try to list all Users without pagination
+// ListUsersWithFilter try to list all Users without pagination
 func (m *Manager) ListUsersWithFilter(filter string, params ...interface{}) []User {
 	filter = strings.Trim(filter, "\n\t ")
 	if filter != "" {
@@ -61,7 +61,7 @@ func (m *Manager) ListUsers() []User {
 	return m.ListUsersWithFilter("")
 }
 
-// CountUsers count entity in Users table with valid where filter
+// CountUsersWithFilter count entity in Users table with valid where filter
 func (m *Manager) CountUsersWithFilter(filter string, params ...interface{}) int64 {
 	filter = strings.Trim(filter, "\n\t ")
 	if filter != "" {
@@ -82,7 +82,8 @@ func (m *Manager) CountUsers() int64 {
 }
 
 // ListUsersWithPaginationFilter try to list all Users with pagination and filter
-func (m *Manager) ListUsersWithPaginationFilter(offset, perPage int, filter string, params ...interface{}) []User {
+func (m *Manager) ListUsersWithPaginationFilter(
+	offset, perPage int, filter string, params ...interface{}) []User {
 	var res []User
 	filter = strings.Trim(filter, "\n\t ")
 	if filter != "" {

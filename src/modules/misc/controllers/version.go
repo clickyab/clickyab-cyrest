@@ -12,6 +12,6 @@ import (
 //		method = get
 //      200 = version.Version
 // }
-func (u *Controller) getVersion(ctx echo.Context) {
-	u.OKResponse(ctx, version.GetVersion())
+func (u *Controller) getVersion(ctx echo.Context) error {
+	return u.OKResponse(ctx, version.GetVersion())
 }

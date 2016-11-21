@@ -76,14 +76,14 @@ func (s *StringSlice) Scan(src interface{}) error {
 	return nil
 }
 
-// Value A very exprimental string slice to postgres array.
+// Value A very experimental string slice to postgres array.
 // BUG use it with care, its not tested so much
 func (s StringSlice) Value() (driver.Value, error) {
 	b, err := json.Marshal(s)
 	if err != nil {
 		return nil, err
 	}
-	// the first charachter is [ and the last is ] so change them to {}
+	// the first character is [ and the last is ] so change them to {}
 	res := fmt.Sprintf("{%s}", string(b[1:len(b)-1]))
 	return []byte(res), nil
 }

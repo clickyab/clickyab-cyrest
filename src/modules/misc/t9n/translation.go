@@ -33,7 +33,7 @@ func (m *Manager) LoadAllInMap() map[string]Translation {
 	return res
 }
 
-// Add missing translation
+// AddMissing translation
 func (m *Manager) AddMissing(txt string) (Translation, error) {
 	tmp := Translation{
 		String: txt,
