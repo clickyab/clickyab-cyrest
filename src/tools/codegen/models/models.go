@@ -109,7 +109,7 @@ func (m *Manager) Update{{ $m.StructName }}({{ $m.StructName|getvar }} *{{ $m.St
 {{ end }}
 {{ if $m.List }}
 
-// List{{ $m.StructName|plural }} try to list all {{ $m.StructName|plural }} without pagination
+// List{{ $m.StructName|plural }}WithFilter try to list all {{ $m.StructName|plural }} without pagination
 func (m *Manager) List{{ $m.StructName|plural }}WithFilter(filter string, params ...interface{}) []{{ $m.StructName }} {
 	filter = strings.Trim(filter, "\n\t ")
 	if filter != "" {
@@ -132,7 +132,7 @@ func (m *Manager) List{{ $m.StructName|plural }}() []{{ $m.StructName }} {
 	return m.List{{ $m.StructName|plural }}WithFilter("")
 }
 
-// Count{{ $m.StructName|plural }} count entity in {{ $m.StructName|plural }} table with valid where filter
+// Count{{ $m.StructName|plural }}WithFilter count entity in {{ $m.StructName|plural }} table with valid where filter
 func (m *Manager) Count{{ $m.StructName|plural }}WithFilter(filter string, params ...interface{}) int64 {
 	filter = strings.Trim(filter, "\n\t ")
 	if filter != "" {
@@ -153,7 +153,8 @@ func (m *Manager) Count{{ $m.StructName|plural }}() int64 {
 }
 
 // List{{ $m.StructName|plural }}WithPaginationFilter try to list all {{ $m.StructName|plural }} with pagination and filter
-func (m *Manager) List{{ $m.StructName|plural }}WithPaginationFilter(offset, perPage int, filter string, params ...interface{}) []{{ $m.StructName }} {
+func (m *Manager) List{{ $m.StructName|plural }}WithPaginationFilter(
+offset, perPage int, filter string, params ...interface{}) []{{ $m.StructName }} {
 	var res []{{ $m.StructName }}
 	filter = strings.Trim(filter, "\n\t ")
 	if filter != "" {

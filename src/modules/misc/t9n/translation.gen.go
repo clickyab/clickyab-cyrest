@@ -37,7 +37,7 @@ func (m *Manager) UpdateTranslation(t *Translation) error {
 	return err
 }
 
-// ListTranslations try to list all Translations without pagination
+// ListTranslationsWithFilter try to list all Translations without pagination
 func (m *Manager) ListTranslationsWithFilter(filter string, params ...interface{}) []Translation {
 	filter = strings.Trim(filter, "\n\t ")
 	if filter != "" {
@@ -59,7 +59,7 @@ func (m *Manager) ListTranslations() []Translation {
 	return m.ListTranslationsWithFilter("")
 }
 
-// CountTranslations count entity in Translations table with valid where filter
+// CountTranslationsWithFilter count entity in Translations table with valid where filter
 func (m *Manager) CountTranslationsWithFilter(filter string, params ...interface{}) int64 {
 	filter = strings.Trim(filter, "\n\t ")
 	if filter != "" {
@@ -80,7 +80,8 @@ func (m *Manager) CountTranslations() int64 {
 }
 
 // ListTranslationsWithPaginationFilter try to list all Translations with pagination and filter
-func (m *Manager) ListTranslationsWithPaginationFilter(offset, perPage int, filter string, params ...interface{}) []Translation {
+func (m *Manager) ListTranslationsWithPaginationFilter(
+	offset, perPage int, filter string, params ...interface{}) []Translation {
 	var res []Translation
 	filter = strings.Trim(filter, "\n\t ")
 	if filter != "" {

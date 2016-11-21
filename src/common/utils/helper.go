@@ -51,7 +51,7 @@ func StringInArray(q string, arr ...string) bool {
 	return false
 }
 
-// StringInArray check for a string in other strings
+// Int64InArray check for a int in other ints
 func Int64InArray(q int64, arr ...int64) bool {
 	for i := range arr {
 		if arr[i] == q {

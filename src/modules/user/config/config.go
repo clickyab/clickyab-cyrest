@@ -7,6 +7,7 @@ import (
 	"gopkg.in/fzerorubigd/onion.v2"
 )
 
+// Cfg is the user module settings
 var Cfg Config
 
 // Config is the user module config
