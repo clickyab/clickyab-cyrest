@@ -263,6 +263,9 @@ func (m *Manager) RegisterUser(email, password string, personal bool) (u *User, 
 		Email:    email,
 		Password: sql.NullString{String: password, Valid: true},
 		Status:   UserStatusRegistered,
+		Source: UserSourceClickyab,
+		Type: UserTypePersonal,
+
 		//updateLastLogin: true, // in this case, we need to update it since it means a login
 	}
 	err = m.Begin()
@@ -285,6 +288,21 @@ func (m *Manager) RegisterUser(email, password string, personal bool) (u *User, 
 		u = nil
 	}
 	return
+}
+
+// FetchByToken find user by its token in db
+func (m *Manager)  FetchByToken(accessToken string)(*User ,error){
+	var res =User{}
+	query:="SELECT * FROM users WHERE access_token=?"
+	err:=m.GetDbMap().SelectOne(
+		&res,
+		query,
+		accessToken,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &res, nil
 }
 
 //
