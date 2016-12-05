@@ -10,6 +10,12 @@ import (
 // AUTO GENERATED CODE. DO NOT EDIT!
 
 const (
+	// RolePermissionTableFull is the RolePermission table name
+	RolePermissionTableFull = "user_role"
+
+	// RoleTableFull is the Role table name
+	RoleTableFull = "roles"
+
 	// UserTableFull is the User table name
 	UserTableFull = "users"
 )
@@ -37,6 +43,22 @@ func NewAaaManagerFromTransaction(tx gorp.SqlExecutor) (*Manager, error) {
 
 // Initialize aaa package
 func (m *Manager) Initialize() {
+
+	m.AddTableWithName(
+		RolePermission{},
+		RolePermissionTableFull,
+	).SetKeys(
+		true,
+		"ID",
+	)
+
+	m.AddTableWithName(
+		Role{},
+		RoleTableFull,
+	).SetKeys(
+		true,
+		"ID",
+	)
 
 	m.AddTableWithName(
 		User{},

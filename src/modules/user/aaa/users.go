@@ -74,6 +74,8 @@ type User struct {
 	Status      UserStatus     `db:"status" json:"status"`
 	CreatedAt   time.Time      `db:"created_at" json:"created_at"`
 	UpdatedAt   time.Time      `db:"updated_at" json:"updated_at"`
+	resources   map[string][]string     `db:"-"`
+	roles           []Role                  `db:"-"`
 	//LastLogin   common.NullTime `db:"last_login" json:"last_login"`
 
 	refreshToken bool `db:"-"`
@@ -121,6 +123,58 @@ func (u *User) Initialize() {
 	}
 }
 
+// GetResources for this user
+func (u *User) GetPermission() map[string][]string {
+	if u.resources == nil {
+		r := u.GetRoles()
+		u.resources = NewAaaManager().GetPermissionMap(r...)
+	}
+	return u.resources
+}
+
+// GetRoles on this user
+func (u *User) GetRoles() []Role {
+	if u.roles == nil {
+		m := NewAaaManager()
+		u.roles = m.GetUserRoles(u)
+	}
+
+	return u.roles
+}
+
+// check if user has specified permission
+func (u *User) HasPerm(resource string,scope string) bool{
+	//get user permissions
+	m:=u.GetPermission()
+	if scope==string(ScopePermOwn){
+		if !utils.StringInArray(resource,m[string(ScopePermOwn)]...) && !utils.StringInArray(resource,m[string(ScopePermParent)]...) && !utils.StringInArray(resource,m[string(ScopePermGlobal)]...){
+			return false
+		}
+	}else if scope==string(ScopePermParent){
+		if !utils.StringInArray(resource,m[string(ScopePermParent)]...) && !utils.StringInArray(resource,m[string(ScopePermGlobal)]...){
+			return false
+		}
+	}else if scope==string(ScopePermGlobal){
+		if !utils.StringInArray(resource,m[string(ScopePermGlobal)]...){
+			return false
+		}
+	}
+	return true
+}
+
+// GetUserRoles return all Roles belong to User (many to many with UserRole)
+func (m *Manager) GetUserRoles(u *User) []Role {
+	var res []Role
+	query:="SELECT roles.* FROM roles INNER JOIN user_role ON user_role.role_id=roles.id WHERE user_role.user_id=?"
+	_, err := m.GetDbMap().Select(
+		&res,
+		query,
+		u.ID,
+	)
+
+	assert.Nil(err)
+	return res
+}
 //
 //// VerifyPassword try to verify password for given hash
 //func (u *User) VerifyPassword(password string) bool {
