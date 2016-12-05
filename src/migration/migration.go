@@ -84,7 +84,7 @@ func dbMigrationsGitignore() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "db/migrations/.gitignore", size: 14, mode: os.FileMode(420), modTime: time.Unix(1473232308, 0)}
+	info := bindataFileInfo{name: "db/migrations/.gitignore", size: 14, mode: os.FileMode(420), modTime: time.Unix(1474802204, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -104,7 +104,7 @@ func dbMigrations20160117193701_user_baseSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "db/migrations/20160117193701_user_base.sql", size: 4202, mode: os.FileMode(420), modTime: time.Unix(1480933817, 0)}
+	info := bindataFileInfo{name: "db/migrations/20160117193701_user_base.sql", size: 7486, mode: os.FileMode(420), modTime: time.Unix(1480940641, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
