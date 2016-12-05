@@ -101,3 +101,13 @@ func init() {
 		}
 	}()
 }
+
+//PasswordGenerate create password
+func PasswordGenerate(n int) string {
+	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456790")
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	return string(b)
+}

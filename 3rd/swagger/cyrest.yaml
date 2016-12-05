@@ -23,6 +23,49 @@ paths:
             $ref: '#/definitions/version_Version'
       tags:
       - misc
+  /user/forgot/call:
+    post:
+      description: forgotPassword get email
+      responses:
+        "200":
+          description: ""
+          produce: application/json
+          schema:
+            $ref: '#/definitions/base_NormalResponse'
+        "400":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_ErrorResponseSimple'
+      parameters:
+      - name: payload_data
+        schema:
+          $ref: '#/definitions/user_forgotPayload'
+        description: ""
+        in: body
+        required: false
+      tags:
+      - user
+  /user/forgot/callback/{code}:
+    get:
+      description: forgotGeneratePassword get email
+      responses:
+        "200":
+          description: ""
+          produce: application/json
+          schema:
+            $ref: '#/definitions/base_NormalResponse'
+        "400":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_ErrorResponseSimple'
+      parameters:
+      - name: code
+        type: string
+        description: ""
+        in: path
+        required: true
+      tags:
+      - user
   /user/register:
     post:
       description: registerUser register user in system
@@ -51,11 +94,19 @@ definitions:
       error:
         type: string
     type: object
+  base_NormalResponse:
+    properties: {}
+    type: object
   user_corporation:
     properties:
       company_name:
         type: string
       phone:
+        type: string
+    type: object
+  user_forgotPayload:
+    properties:
+      email:
         type: string
     type: object
   user_personal:
