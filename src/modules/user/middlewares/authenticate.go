@@ -1,43 +1,43 @@
 package middlewares
 
 import (
-	"github.com/labstack/echo"
 	"common/redis"
 	"time"
 
-	"modules/user/aaa"
-	"net/http"
+	"github.com/labstack/echo"
+
 	"common/assert"
 	"errors"
+	"modules/user/aaa"
+	"net/http"
 )
 
 const userData = "__user_data__"
 const tokenData = "__token__"
 
-
 // Auth is the middleware for authenticating user
 func Auth(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		token:=c.Request().Header().Get("token")
+		token := c.Request().Header().Get("token")
 		st := struct {
 			Error string `json:"error"`
 		}{
-			Error: http.StatusText(http.StatusForbidden),
+			Error: http.StatusText(http.StatusUnauthorized),
 		}
-		if token!=""{
+		if token != "" {
 			//get the token on redis
-			accessToken,err:=aredis.GetKey(token,true,24*time.Hour)
-			if err!=nil{ //user not authenticated
-				return c.JSON(http.StatusForbidden,st)
+			accessToken, err := aredis.GetKey(token, true, 24*time.Hour)
+			if err != nil { //user not authenticated
+				return c.JSON(http.StatusUnauthorized, st)
 			}
 			//check if the accessToken exists in users table
-			user,err:=aaa.NewAaaManager().FetchByToken(accessToken)
-			if err!=nil{ //user not found
-				return c.JSON(http.StatusForbidden,st)
+			user, err := aaa.NewAaaManager().FetchByToken(accessToken)
+			if err != nil { //user not found
+				return c.JSON(http.StatusUnauthorized, st)
 			}
 			//all good put user in context
-			c.Set(userData,user)
-			c.Set(tokenData,token)
+			c.Set(userData, user)
+			c.Set(tokenData, token)
 		}
 		return next(c)
 	}
@@ -59,4 +59,3 @@ func MustGetUserData(ctx echo.Context) *aaa.User {
 	assert.Nil(err)
 	return rd
 }
-

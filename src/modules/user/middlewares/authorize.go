@@ -2,8 +2,8 @@ package middlewares
 
 import (
 	"net/http"
-	"github.com/labstack/echo"
 
+	"github.com/labstack/echo"
 )
 
 // AuthorizeGenerator generate middleware for specified action
@@ -16,10 +16,10 @@ func AuthorizeGenerator(resource string, scope string) echo.MiddlewareFunc {
 				Error: http.StatusText(http.StatusForbidden),
 			}
 			// get user
-			u:= MustGetUserData(c)
+			u := MustGetUserData(c)
 
 			//check if the user has the specified perm
-			if !u.HasPerm(resource,scope){
+			if !u.HasPerm(resource, scope) {
 				c.Request().Header().Set("error", st.Error)
 				c.JSON(
 					http.StatusForbidden,
