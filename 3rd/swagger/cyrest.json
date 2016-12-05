@@ -12,7 +12,7 @@
 			},
 			"type": "object"
 		},
-		"user_registrationPayload": {
+		"user_loginPayload": {
 			"properties": {
 				"email": {
 					"type": "string"
@@ -22,6 +22,41 @@
 				},
 				"personal": {
 					"type": "boolean"
+				}
+			},
+			"type": "object"
+		},
+		"user_registrationPayload": {
+			"properties": {
+				"cellphone": {
+					"type": "string"
+				},
+				"company_name": {
+					"type": "string"
+				},
+				"email": {
+					"type": "string"
+				},
+				"first_name": {
+					"type": "string"
+				},
+				"gender": {
+					"type": "integer"
+				},
+				"last_name": {
+					"type": "string"
+				},
+				"password": {
+					"type": "string"
+				},
+				"personal": {
+					"type": "boolean"
+				},
+				"phone": {
+					"type": "string"
+				},
+				"source": {
+					"type": "string"
 				}
 			},
 			"type": "object"
@@ -84,6 +119,40 @@
 				},
 				"tags": [
 					"misc"
+				]
+			}
+		},
+		"/user/login": {
+			"post": {
+				"description": "loginUser login user in system",
+				"parameters": [
+					{
+						"description": "",
+						"in": "body",
+						"name": "payload_data",
+						"required": false,
+						"schema": {
+							"$ref": "#/definitions/user_loginPayload"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "",
+						"produce": "application/json",
+						"schema": {
+							"$ref": "#/definitions/user_responseLoginOK"
+						}
+					},
+					"400": {
+						"description": "",
+						"schema": {
+							"$ref": "#/definitions/base_ErrorResponseSimple"
+						}
+					}
+				},
+				"tags": [
+					"user"
 				]
 			}
 		},

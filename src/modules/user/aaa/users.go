@@ -79,6 +79,9 @@ type User struct {
 	refreshToken bool `db:"-"`
 }
 
+
+
+
 // CreateUserHook is the hook for create a user
 type CreateUserHook func(gorp.SqlExecutor, *User) error
 
@@ -202,23 +205,23 @@ func (m *Manager) GetNewToken(baseToken string) string {
 //	return aredis.RemoveKey(token)
 //}
 //
-//// LoginUserByPassword try to login user with username and password
-//func (m *Manager) LoginUserByPassword(username, password string) (string, *User, error) {
-//	u, err := m.FindUserByUsername(username)
-//	if err != nil {
-//		return "", nil, err
-//	}
-//
-//	if u.Status == UserStatusBanned {
-//		return "", nil, errors.New("sorry, but you are banned")
-//	}
-//
-//	if u.VerifyPassword(password) {
-//		return m.GetNewToken(u.Token), u, nil
-//	}
-//
-//	return "", nil, errors.New("wrong password")
-//}
+// LoginUserByPassword try to login user with username and password
+func (m *Manager) LoginUserByPassword(username, password string) (string, *User, error) {
+	u, err := m.FindUserByUsername(username)
+	if err != nil {
+		return "", nil, err
+	}
+
+	if u.Status == UserStatusBanned {
+		return "", nil, errors.New("sorry, but you are banned")
+	}
+
+	if u.VerifyPassword(password) {
+		return m.GetNewToken(u.Token), u, nil
+	}
+
+	return "", nil, errors.New("wrong password")
+}
 //
 //// LoginUserByPassword try to login user with username and password
 //func (m *Manager) LoginUserByOAuth(email string) (string, *User, error) {

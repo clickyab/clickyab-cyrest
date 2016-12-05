@@ -23,6 +23,28 @@ paths:
             $ref: '#/definitions/version_Version'
       tags:
       - misc
+  /user/login:
+    post:
+      description: loginUser login user in system
+      responses:
+        "200":
+          description: ""
+          produce: application/json
+          schema:
+            $ref: '#/definitions/user_responseLoginOK'
+        "400":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_ErrorResponseSimple'
+      parameters:
+      - name: payload_data
+        schema:
+          $ref: '#/definitions/user_loginPayload'
+        description: ""
+        in: body
+        required: false
+      tags:
+      - user
   /user/register:
     post:
       description: registerUser register user in system
@@ -51,7 +73,7 @@ definitions:
       error:
         type: string
     type: object
-  user_registrationPayload:
+  user_loginPayload:
     properties:
       email:
         type: string
@@ -59,6 +81,29 @@ definitions:
         type: string
       personal:
         type: boolean
+    type: object
+  user_registrationPayload:
+    properties:
+      cellphone:
+        type: string
+      company_name:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      gender:
+        type: integer
+      last_name:
+        type: string
+      password:
+        type: string
+      personal:
+        type: boolean
+      phone:
+        type: string
+      source:
+        type: string
     type: object
   user_responseLoginOK:
     properties:

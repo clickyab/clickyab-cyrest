@@ -145,9 +145,28 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "github.com/gin-gonic/gin/binding",
+			"repository": "https://github.com/gin-gonic/gin",
+			"revision": "041ca04a4768ededad44dcc2748f3d47e4b59bde",
+			"branch": "master",
+			"path": "/binding"
+		},
+		{
 			"importpath": "github.com/go-gomail/gomail",
 			"repository": "https://github.com/go-gomail/gomail",
 			"revision": "81ebce5c23dfd25c6c67194b37d3dd3f338c98b1",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/go-playground/locales",
+			"repository": "https://github.com/go-playground/locales",
+			"revision": "273913d3b2ff7127452603d55dd3f6f888e4f268",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/go-playground/universal-translator",
+			"repository": "https://github.com/go-playground/universal-translator",
+			"revision": "8bf00f2bdf7faea5c3583d41f57bf1eb15b743d7",
 			"branch": "master"
 		},
 		{
@@ -373,6 +392,12 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "github.com/wordijp/golang-re2",
+			"repository": "https://github.com/wordijp/golang-re2",
+			"revision": "71c0339b3c721408d0ea30a391ff55b270a53211",
+			"branch": "master"
+		},
+		{
 			"importpath": "golang.org/x/crypto",
 			"repository": "https://go.googlesource.com/crypto",
 			"revision": "5bcd134fee4dd1475da17714aac19c0aa0142e2f",
@@ -451,6 +476,12 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "gopkg.in/bluesuncorp/validator.v9",
+			"repository": "https://gopkg.in/bluesuncorp/validator.v9",
+			"revision": "941ce2cabc098467c3ebd66c5d705bc122f18b74",
+			"branch": "master"
+		},
+		{
 			"importpath": "gopkg.in/fzerorubigd/onion.v2",
 			"repository": "https://gopkg.in/fzerorubigd/onion.v2",
 			"revision": "e687b557954d44e2b5c3b4b52bb9ffa8572d9cb0",
@@ -469,10 +500,22 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "gopkg.in/go-playground/validator.v9",
+			"repository": "https://gopkg.in/go-playground/validator.v9",
+			"revision": "941ce2cabc098467c3ebd66c5d705bc122f18b74",
+			"branch": "master"
+		},
+		{
 			"importpath": "gopkg.in/gorp.v1",
 			"repository": "https://gopkg.in/gorp.v1",
 			"revision": "c87af80f3cc5036b55b83d77171e156791085e2e",
 			"branch": "master"
+		},
+		{
+			"importpath": "gopkg.in/validator.v2",
+			"repository": "https://gopkg.in/validator.v2",
+			"revision": "0a9835d809fb647a62611d30cb792e0b5dd65b11",
+			"branch": "v2"
 		},
 		{
 			"importpath": "gopkg.in/yaml.v2",
