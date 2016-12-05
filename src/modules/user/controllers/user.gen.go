@@ -16,13 +16,27 @@ func (u *Controller) Routes(r *echo.Echo, mountPoint string) {
 
 	group := r.Group(mountPoint+"/user", groupMiddleware...)
 
-	// Route {/register POST Controller.registerUser user []  Controller u registrationPayload  } with key 0
+	// Route {/forgot/call POST Controller.forgotPassword user []  Controller u forgotPayload  } with key 0
 	m0 := []echo.MiddlewareFunc{}
 
 	// Make sure payload is the last middleware
-	m0 = append(m0, middlewares.PayloadUnMarshallerGenerator(registrationPayload{}))
-	group.POST("/register", u.registerUser, m0...)
-	// End route {/register POST Controller.registerUser user []  Controller u registrationPayload  } with key 0
+	m0 = append(m0, middlewares.PayloadUnMarshallerGenerator(forgotPayload{}))
+	group.POST("/forgot/call", u.forgotPassword, m0...)
+	// End route {/forgot/call POST Controller.forgotPassword user []  Controller u forgotPayload  } with key 0
+
+	// Route {/forgot/callback/:code GET Controller.forgotGeneratePassword user []  Controller u   } with key 1
+	m1 := []echo.MiddlewareFunc{}
+
+	group.GET("/forgot/callback/:code", u.forgotGeneratePassword, m1...)
+	// End route {/forgot/callback/:code GET Controller.forgotGeneratePassword user []  Controller u   } with key 1
+
+	// Route {/register POST Controller.registerUser user []  Controller u registrationPayload  } with key 2
+	m2 := []echo.MiddlewareFunc{}
+
+	// Make sure payload is the last middleware
+	m2 = append(m2, middlewares.PayloadUnMarshallerGenerator(registrationPayload{}))
+	group.POST("/register", u.registerUser, m2...)
+	// End route {/register POST Controller.registerUser user []  Controller u registrationPayload  } with key 2
 
 	utils.DoInitialize(u)
 }
