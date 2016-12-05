@@ -15,11 +15,11 @@ func (u *Controller) Routes(r *echo.Echo, mountPoint string) {
 
 	group := r.Group(mountPoint+"/misc", groupMiddleware...)
 
-	// Route {/version GET Controller.getVersion misc []  Controller u  } with key 0
+	// Route {/version GET Controller.getVersion misc []  Controller u   } with key 0
 	m0 := []echo.MiddlewareFunc{}
 
 	group.GET("/version", u.getVersion, m0...)
-	// End route {/version GET Controller.getVersion misc []  Controller u  } with key 0
+	// End route {/version GET Controller.getVersion misc []  Controller u   } with key 0
 
 	utils.DoInitialize(u)
 }

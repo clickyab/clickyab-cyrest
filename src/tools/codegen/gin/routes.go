@@ -28,6 +28,7 @@ type route struct {
 	RecName             string
 	Payload             string
 	Resource            string
+	Scope               string
 }
 
 type group struct {
@@ -82,7 +83,7 @@ func ({{ .GroupRec }} *{{ .StructName }}) Routes(r *echo.Echo, mountPoint string
 		{{end}}
 	}
 	{{ if $route.Resource }}
-	m{{ $key }} = append(m{{ $key }}, authz.AuthorizeGenerator("{{$route.Resource}}")){{ end }}
+	m{{ $key }} = append(m{{ $key }}, authz.AuthorizeGenerator("{{$route.Resource}}","{{$route.Scope}}")){{ end }}
 	{{ if $route.RouteFuncMiddleware }}
 	m{{ $key }} = append(m{{ $key }}, {{ $.GroupRec }}.{{ $route.RouteFuncMiddleware|strip_type }}()...){{ end }}
 	{{ if $route.Payload }} // Make sure payload is the last middleware
@@ -93,7 +94,6 @@ func ({{ .GroupRec }} *{{ .StructName }}) Routes(r *echo.Echo, mountPoint string
 	{{ end }}
 	utils.DoInitialize({{ .GroupRec }})
 }
-
 `
 
 var (
@@ -219,11 +219,18 @@ func (r *routerPlugin) ProcessFunction(
 	resource, ok := a.Items["resource"]
 	if ok {
 		resource = strings.Trim(resource, " \n\t")
+		scopes := strings.Split(resource, ":")
+		scope := "global"
+		if len(scopes) == 2 {
+			scope = scopes[1]
+			resource = scopes[0]
+		}
 		// For routes with the resource, must add the authenticate middleware
 		if !utils.StringInArray("authz.Authenticate", data.RouteMiddleware...) {
 			data.RouteMiddleware = append(data.RouteMiddleware, "authz.Authenticate")
 		}
 		data.Resource = resource
+		data.Scope = scope
 	}
 
 	data.RecType = removeStar(f.Reciever.Type).GetDefinition()

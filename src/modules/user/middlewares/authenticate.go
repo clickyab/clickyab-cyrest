@@ -1,22 +1,21 @@
-package middlewares
+package authz
 
 import (
-	"common/redis"
-	"time"
-
-	"github.com/labstack/echo"
-
 	"common/assert"
+	"common/redis"
 	"errors"
 	"modules/user/aaa"
 	"net/http"
+	"time"
+
+	"github.com/labstack/echo"
 )
 
 const userData = "__user_data__"
 const tokenData = "__token__"
 
-// Auth is the middleware for authenticating user
-func Auth(next echo.HandlerFunc) echo.HandlerFunc {
+// Authenticate is the middleware for authenticating user
+func Authenticate(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		token := c.Request().Header().Get("token")
 		st := struct {
