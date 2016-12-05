@@ -14,7 +14,22 @@
 		},
 		"user_registrationPayload": {
 			"properties": {
+				"cellphone": {
+					"type": "string"
+				},
+				"company_name": {
+					"type": "string"
+				},
 				"email": {
+					"type": "string"
+				},
+				"first_name": {
+					"type": "string"
+				},
+				"gender": {
+					"type": "integer"
+				},
+				"last_name": {
 					"type": "string"
 				},
 				"password": {
@@ -22,6 +37,12 @@
 				},
 				"personal": {
 					"type": "boolean"
+				},
+				"phone": {
+					"type": "string"
+				},
+				"source": {
+					"type": "string"
 				}
 			},
 			"type": "object"
