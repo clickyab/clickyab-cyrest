@@ -51,34 +51,42 @@ definitions:
       error:
         type: string
     type: object
-  user_registrationPayload:
+  user_corporation:
     properties:
-      cellphone:
-        type: string
       company_name:
         type: string
-      email:
+      phone:
+        type: string
+    type: object
+  user_personal:
+    properties:
+      cellphone:
         type: string
       first_name:
         type: string
       gender:
-        type: integer
+        type: string
       last_name:
+        type: string
+    type: object
+  user_registrationPayload:
+    properties:
+      corporation:
+        $ref: '#/definitions/user_corporation'
+      email:
         type: string
       password:
         type: string
       personal:
-        type: boolean
-      phone:
-        type: string
+        $ref: '#/definitions/user_personal'
       source:
         type: string
     type: object
   user_responseLoginOK:
     properties:
-      Accesstoken:
-        type: string
       email:
+        type: string
+      token:
         type: string
       user_id:
         type: integer

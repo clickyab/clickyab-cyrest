@@ -13,6 +13,18 @@ const (
 	// RolePermissionTableFull is the RolePermission table name
 	RolePermissionTableFull = "role_permission"
 
+	// UserCRMTableFull is the UserCRM table name
+	UserCRMTableFull = "user_crm"
+
+	// UserFinancialTableFull is the UserFinancial table name
+	UserFinancialTableFull = "user_financial"
+
+	// UserRoleTableFull is the UserRole table name
+	UserRoleTableFull = "user_role"
+
+	// UserTableFull is the User table name
+	UserTableFull = "users"
+
 	// RoleTableFull is the Role table name
 	RoleTableFull = "roles"
 
@@ -22,20 +34,8 @@ const (
 	// UserProfileCorporationTableFull is the UserProfileCorporation table name
 	UserProfileCorporationTableFull = "user_profile_corporation"
 
-	// UserCRMTableFull is the UserCRM table name
-	UserCRMTableFull = "user_crm"
-
-	// UserFinancialTableFull is the UserFinancial table name
-	UserFinancialTableFull = "user_financial"
-
 	// UserProfilePersonalTableFull is the UserProfilePersonal table name
 	UserProfilePersonalTableFull = "user_profile_personal"
-
-	// UserRoleTableFull is the UserRole table name
-	UserRoleTableFull = "user_role"
-
-	// UserTableFull is the User table name
-	UserTableFull = "users"
 )
 
 // Manager is the model manager for aaa package
@@ -71,6 +71,39 @@ func (m *Manager) Initialize() {
 	)
 
 	m.AddTableWithName(
+		UserCRM{},
+		UserCRMTableFull,
+	).SetKeys(
+		false,
+		"UserID",
+	)
+
+	m.AddTableWithName(
+		UserFinancial{},
+		UserFinancialTableFull,
+	).SetKeys(
+		true,
+		"ID",
+	)
+
+	m.AddTableWithName(
+		UserRole{},
+		UserRoleTableFull,
+	).SetKeys(
+		false,
+		"UserID",
+		"RoleID",
+	)
+
+	m.AddTableWithName(
+		User{},
+		UserTableFull,
+	).SetKeys(
+		true,
+		"ID",
+	)
+
+	m.AddTableWithName(
 		Role{},
 		RoleTableFull,
 	).SetKeys(
@@ -95,44 +128,11 @@ func (m *Manager) Initialize() {
 	)
 
 	m.AddTableWithName(
-		UserCRM{},
-		UserCRMTableFull,
-	).SetKeys(
-		false,
-		"UserID",
-	)
-
-	m.AddTableWithName(
-		UserFinancial{},
-		UserFinancialTableFull,
-	).SetKeys(
-		true,
-		"ID",
-	)
-
-	m.AddTableWithName(
 		UserProfilePersonal{},
 		UserProfilePersonalTableFull,
 	).SetKeys(
 		false,
 		"UserID",
-	)
-
-	m.AddTableWithName(
-		UserRole{},
-		UserRoleTableFull,
-	).SetKeys(
-		false,
-		"UserID",
-		"RoleID",
-	)
-
-	m.AddTableWithName(
-		User{},
-		UserTableFull,
-	).SetKeys(
-		true,
-		"ID",
 	)
 
 }

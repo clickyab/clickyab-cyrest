@@ -1,7 +1,6 @@
 package user
 
 import (
-	"common/utils"
 	"modules/user/aaa"
 
 	"modules/misc/trans"
@@ -15,68 +14,36 @@ type responseLoginOK struct {
 	AccessToken string `json:"token"`
 }
 
-type registrationPayload struct {
-	Email    string `json:"email" validate:"min=3,max=40"`
-	Password string `json:"password"`
-	Personal bool   `json:"personal"`
-
-	FirstName   string `json:"first_name" validate:"nonzero"`
-	LastName    string `json:"last_name" validate:"nonzero"`
-	CompanyName string `json:"company_name"`
-
-	Cellphone string `json:"cellphone" validate:"nonzero"`
-	Phone     string `json:"phone"`
-	Gender    int    `json:"gender"`
-	Source    string `json:"source"`
+type personal struct {
+	FirstName string            `json:"first_name"`
+	LastName  string            `json:"last_name"`
+	Cellphone string            `json:"cellphone"`
+	Gender    aaa.ProfileGender `json:"gender"`
 }
 
-func (r *registrationPayload) Validate(ctx echo.Context) (bool, map[string]string) {
-	var res = make(map[string]string)
-	var fail bool
+type corporation struct {
+	CompanyName string `json:"company_name"`
+	Phone       string `json:"phone"`
+}
 
-	if len(r.Password) < 6 {
-		res["password"] = trans.T("Password is invalid")
-		fail = true
+type registrationPayload struct {
+	Email       string         `json:"email"`
+	Password    string         `json:"password"`
+	Source      aaa.UserSource `json:"source"`
+	Personal    *personal      `json:"personal" validate:"-"`
+	Corporation *corporation   `json:"corporation" validate:"-"`
+}
+
+func (r *registrationPayload) Validate(ctx echo.Context) error {
+	if r.Personal != nil && r.Corporation != nil {
+		return trans.E("both personal and corporation is set")
+	}
+	if r.Personal == nil && r.Corporation == nil {
+		return trans.E("both personal and corporation is not set")
 	}
 
-	if len(r.Email) < 4 || !utils.ValidateEmail(r.Email) {
-		res["email"] = trans.T("Email is invalid")
-		fail = true
-	}
-
-	if r.Personal {
-		if len(r.FirstName) < 2 {
-			res["firstname"] = trans.T("First name is invalid")
-			fail = true
-		}
-		if len(r.LastName) < 2 {
-			res["lastName"] = trans.T("Last name is invalid")
-			fail = true
-		}
-		// TODO : validate cell phone
-		if len(r.Cellphone) < 2 {
-			res["cellphone"] = trans.T("Cellphone is invalid")
-			fail = true
-		}
-
-	} else {
-		if len(r.CompanyName) < 2 {
-			res["companyName"] = trans.T("Company Name is invalid")
-			fail = true
-		}
-
-		// TODO : validate phone
-		if len(r.Phone) < 6 {
-			res["phone"] = trans.T("Phone is invalid")
-			fail = true
-		}
-	}
-
-	if fail {
-		return false, res
-	}
-
-	return true, nil
+	//validator.New().Struct()
+	return nil
 }
 
 // registerUser register user in system
@@ -91,7 +58,14 @@ func (u *Controller) registerUser(ctx echo.Context) error {
 	pl := u.MustGetPayload(ctx).(*registrationPayload)
 	m := aaa.NewAaaManager()
 
-	user, err := m.RegisterUser(pl.Email, pl.Password, pl.Personal)
+	var prof interface{}
+	if pl.Personal != nil {
+		prof = aaa.NewUserProfilePersonal(pl.Personal.FirstName, pl.Personal.LastName, pl.Personal.Gender, pl.Personal.Cellphone)
+	} else {
+		prof = aaa.NewUserProfileCorporation(pl.Corporation.CompanyName, pl.Corporation.Phone)
+	}
+
+	user, err := m.RegisterUser(pl.Email, pl.Password, prof)
 	if err != nil {
 		return u.BadResponse(ctx, err)
 	}

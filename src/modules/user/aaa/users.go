@@ -191,15 +191,12 @@ func (m *Manager) GetNewToken(baseToken string) string {
 }
 
 // RegisterUser is try for the user registration
-func (m *Manager) RegisterUser(email, password string, personal bool) (u *User, err error) {
+func (m *Manager) RegisterUser(email, password string, profile interface{}) (u *User, err error) {
 	u = &User{
 		Email:    email,
 		Password: sql.NullString{String: password, Valid: true},
 		Status:   UserStatusRegistered,
 		Source:   UserSourceClickyab,
-		Type:     UserTypePersonal,
-
-		//updateLastLogin: true, // in this case, we need to update it since it means a login
 	}
 	err = m.Begin()
 	if err != nil {
@@ -219,7 +216,18 @@ func (m *Manager) RegisterUser(email, password string, personal bool) (u *User, 
 	err = m.CreateUser(u)
 	if err != nil {
 		u = nil
+		return
 	}
+
+	switch p := profile.(type) {
+	case *UserProfileCorporation:
+		p.UserID = u.ID
+		err = m.CreateUserProfileCorporation(p)
+	case *UserProfilePersonal:
+		p.UserID = u.ID
+		err = m.CreateUserProfilePersonal(p)
+	}
+
 	return
 }
 

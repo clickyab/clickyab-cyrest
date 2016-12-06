@@ -2,12 +2,6 @@
 	"version": 0,
 	"dependencies": [
 		{
-			"importpath": "git.eclipse.org/gitroot/paho/org.eclipse.paho.mqtt.golang.git",
-			"repository": "https://git.eclipse.org/gitroot/paho/org.eclipse.paho.mqtt.golang.git",
-			"revision": "617c801af238c3af2d9e72c5d4a0f02edad03ce5",
-			"branch": "master"
-		},
-		{
 			"importpath": "github.com/BurntSushi/toml",
 			"repository": "https://github.com/BurntSushi/toml",
 			"revision": "f0aeabca5a127c4078abb8c8d64298b147264b55",
@@ -145,9 +139,28 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "github.com/gin-gonic/gin/binding",
+			"repository": "https://github.com/gin-gonic/gin",
+			"revision": "e2212d40c62a98b388a5eb48ecbdcf88534688ba",
+			"branch": "master",
+			"path": "/binding"
+		},
+		{
 			"importpath": "github.com/go-gomail/gomail",
 			"repository": "https://github.com/go-gomail/gomail",
 			"revision": "81ebce5c23dfd25c6c67194b37d3dd3f338c98b1",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/go-playground/locales",
+			"repository": "https://github.com/go-playground/locales",
+			"revision": "273913d3b2ff7127452603d55dd3f6f888e4f268",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/go-playground/universal-translator",
+			"repository": "https://github.com/go-playground/universal-translator",
+			"revision": "8bf00f2bdf7faea5c3583d41f57bf1eb15b743d7",
 			"branch": "master"
 		},
 		{
@@ -463,9 +476,9 @@
 			"branch": "master"
 		},
 		{
-			"importpath": "gopkg.in/go-playground/validator.v8",
-			"repository": "https://gopkg.in/go-playground/validator.v8",
-			"revision": "014792cf3e266caff1e916876be12282b33059e0",
+			"importpath": "gopkg.in/go-playground/validator.v9",
+			"repository": "https://gopkg.in/go-playground/validator.v9",
+			"revision": "941ce2cabc098467c3ebd66c5d705bc122f18b74",
 			"branch": "master"
 		},
 		{
