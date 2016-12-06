@@ -1,16 +1,18 @@
 package user
 
 import (
+	"common/utils"
 	"modules/user/aaa"
 
+	"modules/misc/trans"
+
 	"github.com/labstack/echo"
-	"regexp"
 )
 
 type responseLoginOK struct {
 	UserID      int64  `json:"user_id"`
 	Email       string `json:"email"`
-	AccessToken string `json:"Accesstoken"`
+	AccessToken string `json:"token"`
 }
 
 type registrationPayload struct {
@@ -33,39 +35,41 @@ func (r *registrationPayload) Validate(ctx echo.Context) (bool, map[string]strin
 	var fail bool
 
 	if len(r.Password) < 6 {
-		res["password"] = "Password is invalid"
+		res["password"] = trans.T("Password is invalid")
 		fail = true
 	}
-	valid,_ := ValidateEmail(r.Email)
-	if len(r.Email) < 4 || !valid {
-		res["email"] = "Email is invalid"
-		fail = true
-	}
-	if len(r.Phone) < 6 {
-		res["phone"] = "Phone is invalid"
+
+	if len(r.Email) < 4 || !utils.ValidateEmail(r.Email) {
+		res["email"] = trans.T("Email is invalid")
 		fail = true
 	}
 
 	if r.Personal {
 		if len(r.FirstName) < 2 {
-			res["firstname"] = "First name is invalid"
+			res["firstname"] = trans.T("First name is invalid")
 			fail = true
 		}
 		if len(r.LastName) < 2 {
-			res["lastName"] = "Last name is invalid"
+			res["lastName"] = trans.T("Last name is invalid")
 			fail = true
 		}
+		// TODO : validate cell phone
 		if len(r.Cellphone) < 2 {
-			res["cellphone"] = "Cellphone is invalid"
+			res["cellphone"] = trans.T("Cellphone is invalid")
 			fail = true
 		}
 
 	} else {
 		if len(r.CompanyName) < 2 {
-			res["companyName"] = "Company Name is invalid"
+			res["companyName"] = trans.T("Company Name is invalid")
 			fail = true
 		}
 
+		// TODO : validate phone
+		if len(r.Phone) < 6 {
+			res["phone"] = trans.T("Phone is invalid")
+			fail = true
+		}
 	}
 
 	if fail {
@@ -74,18 +78,14 @@ func (r *registrationPayload) Validate(ctx echo.Context) (bool, map[string]strin
 
 	return true, nil
 }
-func ValidateEmail(email string) (bool,error) {
-	//Re := regexp.MustCompile()
-	return regexp.MatchString(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`, email)
-}
 
 // registerUser register user in system
 // @Route {
 // 		url = /register
 //		method = post
 //      payload = registrationPayload
-//      200 = responseLoginOK
-//      400 = base.ErrorResponseSimple
+//		200 = responseLoginOK
+//		400 = base.ErrorResponseSimple
 // }
 func (u *Controller) registerUser(ctx echo.Context) error {
 	pl := u.MustGetPayload(ctx).(*registrationPayload)
@@ -94,7 +94,6 @@ func (u *Controller) registerUser(ctx echo.Context) error {
 	user, err := m.RegisterUser(pl.Email, pl.Password, pl.Personal)
 	if err != nil {
 		return u.BadResponse(ctx, err)
-
 	}
 
 	token := m.GetNewToken(user.AccessToken)

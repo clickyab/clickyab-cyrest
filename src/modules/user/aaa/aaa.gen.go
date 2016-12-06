@@ -10,11 +10,29 @@ import (
 // AUTO GENERATED CODE. DO NOT EDIT!
 
 const (
-	// RolePermissionTableFull is the RolePermission table name
-	RolePermissionTableFull = "user_role"
-
 	// RoleTableFull is the Role table name
 	RoleTableFull = "roles"
+
+	// UserFinancialTableFull is the UserFinancial table name
+	UserFinancialTableFull = "user_financial"
+
+	// UserProfileCorporationTableFull is the UserProfileCorporation table name
+	UserProfileCorporationTableFull = "user_profile_personal"
+
+	// UserRoleTableFull is the UserRole table name
+	UserRoleTableFull = "user_role"
+
+	// RolePermissionTableFull is the RolePermission table name
+	RolePermissionTableFull = "role_permission"
+
+	// UserAttributesTableFull is the UserAttributes table name
+	UserAttributesTableFull = "user_attributes"
+
+	// UserCRMTableFull is the UserCRM table name
+	UserCRMTableFull = "user_crm"
+
+	// UserProfileCorporationTableFull is the UserProfileCorporation table name
+	UserProfileCorporationTableFull = "user_profile_corporation"
 
 	// UserTableFull is the User table name
 	UserTableFull = "users"
@@ -45,6 +63,39 @@ func NewAaaManagerFromTransaction(tx gorp.SqlExecutor) (*Manager, error) {
 func (m *Manager) Initialize() {
 
 	m.AddTableWithName(
+		Role{},
+		RoleTableFull,
+	).SetKeys(
+		true,
+		"ID",
+	)
+
+	m.AddTableWithName(
+		UserFinancial{},
+		UserFinancialTableFull,
+	).SetKeys(
+		true,
+		"ID",
+	)
+
+	m.AddTableWithName(
+		UserProfileCorporation{},
+		UserProfileCorporationTableFull,
+	).SetKeys(
+		false,
+		"UserID",
+	)
+
+	m.AddTableWithName(
+		UserRole{},
+		UserRoleTableFull,
+	).SetKeys(
+		false,
+		"UserID",
+		"RoleID",
+	)
+
+	m.AddTableWithName(
 		RolePermission{},
 		RolePermissionTableFull,
 	).SetKeys(
@@ -53,11 +104,27 @@ func (m *Manager) Initialize() {
 	)
 
 	m.AddTableWithName(
-		Role{},
-		RoleTableFull,
+		UserAttributes{},
+		UserAttributesTableFull,
 	).SetKeys(
 		true,
 		"ID",
+	)
+
+	m.AddTableWithName(
+		UserCRM{},
+		UserCRMTableFull,
+	).SetKeys(
+		false,
+		"UserID",
+	)
+
+	m.AddTableWithName(
+		UserProfileCorporation{},
+		UserProfileCorporationTableFull,
+	).SetKeys(
+		false,
+		"UserID",
 	)
 
 	m.AddTableWithName(

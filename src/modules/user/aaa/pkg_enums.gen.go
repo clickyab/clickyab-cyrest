@@ -47,6 +47,43 @@ func (e ScopePerm) Value() (driver.Value, error) {
 }
 
 // IsValid try to validate enum value on ths type
+func (e ProfileGender) IsValid() bool {
+	return utils.StringInArray(
+		string(e),
+		string(ProfileGenderMale),
+		string(ProfileGenderFemale),
+	)
+}
+
+// Scan convert the json array ino string slice
+func (e *ProfileGender) Scan(src interface{}) error {
+	var b []byte
+	switch src.(type) {
+	case []byte:
+		b = src.([]byte)
+	case string:
+		b = []byte(src.(string))
+	case nil:
+		b = make([]byte, 0)
+	default:
+		return errors.New("unsupported type")
+	}
+	if !ProfileGender(b).IsValid() {
+		return errors.New("invaid value")
+	}
+	*e = ProfileGender(b)
+	return nil
+}
+
+// Value try to get the string slice representation in database
+func (e ProfileGender) Value() (driver.Value, error) {
+	if !e.IsValid() {
+		return nil, errors.New("invaid status")
+	}
+	return string(e), nil
+}
+
+// IsValid try to validate enum value on ths type
 func (e UserStatus) IsValid() bool {
 	return utils.StringInArray(
 		string(e),

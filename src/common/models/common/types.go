@@ -261,7 +261,7 @@ func (ns NullString) MarshalJSON() ([]byte, error) {
 		return json.Marshal(ns.String)
 	}
 
-	return []byte("null"), nil
+	return []byte(sqlNull), nil
 }
 
 // UnmarshalJSON try to unmarshal dae from input

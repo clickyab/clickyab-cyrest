@@ -6,7 +6,10 @@ import (
 	"strings"
 )
 
-var spaceMatch = regexp.MustCompile(`\s+`)
+var (
+	spaceMatch = regexp.MustCompile(`\s+`)
+	emailMath  = regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
+)
 
 // PrefixMatch return the matched items in array
 func PrefixMatch(in string, data ...string) []string {
@@ -60,4 +63,9 @@ func Int64InArray(q int64, arr ...int64) bool {
 	}
 
 	return false
+}
+
+// ValidateEmail try to validate email
+func ValidateEmail(email string) bool {
+	return emailMath.MatchString(email)
 }

@@ -17,6 +17,7 @@ CREATE TABLE users
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT '0000-00-00 00:00:00' NOT NULL
 );
+
 CREATE INDEX users_users_id_fk ON users (parent_id);
 CREATE UNIQUE INDEX user_id_uindex ON users (id);
 
@@ -84,10 +85,10 @@ CREATE INDEX user_financial_user_id_fk ON user_financial (user_id);
 CREATE TABLE user_profile_corporation
 (
     user_id INT(11) NOT NULL,
-    title VARCHAR(255),
-    economic_code INT(11),
-    register_code INT(11),
-    phone INT(11),
+    title VARCHAR(255) NOT NULL,
+    economic_code VARCHAR(20),
+    register_code VARCHAR(20) NOT NULL,
+    phone VARCHAR(13),
     address VARCHAR(255),
     country_id INT(11),
     province_id INT(11),
@@ -107,7 +108,7 @@ CREATE TABLE user_profile_personal
     first_name VARCHAR(255),
     last_name VARCHAR(255),
     birthday DATETIME,
-    gender ENUM('Male', 'Female'),
+    gender ENUM('male', 'female'),
     cellphone VARCHAR(255),
     phone VARCHAR(255),
     address TEXT,
