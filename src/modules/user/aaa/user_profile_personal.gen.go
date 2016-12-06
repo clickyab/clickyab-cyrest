@@ -8,39 +8,39 @@ import (
 
 // AUTO GENERATED CODE. DO NOT EDIT!
 
-// CreateUserProfileCorporation try to save a new UserProfileCorporation in database
-func (m *Manager) CreateUserProfileCorporation(upc *UserProfileCorporation) error {
+// CreateUserProfilePersonal try to save a new UserProfilePersonal in database
+func (m *Manager) CreateUserProfilePersonal(upp *UserProfilePersonal) error {
 	now := time.Now()
-	upc.CreatedAt = now
-	upc.UpdatedAt = now
+	upp.CreatedAt = now
+	upp.UpdatedAt = now
 	func(in interface{}) {
 		if ii, ok := in.(common.Initializer); ok {
 			ii.Initialize()
 		}
-	}(upc)
+	}(upp)
 
-	return m.GetDbMap().Insert(upc)
+	return m.GetDbMap().Insert(upp)
 }
 
-// UpdateUserProfileCorporation try to update UserProfileCorporation in database
-func (m *Manager) UpdateUserProfileCorporation(upc *UserProfileCorporation) error {
-	upc.UpdatedAt = time.Now()
+// UpdateUserProfilePersonal try to update UserProfilePersonal in database
+func (m *Manager) UpdateUserProfilePersonal(upp *UserProfilePersonal) error {
+	upp.UpdatedAt = time.Now()
 	func(in interface{}) {
 		if ii, ok := in.(common.Initializer); ok {
 			ii.Initialize()
 		}
-	}(upc)
+	}(upp)
 
-	_, err := m.GetDbMap().Update(upc)
+	_, err := m.GetDbMap().Update(upp)
 	return err
 }
 
-// FindUserProfileCorporationByUserID return the UserProfileCorporation base on its user_id
-func (m *Manager) FindUserProfileCorporationByUserID(ui int64) (*UserProfileCorporation, error) {
-	var res UserProfileCorporation
+// FindUserProfilePersonalByUserID return the UserProfilePersonal base on its user_id
+func (m *Manager) FindUserProfilePersonalByUserID(ui int64) (*UserProfilePersonal, error) {
+	var res UserProfilePersonal
 	err := m.GetDbMap().SelectOne(
 		&res,
-		fmt.Sprintf("SELECT * FROM %s WHERE user_id=?", UserProfileCorporationTableFull),
+		fmt.Sprintf("SELECT * FROM %s WHERE user_id=?", UserProfilePersonalTableFull),
 		ui,
 	)
 

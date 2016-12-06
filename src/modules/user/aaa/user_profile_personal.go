@@ -26,7 +26,7 @@ const (
 //		primary = false, user_id
 //		find_by = user_id
 // }
-type UserProfileCorporation struct {
+type UserProfilePersonal struct {
 	UserID       int64             `db:"user_id" json:"user_id"`
 	FirstName    string            `db:"first_name" json:"first_name"`
 	LastName     string            `db:"last_name" json:"last_name"`
