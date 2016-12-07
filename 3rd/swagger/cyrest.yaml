@@ -3,7 +3,7 @@ info:
   version: 1.0.0
   title: The cyrest API
   description: Auto genertaed cyrest API
-host: 127.0.0.1
+host: swaggerbase
 basePath: /api
 schemes:
 - http

@@ -57,3 +57,8 @@
       make:
         chdir: /home/cy/cyrest
         target: migup
+
+    - name: restart rubick ad
+      service:
+        name: rubik
+        state: restarted

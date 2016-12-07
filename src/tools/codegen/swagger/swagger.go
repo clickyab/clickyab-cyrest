@@ -262,7 +262,7 @@ func (rg *swaggerGenerator) mix() error {
 			Title:       "The cyrest API",
 			Description: "Auto genertaed cyrest API",
 		},
-		Host:        "127.0.0.1",
+		Host:        "swaggerbase",
 		BasePath:    "/api",
 		Schemes:     []string{"http"},
 		Consumes:    []string{"application/json"},

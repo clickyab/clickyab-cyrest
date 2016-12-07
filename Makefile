@@ -19,6 +19,7 @@ export LDARG=-ldflags $(FLAGS)
 export BUILD=$(BIN)/gb build $(LDARG)
 export DBPASS?=$(DEFAULT_PASS)
 export DB_USER?=root
+export DB_HOST?=127.0.0.1
 export RUSER?=$(APPNAME)
 export RPASS?=$(DEFAULT_PASS)
 export WORK_DIR=$(ROOT)/tmp
@@ -172,7 +173,7 @@ mysql-setup: needroot
 	make mysql-createdb
 
 mysql-createdb:
-	echo 'CREATE DATABASE cyrest;' | mysql -u $(DB_USER) -p$(DBPASS)
+	echo 'CREATE DATABASE cyrest;' | mysql -h $(DB_HOST) -u $(DB_USER) -p$(DBPASS)
 
 setcap: $(BIN)/server needroot
 	setcap cap_net_bind_service=+ep $(BIN)/server
