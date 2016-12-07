@@ -7,3 +7,4 @@ pkg/
 .git_index
 /tmp
 *.iml
+*.retry

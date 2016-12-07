@@ -5,6 +5,7 @@ export GO=$(shell which go)
 export GIT:=$(shell which git)
 export ROOT=$(realpath $(dir $(lastword $(MAKEFILE_LIST))))
 export BIN=$(ROOT)/bin
+export GB=$(BIN)/gb
 export GOPATH=$(ROOT):$(ROOT)/vendor
 export WATCH?=hello
 export LONGHASH=$(shell git log -n1 --pretty="format:%H" | cat)
@@ -30,15 +31,12 @@ endif
 
 
 all:  $(BIN)/gb
-	$(BIN)/gb build $(LDARG)
+	$(BUILD)
 
 needroot :
 	@[ "$(shell id -u)" -eq "0" ] || exit 1
 
-notroot :
-	@[ "$(shell id -u)" != "0" ] || exit 1
-
-gb: notroot
+gb:
 	GOPATH=$(ROOT)/tmp GOBIN=$(ROOT)/bin $(GO) get $(UPDATE) -v github.com/constabulary/gb/...
 
 clean:
@@ -46,7 +44,7 @@ clean:
 	cd $(ROOT) && git clean -fX ./bin
 	@echo "Done"
 
-$(BIN)/gb: notroot
+$(BIN)/gb:
 	[ -f $(BIN)/gb ] || make gb
 
 
@@ -146,11 +144,11 @@ codegen: swagger-cleaner codegen-user codegen-audit codegen-misc
 #
 # Lint
 #
-metalinter: notroot
+metalinter:
 	GOPATH=$(ROOT)/tmp GOBIN=$(ROOT)/bin $(GO) get $(UPDATE) -v github.com/alecthomas/gometalinter
 	GOPATH=$(ROOT)/tmp GOBIN=$(ROOT)/bin $(ROOT)/bin/gometalinter --install
 
-$(BIN)/gometalinter: notroot
+$(BIN)/gometalinter:
 	@[ -f $(BIN)/gometalinter ] || make metalinter
 
 lint-common: $(BIN)/gometalinter
@@ -174,3 +172,9 @@ mysql-setup: needroot
 
 setcap: $(BIN)/server needroot
 	setcap cap_net_bind_service=+ep $(BIN)/server
+
+restore: $(GB)
+	PATH=$(PATH):$(BIN) $(GB) vendor restore
+
+docker-build:
+	make | make restore | make
