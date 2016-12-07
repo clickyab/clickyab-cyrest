@@ -35,6 +35,17 @@
 			},
 			"type": "object"
 		},
+		"user_loginPayload": {
+			"properties": {
+				"email": {
+					"type": "string"
+				},
+				"password": {
+					"type": "string"
+				}
+			},
+			"type": "object"
+		},
 		"user_personal": {
 			"properties": {
 				"cellphone": {
@@ -185,6 +196,40 @@
 						"produce": "application/json",
 						"schema": {
 							"$ref": "#/definitions/base_NormalResponse"
+						}
+					},
+					"400": {
+						"description": "",
+						"schema": {
+							"$ref": "#/definitions/base_ErrorResponseSimple"
+						}
+					}
+				},
+				"tags": [
+					"user"
+				]
+			}
+		},
+		"/user/login": {
+			"post": {
+				"description": "registerUser register user in system",
+				"parameters": [
+					{
+						"description": "",
+						"in": "body",
+						"name": "payload_data",
+						"required": false,
+						"schema": {
+							"$ref": "#/definitions/user_loginPayload"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "",
+						"produce": "application/json",
+						"schema": {
+							"$ref": "#/definitions/user_responseLoginOK"
 						}
 					},
 					"400": {
