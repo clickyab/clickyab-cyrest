@@ -3,6 +3,7 @@ export APPNAME=cyrest
 export DEFAULT_PASS=bita123
 export GO=$(shell which go)
 export GIT:=$(shell which git)
+export DIFF:=$(shell which diff)
 export ROOT=$(realpath $(dir $(lastword $(MAKEFILE_LIST))))
 export BIN=$(ROOT)/bin
 export GB=$(BIN)/gb
@@ -175,6 +176,9 @@ setcap: $(BIN)/server needroot
 
 restore: $(GB)
 	PATH=$(PATH):$(BIN) $(GB) vendor restore
+	cp $(ROOT)/vendor/manifest $(ROOT)/vendor/manifest.done
 
-docker-build:
-	make | make restore | make
+conditional-restore:
+	$(DIFF) $(ROOT)/vendor/manifest $(ROOT)/vendor/manifest.done || make restore
+
+docker-build: conditional-restore all

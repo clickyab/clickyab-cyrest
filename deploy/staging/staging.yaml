@@ -14,22 +14,19 @@
         dest: /home/cy/cyrest
         accept_hostkey: True
 
-    - name: pull golang image
-      docker_image:
-        name: registry.clickyab.ae/clickyab/golang
+#    - name: pull golang image
+#      docker_image:
+#        name: registry.clickyab.ae/clickyab/redis
 
     - name: pull mariadb image
       docker_image:
         name: registry.clickyab.ae/clickyab/mariadb
 
-    - name: Re-create a redis container
+    - make:
+        chdir: /home/cy/cyrest
+        target: docker-build
+
+    - name: run the mariadb server
       docker_container:
         name: golang-builder
-        image: registry.clickyab.ae/clickyab/golang
-        command: make server
-        state: started
-        recreate: True
-        interactive: True
-        volumes:
-          - /home/cy/cyrest:/go
-
+        state: absent
