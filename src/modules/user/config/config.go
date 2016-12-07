@@ -59,9 +59,9 @@ func (c *configLoader) Initialize(o *onion.Onion) []onion.Layer {
 	_ = def.SetDefault("sms.user", "dev@azmoona.com")
 	_ = def.SetDefault("sms.password", "bita123*")
 
-	_ = def.SetDefault("oauth.client_id", "975262007411-1nk67l3s49ua2lt41pr805flr5a8c1n5.apps.googleusercontent.com")
-	_ = def.SetDefault("oauth.client_secret", "kxddsIpmuSWJ3iAo1Ghs_uR6")
-	_ = def.SetDefault("oauth.redirect_uri", "http://home.rubi.gd/api/user/oauth/callback")
+	_ = def.SetDefault("oauth.client_id", "857991796842-s13c8fg9mdcbn0ncs792ajkaoh0832ga.apps.googleusercontent.com")
+	_ = def.SetDefault("oauth.client_secret", "dk-icoi6_HrsnhMo3pVLD-3_")
+	_ = def.SetDefault("oauth.redirect_uri", "http://localhost/api/user/oauth/callback")
 	_ = def.SetDefault("oauth.login_redirect", "/login")
 	_ = def.SetDefault("oauth.register_redirect", "/register")
 

@@ -49,12 +49,12 @@ paths:
             title: forbidden
             type: object
       parameters:
-      - name: sort
+      - name: source
         type: string
         description: ""
         in: query
         required: false
-      - name: source
+      - name: sort
         type: string
         description: ""
         in: query
