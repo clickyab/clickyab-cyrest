@@ -12,21 +12,48 @@
       git:
         repo: git@github.com:clickyab/clickyab-cyrest.git
         dest: /home/cy/cyrest
+        force: True
         accept_hostkey: True
 
-#    - name: pull golang image
-#      docker_image:
-#        name: registry.clickyab.ae/clickyab/redis
+    - name: pull redis image
+      docker_image:
+        name: registry.clickyab.ae/clickyab/redis
 
     - name: pull mariadb image
       docker_image:
         name: registry.clickyab.ae/clickyab/mariadb
 
-    - make:
+    - name: build the code
+      make:
         chdir: /home/cy/cyrest
         target: docker-build
 
     - name: run the mariadb server
       docker_container:
-        name: golang-builder
-        state: absent
+        name: mariadb-stash
+        state: started
+        image: registry.clickyab.ae/clickyab/mariadb
+        recreate: True
+        ports:
+          - "3306:3306"
+        env:
+          MYSQL_ROOT_PASSWORD=bita123
+
+    - name: run the redis server
+      docker_container:
+        name: redis-stash
+        state: started
+        image: registry.clickyab.ae/clickyab/redis
+        recreate: True
+        ports:
+          - "6379:6379"
+
+    - name: create database
+      make:
+        chdir: /home/cy/cyrest
+        target: mysql-createdb
+
+    - name: do migrate
+      make:
+        chdir: /home/cy/cyrest
+        target: migup

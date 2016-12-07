@@ -169,6 +169,9 @@ mysql-setup: needroot
 	echo 'UPDATE user SET plugin="";' | mysql mysql
 	echo 'UPDATE user SET password=PASSWORD("$(DBPASS)") WHERE user="$(DB_USER)";' | mysql mysql
 	echo 'FLUSH PRIVILEGES;' | mysql mysql
+	make mysql-createdb
+
+mysql-createdb:
 	echo 'CREATE DATABASE cyrest;' | mysql -u $(DB_USER) -p$(DBPASS)
 
 setcap: $(BIN)/server needroot
