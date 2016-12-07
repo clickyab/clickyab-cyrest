@@ -53,7 +53,7 @@ func (u *Controller) loginUser(ctx echo.Context) error {
 		return u.BadResponse(ctx, userPasswordError)
 	}
 
-	if !usr.VerifyPassword(pl.Password) {
+	if !usr.VerifyPassword(pl.Password) || usr.Status==aaa.UserStatusBlocked{
 		return u.BadResponse(ctx, userPasswordError)
 	}
 
