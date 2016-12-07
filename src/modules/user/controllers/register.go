@@ -8,12 +8,6 @@ import (
 	"github.com/labstack/echo"
 )
 
-type responseLoginOK struct {
-	UserID      int64  `json:"user_id"`
-	Email       string `json:"email"`
-	AccessToken string `json:"token"`
-}
-
 type personal struct {
 	FirstName string            `json:"first_name"`
 	LastName  string            `json:"last_name"`

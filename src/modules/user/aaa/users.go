@@ -5,14 +5,14 @@ import (
 	"regexp"
 	"time"
 
-	"database/sql"
-
 	"common/assert"
 
 	"strings"
 
 	"common/redis"
 	"modules/user/config"
+
+	"common/models/common"
 
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/gorp.v1"
@@ -64,13 +64,13 @@ const (
 type User struct {
 	ID          int64               `db:"id" json:"id"`
 	Email       string              `db:"email" json:"email"`
-	Password    sql.NullString      `db:"password" json:"-"`
-	OldPassword sql.NullString      `db:"old_password" json:"-"`
+	Password    common.NullString   `db:"password" json:"-"`
+	OldPassword common.NullString   `db:"old_password" json:"-"`
 	AccessToken string              `db:"access_token" json:"-"`
 	Source      UserSource          `db:"source" json:"source"`
 	Type        UserType            `db:"user_type" json:"user_type"`
-	ParentID    sql.NullInt64       `db:"parent_id" json:"parent_id"`
-	Avatar      sql.NullString      `db:"avatar" json:"avatar"`
+	ParentID    common.NullInt64    `db:"parent_id" json:"parent_id"`
+	Avatar      common.NullString   `db:"avatar" json:"avatar"`
 	Status      UserStatus          `db:"status" json:"status"`
 	CreatedAt   time.Time           `db:"created_at" json:"created_at"`
 	UpdatedAt   time.Time           `db:"updated_at" json:"updated_at"`
@@ -98,6 +98,17 @@ var (
 
 // Initialize the user on save
 func (u *User) Initialize() {
+	// TODO : Watch it if this creepy code is dangerous :)
+	if (len(u.Password.String) < minHashSize ||
+		!isBcrypt.MatchString(u.Password.String)) &&
+		u.Password.String != noPassString {
+		p, err := bcrypt.GenerateFromPassword([]byte(u.Password.String), bcrypt.DefaultCost)
+		assert.Nil(err)
+		u.Password.String = string(p)
+		u.Password.Valid = true
+		u.refreshToken = true
+	}
+
 	u.Email = strings.ToLower(u.Email)
 	if u.refreshToken || u.AccessToken == "" || u.Status == UserStatusBlocked {
 		u.AccessToken = <-utils.ID
@@ -112,15 +123,6 @@ func (u *User) Initialize() {
 	//	u.updateLastLogin = false
 	//}
 
-	// TODO : Watch it if this creepy code is dangerous :)
-	if (len(u.Password.String) < minHashSize ||
-		!isBcrypt.MatchString(u.Password.String)) &&
-		u.Password.String != noPassString {
-		p, err := bcrypt.GenerateFromPassword([]byte(u.Password.String), bcrypt.DefaultCost)
-		assert.Nil(err)
-		u.Password.String = string(p)
-		u.Password.Valid = true
-	}
 }
 
 // GetResources for this user
@@ -194,7 +196,7 @@ func (m *Manager) GetNewToken(baseToken string) string {
 func (m *Manager) RegisterUser(email, password string, profile interface{}) (u *User, err error) {
 	u = &User{
 		Email:    email,
-		Password: sql.NullString{String: password, Valid: true},
+		Password: common.NullString{String: password, Valid: true},
 		Status:   UserStatusRegistered,
 		Source:   UserSourceClickyab,
 	}
@@ -244,4 +246,10 @@ func (m *Manager) FetchByToken(accessToken string) (*User, error) {
 		return nil, err
 	}
 	return &res, nil
+}
+
+// VerifyPassword try to verify password for given hash
+func (u *User) VerifyPassword(password string) bool {
+	// TODO : verify old password
+	return bcrypt.CompareHashAndPassword([]byte(u.Password.String), []byte(password)) == nil
 }

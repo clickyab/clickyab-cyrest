@@ -9,11 +9,32 @@ import (
 
 	"common/assert"
 
+	"modules/misc/trans"
+
+	"common/models/common"
+
 	"github.com/labstack/echo"
+	"gopkg.in/go-playground/validator.v9"
 )
 
 type forgotPayload struct {
-	Email string `json:"email"`
+	Email string `json:"email" validate:"email"`
+	usr   *aaa.User
+}
+
+func (fp *forgotPayload) Validate(ctx echo.Context) error {
+	if err := validator.New().Struct(fp); err != nil {
+		return err
+	}
+
+	m := aaa.NewAaaManager()
+	u, err := m.FindUserByEmail(fp.Email)
+	if err != nil {
+		return trans.E("email not found")
+	}
+
+	fp.usr = u
+	return nil
 }
 
 // forgotPassword get email
@@ -25,18 +46,11 @@ type forgotPayload struct {
 //		400	=	base.ErrorResponseSimple
 // }
 func (u *Controller) forgotPassword(ctx echo.Context) error {
-	//check exist email
 	pl := u.MustGetPayload(ctx).(*forgotPayload)
-	m := aaa.NewAaaManager()
-	_, err := m.FindUserByEmail(pl.Email)
-	if err != nil {
-		return u.BadResponse(ctx, err)
-	}
 	//generate key for email
 	key := <-utils.ID
-	//insert code:email in redis
-	assert.Nil(aredis.StoreKey(key, pl.Email, ucfg.Cfg.TokenTimeout))
-	//send email
+	assert.Nil(aredis.StoreKey(key, pl.usr.Email, ucfg.Cfg.TokenTimeout))
+
 	sendEmailCodeGen()
 	return u.OKResponse(
 		ctx,
@@ -64,11 +78,9 @@ func (u *Controller) forgotGeneratePassword(ctx echo.Context) error {
 		return u.BadResponse(ctx, err)
 	}
 	pass := utils.PasswordGenerate(8)
-	//change password
-	user.Password.String = pass
-	//change token
-	user.AccessToken = <-utils.ID
-	m.UpdateUser(user)
+	// TODO : change password to string when we are ready for it
+	user.Password = common.NullString{String: pass, Valid: true}
+	assert.Nil(m.UpdateUser(user))
 	sendEmailPasswordGen()
 	return u.OKResponse(
 		ctx,

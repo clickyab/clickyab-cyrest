@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/labstack/echo"
+	"gopkg.in/go-playground/validator.v9"
 )
 
 const (
@@ -20,8 +21,8 @@ const (
 
 // Validator is used to validate the input
 type Validator interface {
-	// Validate return true, nil on no error, false ,error map in error string
-	Validate(echo.Context) (bool, map[string]string)
+	// Validate return error if the type is invalid
+	Validate(echo.Context) error
 }
 
 // PayloadUnMarshallerGenerator create a middleware base on the pattern for the request body
@@ -50,12 +51,18 @@ func PayloadUnMarshallerGenerator(pattern interface{}) echo.MiddlewareFunc {
 				return err
 			}
 			if valid, ok := cp.(Validator); ok {
-				if ok, errs := valid.Validate(c); ok {
+				if errs := valid.Validate(c); errs == nil {
 					c.Set(ContextBody, cp)
 				} else {
 					c.Request().Header().Set("error", trans.T("invalid request body"))
-					c.JSON(http.StatusBadRequest, errs)
-					return trans.E("invalid request body")
+					if ve, ok := errs.(validator.ValidationErrors); ok {
+						tmp := make(map[string]string)
+						for i := range ve {
+							tmp[ve[i].Field()] = ve[i].Translate(nil)
+						}
+						return c.JSON(http.StatusBadRequest, errs)
+					}
+					return c.JSON(http.StatusBadRequest, errs)
 				}
 			} else {
 				// Just add it, no validation
