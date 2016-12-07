@@ -38,13 +38,25 @@ func (u *Controller) Routes(r *echo.Echo, mountPoint string) {
 	group.POST("/login", u.loginUser, m2...)
 	// End route {/login POST Controller.loginUser user []  Controller u loginPayload  } with key 2
 
-	// Route {/register POST Controller.registerUser user []  Controller u registrationPayload  } with key 3
+	// Route {/authenticate/:action GET Controller.oauthInit user []  Controller u   } with key 3
 	m3 := []echo.MiddlewareFunc{}
 
+	group.GET("/authenticate/:action", u.oauthInit, m3...)
+	// End route {/authenticate/:action GET Controller.oauthInit user []  Controller u   } with key 3
+
+	// Route {/oauth/callback GET Controller.oauthCallback user []  Controller u   } with key 4
+	m4 := []echo.MiddlewareFunc{}
+
+	group.GET("/oauth/callback", u.oauthCallback, m4...)
+	// End route {/oauth/callback GET Controller.oauthCallback user []  Controller u   } with key 4
+
+	// Route {/register POST Controller.registerUser user []  Controller u registrationPayload  } with key 5
+	m5 := []echo.MiddlewareFunc{}
+
 	// Make sure payload is the last middleware
-	m3 = append(m3, middlewares.PayloadUnMarshallerGenerator(registrationPayload{}))
-	group.POST("/register", u.registerUser, m3...)
-	// End route {/register POST Controller.registerUser user []  Controller u registrationPayload  } with key 3
+	m5 = append(m5, middlewares.PayloadUnMarshallerGenerator(registrationPayload{}))
+	group.POST("/register", u.registerUser, m5...)
+	// End route {/register POST Controller.registerUser user []  Controller u registrationPayload  } with key 5
 
 	utils.DoInitialize(u)
 }
