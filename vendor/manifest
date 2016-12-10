@@ -223,7 +223,7 @@
 		{
 			"importpath": "github.com/goraz/humanize",
 			"repository": "https://github.com/goraz/humanize",
-			"revision": "7a00a10f705d6499896ef6e37f34e6dc7b82b95c",
+			"revision": "f2c5f31fa972453e5b88b3ea307764df75c900f6",
 			"branch": "master"
 		},
 		{

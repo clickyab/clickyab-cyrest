@@ -843,6 +843,13 @@ func sliceToRml(pkg humanize.Package, arr *humanize.ArrayType) (swaggerType, err
 		if err != nil {
 			return nil, err
 		}
+	case *humanize.MapType:
+		theName, err = mapToRaml(pkg, t)
+		if err != nil {
+			return nil, err
+		}
+	default:
+		fmt.Printf("%T", t)
 	}
 
 	return swaggerType{"type": "array", "items": theName}, nil

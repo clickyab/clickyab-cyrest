@@ -19,7 +19,7 @@ func AuthorizeGenerator(resource string, scope aaa.ScopePerm) echo.MiddlewareFun
 				Error: http.StatusText(http.StatusForbidden),
 			}
 			// get user
-			u := MustGetUserData(c)
+			u := MustGetUser(c)
 
 			//check if the user has the specified perm
 			if _, ok :=u.HasPerm(scope, resource); ok{

@@ -4,6 +4,40 @@
 		"application/json"
 	],
 	"definitions": {
+		"base_Column": {
+			"properties": {
+				"data": {
+					"type": "string"
+				},
+				"filter": {
+					"type": "boolean"
+				},
+				"filter_valid_map": {
+					"additionalProperties": {
+						"type": {
+							"type": "string"
+						}
+					},
+					"type": "object"
+				},
+				"name": {
+					"type": "string"
+				},
+				"searchable": {
+					"type": "boolean"
+				},
+				"sortable": {
+					"type": "boolean"
+				},
+				"title": {
+					"type": "string"
+				},
+				"visible": {
+					"type": "boolean"
+				}
+			},
+			"type": "object"
+		},
 		"base_ErrorResponseSimple": {
 			"properties": {
 				"error": {
@@ -31,6 +65,35 @@
 			"properties": {
 				"email": {
 					"type": "string"
+				}
+			},
+			"type": "object"
+		},
+		"user_listUserResponse": {
+			"properties": {
+				"data": {
+					"items": {
+						"additionalProperties": {
+							"type": "string"
+						},
+						"type": "object"
+					},
+					"type": "array"
+				},
+				"definition": {
+					"items": {
+						"$ref": "#/definitions/base_Column"
+					},
+					"type": "array"
+				},
+				"page": {
+					"type": "integer"
+				},
+				"per_page": {
+					"type": "integer"
+				},
+				"total": {
+					"type": "integer"
 				}
 			},
 			"type": "object"
@@ -120,7 +183,7 @@
 			"type": "object"
 		}
 	},
-	"host": "127.0.0.1",
+	"host": "swaggerbase",
 	"info": {
 		"description": "Auto genertaed Cyrest API",
 		"title": "The Cyrest API",
@@ -141,6 +204,84 @@
 				},
 				"tags": [
 					"misc"
+				]
+			}
+		},
+		"/user": {
+			"get": {
+				"description": "",
+				"parameters": [
+					{
+						"description": "",
+						"in": "query",
+						"name": "sort",
+						"required": false,
+						"type": "string"
+					},
+					{
+						"description": "",
+						"in": "query",
+						"name": "source",
+						"required": false,
+						"type": "string"
+					},
+					{
+						"description": "",
+						"in": "query",
+						"name": "status",
+						"required": false,
+						"type": "string"
+					},
+					{
+						"description": " search the email field",
+						"in": "query",
+						"name": "email",
+						"required": false,
+						"type": "string "
+					},
+					{
+						"description": "the security token, get it from login route",
+						"in": "header",
+						"name": "token",
+						"required": true,
+						"type": "string"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "",
+						"produce": "application/json",
+						"schema": {
+							"$ref": "#/definitions/user_listUserResponse"
+						}
+					},
+					"401": {
+						"description": "you are not authorized",
+						"schema": {
+							"properties": {
+								"error": {
+									"type": "string"
+								}
+							},
+							"title": "not_authorized",
+							"type": "object"
+						}
+					},
+					"403": {
+						"description": "forbidden, you have no access here",
+						"schema": {
+							"properties": {
+								"error": {
+									"type": "string"
+								}
+							},
+							"title": "forbidden",
+							"type": "object"
+						}
+					}
+				},
+				"tags": [
+					"user"
 				]
 			}
 		},

@@ -5,6 +5,8 @@ package user
 import (
 	"common/middlewares"
 	"common/utils"
+	"modules/user/aaa"
+	"modules/user/middlewares"
 
 	"gopkg.in/labstack/echo.v3"
 )
@@ -45,6 +47,16 @@ func (u *Controller) Routes(r *echo.Echo, mountPoint string) {
 	m3 = append(m3, middlewares.PayloadUnMarshallerGenerator(registrationPayload{}))
 	group.POST("/register", u.registerUser, m3...)
 	// End route {/register POST Controller.registerUser user []  Controller u registrationPayload  } with key 3
+
+	// Route { GET Controller.listUser user [authz.Authenticate]  Controller u  user_list parent} with key 4
+	m4 := []echo.MiddlewareFunc{
+		authz.Authenticate,
+	}
+
+	m4 = append(m4, authz.AuthorizeGenerator("user_list", aaa.ScopePerm("parent")))
+
+	group.GET("", u.listUser, m4...)
+	// End route { GET Controller.listUser user [authz.Authenticate]  Controller u  user_list parent} with key 4
 
 	utils.DoInitialize(u)
 }

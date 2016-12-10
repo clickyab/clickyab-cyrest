@@ -36,6 +36,7 @@ type (
 
 const (
 	// UserStatusRegistered is the registered user, normal one
+	// Registered
 	UserStatusRegistered UserStatus = "registered"
 	// UserStatusVerified for verified users
 	UserStatusVerified UserStatus = "verified"
@@ -62,23 +63,37 @@ const (
 //		list = yes
 // }
 type User struct {
-	ID          int64               `db:"id" json:"id"`
-	Email       string              `db:"email" json:"email"`
-	Password    common.NullString   `db:"password" json:"-"`
-	OldPassword common.NullString   `db:"old_password" json:"-"`
-	AccessToken string              `db:"access_token" json:"-"`
-	Source      UserSource          `db:"source" json:"source"`
-	Type        UserType            `db:"user_type" json:"user_type"`
-	ParentID    common.NullInt64    `db:"parent_id" json:"parent_id"`
-	Avatar      common.NullString   `db:"avatar" json:"avatar"`
-	Status      UserStatus          `db:"status" json:"status"`
-	CreatedAt   time.Time           `db:"created_at" json:"created_at"`
-	UpdatedAt   time.Time           `db:"updated_at" json:"updated_at"`
+	ID          int64                         `db:"id" json:"id" sort:"true" title:"ID"`
+	Email       string                        `db:"email" json:"email" search:"true" title:"Email"`
+	Password    common.NullString             `db:"password" json:"-"`
+	OldPassword common.NullString             `db:"old_password" json:"-"`
+	AccessToken string                        `db:"access_token" json:"-"`
+	Source      UserSource                    `db:"source" json:"source" filter:"true" title:"User source"`
+	Type        UserType                      `db:"user_type" json:"user_type" filter:"true" title:"User type"`
+	ParentID    common.NullInt64              `db:"parent_id" json:"-"`
+	Avatar      common.NullString             `db:"avatar" json:"avatar" visible:"false"`
+	Status      UserStatus                    `db:"status" json:"status" filter:"true" title:"User status"`
+	CreatedAt   time.Time                     `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
+	UpdatedAt   time.Time                     `db:"updated_at" json:"updated_at" sort:"true" title:"Created at"`
 	resources   map[ScopePerm]map[string]bool `db:"-"`
-	roles       []Role              `db:"-"`
+	roles       []Role                        `db:"-"`
 	//LastLogin   common.NullTime `db:"last_login" json:"last_login"`
 
 	refreshToken bool `db:"-"`
+}
+
+//UserDataTable is the user full data in data table, after join with other field
+// @DataTable {
+//		entity = user
+//		view = user_list:parent
+//		controller = modules/user/controllers
+//		fill = FillUserDataTableArray
+//		_edit = user_edit:global
+// }
+type UserDataTable struct {
+	User
+	ParentID int64 `db:"parent_id_dt" json:"parent_id" visible:"false"`
+	OwnerID  int64 `db:"owner_id_dt" json:"owner_id" visible:"false"`
 }
 
 // CreateUserHook is the hook for create a user
@@ -179,6 +194,13 @@ func (u *User) HasPerm(scope ScopePerm, perm string) (ScopePerm, bool) {
 	return rScope, rHas
 }
 
+// HasPermString the string version of the has perm
+// DO NOT USE IN CODE!
+func (u *User) HasPermString(scope string, perm string) (string, bool) {
+	s, ok := u.HasPerm(ScopePerm(scope), perm)
+	return string(s), ok
+}
+
 // HasPermOn check if user has permission on an object based on its owner id and its
 // parent id
 func (u *User) HasPermOn(perm string, ownerID, parentID int64, scopes ...ScopePerm) (ScopePerm, bool) {
@@ -223,6 +245,28 @@ func (u *User) HasPermOn(perm string, ownerID, parentID int64, scopes ...ScopePe
 		}
 	}
 	return ScopePermOwn, false
+}
+
+// HasPermStringOn the has perm on string version
+// DO NOT USE IN CODE!
+func (u *User) HasPermStringOn(perm string, ownerID, parentID int64, scopes ...string) (string, bool) {
+	sc := make([]ScopePerm, len(scopes))
+	for i := range scopes {
+		sc[i] = ScopePerm(scopes[i])
+	}
+
+	s, ok := u.HasPermOn(perm, ownerID, parentID, sc...)
+	return string(s), ok
+}
+
+// FormatStatus is the example status formatter
+func (u UserDataTable) FormatStatus() string {
+	return string(u.Status)
+}
+
+// FillUserDataTableArray is the function to fill user data table array
+func (m *Manager) FillUserDataTableArray(u *User, filters map[string]string, search map[string]string, sort, order string, p, c int) (UserDataTableArray, int64) {
+	return nil, 0
 }
 
 // GetUserRoles return all Roles belong to User (many to many with UserRole)

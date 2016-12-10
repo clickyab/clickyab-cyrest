@@ -3,7 +3,7 @@ info:
   version: 1.0.0
   title: The Cyrest API
   description: Auto genertaed Cyrest API
-host: 127.0.0.1
+host: swaggerbase
 basePath: /api
 schemes:
 - http
@@ -23,6 +23,59 @@ paths:
             $ref: '#/definitions/version_Version'
       tags:
       - misc
+  /user:
+    get:
+      description: ""
+      responses:
+        "200":
+          description: ""
+          produce: application/json
+          schema:
+            $ref: '#/definitions/user_listUserResponse'
+        "401":
+          description: you are not authorized
+          schema:
+            properties:
+              error:
+                type: string
+            title: not_authorized
+            type: object
+        "403":
+          description: forbidden, you have no access here
+          schema:
+            properties:
+              error:
+                type: string
+            title: forbidden
+            type: object
+      parameters:
+      - name: sort
+        type: string
+        description: ""
+        in: query
+        required: false
+      - name: source
+        type: string
+        description: ""
+        in: query
+        required: false
+      - name: status
+        type: string
+        description: ""
+        in: query
+        required: false
+      - name: email
+        type: 'string '
+        description: ' search the email field'
+        in: query
+        required: false
+      - name: token
+        type: string
+        description: the security token, get it from login route
+        in: header
+        required: true
+      tags:
+      - user
   /user/forgot/call:
     post:
       description: forgotPassword get email
@@ -111,6 +164,28 @@ paths:
       tags:
       - user
 definitions:
+  base_Column:
+    properties:
+      data:
+        type: string
+      filter:
+        type: boolean
+      filter_valid_map:
+        additionalProperties:
+          type:
+            type: string
+        type: object
+      name:
+        type: string
+      searchable:
+        type: boolean
+      sortable:
+        type: boolean
+      title:
+        type: string
+      visible:
+        type: boolean
+    type: object
   base_ErrorResponseSimple:
     properties:
       error:
@@ -130,6 +205,25 @@ definitions:
     properties:
       email:
         type: string
+    type: object
+  user_listUserResponse:
+    properties:
+      data:
+        items:
+          additionalProperties:
+            type: string
+          type: object
+        type: array
+      definition:
+        items:
+          $ref: '#/definitions/base_Column'
+        type: array
+      page:
+        type: integer
+      per_page:
+        type: integer
+      total:
+        type: integer
     type: object
   user_loginPayload:
     properties:

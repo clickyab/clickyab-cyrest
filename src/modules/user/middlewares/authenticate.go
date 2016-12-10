@@ -42,8 +42,8 @@ func Authenticate(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-// GetUserData is the helper function to extract user data from context
-func GetUserData(ctx echo.Context) (*aaa.User, error) {
+// GetUser is the helper function to extract user data from context
+func GetUser(ctx echo.Context) (*aaa.User, error) {
 	rd, ok := ctx.Get(userData).(*aaa.User)
 	if !ok {
 		return nil, errors.New("not valid data in context")
@@ -52,9 +52,9 @@ func GetUserData(ctx echo.Context) (*aaa.User, error) {
 	return rd, nil
 }
 
-// MustGetUserData try to get user data, or panic if there is no user data
-func MustGetUserData(ctx echo.Context) *aaa.User {
-	rd, err := GetUserData(ctx)
+// MustGetUser try to get user data, or panic if there is no user data
+func MustGetUser(ctx echo.Context) *aaa.User {
+	rd, err := GetUser(ctx)
 	assert.Nil(err)
 	return rd
 }
