@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	ginImportPath = "github.com/labstack/echo"
+	ginImportPath = "gopkg.in/labstack/echo.v3"
 )
 
 type swaggerType map[string]interface{}
@@ -84,7 +84,6 @@ var (
 	typeCache  = make(map[string]swaggerType)
 	parameters = regexp.MustCompile("/:([^/]+)")
 	query      = regexp.MustCompile("^_([a-zA-Z0-9]+)_$")
-	//protected  = []string{"cyrest_custom_schema"}
 )
 
 func ucFirst(s string) string {
@@ -259,8 +258,8 @@ func (rg *swaggerGenerator) mix() error {
 			Description string
 		}{
 			Version:     "1.0.0",
-			Title:       "The cyrest API",
-			Description: "Auto genertaed cyrest API",
+			Title:       "The Cyrest API",
+			Description: "Auto genertaed Cyrest API",
 		},
 		Host:        "swaggerbase",
 		BasePath:    "/api",
@@ -693,7 +692,8 @@ func isMatched(gin string, f humanize.Function) bool {
 func findGinImport(f humanize.File) (string, bool) {
 	for i := range f.Imports {
 		if f.Imports[i].Path == ginImportPath {
-			return f.Imports[i].Name, true
+			// TODO : make sure edit this if you change this
+			return "echo", true
 		}
 	}
 
@@ -921,9 +921,6 @@ func mapToRaml(pkg humanize.Package, st *humanize.MapType) (swaggerType, error) 
 	res := make(swaggerType)
 	res["type"] = "object"
 	props := make(swaggerType)
-	if st.Key.GetDefinition() != "string" {
-		return nil, fmt.Errorf("only map[string]T is supported")
-	}
 	if _, ok := st.Value.(*humanize.InterfaceType); !ok {
 		props["type"], err = goToRaml(pkg, st.Value)
 		if err != nil {

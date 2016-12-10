@@ -1,9 +1,9 @@
 swagger: "2.0"
 info:
   version: 1.0.0
-  title: The cyrest API
-  description: Auto genertaed cyrest API
-host: swaggerbase
+  title: The Cyrest API
+  description: Auto genertaed Cyrest API
+host: 127.0.0.1
 basePath: /api
 schemes:
 - http

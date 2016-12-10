@@ -60,7 +60,7 @@ package {{ .GroupPkg }}
 // AUTO GENERATED CODE. DO NOT EDIT!
 
 import (
-	"github.com/labstack/echo"
+	"gopkg.in/labstack/echo.v3"
 )
 
 
@@ -83,7 +83,7 @@ func ({{ .GroupRec }} *{{ .StructName }}) Routes(r *echo.Echo, mountPoint string
 		{{end}}
 	}
 	{{ if $route.Resource }}
-	m{{ $key }} = append(m{{ $key }}, authz.AuthorizeGenerator("{{$route.Resource}}","{{$route.Scope}}")){{ end }}
+	m{{ $key }} = append(m{{ $key }}, authz.AuthorizeGenerator("{{$route.Resource}}",aaa.ScopePerm("{{$route.Scope}}"))){{ end }}
 	{{ if $route.RouteFuncMiddleware }}
 	m{{ $key }} = append(m{{ $key }}, {{ $.GroupRec }}.{{ $route.RouteFuncMiddleware|strip_type }}()...){{ end }}
 	{{ if $route.Payload }} // Make sure payload is the last middleware
@@ -97,7 +97,7 @@ func ({{ .GroupRec }} *{{ .StructName }}) Routes(r *echo.Echo, mountPoint string
 `
 
 var (
-	echoImportPath = "github.com/labstack/echo"
+	echoImportPath = "gopkg.in/labstack/echo.v3"
 	validMethod    = []string{"GET", "POST", "PUT", "PATCH", "HEAD", "OPTIONS", "DELETE", "CONNECT", "TRACE"}
 	fMap           = template.FuncMap{
 		"ucfirst":    ucFirst,
@@ -428,7 +428,7 @@ func isMatched(gin string, f humanize.Function) bool {
 func findEchoImport(f humanize.File) (string, bool) {
 	for i := range f.Imports {
 		if f.Imports[i].Path == echoImportPath {
-			return f.Imports[i].Name, true
+			return "echo", true
 		}
 	}
 

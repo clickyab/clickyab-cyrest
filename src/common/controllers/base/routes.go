@@ -5,8 +5,7 @@ import (
 	"common/middlewares"
 	"sync"
 
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	"gopkg.in/labstack/echo.v3"
 )
 
 // Routes the base rote structure
@@ -32,7 +31,7 @@ func Initialize(mountPoint string) *echo.Echo {
 		engine = echo.New()
 		mid := []echo.MiddlewareFunc{middlewares.Recovery, middlewares.Logger}
 		if config.Config.CORS {
-			mid = append(mid, middleware.CORS())
+			mid = append(mid, middlewares.CORS())
 		}
 		engine.Use(mid...)
 		for i := range all {
@@ -43,6 +42,6 @@ func Initialize(mountPoint string) *echo.Echo {
 	if config.Config.DevelMode {
 		engine.Static("/swagger", config.Config.SwaggerRoot)
 	}
-	engine.SetLogger(NewLogger())
+	engine.Logger=NewLogger()
 	return engine
 }

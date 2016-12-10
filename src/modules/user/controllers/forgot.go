@@ -13,7 +13,7 @@ import (
 
 	"common/models/common"
 
-	"github.com/labstack/echo"
+	"gopkg.in/labstack/echo.v3"
 	"gopkg.in/go-playground/validator.v9"
 )
 

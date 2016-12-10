@@ -8,7 +8,7 @@ import (
 	"runtime/debug"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/labstack/echo"
+	"gopkg.in/labstack/echo.v3"
 )
 
 // Recovery is the middleware to prevent the panic to crash the app

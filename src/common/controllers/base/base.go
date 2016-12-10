@@ -8,7 +8,7 @@ import (
 
 	"common/try"
 
-	"github.com/labstack/echo"
+	"gopkg.in/labstack/echo.v3"
 )
 
 // NormalResponse is for 2X responses

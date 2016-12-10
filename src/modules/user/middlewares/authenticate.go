@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/labstack/echo"
+	"gopkg.in/labstack/echo.v3"
 )
 
 const userData = "__user_data__"
@@ -17,7 +17,7 @@ const tokenData = "__token__"
 // Authenticate is the middleware for authenticating user
 func Authenticate(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		token := c.Request().Header().Get("token")
+		token := c.Request().Header.Get("token")
 		st := struct {
 			Error string `json:"error"`
 		}{

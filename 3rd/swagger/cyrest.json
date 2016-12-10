@@ -120,10 +120,10 @@
 			"type": "object"
 		}
 	},
-	"host": "swaggerbase",
+	"host": "127.0.0.1",
 	"info": {
-		"description": "Auto genertaed cyrest API",
-		"title": "The cyrest API",
+		"description": "Auto genertaed Cyrest API",
+		"title": "The Cyrest API",
 		"version": "1.0.0"
 	},
 	"paths": {

@@ -6,7 +6,7 @@ import (
 	"common/middlewares"
 	"common/utils"
 
-	"github.com/labstack/echo"
+	"gopkg.in/labstack/echo.v3"
 )
 
 // Routes return the route registered with this

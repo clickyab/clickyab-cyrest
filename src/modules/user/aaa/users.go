@@ -74,7 +74,7 @@ type User struct {
 	Status      UserStatus          `db:"status" json:"status"`
 	CreatedAt   time.Time           `db:"created_at" json:"created_at"`
 	UpdatedAt   time.Time           `db:"updated_at" json:"updated_at"`
-	resources   map[string][]string `db:"-"`
+	resources   map[ScopePerm]map[string]bool `db:"-"`
 	roles       []Role              `db:"-"`
 	//LastLogin   common.NullTime `db:"last_login" json:"last_login"`
 
@@ -126,7 +126,7 @@ func (u *User) Initialize() {
 }
 
 // GetResources for this user
-func (u *User) GetPermission() map[string][]string {
+func (u *User) GetPermission() map[ScopePerm]map[string]bool {
 	if u.resources == nil {
 		r := u.GetRoles()
 		u.resources = NewAaaManager().GetPermissionMap(r...)
@@ -144,24 +144,85 @@ func (u *User) GetRoles() []Role {
 	return u.roles
 }
 
-// check if user has specified permission
-func (u *User) HasPerm(resource string, scope string) bool {
-	//get user permissions
-	m := u.GetPermission()
-	if scope == string(ScopePermOwn) {
-		if !utils.StringInArray(resource, m[string(ScopePermOwn)]...) && !utils.StringInArray(resource, m[string(ScopePermParent)]...) && !utils.StringInArray(resource, m[string(ScopePermGlobal)]...) {
-			return false
+// HasPerm try to return if the user has permission with some scope
+// if requesting for lower scope and user has upper scope, the the maximum scope
+// is returned, since the user with scope global, can do the scope self too
+// this is different when the check is done with ids included
+func (u *User) HasPerm(scope ScopePerm, perm string) (ScopePerm, bool) {
+	if scope.IsValid() {
+		return ScopePermOwn, false
+	}
+	var (
+		rScope ScopePerm = ScopePermOwn
+		rHas   bool
+	)
+	res := u.GetPermission()
+	switch scope {
+	case ScopePermOwn:
+		if res[scope][perm] {
+			rScope = scope
+			rHas = true
 		}
-	} else if scope == string(ScopePermParent) {
-		if !utils.StringInArray(resource, m[string(ScopePermParent)]...) && !utils.StringInArray(resource, m[string(ScopePermGlobal)]...) {
-			return false
+		fallthrough
+	case ScopePermParent:
+		if res[scope][perm] {
+			rScope = scope
+			rHas = true
 		}
-	} else if scope == string(ScopePermGlobal) {
-		if !utils.StringInArray(resource, m[string(ScopePermGlobal)]...) {
-			return false
+		fallthrough
+	case ScopePermGlobal:
+		if res[scope][perm] {
+			rScope = scope
+			rHas = true
 		}
 	}
-	return true
+	return rScope, rHas
+}
+
+// HasPermOn check if user has permission on an object based on its owner id and its
+// parent id
+func (u *User) HasPermOn(perm string, ownerID, parentID int64, scopes ...ScopePerm) (ScopePerm, bool) {
+	res := u.GetPermission()
+	var (
+		self, parent, global bool
+	)
+	if len(scopes) == 0 {
+		self = true
+		parent = true
+		global = true
+	} else {
+		for i := range scopes {
+			if scopes[i] == ScopePermOwn {
+				self = true
+			} else if scopes[i] == ScopePermParent {
+				parent = true
+			} else if scopes[i] == ScopePermGlobal {
+				global = true
+			}
+		}
+	}
+
+	if self {
+		if ownerID == u.ID {
+			if res[ScopePermOwn][perm] {
+				return ScopePermOwn, true
+			}
+		}
+	}
+	if parent {
+		if parentID == u.ID {
+			if res[ScopePermParent][perm] {
+				return ScopePermParent, true
+			}
+		}
+	}
+
+	if global {
+		if res[ScopePermGlobal][perm] {
+			return ScopePermGlobal, true
+		}
+	}
+	return ScopePermOwn, false
 }
 
 // GetUserRoles return all Roles belong to User (many to many with UserRole)

@@ -5,7 +5,7 @@ import (
 
 	"modules/misc/trans"
 
-	"github.com/labstack/echo"
+	"gopkg.in/labstack/echo.v3"
 )
 
 type personal struct {

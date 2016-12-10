@@ -3,7 +3,7 @@ package misc
 import (
 	"common/version"
 
-	"github.com/labstack/echo"
+	"gopkg.in/labstack/echo.v3"
 )
 
 // getVersion get the version information

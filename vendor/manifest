@@ -8,6 +8,12 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "github.com/GeertJohan/go.rice",
+			"repository": "https://github.com/GeertJohan/go.rice",
+			"revision": "9fdfd46f9806a9228aae341d65ab75c5235c383c",
+			"branch": "master"
+		},
+		{
 			"importpath": "github.com/PuerkitoBio/goquery",
 			"repository": "https://github.com/PuerkitoBio/goquery",
 			"revision": "2e29ea41f0d13f4a303c75553f4eeadddc7a4c56",
@@ -56,6 +62,12 @@
 			"importpath": "github.com/codeskyblue/go-sh",
 			"repository": "https://github.com/codeskyblue/go-sh",
 			"revision": "ceb46ec4630a726eeed51d0a70066c9e1102c48f",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/daaku/go.zipexe",
+			"repository": "https://github.com/daaku/go.zipexe",
+			"revision": "a5fe2436ffcb3236e175e5149162b41cd28bd27d",
 			"branch": "master"
 		},
 		{
@@ -222,6 +234,12 @@
 			"path": "/scanner"
 		},
 		{
+			"importpath": "github.com/gorilla/websocket",
+			"repository": "https://github.com/gorilla/websocket",
+			"revision": "0868951cdb8e69bc42df4598bdc6164ff2f1a072",
+			"branch": "master"
+		},
+		{
 			"importpath": "github.com/howeyc/fsnotify",
 			"repository": "https://github.com/howeyc/fsnotify",
 			"revision": "f0c08ee9c60704c1879025f2ae0ff3e000082c13",
@@ -245,6 +263,12 @@
 			"revision": "a0ff2567cfb70903282db057e799fd826784d41d",
 			"branch": "master",
 			"path": "/go-bindata"
+		},
+		{
+			"importpath": "github.com/kardianos/osext",
+			"repository": "https://github.com/kardianos/osext",
+			"revision": "c2c54e542fb797ad986b31721e1baedf214ca413",
+			"branch": "master"
 		},
 		{
 			"importpath": "github.com/kisielk/errcheck",
@@ -292,12 +316,6 @@
 			"branch": "master"
 		},
 		{
-			"importpath": "github.com/labstack/echo",
-			"repository": "https://github.com/labstack/echo",
-			"revision": "8fc833b4d5ce7661fd9ff64dee028da153531779",
-			"branch": "master"
-		},
-		{
 			"importpath": "github.com/labstack/gommon/bytes",
 			"repository": "https://github.com/labstack/gommon",
 			"revision": "445cf40e6de4cbef35daf3285ff5212c91e78262",
@@ -307,14 +325,14 @@
 		{
 			"importpath": "github.com/labstack/gommon/color",
 			"repository": "https://github.com/labstack/gommon",
-			"revision": "445cf40e6de4cbef35daf3285ff5212c91e78262",
+			"revision": "447fe7433567c785af957e549aadae2bf2000071",
 			"branch": "master",
 			"path": "/color"
 		},
 		{
 			"importpath": "github.com/labstack/gommon/log",
 			"repository": "https://github.com/labstack/gommon",
-			"revision": "445cf40e6de4cbef35daf3285ff5212c91e78262",
+			"revision": "447fe7433567c785af957e549aadae2bf2000071",
 			"branch": "master",
 			"path": "/log"
 		},
@@ -368,6 +386,12 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "github.com/tylerb/graceful",
+			"repository": "https://github.com/tylerb/graceful",
+			"revision": "4df1190835320af7076dfcf27b3d071fd3612caf",
+			"branch": "master"
+		},
+		{
 			"importpath": "github.com/valyala/bytebufferpool",
 			"repository": "https://github.com/valyala/bytebufferpool",
 			"revision": "8ebd0474e5a2f0a5c7a74ad2bf421a1d1a90264f",
@@ -390,6 +414,20 @@
 			"repository": "https://go.googlesource.com/crypto",
 			"revision": "5bcd134fee4dd1475da17714aac19c0aa0142e2f",
 			"branch": "master"
+		},
+		{
+			"importpath": "golang.org/x/crypto/acme",
+			"repository": "https://go.googlesource.com/crypto",
+			"revision": "b07d8c96772f426812d3fc5530710ec1f3b205e7",
+			"branch": "master",
+			"path": "/acme"
+		},
+		{
+			"importpath": "golang.org/x/crypto/acme/autocert",
+			"repository": "https://go.googlesource.com/crypto",
+			"revision": "b07d8c96772f426812d3fc5530710ec1f3b205e7",
+			"branch": "master",
+			"path": "/acme/autocert"
 		},
 		{
 			"importpath": "golang.org/x/image/bmp",
@@ -485,6 +523,12 @@
 			"importpath": "gopkg.in/gorp.v1",
 			"repository": "https://gopkg.in/gorp.v1",
 			"revision": "c87af80f3cc5036b55b83d77171e156791085e2e",
+			"branch": "master"
+		},
+		{
+			"importpath": "gopkg.in/labstack/echo.v3",
+			"repository": "https://gopkg.in/labstack/echo.v3",
+			"revision": "8d504c1b699c757b267255c53b3e5219f9974abc",
 			"branch": "master"
 		},
 		{

@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/labstack/echo/engine/fasthttp"
 )
 
 func main() {
@@ -49,5 +48,5 @@ func main() {
 		},
 	).Infof("Application started")
 
-	base.Initialize(config.Config.MountPoint).Run(fasthttp.New(config.Config.Port))
+	base.Initialize(config.Config.MountPoint).Start(config.Config.Port)
 }

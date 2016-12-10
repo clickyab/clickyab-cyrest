@@ -1,17 +1,19 @@
 package middlewares
 
 import (
+	"common/assert"
+	"common/utils"
 	"encoding/json"
+	"fmt"
 	"modules/misc/trans"
 	"net/http"
 	"reflect"
-
-	"common/assert"
-	"common/utils"
 	"strings"
 
-	"github.com/labstack/echo"
+	"github.com/go-playground/locales/en"
+	"github.com/go-playground/universal-translator"
 	"gopkg.in/go-playground/validator.v9"
+	echo "gopkg.in/labstack/echo.v3"
 )
 
 const (
@@ -19,10 +21,50 @@ const (
 	ContextBody string = "_body"
 )
 
-// Validator is used to validate the input
-type Validator interface {
-	// Validate return error if the type is invalid
-	Validate(echo.Context) error
+type (
+	// GroupError is the type of error is used by route validators
+	GroupError map[string]string
+
+	// Validator is used to validate the input
+	Validator interface {
+		// Validate return true, nil on no error, false ,error map in error string
+		Validate(echo.Context) error
+	}
+)
+
+// Error is to make this error object
+func (ge GroupError) Error() string {
+	tmp := ""
+
+	for i := range ge {
+		tmp = fmt.Sprintf("%s : %s\n", i, ge[i])
+	}
+
+	return tmp
+}
+
+// Translate is a helper function to translate the error to map error required by the
+// middleware
+func translate(err error) error {
+	if err == nil {
+		return nil
+	}
+	switch e := err.(type) {
+	case GroupError:
+		return e
+	case validator.ValidationErrors:
+		en := en.New()
+		uni := ut.New(en, en)
+		tran, _ := uni.GetTranslator("en")
+		tmp := make(GroupError)
+		for i := range e {
+			tmp[e[i].Field()] = e[i].Translate(tran)
+		}
+
+		return tmp
+	}
+
+	return err
 }
 
 // PayloadUnMarshallerGenerator create a middleware base on the pattern for the request body
@@ -30,17 +72,17 @@ func PayloadUnMarshallerGenerator(pattern interface{}) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			// Make sure the request is POST or PUT since DELETE and GET must not have payloads
-			method := strings.ToUpper(c.Request().Method())
+			method := strings.ToUpper(c.Request().Method)
 			assert.True(
 				!utils.StringInArray(method, "GET", "DELETE"),
 				"[BUG] Get and Delete must not have request body",
 			)
 			// Create a copy
 			cp := reflect.New(reflect.TypeOf(pattern)).Elem().Addr().Interface()
-			decoder := json.NewDecoder(c.Request().Body())
+			decoder := json.NewDecoder(c.Request().Body)
 			err := decoder.Decode(cp)
 			if err != nil {
-				c.Request().Header().Set("error", trans.T("invalid request body"))
+				c.Request().Header.Set("error", trans.T("invalid request body"))
 				e := struct {
 					Error string `json:"error"`
 				}{
@@ -54,15 +96,10 @@ func PayloadUnMarshallerGenerator(pattern interface{}) echo.MiddlewareFunc {
 				if errs := valid.Validate(c); errs == nil {
 					c.Set(ContextBody, cp)
 				} else {
-					c.Request().Header().Set("error", trans.T("invalid request body"))
-					if ve, ok := errs.(validator.ValidationErrors); ok {
-						tmp := make(map[string]string)
-						for i := range ve {
-							tmp[ve[i].Field()] = ve[i].Translate(nil)
-						}
-						return c.JSON(http.StatusBadRequest, errs)
-					}
-					return c.JSON(http.StatusBadRequest, errs)
+					c.Request().Header.Set("error", trans.T("invalid request body"))
+					c.JSON(http.StatusBadRequest, translate(errs))
+
+					return trans.E("invalid request body")
 				}
 			} else {
 				// Just add it, no validation

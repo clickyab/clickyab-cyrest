@@ -39,8 +39,11 @@ const (
 )
 
 // GetResourceMap return resource map for some roles
-func (m *Manager) GetPermissionMap(r ...Role) map[string][]string {
-	res := make(map[string][]string)
+func (m *Manager) GetPermissionMap(r ...Role) map[ScopePerm]map[string]bool {
+	res := make(map[ScopePerm]map[string]bool)
+	res[ScopePermGlobal]=make(map[string]bool)
+	res[ScopePermOwn]=make(map[string]bool)
+	res[ScopePermParent]=make(map[string]bool)
 	if len(r) == 0 {
 		return res
 	}
@@ -58,7 +61,7 @@ func (m *Manager) GetPermissionMap(r ...Role) map[string][]string {
 	)
 	assert.Nil(err)
 	for i := range rr {
-		res[string(rr[i].Scope)] = append(res[string(rr[i].Scope)], rr[i].Permission)
+		res[rr[i].Scope][rr[i].Permission] = true
 	}
 	return res
 }
