@@ -14,6 +14,8 @@ import (
 
 	"common/models/common"
 
+	"common/controllers/base"
+
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/gorp.v1"
 )
@@ -265,7 +267,7 @@ func (u UserDataTable) FormatStatus() string {
 }
 
 // FillUserDataTableArray is the function to fill user data table array
-func (m *Manager) FillUserDataTableArray(u *User, filters map[string]string, search map[string]string, sort, order string, p, c int) (UserDataTableArray, int64) {
+func (m *Manager) FillUserDataTableArray(u base.PermInterfaceComplete, filters map[string]string, search map[string]string, sort, order string, p, c int) (UserDataTableArray, int64) {
 	return nil, 0
 }
 

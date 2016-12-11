@@ -74,7 +74,8 @@ func (u *Controller) listUser(ctx echo.Context) error {
 		order = "ASC"
 	}
 
-	dt, cnt := m.FillUserDataTableArray(usr, filter, search, sort, order, p, c)
+	pc := base.NewPermInterfaceComplete(usr, usr.ID, "user_list", "parent")
+	dt, cnt := m.FillUserDataTableArray(pc, filter, search, sort, order, p, c)
 	res := listUserResponse{
 		Total:   cnt,
 		Data:    dt.Filter(usr),
