@@ -32,30 +32,20 @@ func (udt UserDataTable) Filter(u base.PermInterface) map[string]interface{} {
 
 		"email": udt.Email,
 
+		"source": udt.Source,
+
+		"user_type": udt.Type,
+
 		"avatar": udt.Avatar,
+
+		"status": udt.FormatStatus(),
 
 		"created_at": udt.CreatedAt,
 
 		"updated_at": udt.UpdatedAt,
 	}
 
-	if _, ok := u.HasPermStringOn("user_list", udt.OwnerID, udt.ParentID, "parent", "global"); ok {
-		res["source"] = udt.Source
-	}
-
-	if _, ok := u.HasPermStringOn("user_list", udt.OwnerID, udt.ParentID, "parent", "global"); ok {
-		res["user_type"] = udt.Type
-	}
-
-	if _, ok := u.HasPermStringOn("user_list", udt.OwnerID, udt.ParentID, "parent", "global"); ok {
-		res["status"] = udt.FormatStatus()
-	}
-
 	action := []string{}
-
-	if _, ok := u.HasPermStringOn("user_edit", udt.OwnerID, udt.ParentID, "global"); ok {
-		action = append(action, "change_status")
-	}
 
 	if _, ok := u.HasPermStringOn("user_edit", udt.OwnerID, udt.ParentID, "global"); ok {
 		action = append(action, "edit")

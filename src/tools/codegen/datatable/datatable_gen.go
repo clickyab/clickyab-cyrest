@@ -496,8 +496,8 @@ func (e dataTablePlugin) Finalize(c interface{}, p humanize.Package) error {
 		}
 	}
 
-	j, _ := json.MarshalIndent(ctx[0].Column, "\t", "\t")
-	fmt.Println(string(j))
+	//j, _ := json.MarshalIndent(ctx[0].Column, "\t", "\t")
+	//fmt.Println(string(j))
 	return nil
 }
 

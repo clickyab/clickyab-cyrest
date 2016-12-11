@@ -54,12 +54,12 @@ paths:
         description: ""
         in: query
         required: false
-      - name: source
+      - name: status
         type: string
         description: ""
         in: query
         required: false
-      - name: status
+      - name: source
         type: string
         description: ""
         in: query
