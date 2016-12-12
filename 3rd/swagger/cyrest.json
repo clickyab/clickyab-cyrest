@@ -4,6 +4,26 @@
 		"application/json"
 	],
 	"definitions": {
+		"aaa_Session": {
+			"properties": {
+				"current": {
+					"type": "boolean"
+				},
+				"expire_after": {
+					"type": "integer"
+				},
+				"ip": {
+					"type": "string"
+				},
+				"key": {
+					"type": "string"
+				},
+				"user_agent": {
+					"type": "string"
+				}
+			},
+			"type": "object"
+		},
 		"base_Column": {
 			"properties": {
 				"data": {
@@ -48,6 +68,20 @@
 		},
 		"base_NormalResponse": {
 			"properties": {},
+			"type": "object"
+		},
+		"user_activeSessions": {
+			"properties": {
+				"more": {
+					"type": "boolean"
+				},
+				"sessions": {
+					"items": {
+						"$ref": "#/definitions/aaa_Session"
+					},
+					"type": "array"
+				}
+			},
 			"type": "object"
 		},
 		"user_corporation": {
@@ -219,11 +253,11 @@
 						"type": "string"
 					},
 					{
-						"description": " search the email field",
+						"description": "",
 						"in": "query",
-						"name": "email",
+						"name": "status",
 						"required": false,
-						"type": "string "
+						"type": "string"
 					},
 					{
 						"description": "",
@@ -233,11 +267,11 @@
 						"type": "string"
 					},
 					{
-						"description": "",
+						"description": " search the email field",
 						"in": "query",
-						"name": "status",
+						"name": "email",
 						"required": false,
-						"type": "string"
+						"type": "string "
 					},
 					{
 						"description": "the security token, get it from login route",
@@ -385,6 +419,56 @@
 				]
 			}
 		},
+		"/user/logout": {
+			"get": {
+				"description": "logout is for the logout from the system",
+				"parameters": [
+					{
+						"description": "the security token, get it from login route",
+						"in": "header",
+						"name": "token",
+						"required": true,
+						"type": "string"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "",
+						"produce": "application/json",
+						"schema": {
+							"$ref": "#/definitions/base_NormalResponse"
+						}
+					},
+					"401": {
+						"description": "you are not authorized",
+						"schema": {
+							"properties": {
+								"error": {
+									"type": "string"
+								}
+							},
+							"title": "not_authorized",
+							"type": "object"
+						}
+					},
+					"403": {
+						"description": "forbidden, you have no access here",
+						"schema": {
+							"properties": {
+								"error": {
+									"type": "string"
+								}
+							},
+							"title": "forbidden",
+							"type": "object"
+						}
+					}
+				},
+				"tags": [
+					"user"
+				]
+			}
+		},
 		"/user/register": {
 			"post": {
 				"description": "registerUser register user in system",
@@ -411,6 +495,175 @@
 						"description": "",
 						"schema": {
 							"$ref": "#/definitions/base_ErrorResponseSimple"
+						}
+					}
+				},
+				"tags": [
+					"user"
+				]
+			}
+		},
+		"/user/session/terminate/{id}": {
+			"get": {
+				"description": "",
+				"parameters": [
+					{
+						"description": "",
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"type": "string"
+					},
+					{
+						"description": "the security token, get it from login route",
+						"in": "header",
+						"name": "token",
+						"required": true,
+						"type": "string"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "",
+						"produce": "application/json",
+						"schema": {
+							"$ref": "#/definitions/user_activeSessions"
+						}
+					},
+					"400": {
+						"description": "",
+						"schema": {
+							"$ref": "#/definitions/base_ErrorResponseSimple"
+						}
+					},
+					"401": {
+						"description": "you are not authorized",
+						"schema": {
+							"properties": {
+								"error": {
+									"type": "string"
+								}
+							},
+							"title": "not_authorized",
+							"type": "object"
+						}
+					},
+					"403": {
+						"description": "forbidden, you have no access here",
+						"schema": {
+							"properties": {
+								"error": {
+									"type": "string"
+								}
+							},
+							"title": "forbidden",
+							"type": "object"
+						}
+					}
+				},
+				"tags": [
+					"user"
+				]
+			}
+		},
+		"/user/sessions": {
+			"get": {
+				"description": "",
+				"parameters": [
+					{
+						"description": "the security token, get it from login route",
+						"in": "header",
+						"name": "token",
+						"required": true,
+						"type": "string"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "",
+						"produce": "application/json",
+						"schema": {
+							"$ref": "#/definitions/user_activeSessions"
+						}
+					},
+					"401": {
+						"description": "you are not authorized",
+						"schema": {
+							"properties": {
+								"error": {
+									"type": "string"
+								}
+							},
+							"title": "not_authorized",
+							"type": "object"
+						}
+					},
+					"403": {
+						"description": "forbidden, you have no access here",
+						"schema": {
+							"properties": {
+								"error": {
+									"type": "string"
+								}
+							},
+							"title": "forbidden",
+							"type": "object"
+						}
+					}
+				},
+				"tags": [
+					"user"
+				]
+			}
+		},
+		"/user/sessions/terminate": {
+			"get": {
+				"description": "",
+				"parameters": [
+					{
+						"description": "the security token, get it from login route",
+						"in": "header",
+						"name": "token",
+						"required": true,
+						"type": "string"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "",
+						"produce": "application/json",
+						"schema": {
+							"$ref": "#/definitions/user_activeSessions"
+						}
+					},
+					"400": {
+						"description": "",
+						"schema": {
+							"$ref": "#/definitions/base_ErrorResponseSimple"
+						}
+					},
+					"401": {
+						"description": "you are not authorized",
+						"schema": {
+							"properties": {
+								"error": {
+									"type": "string"
+								}
+							},
+							"title": "not_authorized",
+							"type": "object"
+						}
+					},
+					"403": {
+						"description": "forbidden, you have no access here",
+						"schema": {
+							"properties": {
+								"error": {
+									"type": "string"
+								}
+							},
+							"title": "forbidden",
+							"type": "object"
 						}
 					}
 				},

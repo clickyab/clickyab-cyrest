@@ -3,10 +3,10 @@ package authz
 import (
 	"common/assert"
 	"common/redis"
-	"errors"
 	"modules/user/aaa"
 	"net/http"
-	"time"
+
+	"modules/user/config"
 
 	"gopkg.in/labstack/echo.v3"
 )
@@ -25,7 +25,7 @@ func Authenticate(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 		if token != "" {
 			//get the token on redis
-			accessToken, err := aredis.GetKey(token, true, 24*time.Hour)
+			accessToken, err := aredis.GetHashKey(token, "token", true, ucfg.Cfg.TokenTimeout)
 			if err != nil { //user not authenticated
 				return c.JSON(http.StatusUnauthorized, st)
 			}
@@ -43,18 +43,35 @@ func Authenticate(next echo.HandlerFunc) echo.HandlerFunc {
 }
 
 // GetUser is the helper function to extract user data from context
-func GetUser(ctx echo.Context) (*aaa.User, error) {
+func GetUser(ctx echo.Context) (*aaa.User, bool) {
 	rd, ok := ctx.Get(userData).(*aaa.User)
 	if !ok {
-		return nil, errors.New("not valid data in context")
+		return nil, false
 	}
 
-	return rd, nil
+	return rd, true
 }
 
 // MustGetUser try to get user data, or panic if there is no user data
 func MustGetUser(ctx echo.Context) *aaa.User {
-	rd, err := GetUser(ctx)
-	assert.Nil(err)
+	rd, ok := GetUser(ctx)
+	assert.True(ok, "[BUG] no user in context")
 	return rd
+}
+
+// GetToken return the token in context
+func GetToken(ctx echo.Context) (string, bool) {
+	t, ok := ctx.Get(tokenData).(string)
+	if !ok {
+		return "", false
+	}
+
+	return t, true
+}
+
+// MustGetToken return the token in context
+func MustGetToken(ctx echo.Context) string {
+	t, ok := GetToken(ctx)
+	assert.True(ok, "[BUG] no token in context")
+	return t
 }

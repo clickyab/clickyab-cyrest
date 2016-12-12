@@ -5,8 +5,8 @@ import (
 
 	"modules/misc/trans"
 
-	"gopkg.in/labstack/echo.v3"
 	"gopkg.in/go-playground/validator.v9"
+	"gopkg.in/labstack/echo.v3"
 )
 
 var (
@@ -57,7 +57,7 @@ func (u *Controller) loginUser(ctx echo.Context) error {
 		return u.BadResponse(ctx, userPasswordError)
 	}
 
-	token := m.GetNewToken(usr.AccessToken)
+	token := m.GetNewToken(usr, ctx.Request().UserAgent(), ctx.RealIP())
 	return u.OKResponse(
 		ctx,
 		createLoginResponse(usr, token),

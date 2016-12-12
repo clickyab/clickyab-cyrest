@@ -48,15 +48,47 @@ func (u *Controller) Routes(r *echo.Echo, mountPoint string) {
 	group.POST("/register", u.registerUser, m3...)
 	// End route {/register POST Controller.registerUser user []  Controller u registrationPayload  } with key 3
 
-	// Route { GET Controller.listUser user [authz.Authenticate]  Controller u  user_list parent} with key 4
+	// Route {/logout GET Controller.logout user [authz.Authenticate]  Controller u   } with key 4
 	m4 := []echo.MiddlewareFunc{
 		authz.Authenticate,
 	}
 
-	m4 = append(m4, authz.AuthorizeGenerator("user_list", base.UserScope("parent")))
+	group.GET("/logout", u.logout, m4...)
+	// End route {/logout GET Controller.logout user [authz.Authenticate]  Controller u   } with key 4
 
-	group.GET("", u.listUser, m4...)
-	// End route { GET Controller.listUser user [authz.Authenticate]  Controller u  user_list parent} with key 4
+	// Route {/sessions GET Controller.activeSessions user [authz.Authenticate]  Controller u   } with key 5
+	m5 := []echo.MiddlewareFunc{
+		authz.Authenticate,
+	}
+
+	group.GET("/sessions", u.activeSessions, m5...)
+	// End route {/sessions GET Controller.activeSessions user [authz.Authenticate]  Controller u   } with key 5
+
+	// Route {/session/terminate/:id GET Controller.terminateSession user [authz.Authenticate]  Controller u   } with key 6
+	m6 := []echo.MiddlewareFunc{
+		authz.Authenticate,
+	}
+
+	group.GET("/session/terminate/:id", u.terminateSession, m6...)
+	// End route {/session/terminate/:id GET Controller.terminateSession user [authz.Authenticate]  Controller u   } with key 6
+
+	// Route {/sessions/terminate GET Controller.terminateAllSession user [authz.Authenticate]  Controller u   } with key 7
+	m7 := []echo.MiddlewareFunc{
+		authz.Authenticate,
+	}
+
+	group.GET("/sessions/terminate", u.terminateAllSession, m7...)
+	// End route {/sessions/terminate GET Controller.terminateAllSession user [authz.Authenticate]  Controller u   } with key 7
+
+	// Route { GET Controller.listUser user [authz.Authenticate]  Controller u  user_list parent} with key 8
+	m8 := []echo.MiddlewareFunc{
+		authz.Authenticate,
+	}
+
+	m8 = append(m8, authz.AuthorizeGenerator("user_list", base.UserScope("parent")))
+
+	group.GET("", u.listUser, m8...)
+	// End route { GET Controller.listUser user [authz.Authenticate]  Controller u  user_list parent} with key 8
 
 	utils.DoInitialize(u)
 }

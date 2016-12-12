@@ -18,9 +18,9 @@ const (
 
 // PermInterface is the perm interface
 type PermInterface interface {
-	// HasPermString is the has perm check
+	// HasPerm is the has perm check
 	HasPerm(scope UserScope, perm string) (UserScope, bool)
-	// HasPermStringOn is the has perm on check
+	// HasPermOn is the has perm on check
 	HasPermOn(perm string, ownerID, parentID int64, scopes ...UserScope) (UserScope, bool)
 }
 

@@ -64,7 +64,7 @@ func (u *Controller) registerUser(ctx echo.Context) error {
 		return u.BadResponse(ctx, err)
 	}
 
-	token := m.GetNewToken(user.AccessToken)
+	token := m.GetNewToken(user, ctx.Request().UserAgent(), ctx.RealIP())
 	return u.OKResponse(
 		ctx,
 		responseLoginOK{

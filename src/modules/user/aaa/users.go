@@ -1,20 +1,16 @@
 package aaa
 
 import (
-	"common/utils"
-	"regexp"
-	"time"
-
 	"common/assert"
-
-	"strings"
-
-	"common/redis"
-	"modules/user/config"
-
-	"common/models/common"
-
 	"common/controllers/base"
+	"common/models/common"
+	"common/redis"
+	"common/utils"
+	"fmt"
+	"modules/user/config"
+	"regexp"
+	"strings"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/gorp.v1"
@@ -267,16 +263,32 @@ func (m *Manager) GetUserRoles(u *User) []Role {
 }
 
 // GetNewToken try to create a time base token in redis
-func (m *Manager) GetNewToken(baseToken string) string {
-	t := <-utils.ID
+func (m *Manager) GetNewToken(user *User, ua, ip string) string {
+	t := fmt.Sprintf("%d:%s", user.ID, <-utils.ID)
 	assert.Nil(
-		aredis.StoreKey(
+		aredis.StoreHashKey(
 			t,
-			baseToken,
+			"token",
+			user.AccessToken,
 			ucfg.Cfg.TokenTimeout,
 		),
 	)
-
+	assert.Nil(
+		aredis.StoreHashKey(
+			t,
+			"ua",
+			ua,
+			ucfg.Cfg.TokenTimeout,
+		),
+	)
+	assert.Nil(
+		aredis.StoreHashKey(
+			t,
+			"ip",
+			ip,
+			ucfg.Cfg.TokenTimeout,
+		),
+	)
 	return t
 }
 
@@ -340,4 +352,15 @@ func (m *Manager) FetchByToken(accessToken string) (*User, error) {
 func (u *User) VerifyPassword(password string) bool {
 	// TODO : verify old password
 	return bcrypt.CompareHashAndPassword([]byte(u.Password.String), []byte(password)) == nil
+}
+
+// EraseToken remove a token from redis
+func (m *Manager) EraseToken(t string) error {
+	return aredis.RemoveKey(t)
+}
+
+// LogoutAllSession login from all user session
+func (m *Manager) LogoutAllSession(u *User) error {
+	u.refreshToken = true
+	return m.UpdateUser(u)
 }

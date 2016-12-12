@@ -16,9 +16,6 @@ const (
 	// UserCRMTableFull is the UserCRM table name
 	UserCRMTableFull = "user_crm"
 
-	// UserRoleTableFull is the UserRole table name
-	UserRoleTableFull = "user_role"
-
 	// UserProfileCorporationTableFull is the UserProfileCorporation table name
 	UserProfileCorporationTableFull = "user_profile_corporation"
 
@@ -36,6 +33,9 @@ const (
 
 	// UserFinancialTableFull is the UserFinancial table name
 	UserFinancialTableFull = "user_financial"
+
+	// UserRoleTableFull is the UserRole table name
+	UserRoleTableFull = "user_role"
 )
 
 // Manager is the model manager for aaa package
@@ -76,15 +76,6 @@ func (m *Manager) Initialize() {
 	).SetKeys(
 		false,
 		"UserID",
-	)
-
-	m.AddTableWithName(
-		UserRole{},
-		UserRoleTableFull,
-	).SetKeys(
-		false,
-		"UserID",
-		"RoleID",
 	)
 
 	m.AddTableWithName(
@@ -133,6 +124,15 @@ func (m *Manager) Initialize() {
 	).SetKeys(
 		true,
 		"ID",
+	)
+
+	m.AddTableWithName(
+		UserRole{},
+		UserRoleTableFull,
+	).SetKeys(
+		false,
+		"UserID",
+		"RoleID",
 	)
 
 }
