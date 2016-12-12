@@ -5,21 +5,22 @@
 CREATE TABLE users
 (
     id INT(11) PRIMARY KEY NOT NULL AUTO_INCREMENT,
-    email VARCHAR(255),
-    password VARCHAR(255),
-    old_password VARCHAR(255),
-    access_token VARCHAR(255),
-    source ENUM('crm', 'clickyab'),
+    email VARCHAR(50) NOT NULL UNIQUE ,
+    password VARCHAR(60)NOT NULL ,
+    old_password VARCHAR(30),
+    access_token VARCHAR(30) NOT NULL ,
     user_type ENUM('personal', 'corporation'),
     parent_id INT(11),
-    avatar VARCHAR(255),
-    status ENUM('registered', 'verified', 'blocked'),
+    avatar VARCHAR(160),
+    status ENUM('registered', 'verified', 'blocked') NOT NULL ,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP DEFAULT '0000-00-00 00:00:00' NOT NULL
+    updated_at TIMESTAMP DEFAULT '0000-00-00 00:00:00' NOT NULL,
+    CONSTRAINT user_id_parent_id_fk FOREIGN KEY (parent_id) REFERENCES users (id)
 );
 
 CREATE INDEX users_users_id_fk ON users (parent_id);
-CREATE UNIQUE INDEX user_id_uindex ON users (id);
+
+
 
 CREATE TABLE roles
 (
@@ -36,7 +37,7 @@ CREATE TABLE role_permission
     id INT(11) PRIMARY KEY NOT NULL AUTO_INCREMENT,
     role_id INT(11) NOT NULL,
     permission VARCHAR(255),
-    scope ENUM('global', 'parent', 'own'),
+    scope ENUM('global', 'parent', 'self'),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT '0000-00-00 00:00:00' NOT NULL,
     CONSTRAINT role_permission_roles_id_fk FOREIGN KEY (role_id) REFERENCES roles (id)
@@ -54,17 +55,6 @@ CREATE TABLE user_attributes
 );
 CREATE UNIQUE INDEX user_attributes_id_uindex ON user_attributes (id);
 CREATE INDEX user_attributes_users_id_fk ON user_attributes (user_id);
-CREATE TABLE user_crm
-(
-    user_id INT(11) NOT NULL,
-    originating_lead VARCHAR(255),
-    customer_code INT(12),
-    gid VARCHAR(64),
-    lead_status INT(1),
-    read_by_crm INT(2),
-    CONSTRAINT user_crm_users_id_fk FOREIGN KEY (user_id) REFERENCES users (id)
-);
-CREATE UNIQUE INDEX user_crm_user_id_uindex ON user_crm (user_id);
 
 CREATE TABLE user_financial
 (
