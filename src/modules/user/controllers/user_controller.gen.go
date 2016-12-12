@@ -25,12 +25,10 @@ type listUserResponse struct {
 var listUserDefinition base.Columns
 
 // @Route {
-// 		url =
+// 		url = /users
 //		method = get
 //		resource = user_list:parent
 //		_sort_ = string, the sort and order like id:asc or id:desc available column "id","created_at","updated_at"
-//		_source_ = string , filter the source field valid values are "crm","clickyab"
-//		_user_type_ = string , filter the user_type field valid values are "personal","corpartion"
 //		_status_ = string , filter the status field valid values are "registered","verified","blocked"
 //		_email_ = string , search the email field
 //      200 = listUserResponse
@@ -41,14 +39,6 @@ func (u *Controller) listUser(ctx echo.Context) error {
 	p, c := utils.GetPageAndCount(ctx.Request(), false)
 
 	filter := make(map[string]string)
-
-	if e := ctx.Request().URL.Query().Get("source"); e != "" && aaa.UserSource(e).IsValid() {
-		filter["source"] = e
-	}
-
-	if e := ctx.Request().URL.Query().Get("user_type"); e != "" && aaa.UserType(e).IsValid() {
-		filter["user_type"] = e
-	}
 
 	if e := ctx.Request().URL.Query().Get("status"); e != "" && aaa.UserStatus(e).IsValid() {
 		filter["status"] = e
@@ -132,32 +122,6 @@ func init() {
 			"filter": false,
 			"title": "Email",
 			"filter_valid_map": null
-		},
-		{
-			"data": "source",
-			"name": "Source",
-			"searchable": false,
-			"sortable": false,
-			"visible": true,
-			"filter": true,
-			"title": "User source",
-			"filter_valid_map": {
-				"clickyab": "UserSourceClickyab",
-				"crm": "UserSourceCRM"
-			}
-		},
-		{
-			"data": "user_type",
-			"name": "Type",
-			"searchable": false,
-			"sortable": false,
-			"visible": true,
-			"filter": true,
-			"title": "User type",
-			"filter_valid_map": {
-				"corpartion": "UserTypeCorporation",
-				"personal": "UserTypePersonal"
-			}
 		},
 		{
 			"data": "avatar",

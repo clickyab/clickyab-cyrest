@@ -37,8 +37,9 @@ func Authenticate(next echo.HandlerFunc) echo.HandlerFunc {
 			//all good put user in context
 			c.Set(userData, user)
 			c.Set(tokenData, token)
+			return next(c)
 		}
-		return next(c)
+		return c.JSON(http.StatusUnauthorized, st)
 	}
 }
 

@@ -10,9 +10,6 @@ import (
 	"common/assert"
 
 	"modules/misc/trans"
-
-	"common/models/common"
-
 	"gopkg.in/labstack/echo.v3"
 	"gopkg.in/go-playground/validator.v9"
 )
@@ -79,7 +76,7 @@ func (u *Controller) forgotGeneratePassword(ctx echo.Context) error {
 	}
 	pass := utils.PasswordGenerate(8)
 	// TODO : change password to string when we are ready for it
-	user.Password = common.NullString{String: pass, Valid: true}
+	user.Password = pass
 	assert.Nil(m.UpdateUser(user))
 	sendEmailPasswordGen()
 	return u.OKResponse(
