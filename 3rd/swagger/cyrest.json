@@ -84,6 +84,17 @@
 			},
 			"type": "object"
 		},
+		"user_changePasswordPayload": {
+			"properties": {
+				"new_password": {
+					"type": "string"
+				},
+				"old_password": {
+					"type": "string"
+				}
+			},
+			"type": "object"
+		},
 		"user_corporation": {
 			"properties": {
 				"company_name": {
@@ -253,11 +264,11 @@
 						"type": "string"
 					},
 					{
-						"description": " search the email field",
+						"description": "",
 						"in": "query",
-						"name": "email",
+						"name": "source",
 						"required": false,
-						"type": "string "
+						"type": "string"
 					},
 					{
 						"description": "",
@@ -267,11 +278,11 @@
 						"type": "string"
 					},
 					{
-						"description": "",
+						"description": " search the email field",
 						"in": "query",
-						"name": "source",
+						"name": "email",
 						"required": false,
-						"type": "string"
+						"type": "string "
 					},
 					{
 						"description": "the security token, get it from login route",
@@ -287,6 +298,71 @@
 						"produce": "application/json",
 						"schema": {
 							"$ref": "#/definitions/user_listUserResponse"
+						}
+					},
+					"401": {
+						"description": "you are not authorized",
+						"schema": {
+							"properties": {
+								"error": {
+									"type": "string"
+								}
+							},
+							"title": "not_authorized",
+							"type": "object"
+						}
+					},
+					"403": {
+						"description": "forbidden, you have no access here",
+						"schema": {
+							"properties": {
+								"error": {
+									"type": "string"
+								}
+							},
+							"title": "forbidden",
+							"type": "object"
+						}
+					}
+				},
+				"tags": [
+					"user"
+				]
+			}
+		},
+		"/user/change-password": {
+			"post": {
+				"description": "changePassword",
+				"parameters": [
+					{
+						"description": "the security token, get it from login route",
+						"in": "header",
+						"name": "token",
+						"required": true,
+						"type": "string"
+					},
+					{
+						"description": "",
+						"in": "body",
+						"name": "payload_data",
+						"required": false,
+						"schema": {
+							"$ref": "#/definitions/user_changePasswordPayload"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "",
+						"produce": "application/json",
+						"schema": {
+							"$ref": "#/definitions/base_NormalResponse"
+						}
+					},
+					"400": {
+						"description": "",
+						"schema": {
+							"$ref": "#/definitions/base_ErrorResponseSimple"
 						}
 					},
 					"401": {

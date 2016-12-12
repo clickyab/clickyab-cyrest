@@ -3,7 +3,7 @@ info:
   version: 1.0.0
   title: The Cyrest API
   description: Auto genertaed Cyrest API
-host: localhost
+host: swaggerbase
 basePath: /api
 schemes:
 - http
@@ -54,9 +54,9 @@ paths:
         description: ""
         in: query
         required: false
-      - name: email
-        type: 'string '
-        description: ' search the email field'
+      - name: source
+        type: string
+        description: ""
         in: query
         required: false
       - name: status
@@ -64,9 +64,9 @@ paths:
         description: ""
         in: query
         required: false
-      - name: source
-        type: string
-        description: ""
+      - name: email
+        type: 'string '
+        description: ' search the email field'
         in: query
         required: false
       - name: token
@@ -74,6 +74,49 @@ paths:
         description: the security token, get it from login route
         in: header
         required: true
+      tags:
+      - user
+  /user/change-password:
+    post:
+      description: changePassword
+      responses:
+        "200":
+          description: ""
+          produce: application/json
+          schema:
+            $ref: '#/definitions/base_NormalResponse'
+        "400":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_ErrorResponseSimple'
+        "401":
+          description: you are not authorized
+          schema:
+            properties:
+              error:
+                type: string
+            title: not_authorized
+            type: object
+        "403":
+          description: forbidden, you have no access here
+          schema:
+            properties:
+              error:
+                type: string
+            title: forbidden
+            type: object
+      parameters:
+      - name: token
+        type: string
+        description: the security token, get it from login route
+        in: header
+        required: true
+      - name: payload_data
+        schema:
+          $ref: '#/definitions/user_changePasswordPayload'
+        description: ""
+        in: body
+        required: false
       tags:
       - user
   /user/forgot/call:
@@ -360,6 +403,13 @@ definitions:
         items:
           $ref: '#/definitions/aaa_Session'
         type: array
+    type: object
+  user_changePasswordPayload:
+    properties:
+      new_password:
+        type: string
+      old_password:
+        type: string
     type: object
   user_corporation:
     properties:
