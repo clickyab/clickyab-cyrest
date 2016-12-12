@@ -22,10 +22,6 @@ type (
 	// @Enum{
 	// }
 	UserStatus string
-	// UserSource is the source of user
-	// @Enum{
-	// }
-	UserSource string
 	// UserType is the type of user
 	// @Enum{
 	// }
@@ -40,11 +36,6 @@ const (
 	UserStatusVerified UserStatus = "verified"
 	// UserStatusBlocked for banned user
 	UserStatusBlocked UserStatus = "blocked"
-
-	// UserSourceCRM is the crm source
-	UserSourceCRM UserSource = "crm"
-	// UserSourceClickyab is the clickyab source
-	UserSourceClickyab UserSource = "clickyab"
 
 	// UserTypePersonal is the personal profile
 	UserTypePersonal UserType = "personal"
@@ -63,10 +54,9 @@ const (
 type User struct {
 	ID          int64                              `db:"id" json:"id" sort:"true" title:"ID"`
 	Email       string                             `db:"email" json:"email" search:"true" title:"Email"`
-	Password    common.NullString                  `db:"password" json:"-"`
+	Password    string                  `db:"password" json:"-"`
 	OldPassword common.NullString                  `db:"old_password" json:"-"`
 	AccessToken string                             `db:"access_token" json:"-"`
-	Source      UserSource                         `db:"source" json:"source" filter:"true" title:"User source"`
 	Type        UserType                           `db:"user_type" json:"user_type" filter:"true" title:"User type"`
 	ParentID    common.NullInt64                   `db:"parent_id" json:"-"`
 	Avatar      common.NullString                  `db:"avatar" json:"avatar" visible:"false"`
@@ -82,6 +72,7 @@ type User struct {
 
 //UserDataTable is the user full data in data table, after join with other field
 // @DataTable {
+//		url = /users
 //		entity = user
 //		view = user_list:parent
 //		controller = modules/user/controllers
@@ -105,20 +96,17 @@ const (
 
 var (
 	isBcrypt = regexp.MustCompile(`^\$[^$]+\$[0-9]+\$`)
-	//hooks    []CreateUserHook
-	//lock     = &sync.RWMutex{}
 )
 
 // Initialize the user on save
 func (u *User) Initialize() {
 	// TODO : Watch it if this creepy code is dangerous :)
-	if (len(u.Password.String) < minHashSize ||
-		!isBcrypt.MatchString(u.Password.String)) &&
-		u.Password.String != noPassString {
-		p, err := bcrypt.GenerateFromPassword([]byte(u.Password.String), bcrypt.DefaultCost)
+	if (len(u.Password) < minHashSize ||
+		!isBcrypt.MatchString(u.Password)) &&
+		u.Password != noPassString {
+		p, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 		assert.Nil(err)
-		u.Password.String = string(p)
-		u.Password.Valid = true
+		u.Password = string(p)
 		u.refreshToken = true
 	}
 
@@ -127,15 +115,6 @@ func (u *User) Initialize() {
 		u.AccessToken = <-utils.ID
 		u.refreshToken = false
 	}
-
-	//if u.updateLastLogin {
-	//	u.LastLogin = common.NullTime{
-	//		Time:  time.Now(),
-	//		Valid: true,
-	//	}
-	//	u.updateLastLogin = false
-	//}
-
 }
 
 // GetResources for this user
@@ -245,7 +224,61 @@ func (u UserDataTable) FormatStatus() string {
 
 // FillUserDataTableArray is the function to fill user data table array
 func (m *Manager) FillUserDataTableArray(u base.PermInterfaceComplete, filters map[string]string, search map[string]string, sort, order string, p, c int) (UserDataTableArray, int64) {
-	return nil, 0
+	var params []interface{}
+	var count int64
+	var res UserDataTableArray
+	var where []string
+
+	countQuery:="SELECT COUNT(id) FROM users"
+	query:="SELECT users.*,users.id AS owner_id_dt,users.parent_id as parent_id_dt FROM users"
+	for field,value:=range filters{
+		where=append(where,fmt.Sprintf("%s=%s",field,"?"))
+		params=append(params,value)
+	}
+
+	for column,val:=range search{
+		where=append(where,fmt.Sprintf("%s=%s",column,"?"))
+		params=append(params,val)
+	}
+
+
+	currentUserID:=u.GetID()
+	highestScope:=u.GetCurrentScope()
+
+	if highestScope==base.ScopeSelf{
+		where=append(where,"users.id=?")
+		params=append(params,currentUserID)
+	}else if highestScope==base.ScopeParent {
+		where=append(where,"users.parent_id=?")
+		params=append(params,currentUserID)
+	}
+
+	//check for perm
+	if len(where) > 0{
+		query+=" WHERE "
+		countQuery+=" WHERE "
+	}
+	query+=strings.Join(where," AND ")
+	countQuery+=strings.Join(where," AND ")
+	limit:=c
+	offset:=(p-1)*c
+
+	query+=fmt.Sprintf(" ORDER BY %s %s LIMIT %d OFFSET %d",sort,order,limit,offset)
+	fmt.Println(query)
+	fmt.Println(countQuery)
+	/*_,err:=m.GetDbMap().Select(
+		&res,
+		query,
+		params...,
+	)
+	assert.Nil(err)
+	count,err=m.GetDbMap().SelectInt(
+		query,
+		params...,
+	)
+	assert.Nil(err)*/
+	return res,count
+
 }
 
 // GetUserRoles return all Roles belong to User (many to many with UserRole)
@@ -265,6 +298,7 @@ func (m *Manager) GetUserRoles(u *User) []Role {
 // GetNewToken try to create a time base token in redis
 func (m *Manager) GetNewToken(user *User, ua, ip string) string {
 	t := fmt.Sprintf("%d:%s", user.ID, <-utils.ID)
+	// TODO set at once
 	assert.Nil(
 		aredis.StoreHashKey(
 			t,
@@ -293,12 +327,12 @@ func (m *Manager) GetNewToken(user *User, ua, ip string) string {
 }
 
 // RegisterUser is try for the user registration
-func (m *Manager) RegisterUser(email, password string, profile interface{}) (u *User, err error) {
+func (m *Manager) RegisterUser(email, password string) (u *User, err error) {
 	u = &User{
 		Email:    email,
-		Password: common.NullString{String: password, Valid: true},
+		Password:password,
 		Status:   UserStatusRegistered,
-		Source:   UserSourceClickyab,
+		Type: UserTypePersonal,
 	}
 	err = m.Begin()
 	if err != nil {
@@ -319,15 +353,6 @@ func (m *Manager) RegisterUser(email, password string, profile interface{}) (u *
 	if err != nil {
 		u = nil
 		return
-	}
-
-	switch p := profile.(type) {
-	case *UserProfileCorporation:
-		p.UserID = u.ID
-		err = m.CreateUserProfileCorporation(p)
-	case *UserProfilePersonal:
-		p.UserID = u.ID
-		err = m.CreateUserProfilePersonal(p)
 	}
 
 	return
@@ -351,7 +376,7 @@ func (m *Manager) FetchByToken(accessToken string) (*User, error) {
 // VerifyPassword try to verify password for given hash
 func (u *User) VerifyPassword(password string) bool {
 	// TODO : verify old password
-	return bcrypt.CompareHashAndPassword([]byte(u.Password.String), []byte(password)) == nil
+	return bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password)) == nil
 }
 
 // EraseToken remove a token from redis

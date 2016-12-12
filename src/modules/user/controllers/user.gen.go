@@ -80,15 +80,15 @@ func (u *Controller) Routes(r *echo.Echo, mountPoint string) {
 	group.GET("/sessions/terminate", u.terminateAllSession, m7...)
 	// End route {/sessions/terminate GET Controller.terminateAllSession user [authz.Authenticate]  Controller u   } with key 7
 
-	// Route { GET Controller.listUser user [authz.Authenticate]  Controller u  user_list parent} with key 8
+	// Route {/users GET Controller.listUser user [authz.Authenticate]  Controller u  user_list parent} with key 8
 	m8 := []echo.MiddlewareFunc{
 		authz.Authenticate,
 	}
 
 	m8 = append(m8, authz.AuthorizeGenerator("user_list", base.UserScope("parent")))
 
-	group.GET("", u.listUser, m8...)
-	// End route { GET Controller.listUser user [authz.Authenticate]  Controller u  user_list parent} with key 8
+	group.GET("/users", u.listUser, m8...)
+	// End route {/users GET Controller.listUser user [authz.Authenticate]  Controller u  user_list parent} with key 8
 
 	utils.DoInitialize(u)
 }

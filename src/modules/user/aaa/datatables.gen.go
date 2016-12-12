@@ -32,8 +32,6 @@ func (udt UserDataTable) Filter(u base.PermInterface) map[string]interface{} {
 
 		"email": udt.Email,
 
-		"source": udt.Source,
-
 		"user_type": udt.Type,
 
 		"avatar": udt.Avatar,

@@ -9,7 +9,7 @@ type UserScope string
 
 const (
 	// ScopeSelf means the user him self, no additional parameter
-	ScopeSelf UserScope = "own"
+	ScopeSelf UserScope = "self"
 	// ScopeParent means the user child, need id of all child as parameter
 	ScopeParent UserScope = "parent"
 	// ScopeGlobal means the entire perm, no param is required
