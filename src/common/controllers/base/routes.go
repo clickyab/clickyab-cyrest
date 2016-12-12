@@ -5,10 +5,10 @@ import (
 	"common/middlewares"
 	"sync"
 
-	"common/assert"
 	"common/utils"
 	"path/filepath"
 
+	"github.com/Sirupsen/logrus"
 	"gopkg.in/labstack/echo.v3"
 )
 
@@ -44,7 +44,14 @@ func Initialize(mountPoint string) *echo.Echo {
 	})
 	//engine.SetLogLevel(log.DEBUG)
 	if config.Config.DevelMode {
-		assert.Nil(utils.ChangeInFile(filepath.Join(config.Config.SwaggerRoot, "cyrest.yaml"), "swaggerbase", config.Config.Site))
+		err := utils.ChangeInFile(filepath.Join(config.Config.SwaggerRoot, "cyrest.yaml"), "swaggerbase", config.Config.Site)
+		if err != nil {
+			logrus.Warnf(
+				"can not change the %s file and set the site %s",
+				filepath.Join(config.Config.SwaggerRoot, "cyrest.yaml"),
+				config.Config.Site,
+			)
+		}
 
 		engine.Static("/swagger", config.Config.SwaggerRoot)
 	}
