@@ -1,6 +1,12 @@
 package user
 
-import "common/controllers/base"
+import (
+	"common/controllers/base"
+	"common/redis"
+	"modules/user/config"
+
+	"gopkg.in/labstack/echo.v3"
+)
 
 // Controller is the controller for the user package
 // @Route {
@@ -40,6 +46,14 @@ var (
 //		},
 //	)
 //}
+
+func (c Controller) storeData(ctx echo.Context, token string) error {
+	err := aredis.StoreHashKey(token, "ua", ctx.Request().UserAgent(), ucfg.Cfg.TokenTimeout)
+	if err != nil {
+		return err
+	}
+	return aredis.StoreHashKey(token, "ip", ctx.RealIP(), ucfg.Cfg.TokenTimeout)
+}
 
 func init() {
 	base.Register(&Controller{})

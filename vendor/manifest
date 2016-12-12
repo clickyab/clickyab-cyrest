@@ -145,12 +145,6 @@
 			"branch": "master"
 		},
 		{
-			"importpath": "github.com/garyburd/redigo",
-			"repository": "https://github.com/garyburd/redigo",
-			"revision": "8873b2f1995f59d4bcdd2b0dc9858e2cb9bf0c13",
-			"branch": "master"
-		},
-		{
 			"importpath": "github.com/gin-gonic/gin/binding",
 			"repository": "https://github.com/gin-gonic/gin",
 			"revision": "e2212d40c62a98b388a5eb48ecbdcf88534688ba",
@@ -223,7 +217,7 @@
 		{
 			"importpath": "github.com/goraz/humanize",
 			"repository": "https://github.com/goraz/humanize",
-			"revision": "f2c5f31fa972453e5b88b3ea307764df75c900f6",
+			"revision": "6a0cc17137736382d848b6a2ea5d143bc295da47",
 			"branch": "master"
 		},
 		{
@@ -502,6 +496,12 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "gopkg.in/bsm/ratelimit.v1",
+			"repository": "https://gopkg.in/bsm/ratelimit.v1",
+			"revision": "db14e161995a5177acef654cb0dd785e8ee8bc22",
+			"branch": "v1"
+		},
+		{
 			"importpath": "gopkg.in/fzerorubigd/onion.v2",
 			"repository": "https://gopkg.in/fzerorubigd/onion.v2",
 			"revision": "e687b557954d44e2b5c3b4b52bb9ffa8572d9cb0",
@@ -529,6 +529,12 @@
 			"importpath": "gopkg.in/labstack/echo.v3",
 			"repository": "https://gopkg.in/labstack/echo.v3",
 			"revision": "8d504c1b699c757b267255c53b3e5219f9974abc",
+			"branch": "master"
+		},
+		{
+			"importpath": "gopkg.in/redis.v5",
+			"repository": "https://gopkg.in/redis.v5",
+			"revision": "854c88a72c8bb9c09936145aef886b7697d6b995",
 			"branch": "master"
 		},
 		{

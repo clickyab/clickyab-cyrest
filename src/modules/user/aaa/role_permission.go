@@ -2,6 +2,7 @@ package aaa
 
 import (
 	"common/assert"
+	"common/controllers/base"
 	"fmt"
 	"strings"
 )
@@ -15,35 +16,18 @@ import (
 //		list = true
 // }
 type RolePermission struct {
-	ID         int64     `db:"id" json:"id"`
-	RoleID     int64     `json:"role_id" db:"role_id"`
-	Permission string    `json:"permission" db:"permission"`
-	Scope      ScopePerm `json:"scope" db:"scope"`
+	ID         int64          `db:"id" json:"id"`
+	RoleID     int64          `json:"role_id" db:"role_id"`
+	Permission string         `json:"permission" db:"permission"`
+	Scope      base.UserScope `json:"scope" db:"scope"`
 }
 
-// scopePerm is the perm for the role
-type (
-	// scopePerm is the scope perm status for a single permission
-	// @Enum{
-	// }
-	ScopePerm string
-)
-
-const (
-	// ScopePermGlobal is the global permission
-	ScopePermGlobal ScopePerm = "global"
-	// ScopePermParent is the parent permission
-	ScopePermParent ScopePerm = "parent"
-	// ScopePermOwn is the own permission
-	ScopePermOwn ScopePerm = "own"
-)
-
 // GetResourceMap return resource map for some roles
-func (m *Manager) GetPermissionMap(r ...Role) map[ScopePerm]map[string]bool {
-	res := make(map[ScopePerm]map[string]bool)
-	res[ScopePermGlobal]=make(map[string]bool)
-	res[ScopePermOwn]=make(map[string]bool)
-	res[ScopePermParent]=make(map[string]bool)
+func (m *Manager) GetPermissionMap(r ...Role) map[base.UserScope]map[string]bool {
+	res := make(map[base.UserScope]map[string]bool)
+	res[base.ScopeGlobal] = make(map[string]bool)
+	res[base.ScopeSelf] = make(map[string]bool)
+	res[base.ScopeParent] = make(map[string]bool)
 	if len(r) == 0 {
 		return res
 	}

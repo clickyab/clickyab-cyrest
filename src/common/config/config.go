@@ -38,6 +38,7 @@ type AppConfig struct {
 		Network  string
 		Address  string
 		Password string
+		Database int
 	}
 
 	Mysql struct {
@@ -91,6 +92,7 @@ func defaultLayer() onion.DefaultLayer {
 	assert.Nil(res.SetDefault("redis.network", "tcp"))
 	assert.Nil(res.SetDefault("redis.address", ":6379"))
 	assert.Nil(res.SetDefault("redis.password", ""))
+	assert.Nil(res.SetDefault("redis.database", 0))
 
 	assert.Nil(res.SetDefault("mysql.dsn", "root:bita123@/cyrest?parseTime=true"))
 	assert.Nil(res.SetDefault("mysql.max_connection", 100))

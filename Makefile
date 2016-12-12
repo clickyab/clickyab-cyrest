@@ -118,6 +118,8 @@ watch: $(WATCH) tools-fswatch
 #
 # Codegen
 #
+codegen-base: tools-codegen
+	@$(BIN)/codegen -p common/controllers/base
 
 codegen-user: tools-codegen
 	@$(BIN)/codegen -p modules/user/controllers
@@ -138,7 +140,7 @@ swagger-cleaner:
 swagger-client: tools-swagger
 	GOPATH=$(ROOT) cd $(ROOT)/src && $(BIN)/swagger generate client -f $(ROOT)/3rd/swagger/cyrest.yaml
 
-codegen: swagger-cleaner codegen-user codegen-audit codegen-misc
+codegen: swagger-cleaner codegen-base codegen-user codegen-audit codegen-misc
 	@cp $(WORK_DIR)/swagger/cyrest.yaml $(ROOT)/3rd/swagger
 	@cp $(WORK_DIR)/swagger/cyrest.json $(ROOT)/3rd/swagger
 	@echo "Done"

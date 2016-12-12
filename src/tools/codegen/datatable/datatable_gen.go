@@ -99,14 +99,14 @@ func ({{ $m.Type|getvar }} {{ $m.Type }}) Filter(u base.PermInterface) map[strin
 	}
 	{{ range $clm := $m.Column }}
 	{{ if $clm.HasPerm }}
-	if _, ok := u.HasPermStringOn("{{ $clm.Perm.Perm }}", {{ $m.Type|getvar }}.OwnerID, {{ $m.Type|getvar }}.ParentID {{ $clm.Perm.Scope|scopeArg }}); ok {
+	if _, ok := u.HasPermOn("{{ $clm.Perm.Perm }}", {{ $m.Type|getvar }}.OwnerID, {{ $m.Type|getvar }}.ParentID {{ $clm.Perm.Scope|scopeArg }}); ok {
 		res["{{ $clm.Data }}"] = {{ if $clm.Format }} {{ $m.Type|getvar }}.Format{{ $clm.Name}}()  {{ else }}{{ $m.Type|getvar }}.{{ $clm.Name}} {{ end }}
 	}
 	{{ end }}
 	{{ end }}
 	action := []string{}
 	{{ range $act, $perm := $m.Actions }}
-	if _, ok := u.HasPermStringOn("{{ $perm.Perm }}", {{ $m.Type|getvar }}.OwnerID, {{ $m.Type|getvar }}.ParentID{{ $perm.Scope|scopeArg }}); ok {
+	if _, ok := u.HasPermOn("{{ $perm.Perm }}", {{ $m.Type|getvar }}.OwnerID, {{ $m.Type|getvar }}.ParentID {{ $perm.Scope|scopeArg }}); ok {
 		action = append(action, "{{ $act }}")
 	}
 	{{ end }}
@@ -225,9 +225,9 @@ var (
 func scopeArg(s string) template.HTML {
 	switch s {
 	case "parent":
-		return template.HTML(`,"parent", "global"`)
+		return template.HTML(`,base.ScopeParent, base.ScopeGlobal`)
 	case "global":
-		return template.HTML(`,"global"`)
+		return template.HTML(`,base.ScopeGlobal`)
 	}
 	return ""
 }

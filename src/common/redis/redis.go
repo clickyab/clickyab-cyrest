@@ -8,90 +8,87 @@ import (
 	"time"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/garyburd/redigo/redis"
+	"gopkg.in/redis.v5"
 )
 
 var (
-	// Pool the actual pool to use with redis
-	Pool *redis.Pool
-	once = &sync.Once{}
+	// Client the actual pool to use with redis
+	Client *redis.Client
+	once   = &sync.Once{}
 )
 
 // Initialize try to create a redis pool
 func Initialize() {
 	once.Do(func() {
-		Pool = &redis.Pool{
-			MaxIdle:     3,
-			IdleTimeout: 240 * time.Second,
-			Dial: func() (redis.Conn, error) {
-				c, err := redis.Dial(config.Config.Redis.Network, config.Config.Redis.Address)
-				if err != nil {
-					return nil, err
-				}
-				if config.Config.Redis.Password != "" {
-					if _, err := c.Do("AUTH", config.Config.Redis.Password); err != nil {
-						_ = c.Close()
-						return nil, err
-					}
-				}
-				return c, err
+		Client = redis.NewClient(
+			&redis.Options{
+				Network:  config.Config.Redis.Network,
+				Addr:     config.Config.Redis.Address,
+				Password: config.Config.Redis.Password,
+				PoolSize: config.Config.Redis.Size,
+				DB:       config.Config.Redis.Database,
 			},
-			TestOnBorrow: func(c redis.Conn, t time.Time) error {
-				_, err := c.Do("PING")
-				return err
-			},
-		}
-
+		)
 		// PING the server to make sure every thing is fine
-		conn := Pool.Get()
-		defer func() { _ = conn.Close() }()
-
-		_, err := conn.Do("PING")
-		assert.Nil(err)
-
-		logrus.Info("redis is reday.")
+		assert.Nil(Client.Ping().Err())
+		logrus.Debug("redis is ready.")
 	})
 }
 
 // StoreKey is a simple key value store with timeout
 func StoreKey(key, data string, expire time.Duration) error {
-	r := Pool.Get()
-	defer func() { assert.Nil(r.Close()) }()
-	_, err := r.Do("SET", key, data)
-	if err != nil {
-		return err
+	return Client.Set(key, data, expire).Err()
+}
+
+// StoreHashKey is a simple function to set hash key
+func StoreHashKey(key, subkey, data string, expire time.Duration) error {
+	err := Client.HSet(key, subkey, data).Err()
+	if err == nil {
+		err = Client.Expire(key, expire).Err()
 	}
-	_, err = r.Do("EXPIRE", key, int64(expire.Seconds()))
 
 	return err
 }
 
 // GetKey Get a key from redis
 func GetKey(key string, touch bool, expire time.Duration) (string, error) {
-	r := Pool.Get()
-	defer func() { assert.Nil(r.Close()) }()
-	res, err := r.Do("GET", key)
-	if err != nil {
+	cmd := Client.Get(key)
+	if err := cmd.Err(); err != nil {
 		return "", err
 	}
 
 	if touch {
-		_, err = r.Do("EXPIRE", key, int64(expire.Seconds()))
-		assert.Nil(err)
+		bCmd := Client.Expire(key, expire)
+		if err := bCmd.Err(); err != nil {
+			return "", err
+		}
 	}
-	data, err := redis.Bytes(res, err)
-	if err != nil {
+	return cmd.Val(), nil
+}
+
+// GetHashKey return a key from a hash
+func GetHashKey(key, subkey string, touch bool, expire time.Duration) (string, error) {
+	cmd := Client.HGet(key, subkey)
+	if err := cmd.Err(); err != nil {
 		return "", err
 	}
-
-	return string(data), nil
+	if touch {
+		bCmd := Client.Expire(key, expire)
+		if err := bCmd.Err(); err != nil {
+			return "", err
+		}
+	}
+	return cmd.Val(), nil
 }
 
 // RemoveKey for removing a key in redis
 func RemoveKey(key string) error {
-	r := Pool.Get()
-	defer func() { assert.Nil(r.Close()) }()
-	_, err := r.Do("DEL", key)
+	bCmd := Client.Del(key)
+	return bCmd.Err()
+}
 
-	return err
+// GetExpire return the expire of a key
+func GetExpire(key string) (time.Duration, error) {
+	eCmd := Client.TTL(key)
+	return eCmd.Val(), eCmd.Err()
 }

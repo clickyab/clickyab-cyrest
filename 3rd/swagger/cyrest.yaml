@@ -49,7 +49,7 @@ paths:
             title: forbidden
             type: object
       parameters:
-      - name: status
+      - name: source
         type: string
         description: ""
         in: query
@@ -64,7 +64,7 @@ paths:
         description: ""
         in: query
         required: false
-      - name: source
+      - name: status
         type: string
         description: ""
         in: query

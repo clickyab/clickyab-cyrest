@@ -3,9 +3,9 @@ package user
 // AUTO GENERATED CODE. DO NOT EDIT!
 
 import (
+	"common/controllers/base"
 	"common/middlewares"
 	"common/utils"
-	"modules/user/aaa"
 	"modules/user/middlewares"
 
 	"gopkg.in/labstack/echo.v3"
@@ -53,7 +53,7 @@ func (u *Controller) Routes(r *echo.Echo, mountPoint string) {
 		authz.Authenticate,
 	}
 
-	m4 = append(m4, authz.AuthorizeGenerator("user_list", aaa.ScopePerm("parent")))
+	m4 = append(m4, authz.AuthorizeGenerator("user_list", base.UserScope("parent")))
 
 	group.GET("", u.listUser, m4...)
 	// End route { GET Controller.listUser user [authz.Authenticate]  Controller u  user_list parent} with key 4

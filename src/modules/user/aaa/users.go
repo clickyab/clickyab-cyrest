@@ -65,20 +65,20 @@ const (
 //		list = yes
 // }
 type User struct {
-	ID          int64                         `db:"id" json:"id" sort:"true" title:"ID"`
-	Email       string                        `db:"email" json:"email" search:"true" title:"Email"`
-	Password    common.NullString             `db:"password" json:"-"`
-	OldPassword common.NullString             `db:"old_password" json:"-"`
-	AccessToken string                        `db:"access_token" json:"-"`
-	Source      UserSource                    `db:"source" json:"source" filter:"true" title:"User source"`
-	Type        UserType                      `db:"user_type" json:"user_type" filter:"true" title:"User type"`
-	ParentID    common.NullInt64              `db:"parent_id" json:"-"`
-	Avatar      common.NullString             `db:"avatar" json:"avatar" visible:"false"`
-	Status      UserStatus                    `db:"status" json:"status" filter:"true" title:"User status"`
-	CreatedAt   time.Time                     `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
-	UpdatedAt   time.Time                     `db:"updated_at" json:"updated_at" sort:"true" title:"Created at"`
-	resources   map[ScopePerm]map[string]bool `db:"-"`
-	roles       []Role                        `db:"-"`
+	ID          int64                              `db:"id" json:"id" sort:"true" title:"ID"`
+	Email       string                             `db:"email" json:"email" search:"true" title:"Email"`
+	Password    common.NullString                  `db:"password" json:"-"`
+	OldPassword common.NullString                  `db:"old_password" json:"-"`
+	AccessToken string                             `db:"access_token" json:"-"`
+	Source      UserSource                         `db:"source" json:"source" filter:"true" title:"User source"`
+	Type        UserType                           `db:"user_type" json:"user_type" filter:"true" title:"User type"`
+	ParentID    common.NullInt64                   `db:"parent_id" json:"-"`
+	Avatar      common.NullString                  `db:"avatar" json:"avatar" visible:"false"`
+	Status      UserStatus                         `db:"status" json:"status" filter:"true" title:"User status"`
+	CreatedAt   time.Time                          `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
+	UpdatedAt   time.Time                          `db:"updated_at" json:"updated_at" sort:"true" title:"Created at"`
+	resources   map[base.UserScope]map[string]bool `db:"-"`
+	roles       []Role                             `db:"-"`
 	//LastLogin   common.NullTime `db:"last_login" json:"last_login"`
 
 	refreshToken bool `db:"-"`
@@ -143,7 +143,7 @@ func (u *User) Initialize() {
 }
 
 // GetResources for this user
-func (u *User) GetPermission() map[ScopePerm]map[string]bool {
+func (u *User) GetPermission() map[base.UserScope]map[string]bool {
 	if u.resources == nil {
 		r := u.GetRoles()
 		u.resources = NewAaaManager().GetPermissionMap(r...)
@@ -165,29 +165,29 @@ func (u *User) GetRoles() []Role {
 // if requesting for lower scope and user has upper scope, the the maximum scope
 // is returned, since the user with scope global, can do the scope self too
 // this is different when the check is done with ids included
-func (u *User) HasPerm(scope ScopePerm, perm string) (ScopePerm, bool) {
+func (u *User) HasPerm(scope base.UserScope, perm string) (base.UserScope, bool) {
 	if scope.IsValid() {
-		return ScopePermOwn, false
+		return base.ScopeSelf, false
 	}
 	var (
-		rScope ScopePerm = ScopePermOwn
+		rScope base.UserScope = base.ScopeSelf
 		rHas   bool
 	)
 	res := u.GetPermission()
 	switch scope {
-	case ScopePermOwn:
+	case base.ScopeSelf:
 		if res[scope][perm] {
 			rScope = scope
 			rHas = true
 		}
 		fallthrough
-	case ScopePermParent:
+	case base.ScopeParent:
 		if res[scope][perm] {
 			rScope = scope
 			rHas = true
 		}
 		fallthrough
-	case ScopePermGlobal:
+	case base.ScopeGlobal:
 		if res[scope][perm] {
 			rScope = scope
 			rHas = true
@@ -196,16 +196,9 @@ func (u *User) HasPerm(scope ScopePerm, perm string) (ScopePerm, bool) {
 	return rScope, rHas
 }
 
-// HasPermString the string version of the has perm
-// DO NOT USE IN CODE!
-func (u *User) HasPermString(scope string, perm string) (string, bool) {
-	s, ok := u.HasPerm(ScopePerm(scope), perm)
-	return string(s), ok
-}
-
 // HasPermOn check if user has permission on an object based on its owner id and its
 // parent id
-func (u *User) HasPermOn(perm string, ownerID, parentID int64, scopes ...ScopePerm) (ScopePerm, bool) {
+func (u *User) HasPermOn(perm string, ownerID, parentID int64, scopes ...base.UserScope) (base.UserScope, bool) {
 	res := u.GetPermission()
 	var (
 		self, parent, global bool
@@ -216,11 +209,11 @@ func (u *User) HasPermOn(perm string, ownerID, parentID int64, scopes ...ScopePe
 		global = true
 	} else {
 		for i := range scopes {
-			if scopes[i] == ScopePermOwn {
+			if scopes[i] == base.ScopeSelf {
 				self = true
-			} else if scopes[i] == ScopePermParent {
+			} else if scopes[i] == base.ScopeParent {
 				parent = true
-			} else if scopes[i] == ScopePermGlobal {
+			} else if scopes[i] == base.ScopeGlobal {
 				global = true
 			}
 		}
@@ -228,37 +221,25 @@ func (u *User) HasPermOn(perm string, ownerID, parentID int64, scopes ...ScopePe
 
 	if self {
 		if ownerID == u.ID {
-			if res[ScopePermOwn][perm] {
-				return ScopePermOwn, true
+			if res[base.ScopeSelf][perm] {
+				return base.ScopeSelf, true
 			}
 		}
 	}
 	if parent {
 		if parentID == u.ID {
-			if res[ScopePermParent][perm] {
-				return ScopePermParent, true
+			if res[base.ScopeParent][perm] {
+				return base.ScopeParent, true
 			}
 		}
 	}
 
 	if global {
-		if res[ScopePermGlobal][perm] {
-			return ScopePermGlobal, true
+		if res[base.ScopeGlobal][perm] {
+			return base.ScopeGlobal, true
 		}
 	}
-	return ScopePermOwn, false
-}
-
-// HasPermStringOn the has perm on string version
-// DO NOT USE IN CODE!
-func (u *User) HasPermStringOn(perm string, ownerID, parentID int64, scopes ...string) (string, bool) {
-	sc := make([]ScopePerm, len(scopes))
-	for i := range scopes {
-		sc[i] = ScopePerm(scopes[i])
-	}
-
-	s, ok := u.HasPermOn(perm, ownerID, parentID, sc...)
-	return string(s), ok
+	return base.ScopeSelf, false
 }
 
 // FormatStatus is the example status formatter

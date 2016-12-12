@@ -47,7 +47,7 @@ func (udt UserDataTable) Filter(u base.PermInterface) map[string]interface{} {
 
 	action := []string{}
 
-	if _, ok := u.HasPermStringOn("user_edit", udt.OwnerID, udt.ParentID, "global"); ok {
+	if _, ok := u.HasPermOn("user_edit", udt.OwnerID, udt.ParentID, base.ScopeGlobal); ok {
 		action = append(action, "edit")
 	}
 

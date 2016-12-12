@@ -83,7 +83,7 @@ func ({{ .GroupRec }} *{{ .StructName }}) Routes(r *echo.Echo, mountPoint string
 		{{end}}
 	}
 	{{ if $route.Resource }}
-	m{{ $key }} = append(m{{ $key }}, authz.AuthorizeGenerator("{{$route.Resource}}",aaa.ScopePerm("{{$route.Scope}}"))){{ end }}
+	m{{ $key }} = append(m{{ $key }}, authz.AuthorizeGenerator("{{$route.Resource}}",base.UserScope("{{$route.Scope}}"))){{ end }}
 	{{ if $route.RouteFuncMiddleware }}
 	m{{ $key }} = append(m{{ $key }}, {{ $.GroupRec }}.{{ $route.RouteFuncMiddleware|strip_type }}()...){{ end }}
 	{{ if $route.Payload }} // Make sure payload is the last middleware
