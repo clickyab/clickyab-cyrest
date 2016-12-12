@@ -10,6 +10,12 @@ import (
 // AUTO GENERATED CODE. DO NOT EDIT!
 
 const (
+	// UserProfileCorporationTableFull is the UserProfileCorporation table name
+	UserProfileCorporationTableFull = "user_profile_corporation"
+
+	// UserTableFull is the User table name
+	UserTableFull = "users"
+
 	// RolePermissionTableFull is the RolePermission table name
 	RolePermissionTableFull = "role_permission"
 
@@ -22,14 +28,8 @@ const (
 	// UserFinancialTableFull is the UserFinancial table name
 	UserFinancialTableFull = "user_financial"
 
-	// UserProfileCorporationTableFull is the UserProfileCorporation table name
-	UserProfileCorporationTableFull = "user_profile_corporation"
-
-	// UserTableFull is the User table name
-	UserTableFull = "users"
-
-	// UserCRMTableFull is the UserCRM table name
-	UserCRMTableFull = "user_crm"
+	// DomainTableFull is the Domain table name
+	DomainTableFull = "domains"
 
 	// UserProfilePersonalTableFull is the UserProfilePersonal table name
 	UserProfilePersonalTableFull = "user_profile_personal"
@@ -61,6 +61,22 @@ func NewAaaManagerFromTransaction(tx gorp.SqlExecutor) (*Manager, error) {
 
 // Initialize aaa package
 func (m *Manager) Initialize() {
+
+	m.AddTableWithName(
+		UserProfileCorporation{},
+		UserProfileCorporationTableFull,
+	).SetKeys(
+		false,
+		"UserID",
+	)
+
+	m.AddTableWithName(
+		User{},
+		UserTableFull,
+	).SetKeys(
+		true,
+		"ID",
+	)
 
 	m.AddTableWithName(
 		RolePermission{},
@@ -95,27 +111,11 @@ func (m *Manager) Initialize() {
 	)
 
 	m.AddTableWithName(
-		UserProfileCorporation{},
-		UserProfileCorporationTableFull,
-	).SetKeys(
-		false,
-		"UserID",
-	)
-
-	m.AddTableWithName(
-		User{},
-		UserTableFull,
+		Domain{},
+		DomainTableFull,
 	).SetKeys(
 		true,
 		"ID",
-	)
-
-	m.AddTableWithName(
-		UserCRM{},
-		UserCRMTableFull,
-	).SetKeys(
-		false,
-		"UserID",
 	)
 
 	m.AddTableWithName(
