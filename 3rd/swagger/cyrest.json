@@ -248,9 +248,16 @@
 					{
 						"description": "",
 						"in": "query",
-						"name": "source",
+						"name": "sort",
 						"required": false,
 						"type": "string"
+					},
+					{
+						"description": " search the email field",
+						"in": "query",
+						"name": "email",
+						"required": false,
+						"type": "string "
 					},
 					{
 						"description": "",
@@ -262,16 +269,9 @@
 					{
 						"description": "",
 						"in": "query",
-						"name": "sort",
+						"name": "source",
 						"required": false,
 						"type": "string"
-					},
-					{
-						"description": " search the email field",
-						"in": "query",
-						"name": "email",
-						"required": false,
-						"type": "string "
 					},
 					{
 						"description": "the security token, get it from login route",

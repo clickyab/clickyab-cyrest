@@ -3,7 +3,7 @@ info:
   version: 1.0.0
   title: The Cyrest API
   description: Auto genertaed Cyrest API
-host: 127.0.0.1
+host: localhost
 basePath: /api
 schemes:
 - http
@@ -49,16 +49,6 @@ paths:
             title: forbidden
             type: object
       parameters:
-      - name: source
-        type: string
-        description: ""
-        in: query
-        required: false
-      - name: status
-        type: string
-        description: ""
-        in: query
-        required: false
       - name: sort
         type: string
         description: ""
@@ -67,6 +57,16 @@ paths:
       - name: email
         type: 'string '
         description: ' search the email field'
+        in: query
+        required: false
+      - name: status
+        type: string
+        description: ""
+        in: query
+        required: false
+      - name: source
+        type: string
+        description: ""
         in: query
         required: false
       - name: token

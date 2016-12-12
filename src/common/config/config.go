@@ -71,7 +71,7 @@ type AppConfig struct {
 
 func defaultLayer() onion.DefaultLayer {
 	res := onion.NewDefaultLayer()
-	assert.Nil(res.SetDefault("site", "cyrest.loc"))
+	assert.Nil(res.SetDefault("site", "localhost"))
 	assert.Nil(res.SetDefault("mount_point", "/api"))
 	assert.Nil(res.SetDefault("devel_mode", true))
 	assert.Nil(res.SetDefault("cors", true))

@@ -5,6 +5,10 @@ import (
 	"common/middlewares"
 	"sync"
 
+	"common/assert"
+	"common/utils"
+	"path/filepath"
+
 	"gopkg.in/labstack/echo.v3"
 )
 
@@ -40,8 +44,10 @@ func Initialize(mountPoint string) *echo.Echo {
 	})
 	//engine.SetLogLevel(log.DEBUG)
 	if config.Config.DevelMode {
+		assert.Nil(utils.ChangeInFile(filepath.Join(config.Config.SwaggerRoot, "cyrest.yaml"), "swaggerbase", config.Config.Site))
+
 		engine.Static("/swagger", config.Config.SwaggerRoot)
 	}
-	engine.Logger=NewLogger()
+	engine.Logger = NewLogger()
 	return engine
 }
