@@ -57,6 +57,7 @@ type User struct {
 	Password    string                  `db:"password" json:"-"`
 	OldPassword common.NullString                  `db:"old_password" json:"-"`
 	AccessToken string                             `db:"access_token" json:"-"`
+	Type        UserType                           `db:"user_type" json:"user_type" filter:"true" title:"User type"`
 	ParentID    common.NullInt64                   `db:"parent_id" json:"-"`
 	Avatar      common.NullString                  `db:"avatar" json:"avatar" visible:"false"`
 	Status      UserStatus                         `db:"status" json:"status" filter:"true" title:"User status"`
@@ -331,6 +332,7 @@ func (m *Manager) RegisterUser(email, password string) (u *User, err error) {
 		Email:    email,
 		Password:password,
 		Status:   UserStatusRegistered,
+		Type: UserTypePersonal,
 	}
 	err = m.Begin()
 	if err != nil {
