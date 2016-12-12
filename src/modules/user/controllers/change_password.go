@@ -36,7 +36,7 @@ func (u *Controller) changePassword(ctx echo.Context) error {
 	if !usr.VerifyPassword(pl.OldPassword) {
 		return u.BadResponse(ctx, trans.E("old password is not true"))
 	}
-	usr.Password.String = pl.NewPassword
+	usr.Password = pl.NewPassword
 
 	m := aaa.NewAaaManager()
 	assert.Nil(m.UpdateUser(usr))

@@ -699,6 +699,13 @@
 					{
 						"description": "",
 						"in": "query",
+						"name": "sort",
+						"required": false,
+						"type": "string"
+					},
+					{
+						"description": "",
+						"in": "query",
 						"name": "status",
 						"required": false,
 						"type": "string"
@@ -709,13 +716,6 @@
 						"name": "email",
 						"required": false,
 						"type": "string "
-					},
-					{
-						"description": "",
-						"in": "query",
-						"name": "sort",
-						"required": false,
-						"type": "string"
 					},
 					{
 						"description": "the security token, get it from login route",
