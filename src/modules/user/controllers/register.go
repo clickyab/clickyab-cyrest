@@ -3,6 +3,7 @@ package user
 import (
 	"modules/user/aaa"
 
+	"modules/misc/trans"
 
 	"gopkg.in/labstack/echo.v3"
 )
@@ -10,8 +11,8 @@ import (
 //@Validate{
 // }
 type registrationPayload struct {
-	Email       string         `json:"email" validate:"email"`
-	Password    string         `json:"password" validate:"gt=5"`
+	Email    string `json:"email" validate:"email"`
+	Password string `json:"password" validate:"gt=5"`
 }
 
 // registerUser register user in system
@@ -28,7 +29,7 @@ func (u *Controller) registerUser(ctx echo.Context) error {
 
 	user, err := m.RegisterUser(pl.Email, pl.Password)
 	if err != nil {
-		return u.BadResponse(ctx, err)
+		return u.BadResponse(ctx, trans.E("duplicate user"))
 	}
 
 	token := m.GetNewToken(user, ctx.Request().UserAgent(), ctx.RealIP())

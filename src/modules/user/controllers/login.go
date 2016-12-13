@@ -45,7 +45,6 @@ func createLoginResponse(u *aaa.User, t string) responseLoginOK {
 // }
 func (u *Controller) loginUser(ctx echo.Context) error {
 	pl := u.MustGetPayload(ctx).(*loginPayload)
-	fmt.Printf("%+v", pl)
 	m := aaa.NewAaaManager()
 
 	usr, err := m.FindUserByEmail(pl.Email)

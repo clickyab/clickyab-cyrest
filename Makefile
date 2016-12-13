@@ -57,7 +57,7 @@ run-server: server
 	sudo setcap cap_net_bind_service=+ep $(BIN)/server
 	$(BIN)/server
 
-watch-server:
+watch-server: codegen
 	make watch WATCH=server
 
 #
@@ -107,7 +107,7 @@ migcp:
 	cp $(ROOT)/src/modules/*/migrations/*.sql $(ROOT)/db/migrations
 
 migration: migcp tools-gobindata
-	cd $(ROOT) && $(BIN)/go-bindata -o ./src/migration/migration.go -nomemcopy=true -pkg=main ./db/migrations/...
+	cd $(ROOT) && $(BIN)/go-bindata -o ./src/migration/migration.gen.go -nomemcopy=true -pkg=main ./db/migrations/...
 
 tools-migrate: $(BIN)/gb migration
 	$(BUILD) migration
@@ -188,4 +188,4 @@ restore: $(GB)
 conditional-restore:
 	$(DIFF) $(ROOT)/vendor/manifest $(ROOT)/vendor/manifest.done || make restore
 
-docker-build: conditional-restore all
+docker-build: conditional-restore codegen all

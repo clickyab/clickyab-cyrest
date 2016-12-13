@@ -8,3 +8,6 @@ pkg/
 /tmp
 *.iml
 *.retry
+
+*.gen.go
+3rd/swagger/cyrest.*

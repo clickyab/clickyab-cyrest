@@ -54,7 +54,7 @@ const (
 type User struct {
 	ID          int64                              `db:"id" json:"id" sort:"true" title:"ID"`
 	Email       string                             `db:"email" json:"email" search:"true" title:"Email"`
-	Password    string                  `db:"password" json:"-"`
+	Password    string                             `db:"password" json:"-"`
 	OldPassword common.NullString                  `db:"old_password" json:"-"`
 	AccessToken string                             `db:"access_token" json:"-"`
 	Type        UserType                           `db:"user_type" json:"user_type" filter:"true" title:"User type"`
@@ -229,41 +229,40 @@ func (m *Manager) FillUserDataTableArray(u base.PermInterfaceComplete, filters m
 	var res UserDataTableArray
 	var where []string
 
-	countQuery:="SELECT COUNT(id) FROM users"
-	query:="SELECT users.*,users.id AS owner_id_dt,users.parent_id as parent_id_dt FROM users"
-	for field,value:=range filters{
-		where=append(where,fmt.Sprintf("%s=%s",field,"?"))
-		params=append(params,value)
+	countQuery := "SELECT COUNT(id) FROM users"
+	query := "SELECT users.*,users.id AS owner_id_dt,users.parent_id as parent_id_dt FROM users"
+	for field, value := range filters {
+		where = append(where, fmt.Sprintf("%s=%s", field, "?"))
+		params = append(params, value)
 	}
 
-	for column,val:=range search{
-		where=append(where,fmt.Sprintf("%s=%s",column,"?"))
-		params=append(params,val)
+	for column, val := range search {
+		where = append(where, fmt.Sprintf("%s=%s", column, "?"))
+		params = append(params, val)
 	}
 
+	currentUserID := u.GetID()
+	highestScope := u.GetCurrentScope()
 
-	currentUserID:=u.GetID()
-	highestScope:=u.GetCurrentScope()
-
-	if highestScope==base.ScopeSelf{
-		where=append(where,"users.id=?")
-		params=append(params,currentUserID)
-	}else if highestScope==base.ScopeParent {
-		where=append(where,"users.parent_id=?")
-		params=append(params,currentUserID)
+	if highestScope == base.ScopeSelf {
+		where = append(where, "users.id=?")
+		params = append(params, currentUserID)
+	} else if highestScope == base.ScopeParent {
+		where = append(where, "users.parent_id=?")
+		params = append(params, currentUserID)
 	}
 
 	//check for perm
-	if len(where) > 0{
-		query+=" WHERE "
-		countQuery+=" WHERE "
+	if len(where) > 0 {
+		query += " WHERE "
+		countQuery += " WHERE "
 	}
-	query+=strings.Join(where," AND ")
-	countQuery+=strings.Join(where," AND ")
-	limit:=c
-	offset:=(p-1)*c
+	query += strings.Join(where, " AND ")
+	countQuery += strings.Join(where, " AND ")
+	limit := c
+	offset := (p - 1) * c
 
-	query+=fmt.Sprintf(" ORDER BY %s %s LIMIT %d OFFSET %d",sort,order,limit,offset)
+	query += fmt.Sprintf(" ORDER BY %s %s LIMIT %d OFFSET %d", sort, order, limit, offset)
 	fmt.Println(query)
 	fmt.Println(countQuery)
 	/*_,err:=m.GetDbMap().Select(
@@ -277,7 +276,7 @@ func (m *Manager) FillUserDataTableArray(u base.PermInterfaceComplete, filters m
 		params...,
 	)
 	assert.Nil(err)*/
-	return res,count
+	return res, count
 
 }
 
@@ -338,9 +337,9 @@ func (m *Manager) GetNewToken(user *User, ua, ip string) string {
 func (m *Manager) RegisterUser(email, password string) (u *User, err error) {
 	u = &User{
 		Email:    email,
-		Password:password,
+		Password: password,
 		Status:   UserStatusRegistered,
-		Type: UserTypePersonal,
+		Type:     UserTypePersonal,
 	}
 	err = m.Begin()
 	if err != nil {
