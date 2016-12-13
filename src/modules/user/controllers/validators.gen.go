@@ -10,3 +10,7 @@ import (
 func (pl changePasswordPayload) Validate(ctx echo.Context) error {
 	return validator.New().Struct(pl)
 }
+
+func (pl registrationPayload) Validate(ctx echo.Context) error {
+	return validator.New().Struct(pl)
+}

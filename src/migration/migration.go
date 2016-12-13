@@ -104,7 +104,7 @@ func dbMigrations20160117193701_user_baseSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "db/migrations/20160117193701_user_base.sql", size: 4773, mode: os.FileMode(420), modTime: time.Unix(1481611438, 0)}
+	info := bindataFileInfo{name: "db/migrations/20160117193701_user_base.sql", size: 4773, mode: os.FileMode(420), modTime: time.Unix(1481612466, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

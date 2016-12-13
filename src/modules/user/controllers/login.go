@@ -7,6 +7,7 @@ import (
 
 	"gopkg.in/go-playground/validator.v9"
 	"gopkg.in/labstack/echo.v3"
+	"fmt"
 )
 
 var (
@@ -46,9 +47,11 @@ func createLoginResponse(u *aaa.User, t string) responseLoginOK {
 // }
 func (u *Controller) loginUser(ctx echo.Context) error {
 	pl := u.MustGetPayload(ctx).(*loginPayload)
+	fmt.Printf("%+v",pl)
 	m := aaa.NewAaaManager()
 
 	usr, err := m.FindUserByEmail(pl.Email)
+	fmt.Println(err)
 	if err != nil {
 		return u.BadResponse(ctx, userPasswordError)
 	}

@@ -6,6 +6,10 @@
 	"definitions": {
 		"aaa_Session": {
 			"properties": {
+				"created_at": {
+					"format": "dateTime",
+					"type": "string"
+				},
 				"current": {
 					"type": "boolean"
 				},
@@ -95,17 +99,6 @@
 			},
 			"type": "object"
 		},
-		"user_corporation": {
-			"properties": {
-				"company_name": {
-					"type": "string"
-				},
-				"phone": {
-					"type": "string"
-				}
-			},
-			"type": "object"
-		},
 		"user_forgotPayload": {
 			"properties": {
 				"email": {
@@ -154,38 +147,12 @@
 			},
 			"type": "object"
 		},
-		"user_personal": {
-			"properties": {
-				"cellphone": {
-					"type": "string"
-				},
-				"first_name": {
-					"type": "string"
-				},
-				"gender": {
-					"type": "string"
-				},
-				"last_name": {
-					"type": "string"
-				}
-			},
-			"type": "object"
-		},
 		"user_registrationPayload": {
 			"properties": {
-				"corporation": {
-					"$ref": "#/definitions/user_corporation"
-				},
 				"email": {
 					"type": "string"
 				},
 				"password": {
-					"type": "string"
-				},
-				"personal": {
-					"$ref": "#/definitions/user_personal"
-				},
-				"source": {
 					"type": "string"
 				}
 			},
@@ -252,42 +219,14 @@
 				]
 			}
 		},
-		"/user": {
+		"/user/authenticate/{action}": {
 			"get": {
-				"description": "",
+				"description": "reserveUser is the route for reserve a email/phone for registration",
 				"parameters": [
 					{
 						"description": "",
-						"in": "query",
-						"name": "source",
-						"required": false,
-						"type": "string"
-					},
-					{
-						"description": "",
-						"in": "query",
-						"name": "sort",
-						"required": false,
-						"type": "string"
-					},
-					{
-						"description": "",
-						"in": "query",
-						"name": "status",
-						"required": false,
-						"type": "string"
-					},
-					{
-						"description": " search the email field",
-						"in": "query",
-						"name": "email",
-						"required": false,
-						"type": "string "
-					},
-					{
-						"description": "the security token, get it from login route",
-						"in": "header",
-						"name": "token",
+						"in": "path",
+						"name": "action",
 						"required": true,
 						"type": "string"
 					}
@@ -297,31 +236,13 @@
 						"description": "",
 						"produce": "application/json",
 						"schema": {
-							"$ref": "#/definitions/user_listUserResponse"
+							"$ref": "#/definitions/base_NormalResponse"
 						}
 					},
-					"401": {
-						"description": "you are not authorized",
+					"400": {
+						"description": "",
 						"schema": {
-							"properties": {
-								"error": {
-									"type": "string"
-								}
-							},
-							"title": "not_authorized",
-							"type": "object"
-						}
-					},
-					"403": {
-						"description": "forbidden, you have no access here",
-						"schema": {
-							"properties": {
-								"error": {
-									"type": "string"
-								}
-							},
-							"title": "forbidden",
-							"type": "object"
+							"$ref": "#/definitions/base_ErrorResponseSimple"
 						}
 					}
 				},
@@ -545,6 +466,29 @@
 				]
 			}
 		},
+		"/user/oauth/callback": {
+			"get": {
+				"description": "reserveUser is the route for reserve a email/phone for registration",
+				"responses": {
+					"200": {
+						"description": "",
+						"produce": "application/json",
+						"schema": {
+							"$ref": "#/definitions/base_NormalResponse"
+						}
+					},
+					"400": {
+						"description": "",
+						"schema": {
+							"$ref": "#/definitions/base_ErrorResponseSimple"
+						}
+					}
+				},
+				"tags": [
+					"user"
+				]
+			}
+		},
 		"/user/register": {
 			"post": {
 				"description": "registerUser register user in system",
@@ -716,6 +660,77 @@
 						"description": "",
 						"schema": {
 							"$ref": "#/definitions/base_ErrorResponseSimple"
+						}
+					},
+					"401": {
+						"description": "you are not authorized",
+						"schema": {
+							"properties": {
+								"error": {
+									"type": "string"
+								}
+							},
+							"title": "not_authorized",
+							"type": "object"
+						}
+					},
+					"403": {
+						"description": "forbidden, you have no access here",
+						"schema": {
+							"properties": {
+								"error": {
+									"type": "string"
+								}
+							},
+							"title": "forbidden",
+							"type": "object"
+						}
+					}
+				},
+				"tags": [
+					"user"
+				]
+			}
+		},
+		"/user/users": {
+			"get": {
+				"description": "",
+				"parameters": [
+					{
+						"description": "",
+						"in": "query",
+						"name": "sort",
+						"required": false,
+						"type": "string"
+					},
+					{
+						"description": "",
+						"in": "query",
+						"name": "status",
+						"required": false,
+						"type": "string"
+					},
+					{
+						"description": " search the email field",
+						"in": "query",
+						"name": "email",
+						"required": false,
+						"type": "string "
+					},
+					{
+						"description": "the security token, get it from login route",
+						"in": "header",
+						"name": "token",
+						"required": true,
+						"type": "string"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "",
+						"produce": "application/json",
+						"schema": {
+							"$ref": "#/definitions/user_listUserResponse"
 						}
 					},
 					"401": {
