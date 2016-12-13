@@ -8,7 +8,7 @@ CREATE TABLE users
     email VARCHAR(50) NOT NULL UNIQUE ,
     password VARCHAR(60)NOT NULL ,
     old_password VARCHAR(30),
-    access_token VARCHAR(30) NOT NULL ,
+    access_token VARCHAR(60) NOT NULL ,
     user_type ENUM('personal', 'corporation'),
     parent_id INT(11),
     avatar VARCHAR(160),

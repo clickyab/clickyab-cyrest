@@ -7,6 +7,8 @@ import (
 	"gopkg.in/go-playground/validator.v9"
 	"common/middlewares"
 	"modules/misc/trans"
+	"strconv"
+	"fmt"
 )
 
 type rolePayLoad struct {
@@ -52,4 +54,29 @@ func (u *Controller) createRole(ctx echo.Context) error {
 		role,
 	)
 	return nil
+}
+
+// deleteRole delete specified role in system
+// @Route {
+// 		url = /role/delete/:id
+// 		resource = delete_role:global
+//		method = delete
+//		:id = true, int, id of role to be deleted
+//		200 = aaa.Role
+//		400 = base.ErrorResponseSimple
+// }
+func (u *Controller) deleteRole(ctx echo.Context) (err error) {
+	fmt.Println("here")
+	//var role *aaa.Role
+	var m= aaa.NewAaaManager()
+	ID,err:=strconv.ParseInt(ctx.Param("id"),10,0)
+	role,err:=m.DeleteRole(ID)
+	if err!=nil{
+		return u.BadResponse(ctx,trans.E("can not delete role"))
+	}
+	return u.OKResponse(
+		ctx,
+		role,
+	)
+
 }

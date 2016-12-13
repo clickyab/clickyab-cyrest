@@ -69,3 +69,12 @@ func (m *Manager) RegisterRolePermission(roleID int64,perm map[base.UserScope][]
 	}
 	return m.GetDbMap().Insert(rolePermission...)
 }
+
+func (m *Manager) DeleteRolePermissionByRoleID(roleID int64) error{
+	query:=fmt.Sprintf("DELETE FROM %s WHERE role_id=?",RolePermissionTableFull)
+	_,err:=m.GetDbMap().Exec(
+		query,
+		roleID,
+	)
+	return err
+}
