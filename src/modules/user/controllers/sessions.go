@@ -64,7 +64,7 @@ func (u *Controller) terminateSession(ctx echo.Context) error {
 	if inner != inner2 {
 		return u.BadResponse(ctx, errors.New("the token is invalid"))
 	}
-	if other ==token{
+	if other == token {
 		return u.BadResponse(ctx, errors.New("cant kill current session"))
 	}
 

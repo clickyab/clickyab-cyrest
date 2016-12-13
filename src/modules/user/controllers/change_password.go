@@ -1,13 +1,10 @@
 package user
 
 import (
-	"modules/user/aaa"
-
 	"common/assert"
-
-	"modules/user/middlewares"
-
 	"modules/misc/trans"
+	"modules/user/aaa"
+	"modules/user/middlewares"
 
 	"gopkg.in/labstack/echo.v3"
 )
