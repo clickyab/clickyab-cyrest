@@ -16,17 +16,14 @@ const (
 	// RoleTableFull is the Role table name
 	RoleTableFull = "roles"
 
-	// UserFinancialTableFull is the UserFinancial table name
-	UserFinancialTableFull = "user_financial"
-
 	// UserProfileCorporationTableFull is the UserProfileCorporation table name
 	UserProfileCorporationTableFull = "user_profile_corporation"
 
+	// UserProfilePersonalTableFull is the UserProfilePersonal table name
+	UserProfilePersonalTableFull = "user_profile_personal"
+
 	// UserRoleTableFull is the UserRole table name
 	UserRoleTableFull = "user_role"
-
-	// UserTableFull is the User table name
-	UserTableFull = "users"
 
 	// RolePermissionTableFull is the RolePermission table name
 	RolePermissionTableFull = "role_permission"
@@ -34,8 +31,11 @@ const (
 	// UserAttributesTableFull is the UserAttributes table name
 	UserAttributesTableFull = "user_attributes"
 
-	// UserProfilePersonalTableFull is the UserProfilePersonal table name
-	UserProfilePersonalTableFull = "user_profile_personal"
+	// UserFinancialTableFull is the UserFinancial table name
+	UserFinancialTableFull = "user_financial"
+
+	// UserTableFull is the User table name
+	UserTableFull = "users"
 )
 
 // Manager is the model manager for aaa package
@@ -79,16 +79,16 @@ func (m *Manager) Initialize() {
 	)
 
 	m.AddTableWithName(
-		UserFinancial{},
-		UserFinancialTableFull,
+		UserProfileCorporation{},
+		UserProfileCorporationTableFull,
 	).SetKeys(
-		true,
-		"ID",
+		false,
+		"UserID",
 	)
 
 	m.AddTableWithName(
-		UserProfileCorporation{},
-		UserProfileCorporationTableFull,
+		UserProfilePersonal{},
+		UserProfilePersonalTableFull,
 	).SetKeys(
 		false,
 		"UserID",
@@ -101,14 +101,6 @@ func (m *Manager) Initialize() {
 		false,
 		"UserID",
 		"RoleID",
-	)
-
-	m.AddTableWithName(
-		User{},
-		UserTableFull,
-	).SetKeys(
-		true,
-		"ID",
 	)
 
 	m.AddTableWithName(
@@ -128,11 +120,19 @@ func (m *Manager) Initialize() {
 	)
 
 	m.AddTableWithName(
-		UserProfilePersonal{},
-		UserProfilePersonalTableFull,
+		UserFinancial{},
+		UserFinancialTableFull,
 	).SetKeys(
-		false,
-		"UserID",
+		true,
+		"ID",
+	)
+
+	m.AddTableWithName(
+		User{},
+		UserTableFull,
+	).SetKeys(
+		true,
+		"ID",
 	)
 
 }
