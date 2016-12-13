@@ -22,9 +22,9 @@ func AuthorizeGenerator(resource string, scope base.UserScope) echo.MiddlewareFu
 			u := MustGetUser(c)
 
 			//check if the user has the specified perm
-			if _, ok := u.HasPerm(scope, resource); ok {
+			if _, ok := u.HasPerm(scope, resource); !ok {
 				c.Request().Header.Set("error", st.Error)
-				c.JSON(
+				return c.JSON(
 					http.StatusForbidden,
 					st,
 				)
