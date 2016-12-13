@@ -5,9 +5,9 @@ import (
 
 	"modules/misc/trans"
 
-	"gopkg.in/go-playground/validator.v9"
-	"gopkg.in/labstack/echo.v3"
 	"fmt"
+
+	"gopkg.in/labstack/echo.v3"
 )
 
 var (
@@ -20,13 +20,11 @@ type responseLoginOK struct {
 	AccessToken string `json:"token"`
 }
 
+// @Validate {
+// }
 type loginPayload struct {
-	Email    string `json:"email" validate:"email"`
-	Password string `json:"password" validate:"gt=6"`
-}
-
-func (lp *loginPayload) Validate(ctx echo.Context) error {
-	return validator.New().Struct(lp)
+	Email    string `json:"email" validate:"email" error:"email is invalid"`
+	Password string `json:"password" validate:"gt=5" error:"password is too short"`
 }
 
 func createLoginResponse(u *aaa.User, t string) responseLoginOK {
@@ -47,7 +45,7 @@ func createLoginResponse(u *aaa.User, t string) responseLoginOK {
 // }
 func (u *Controller) loginUser(ctx echo.Context) error {
 	pl := u.MustGetPayload(ctx).(*loginPayload)
-	fmt.Printf("%+v",pl)
+	fmt.Printf("%+v", pl)
 	m := aaa.NewAaaManager()
 
 	usr, err := m.FindUserByEmail(pl.Email)
@@ -56,7 +54,7 @@ func (u *Controller) loginUser(ctx echo.Context) error {
 		return u.BadResponse(ctx, userPasswordError)
 	}
 
-	if !usr.VerifyPassword(pl.Password) || usr.Status==aaa.UserStatusBlocked{
+	if !usr.VerifyPassword(pl.Password) || usr.Status == aaa.UserStatusBlocked {
 		return u.BadResponse(ctx, userPasswordError)
 	}
 

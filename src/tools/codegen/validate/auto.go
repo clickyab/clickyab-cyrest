@@ -48,14 +48,14 @@ import (
 )
 
 	{{ range $m := .Data }}
-	func ({{ $m.Rec }} {{ $m.Type }}) Validate(ctx echo.Context ) error {
+	func ({{ $m.Rec }} *{{ $m.Type }}) Validate(ctx echo.Context ) error {
 		errs :=  validator.New().Struct({{ $m.Rec }})
 		if errs == nil {
 			return nil
 		}
 		res := middlewares.GroupError{}
-		for i := range errs.(validator.ValidationErrors) {
-			switch i { {{ range $f := $m.Map }}
+		for _, i := range errs.(validator.ValidationErrors) {
+			switch i.Field() { {{ range $f := $m.Map }}
 				case "{{ $f.Name }}":
 					res["{{ $f.Json }}"] = "{{ $f.Err }}"
 			{{ end }}

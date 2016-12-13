@@ -360,6 +360,11 @@ paths:
             title: forbidden
             type: object
       parameters:
+      - name: sort
+        type: string
+        description: ""
+        in: query
+        required: false
       - name: status
         type: string
         description: ""
@@ -368,11 +373,6 @@ paths:
       - name: email
         type: 'string '
         description: ' search the email field'
-        in: query
-        required: false
-      - name: sort
-        type: string
-        description: ""
         in: query
         required: false
       - name: token
