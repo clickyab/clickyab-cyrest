@@ -14,6 +14,7 @@ type Session struct {
 	UserAgent   string        `json:"user_agent"`
 	IP          string        `json:"ip"`
 	ExpireAfter time.Duration `json:"expire_after"`
+	CreatedAt   time.Time     `json:"created_at"`
 }
 
 // Sessions is slice of session
@@ -27,6 +28,8 @@ func getSession(st string) Session {
 	s.Value, _ = aredis.GetHashKey(s.Key, "token", false, 0)
 	s.UserAgent, _ = aredis.GetHashKey(s.Key, "ua", false, 0)
 	s.IP, _ = aredis.GetHashKey(s.Key, "ip", false, 0)
+	tmp, _ := aredis.GetHashKey(s.Key, "date", false, 0)
+	s.CreatedAt, _ = time.Parse(time.RFC3339, tmp)
 	s.ExpireAfter, _ = aredis.GetExpire(s.Key)
 
 	return s
