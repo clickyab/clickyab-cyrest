@@ -10,14 +10,17 @@ import (
 // AUTO GENERATED CODE. DO NOT EDIT!
 
 const (
-	// RolePermissionTableFull is the RolePermission table name
-	RolePermissionTableFull = "role_permission"
+	// UserRoleTableFull is the UserRole table name
+	UserRoleTableFull = "user_role"
+
+	// RoleTableFull is the Role table name
+	RoleTableFull = "roles"
 
 	// UserAttributesTableFull is the UserAttributes table name
 	UserAttributesTableFull = "user_attributes"
 
-	// UserProfileCorporationTableFull is the UserProfileCorporation table name
-	UserProfileCorporationTableFull = "user_profile_corporation"
+	// UserFinancialTableFull is the UserFinancial table name
+	UserFinancialTableFull = "user_financial"
 
 	// UserProfilePersonalTableFull is the UserProfilePersonal table name
 	UserProfilePersonalTableFull = "user_profile_personal"
@@ -25,14 +28,11 @@ const (
 	// DomainTableFull is the Domain table name
 	DomainTableFull = "domains"
 
-	// RoleTableFull is the Role table name
-	RoleTableFull = "roles"
+	// RolePermissionTableFull is the RolePermission table name
+	RolePermissionTableFull = "role_permission"
 
-	// UserFinancialTableFull is the UserFinancial table name
-	UserFinancialTableFull = "user_financial"
-
-	// UserRoleTableFull is the UserRole table name
-	UserRoleTableFull = "user_role"
+	// UserProfileCorporationTableFull is the UserProfileCorporation table name
+	UserProfileCorporationTableFull = "user_profile_corporation"
 
 	// UserTableFull is the User table name
 	UserTableFull = "users"
@@ -63,8 +63,17 @@ func NewAaaManagerFromTransaction(tx gorp.SqlExecutor) (*Manager, error) {
 func (m *Manager) Initialize() {
 
 	m.AddTableWithName(
-		RolePermission{},
-		RolePermissionTableFull,
+		UserRole{},
+		UserRoleTableFull,
+	).SetKeys(
+		false,
+		"UserID",
+		"RoleID",
+	)
+
+	m.AddTableWithName(
+		Role{},
+		RoleTableFull,
 	).SetKeys(
 		true,
 		"ID",
@@ -79,11 +88,11 @@ func (m *Manager) Initialize() {
 	)
 
 	m.AddTableWithName(
-		UserProfileCorporation{},
-		UserProfileCorporationTableFull,
+		UserFinancial{},
+		UserFinancialTableFull,
 	).SetKeys(
-		false,
-		"UserID",
+		true,
+		"ID",
 	)
 
 	m.AddTableWithName(
@@ -103,28 +112,19 @@ func (m *Manager) Initialize() {
 	)
 
 	m.AddTableWithName(
-		Role{},
-		RoleTableFull,
+		RolePermission{},
+		RolePermissionTableFull,
 	).SetKeys(
 		true,
 		"ID",
 	)
 
 	m.AddTableWithName(
-		UserFinancial{},
-		UserFinancialTableFull,
-	).SetKeys(
-		true,
-		"ID",
-	)
-
-	m.AddTableWithName(
-		UserRole{},
-		UserRoleTableFull,
+		UserProfileCorporation{},
+		UserProfileCorporationTableFull,
 	).SetKeys(
 		false,
 		"UserID",
-		"RoleID",
 	)
 
 	m.AddTableWithName(

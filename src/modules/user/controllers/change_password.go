@@ -29,7 +29,7 @@ type changePasswordPayload struct {
 //		400	=	base.ErrorResponseSimple
 // }
 func (u *Controller) changePassword(ctx echo.Context) error {
-	pl := u.MustGetPayload(ctx).(changePasswordPayload)
+	pl := u.MustGetPayload(ctx).(*changePasswordPayload)
 
 	//var usr *aaa.User
 	usr := authz.MustGetUser(ctx)
@@ -40,5 +40,5 @@ func (u *Controller) changePassword(ctx echo.Context) error {
 
 	m := aaa.NewAaaManager()
 	assert.Nil(m.UpdateUser(usr))
-	return u.OKResponse(ctx, trans.T("change password successful"))
+	return u.OKResponse(ctx, nil)
 }
