@@ -1,18 +1,16 @@
 package user
 
 import (
+	"encoding/json"
 	"fmt"
+	"modules/user/aaa"
 	"modules/user/config"
 	"net/http"
 
-	"encoding/json"
-
-	"modules/user/aaa"
-
 	"github.com/Sirupsen/logrus"
-	"github.com/labstack/echo"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
+	"gopkg.in/labstack/echo.v3"
 )
 
 const (
@@ -137,26 +135,24 @@ func (u *Controller) oauthCallback(ctx echo.Context) error {
 			return u.BadResponse(ctx, userPasswordError)
 		}
 
-		if !usr.VerifyPassword(pl.Password) || usr.Status==aaa.UserStatusBlocked{
+		if !usr.VerifyPassword(pl.Password) || usr.Status == aaa.UserStatusBlocked {
 			return u.BadResponse(ctx, userPasswordError)
 		}
 
-		token = m.GetNewToken(usr.AccessToken)
-		if err!=nil{
+		token = m.GetNewToken(usr, ctx.Request().UserAgent(), ctx.RealIP())
+		if err != nil {
 			return ctx.Redirect(http.StatusFound, redirect+"?error="+err.Error())
 		}
 		ctx.Redirect(http.StatusFound, redirect+"?token="+token)
 	case "register":
-		err=u.registerUser(ctx)
+		err = u.registerUser(ctx)
 		if err != nil {
 			return ctx.Redirect(http.StatusFound, redirect+"?error=already_regsitered")
 
 		}
-		token := m.GetNewToken(usr.AccessToken)
+		token := m.GetNewToken(usr, ctx.Request().UserAgent(), ctx.RealIP())
 		return ctx.Redirect(http.StatusFound, redirect+"?token="+token)
 	}
 
 	return nil
 }
-
-

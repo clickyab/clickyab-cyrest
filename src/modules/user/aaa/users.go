@@ -289,6 +289,14 @@ func (m *Manager) GetNewToken(user *User, ua, ip string) string {
 			ucfg.Cfg.TokenTimeout,
 		),
 	)
+	assert.Nil(
+		aredis.StoreHashKey(
+			t,
+			"date",
+			time.Now().Format(time.RFC3339),
+			ucfg.Cfg.TokenTimeout,
+		),
+	)
 	return t
 }
 
