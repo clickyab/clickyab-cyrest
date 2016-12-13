@@ -3,8 +3,6 @@ package user
 import (
 	"modules/user/aaa"
 
-	"modules/misc/trans"
-
 	"gopkg.in/labstack/echo.v3"
 )
 
@@ -29,7 +27,7 @@ func (u *Controller) registerUser(ctx echo.Context) error {
 
 	user, err := m.RegisterUser(pl.Email, pl.Password)
 	if err != nil {
-		return u.BadResponse(ctx, trans.E("duplicate user"))
+		return u.BadResponse(ctx, err)
 	}
 
 	token := m.GetNewToken(user, ctx.Request().UserAgent(), ctx.RealIP())

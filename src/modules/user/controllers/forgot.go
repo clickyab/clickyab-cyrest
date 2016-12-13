@@ -9,10 +9,9 @@ import (
 
 	"common/assert"
 
-	"modules/misc/trans"
-
 	"gopkg.in/go-playground/validator.v9"
 	"gopkg.in/labstack/echo.v3"
+	"modules/misc/trans"
 )
 
 type forgotPayload struct {
