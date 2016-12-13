@@ -25,7 +25,8 @@ CREATE INDEX users_users_id_fk ON users (parent_id);
 CREATE TABLE roles
 (
     id INT(11) PRIMARY KEY NOT NULL AUTO_INCREMENT,
-    name VARCHAR(255),
+    name VARCHAR(60) NOT NULL UNIQUE,
+    description VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT '0000-00-00 00:00:00' NOT NULL
 );
@@ -131,3 +132,12 @@ CREATE INDEX user_role_users_id_fk ON user_role (user_id);
 
 -- +migrate Down
 -- SQL section 'Down' is executed when this migration is rolled back
+
+DROP TABLE user_role;
+DROP TABLE user_profile_personal;
+DROP TABLE user_profile_corporation;
+DROP TABLE user_financial;
+DROP TABLE user_attributes;
+DROP TABLE role_permission;
+DROP TABLE roles;
+DROP TABLE users;

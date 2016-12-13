@@ -141,7 +141,7 @@ func (u *User) GetRoles() []Role {
 // is returned, since the user with scope global, can do the scope self too
 // this is different when the check is done with ids included
 func (u *User) HasPerm(scope base.UserScope, perm string) (base.UserScope, bool) {
-	if scope.IsValid() {
+	if !scope.IsValid() {
 		return base.ScopeSelf, false
 	}
 	var (
