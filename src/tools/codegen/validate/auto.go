@@ -24,8 +24,15 @@ type validate struct {
 	ann  annotate.Annotate
 	typ  humanize.TypeName
 
+	Map  []fieldMap
 	Rec  string
 	Type string
+}
+
+type fieldMap struct {
+	Name string
+	Json string
+	Err  string
 }
 
 type context []validate
@@ -41,8 +48,27 @@ import (
 )
 
 	{{ range $m := .Data }}
-	func ({{ $m.Rec }} {{ $m.Type }}) Validate(ctx echo.Context ) error {
-		return validator.New().Struct({{ $m.Rec }})
+	func ({{ $m.Rec }} *{{ $m.Type }}) Validate(ctx echo.Context ) error {
+		errs :=  validator.New().Struct({{ $m.Rec }})
+		if errs == nil {
+			return nil
+		}
+		res := middlewares.GroupError{}
+		for _, i := range errs.(validator.ValidationErrors) {
+			switch i.Field() { {{ range $f := $m.Map }}
+				case "{{ $f.Name }}":
+					res["{{ $f.Json }}"] = "{{ $f.Err }}"
+			{{ end }}
+				default :
+					logrus.Panicf("the field %s is not translated", i)
+			}
+		}
+
+		if len(res) >0 {
+			return res
+		}
+
+		return nil
 	}
 	{{ end }}
 	`
@@ -119,6 +145,26 @@ func (r *validatePlugin) ProcessStructure(
 
 		Type: f.Name,
 		Rec:  "pl",
+	}
+
+	for _, field := range f.Type.(*humanize.StructType).Fields {
+		if field.Tags.Get("validate") != "" {
+			t := fieldMap{
+				Name: field.Name,
+				Json: field.Tags.Get("json"),
+				Err:  field.Tags.Get("error"),
+			}
+
+			if t.Json == "" {
+				t.Json = t.Name
+			}
+
+			if t.Err == "" {
+				t.Err = "invalid value"
+			}
+
+			dt.Map = append(dt.Map, t)
+		}
 	}
 
 bigLoop:

@@ -15,8 +15,8 @@ import (
 // @Validate {
 // }
 type changePasswordPayload struct {
-	OldPassword string `json:"old_password" validate:"gt=5"`
-	NewPassword string `json:"new_password" validate:"gt=5"`
+	OldPassword string `json:"old_password" validate:"gt=5" error:"old password is wrong"`
+	NewPassword string `json:"new_password" validate:"gt=5" error:"new password can not be less than 6 charachter"`
 }
 
 // changePassword
