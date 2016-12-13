@@ -175,7 +175,7 @@ mysql-setup: needroot
 	make mysql-createdb
 
 mysql-createdb:
-	echo 'DROP DATABASE cyrest;' | mysql -h $(DB_HOST) -u $(DB_USER) -p$(DBPASS)
+	echo 'DROP DATABASE IF EXISTS cyrest ;' | mysql -h $(DB_HOST) -u $(DB_USER) -p$(DBPASS)
 	echo 'CREATE DATABASE cyrest;' | mysql -h $(DB_HOST) -u $(DB_USER) -p$(DBPASS)
 
 setcap: $(BIN)/server needroot

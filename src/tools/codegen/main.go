@@ -1,13 +1,13 @@
 package main
 
 import (
-	_ "tools/codegen/gin"    // Gin plugin
-	_ "tools/codegen/models" // Models plugin
-	"tools/codegen/plugins"
-	_ "tools/codegen/swagger" // Raml plugin
-	_ "tools/codegen/enum" // ENUM plugin
-	_ "tools/codegen/validate" // ENUM plugin
 	_ "tools/codegen/datatable" // ENUM plugin
+	_ "tools/codegen/enum"      // ENUM plugin
+	_ "tools/codegen/gin"       // Gin plugin
+	_ "tools/codegen/models"    // Models plugin
+	"tools/codegen/plugins"
+	_ "tools/codegen/swagger"  // Raml plugin
+	_ "tools/codegen/validate" // ENUM plugin
 
 	"github.com/Sirupsen/logrus"
 	"github.com/goraz/humanize"
