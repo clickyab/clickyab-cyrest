@@ -30,7 +30,7 @@ func Authenticate(next echo.HandlerFunc) echo.HandlerFunc {
 				return c.JSON(http.StatusUnauthorized, st)
 			}
 			//check if the accessToken exists in users table
-			user, err := aaa.NewAaaManager().FetchByToken(accessToken)
+			user, err := aaa.NewAaaManager().FindUserByAccessToken(accessToken)
 			if err != nil { //user not found
 				return c.JSON(http.StatusUnauthorized, st)
 			}

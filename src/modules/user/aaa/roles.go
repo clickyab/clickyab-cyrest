@@ -16,10 +16,11 @@ import (
 //		list = yes
 // }
 type Role struct {
-	ID        int64     `db:"id" json:"id" sort:"true"`
-	Name      string    `json:"name" db:"name" search:"true"`
-	CreatedAt time.Time `db:"created_at" json:"created_at" sort:"true"`
-	UpdatedAt time.Time `db:"updated_at" json:"updated_at" sort:"true"`
+	ID          int64     `db:"id" json:"id" sort:"true"`
+	Name        string    `json:"name" db:"name" search:"true"`
+	Description string    `db:"description" json:"description"`
+	CreatedAt   time.Time `db:"created_at" json:"created_at" sort:"true"`
+	UpdatedAt   time.Time `db:"updated_at" json:"updated_at" sort:"true"`
 }
 
 //RoleDataTable is the role full data in data table, after join with other field
@@ -37,6 +38,38 @@ type RoleDataTable struct {
 	OwnerID  int64 `db:"-" json:"owner_id" visible:"false"`
 }
 
+// RegisterRole is try to register role
+func (m *Manager) RegisterRole(name string, description string, perm map[base.UserScope][]string) (role *Role, err error) {
+	role = &Role{
+		Name:        name,
+		Description: description,
+	}
+	err = m.Begin()
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if err != nil {
+			assert.Nil(m.Rollback())
+		} else {
+			err = m.Commit()
+		}
+
+		if err != nil {
+			role = nil
+		}
+	}()
+	err = m.CreateRole(role)
+	err = m.RegisterRolePermission(role.ID, perm)
+	if err != nil {
+		role = nil
+		return
+	}
+
+	return
+}
+
+// FillRoleDataTableArray is the function to handle
 func (m *Manager) FillRoleDataTableArray(u base.PermInterfaceComplete, filters map[string]string, search map[string]string, sort, order string, p, c int) (RoleDataTableArray, int64) {
 	var params []interface{}
 	var res RoleDataTableArray
@@ -72,7 +105,5 @@ func (m *Manager) FillRoleDataTableArray(u base.PermInterfaceComplete, filters m
 
 	_, err = m.GetDbMap().Select(&res, query, params...)
 	assert.Nil(err)
-	fmt.Println(query)
-	fmt.Println(countQuery)
 	return res, count
 }

@@ -5,6 +5,7 @@ import (
 	"common/controllers/base"
 	"fmt"
 	"strings"
+	"time"
 )
 
 // RolePermission model
@@ -20,6 +21,8 @@ type RolePermission struct {
 	RoleID     int64          `json:"role_id" db:"role_id"`
 	Permission string         `json:"permission" db:"permission"`
 	Scope      base.UserScope `json:"scope" db:"scope"`
+	CreatedAt  time.Time      `json:"created_at" db:"created_at"`
+	UpdatedAt  time.Time      `json:"updated_at" db:"updated_at"`
 }
 
 // GetResourceMap return resource map for some roles
@@ -48,4 +51,21 @@ func (m *Manager) GetPermissionMap(r ...Role) map[base.UserScope]map[string]bool
 		res[rr[i].Scope][rr[i].Permission] = true
 	}
 	return res
+}
+
+// RegisterRolePermission register role with permission assign
+func (m *Manager) RegisterRolePermission(roleID int64,perm map[base.UserScope][]string) error {
+	var rolePermission []interface{}
+	for scope,val := range perm{
+		for i:=range val{
+			role:=&RolePermission{
+				Permission:val[i],
+				RoleID:roleID,
+				Scope:scope,
+			}
+			rolePermission=append(rolePermission,role)
+		}
+
+	}
+	return m.GetDbMap().Insert(rolePermission...)
 }
