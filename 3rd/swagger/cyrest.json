@@ -88,6 +88,17 @@
 			},
 			"type": "object"
 		},
+		"user_assignParentPayload": {
+			"properties": {
+				"parent_id": {
+					"type": "integer"
+				},
+				"user_id": {
+					"type": "integer"
+				}
+			},
+			"type": "object"
+		},
 		"user_changePasswordPayload": {
 			"properties": {
 				"new_password": {
@@ -216,6 +227,71 @@
 				},
 				"tags": [
 					"misc"
+				]
+			}
+		},
+		"/user/assign/parent": {
+			"post": {
+				"description": "changePassword",
+				"parameters": [
+					{
+						"description": "the security token, get it from login route",
+						"in": "header",
+						"name": "token",
+						"required": true,
+						"type": "string"
+					},
+					{
+						"description": "",
+						"in": "body",
+						"name": "payload_data",
+						"required": false,
+						"schema": {
+							"$ref": "#/definitions/user_assignParentPayload"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "",
+						"produce": "application/json",
+						"schema": {
+							"$ref": "#/definitions/base_NormalResponse"
+						}
+					},
+					"400": {
+						"description": "",
+						"schema": {
+							"$ref": "#/definitions/base_ErrorResponseSimple"
+						}
+					},
+					"401": {
+						"description": "you are not authorized",
+						"schema": {
+							"properties": {
+								"error": {
+									"type": "string"
+								}
+							},
+							"title": "not_authorized",
+							"type": "object"
+						}
+					},
+					"403": {
+						"description": "forbidden, you have no access here",
+						"schema": {
+							"properties": {
+								"error": {
+									"type": "string"
+								}
+							},
+							"title": "forbidden",
+							"type": "object"
+						}
+					}
+				},
+				"tags": [
+					"user"
 				]
 			}
 		},
