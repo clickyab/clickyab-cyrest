@@ -1,6 +1,5 @@
 package aaa
 
-
 // Domain model
 // @Model {
 //		table = domains
@@ -10,7 +9,6 @@ package aaa
 //		list = yes
 // }
 type Domain struct {
-	ID int64 `json:"id" db:"id"`
+	ID    int64  `json:"id" db:"id"`
 	CName string `json:"cname" db:"cname"`
 }
-
