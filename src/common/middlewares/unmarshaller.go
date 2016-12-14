@@ -45,7 +45,7 @@ func (ge GroupError) Error() string {
 
 // Translate is a helper function to translate the error to map error required by the
 // middleware
-func translate(err error) error {
+func translate(err error) interface{} {
 	if err == nil {
 		return nil
 	}
@@ -62,9 +62,14 @@ func translate(err error) error {
 		}
 
 		return tmp
+	default:
+		return struct {
+			Error string `json:"error"`
+		}{
+			Error: "invalid request body",
+		}
 	}
 
-	return err
 }
 
 // PayloadUnMarshallerGenerator create a middleware base on the pattern for the request body
