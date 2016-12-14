@@ -37,6 +37,7 @@ func (u *Controller) registerUser(ctx echo.Context) error {
 			UserID:      user.ID,
 			Email:       user.Email,
 			AccessToken: token,
+			Perm: user.GetPermission(),
 		},
 	)
 }
