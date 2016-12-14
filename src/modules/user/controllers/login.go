@@ -7,6 +7,8 @@ import (
 
 	"fmt"
 
+	"modules/user/middlewares"
+
 	"gopkg.in/labstack/echo.v3"
 )
 
@@ -35,7 +37,7 @@ func createLoginResponse(u *aaa.User, t string) responseLoginOK {
 	}
 }
 
-// registerUser register user in system
+// loginUser login user in system
 // @Route {
 // 		url = /login
 //		method = post
@@ -58,6 +60,23 @@ func (u *Controller) loginUser(ctx echo.Context) error {
 	}
 
 	token := m.GetNewToken(usr, ctx.Request().UserAgent(), ctx.RealIP())
+	return u.OKResponse(
+		ctx,
+		createLoginResponse(usr, token),
+	)
+}
+
+// pingUser is the ping user and get data again
+// @Route {
+// 		url = /ping
+//		method = get
+//		middleware = authz.Authenticate
+//		200 = responseLoginOK
+// }
+func (u *Controller) pingUser(ctx echo.Context) error {
+	usr := authz.MustGetUser(ctx)
+	token := authz.MustGetToken(ctx)
+
 	return u.OKResponse(
 		ctx,
 		createLoginResponse(usr, token),
