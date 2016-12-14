@@ -71,6 +71,9 @@ func (pc permComplete) GetCurrentScope() UserScope {
 // NewPermInterfaceComplete return a new object base on the minimum object
 func NewPermInterfaceComplete(inner PermInterface, id int64, perm string, scope UserScope) PermInterfaceComplete {
 	s, ok := inner.HasPerm(scope, perm)
+	if !ok {
+		s, ok = inner.HasPerm(ScopeGlobal, "god")
+	}
 	assert.True(ok, "[BUG] probably there is some thing wrong with code generation")
 	pc := &permComplete{
 		inner: inner,

@@ -146,7 +146,8 @@ var list{{ .Data.Entity|ucfirst }}Definition base.Columns
 //		_sort_ = string, the sort and order like id:asc or id:desc available column {{ .ValidSorts }}{{end}}{{ range $f := .Data.Column }}{{ if $f.Filter }}
 //		_{{ $f.Data }}_ = string , filter the {{ $f.Data }} field valid values are {{ $f.FilterValid }}{{ end }}{{ end }}{{ range $f := .Data.Column }}{{ if $f.Searchable }}
 //		_{{ $f.Data }}_ = string , search the {{ $f.Data }} field {{ end }}{{ end }}
-//      200 = list{{ .Data.Entity|ucfirst }}Response
+//		_def_ = bool, show definition in result?
+//		200 = list{{ .Data.Entity|ucfirst }}Response
 // }
 func (u *Controller) list{{ .Data.Entity|ucfirst }}(ctx echo.Context) error {
 	m :=  {{ .PackageName }}.New{{ .PackageName|ucfirst }}Manager()
@@ -206,7 +207,7 @@ func (u *Controller) list{{ .Data.Entity|ucfirst }}(ctx echo.Context) error {
 
 func init() {
 	tmp := []byte(` + "` {{ .Data.Columns }} `" + `)
-	assert.Nil(json.Unmarshal(tmp, &listUserDefinition))
+	assert.Nil(json.Unmarshal(tmp, &list{{ .Data.Entity|ucfirst }}Definition))
 }
 
 `

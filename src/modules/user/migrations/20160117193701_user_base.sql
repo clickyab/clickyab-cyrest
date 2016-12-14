@@ -129,7 +129,11 @@ CREATE TABLE user_role
 CREATE INDEX user_role_role_id_fk ON user_role (role_id);
 CREATE INDEX user_role_users_id_fk ON user_role (user_id);
 
-
+INSERT INTO users (id,email,password,access_token,user_type,status,created_at,updated_at) VALUES (NULL,"root@rubik.com","$2a$10$6WeBOWQn2CwYzosiPK0ii.6XiW1rt0hZD3iXDsaySGo.RLoJUFwdq","92d80885abad94e24d3ffaea7501331fc7701135","personal","registered",NOW(),NOW());
+INSERT INTO roles (id,name,description,created_at,updated_at) VALUES (NULL,"root","all access granted",NOW(),NOW());
+INSERT INTO roles (id,name,description,created_at,updated_at) VALUES (NULL,"user","only some perm",NOW(),NOW());
+INSERT INTO role_permission (id,role_id,permission,scope,created_at,updated_at) VALUES (NULL,(SELECT id FROM roles WHERE name="root"),"god","global",NOW(),NOW());
+INSERT INTO user_role (user_id,role_id,created_at) VALUES ((SELECT id FROM users WHERE email="root@rubik.com"),(SELECT id FROM roles WHERE name="root"),NOW());
 -- +migrate Down
 -- SQL section 'Down' is executed when this migration is rolled back
 
