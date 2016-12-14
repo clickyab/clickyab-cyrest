@@ -25,19 +25,14 @@ func (u *Controller) registerUser(ctx echo.Context) error {
 	pl := u.MustGetPayload(ctx).(*registrationPayload)
 	m := aaa.NewAaaManager()
 
-	user, err := m.RegisterUser(pl.Email, pl.Password)
+	usr, err := m.RegisterUser(pl.Email, pl.Password)
 	if err != nil {
 		return u.BadResponse(ctx, err)
 	}
 
-	token := m.GetNewToken(user, ctx.Request().UserAgent(), ctx.RealIP())
+	token := m.GetNewToken(usr, ctx.Request().UserAgent(), ctx.RealIP())
 	return u.OKResponse(
 		ctx,
-		responseLoginOK{
-			UserID:      user.ID,
-			Email:       user.Email,
-			AccessToken: token,
-			Perm: user.GetPermission(),
-		},
+		createLoginResponse(usr, token),
 	)
 }
