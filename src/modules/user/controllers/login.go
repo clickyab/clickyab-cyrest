@@ -1,12 +1,10 @@
 package user
 
 import (
-	"modules/user/aaa"
-
-	"modules/misc/trans"
-
+	"common/controllers/base"
 	"fmt"
-
+	"modules/misc/trans"
+	"modules/user/aaa"
 	"modules/user/middlewares"
 
 	"gopkg.in/labstack/echo.v3"
@@ -17,9 +15,10 @@ var (
 )
 
 type responseLoginOK struct {
-	UserID      int64  `json:"user_id"`
-	Email       string `json:"email"`
-	AccessToken string `json:"token"`
+	UserID      int64                              `json:"user_id"`
+	Email       string                             `json:"email"`
+	AccessToken string                             `json:"token"`
+	Permissions map[base.UserScope]map[string]bool `json:"perm"`
 }
 
 // @Validate {
@@ -34,6 +33,7 @@ func createLoginResponse(u *aaa.User, t string) responseLoginOK {
 		UserID:      u.ID,
 		Email:       u.Email,
 		AccessToken: t,
+		Permissions: u.GetPermission(),
 	}
 }
 
