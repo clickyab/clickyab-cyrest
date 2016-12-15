@@ -116,6 +116,15 @@ watch: $(WATCH) tools-fswatch
 	$(BIN)/fswatch -d 10 -ext go make run-$(WATCH)
 
 #
+# Swagger
+#
+
+swagger-ui:
+	$(GIT) clone --depth 1 https://github.com/swagger-api/swagger-ui.git $(ROOT)/tmp/swagger-ui || cd $(ROOT)/tmp/swagger-ui && $(GIT) pull
+	cp -R $(ROOT)/tmp/swagger-ui/dist/* $(ROOT)/3rd/swagger
+
+
+#
 # Codegen
 #
 codegen-base: tools-codegen
@@ -145,7 +154,7 @@ swagger-cleaner:
 swagger-client: tools-swagger
 	GOPATH=$(ROOT) cd $(ROOT)/src && $(BIN)/swagger generate client -f $(ROOT)/3rd/swagger/cyrest.yaml
 
-codegen: swagger-cleaner codegen-base codegen-user codegen-audit codegen-misc codegen-category
+codegen: swagger-ui swagger-cleaner codegen-base codegen-user codegen-audit codegen-misc codegen-category
 	@cp $(WORK_DIR)/swagger/cyrest.yaml $(ROOT)/3rd/swagger
 	@cp $(WORK_DIR)/swagger/cyrest.json $(ROOT)/3rd/swagger
 	@echo "Done"

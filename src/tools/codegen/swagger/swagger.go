@@ -50,7 +50,7 @@ type apiBodyInner struct {
 
 type apiBody struct {
 	Description string       `json:"description"`
-	Produce     string       `json:"produce,omitempty" yaml:",omitempty"`
+	Produce     string       `json:"produces,omitempty" yaml:"produces,omitempty"`
 	Schema      apiBodyInner `json:"schema"`
 }
 
@@ -258,8 +258,8 @@ func (rg *swaggerGenerator) mix() error {
 			Description string
 		}{
 			Version:     "1.0.0",
-			Title:       "The Cyrest API",
-			Description: "Auto genertaed Cyrest API",
+			Title:       "The Malooch API",
+			Description: "Auto genertaed Malooch API",
 		},
 		Host:        "swaggerbase",
 		BasePath:    "/api",
@@ -287,11 +287,11 @@ func (rg *swaggerGenerator) mix() error {
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(filepath.Join(rg.workDir, "cyrest.json"), jsonData, 0644)
+	err = ioutil.WriteFile(filepath.Join(rg.workDir, "malooch.json"), jsonData, 0644)
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(filepath.Join(rg.workDir, "cyrest.yaml"), data, 0644)
+	return ioutil.WriteFile(filepath.Join(rg.workDir, "malooch.yaml"), data, 0644)
 }
 
 // FunctionIsSupported check for a function signature and if the function is supported in this
@@ -479,7 +479,7 @@ func (rg *swaggerGenerator) ProcessFunction(ctx interface{}, pkg humanize.Packag
 					am.Parameters,
 					uriParameter{
 						Name:        p,
-						Type:        parts[0],
+						Type:        strings.Trim(parts[0], " \t"),
 						Description: parts[1],
 						In:          "path",
 						Required:    true,
@@ -491,7 +491,7 @@ func (rg *swaggerGenerator) ProcessFunction(ctx interface{}, pkg humanize.Packag
 					am.Parameters,
 					uriParameter{
 						Name:     p,
-						Type:     parts[0],
+						Type:     strings.Trim(parts[0], " \t"),
 						In:       "path",
 						Required: true,
 					},
@@ -518,7 +518,7 @@ func (rg *swaggerGenerator) ProcessFunction(ctx interface{}, pkg humanize.Packag
 				am.Parameters = append(am.Parameters,
 					uriParameter{
 						Name:        qParam[1],
-						Type:        parts[0],
+						Type:        strings.Trim(parts[0], " \t"),
 						Description: parts[1],
 						In:          "query",
 						Required:    false,
@@ -528,7 +528,7 @@ func (rg *swaggerGenerator) ProcessFunction(ctx interface{}, pkg humanize.Packag
 				am.Parameters = append(am.Parameters,
 					uriParameter{
 						Name:     qParam[1],
-						Type:     parts[0],
+						Type:     strings.Trim(parts[0], " \t"),
 						In:       "query",
 						Required: false,
 					},
@@ -625,13 +625,9 @@ func (rg *swaggerGenerator) ProcessFunction(ctx interface{}, pkg humanize.Packag
 		}
 		var (
 			produce string
-			ok      bool
 		)
 		if code == 200 {
-			produce, ok = ann.Items["produce"]
-			if !ok {
-				produce = "application/json"
-			}
+			produce = ann.Items["produces"]
 		}
 		am.Responses[fmt.Sprintf("%d", code)] = apiBody{
 			Schema: apiBodyInner{
@@ -801,7 +797,7 @@ func identToRaml(pkg humanize.Package, i *humanize.IdentType) (swaggerType, erro
 			return res, nil
 		}
 	}
-	if i.Ident == "string" {
+	if i.Ident == "string" || i.Ident == "interface" {
 		return swaggerType{"type": "string"}, nil
 	} else if i.Ident == "int64" || i.Ident == "int" {
 		return swaggerType{"type": "integer"}, nil
@@ -929,7 +925,8 @@ func mapToRaml(pkg humanize.Package, st *humanize.MapType) (swaggerType, error) 
 	res["type"] = "object"
 	props := make(swaggerType)
 	if _, ok := st.Value.(*humanize.InterfaceType); !ok {
-		props["type"], err = goToRaml(pkg, st.Value)
+		props["type"] = "array"
+		props["items"], err = goToRaml(pkg, st.Value)
 		if err != nil {
 			return nil, err
 		}
