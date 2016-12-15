@@ -6,5 +6,7 @@ echo -e "\nexport PATH=\${PATH}:/home/develop/cyrest/bin" >> /home/develop/.zshr
 
 cd /home/develop/cyrest
 
+make conditional-restore
+make codegen
 make all
 make migup

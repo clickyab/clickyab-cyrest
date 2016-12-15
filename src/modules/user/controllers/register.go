@@ -4,6 +4,7 @@ import (
 	"modules/user/aaa"
 
 	"gopkg.in/labstack/echo.v3"
+	"modules/misc/trans"
 )
 
 //@Validate{
@@ -27,7 +28,7 @@ func (u *Controller) registerUser(ctx echo.Context) error {
 
 	usr, err := m.RegisterUser(pl.Email, pl.Password)
 	if err != nil {
-		return u.BadResponse(ctx, err)
+		return u.BadResponse(ctx, trans.E("email is already registered in our system"))
 	}
 
 	token := m.GetNewToken(usr, ctx.Request().UserAgent(), ctx.RealIP())

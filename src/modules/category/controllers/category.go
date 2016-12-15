@@ -1,6 +1,6 @@
 package controllers
 
-import "common/controllers/base"
+import "modules/misc/base"
 
 // Controller is the controller for the category package
 // @Route {

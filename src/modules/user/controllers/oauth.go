@@ -2,7 +2,6 @@ package user
 
 import (
 	"encoding/json"
-	"fmt"
 	"modules/user/aaa"
 	"modules/user/config"
 	"net/http"
@@ -67,7 +66,6 @@ func (u *Controller) oauthInit(ctx echo.Context) error {
 	}
 	oauthCfg := getConfig()
 	url := oauthCfg.AuthCodeURL(state)
-	fmt.Print(oauthCfg)
 	//redirect user to that page
 	return ctx.Redirect(http.StatusFound, url)
 }

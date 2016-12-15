@@ -2,7 +2,6 @@ package aaa
 
 import (
 	"common/assert"
-	"common/controllers/base"
 	"common/models/common"
 	"common/redis"
 	"common/utils"
@@ -11,6 +10,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"modules/misc/base"
 
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/gorp.v1"

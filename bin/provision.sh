@@ -10,6 +10,7 @@ echo "export PATH=$PATH:/usr/local/go/bin:/home/develop/go/bin" >> /home/develop
 echo "Waiting for services to start..."
 sleep 5
 
-make -f /home/develop/cyrest/Makefile mysql-setup POSTGRES_USER=postgres
+cd /home/develop/cyrest
+make -f /home/develop/cyrest/Makefile mysql-setup
 
 sudo -u develop /home/develop/cyrest/bin/provision_user.sh

@@ -2,8 +2,8 @@ package aaa
 
 import (
 	"common/assert"
-	"common/controllers/base"
 	"fmt"
+	"modules/misc/base"
 	"strings"
 	"time"
 )
@@ -54,25 +54,25 @@ func (m *Manager) GetPermissionMap(r ...Role) map[base.UserScope]map[string]bool
 }
 
 // RegisterRolePermission register role with permission assign
-func (m *Manager) RegisterRolePermission(roleID int64,perm map[base.UserScope][]string) error {
+func (m *Manager) RegisterRolePermission(roleID int64, perm map[base.UserScope][]string) error {
 	var rolePermission []interface{}
-	for scope,val := range perm{
-		for i:=range val{
-			role:=&RolePermission{
-				Permission:val[i],
-				RoleID:roleID,
-				Scope:scope,
+	for scope, val := range perm {
+		for i := range val {
+			role := &RolePermission{
+				Permission: val[i],
+				RoleID:     roleID,
+				Scope:      scope,
 			}
-			rolePermission=append(rolePermission,role)
+			rolePermission = append(rolePermission, role)
 		}
 
 	}
 	return m.GetDbMap().Insert(rolePermission...)
 }
 
-func (m *Manager) DeleteRolePermissionByRoleID(roleID int64) error{
-	query:=fmt.Sprintf("DELETE FROM %s WHERE role_id=?",RolePermissionTableFull)
-	_,err:=m.GetDbMap().Exec(
+func (m *Manager) DeleteRolePermissionByRoleID(roleID int64) error {
+	query := fmt.Sprintf("DELETE FROM %s WHERE role_id=?", RolePermissionTableFull)
+	_, err := m.GetDbMap().Exec(
 		query,
 		roleID,
 	)

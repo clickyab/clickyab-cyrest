@@ -2,8 +2,10 @@ package authz
 
 import (
 	"common/assert"
-	"common/controllers/base"
 	"net/http"
+
+	"modules/misc/base"
+	"modules/misc/trans"
 
 	"gopkg.in/labstack/echo.v3"
 )
@@ -21,9 +23,9 @@ func AuthorizeGenerator(resource string, scope base.UserScope) echo.MiddlewareFu
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			st := struct {
-				Error string `json:"error"`
+				Error error `json:"error"`
 			}{
-				Error: http.StatusText(http.StatusForbidden),
+				Error: trans.E(http.StatusText(http.StatusForbidden)),
 			}
 			// get user
 			u := MustGetUser(c)
@@ -36,7 +38,7 @@ func AuthorizeGenerator(resource string, scope base.UserScope) echo.MiddlewareFu
 				grantedScope, ok = u.HasPerm(base.ScopeGlobal, granted)
 			}
 			if !ok {
-				c.Request().Header.Set("error", st.Error)
+				c.Request().Header.Set("error", st.Error.Error())
 				return c.JSON(
 					http.StatusForbidden,
 					st,

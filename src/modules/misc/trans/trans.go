@@ -1,55 +1,113 @@
 package trans
 
 import (
-	"errors"
+	"fmt"
 	"modules/misc/t9n"
 	"sync"
-
-	"fmt"
 
 	"github.com/Sirupsen/logrus"
 )
 
 var (
-	translations map[string]t9n.Translation
+	translations map[string]bool
 	lock         = &sync.RWMutex{}
 )
 
-// T is the translate function
-func T(translationID string, args ...interface{}) string {
-	return translationID
+type baseTranslated interface {
+	// Text return the unformatted text
+	GetText() string
+	// Params is the parameters
+	GetParams() []interface{}
+}
 
+type Translated interface {
+	fmt.Stringer
+	baseTranslated
+}
+
+type TranslatedError interface {
+	error
+	baseTranslated
+}
+
+type t9Base struct {
+	Text   string        `json:"text"`
+	Params []interface{} `json:"params"`
+}
+
+type T9String struct {
+	t9Base
+}
+
+type T9Error struct {
+	t9Base
+}
+
+func (t9 t9Base) GetText() string {
+	return t9.Text
+}
+
+func (t9 t9Base) GetParams() []interface{} {
+	return t9.Params
+}
+
+func (t9 T9String) String() string {
+	return fmt.Sprintf(t9.GetText(), t9.GetParams()...)
+}
+
+func (t9 T9Error) Error() string {
+	return fmt.Sprintf(t9.GetText(), t9.GetParams()...)
+}
+
+// T is the universal translate function
+func T(translationID string, args ...interface{}) T9String {
 	lock.RLock()
+
 	if translations == nil {
 		lock.RUnlock()
 		lock.Lock()
 		m := t9n.NewT9nManager()
-		translations = m.LoadAllInMap()
+		translations = m.LoadAllInMap(true)
 		lock.Unlock()
 		lock.RLock()
 	}
 
-	tt, ok := translations[translationID]
+	_, ok := translations[translationID]
 	lock.RUnlock()
 	if !ok {
 		var err error
 		lock.Lock()
 		m := t9n.NewT9nManager()
-		tt, err = m.AddMissing(translationID)
+		err = m.AddMissing(translationID)
 		if err == nil {
-			translations[translationID] = tt
+			logrus.Debugf("[ADD TRANSLATION] %s", translationID)
+			translations[translationID] = true
 		}
 		lock.Unlock()
 	}
 
-	if tt.Single.Valid {
-		return fmt.Sprintf(tt.Single.String, args...)
+	return T9String{
+		t9Base{
+			Text:   translationID,
+			Params: args,
+		},
 	}
-	logrus.Debugf("NOT TRANSLATED : %s ", translationID)
-	return fmt.Sprintf(translationID, args...)
 }
 
 // E is the error version of the T
-func E(translationID string, args ...interface{}) error {
-	return errors.New(T(translationID, args...))
+func E(translationID string, args ...interface{}) T9Error {
+	text := T(translationID, args...)
+	return T9Error{
+		t9Base: text.t9Base,
+	}
+}
+
+// EE try to translate an already generated error
+func EE(e error) T9Error {
+	switch t9 := e.(type) {
+	case T9Error:
+		return t9
+	default:
+		return E(e.Error())
+	}
 }

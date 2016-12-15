@@ -3,10 +3,11 @@ package user
 import (
 	"common/assert"
 	"common/redis"
-	"errors"
 	"modules/user/aaa"
 	"modules/user/config"
 	"modules/user/middlewares"
+
+	"modules/misc/trans"
 
 	"gopkg.in/labstack/echo.v3"
 )
@@ -62,10 +63,10 @@ func (u *Controller) terminateSession(ctx echo.Context) error {
 	assert.Nil(err)
 
 	if inner != inner2 {
-		return u.BadResponse(ctx, errors.New("the token is invalid"))
+		return u.BadResponse(ctx, trans.E("the token is invalid"))
 	}
 	if other == token {
-		return u.BadResponse(ctx, errors.New("cant kill current session"))
+		return u.BadResponse(ctx, trans.E("cant kill current session"))
 	}
 
 	m := aaa.NewAaaManager()

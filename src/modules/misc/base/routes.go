@@ -2,10 +2,11 @@ package base
 
 import (
 	"common/config"
-	"common/middlewares"
 	"common/utils"
 	"path/filepath"
 	"sync"
+
+	"modules/misc/middlewares"
 
 	"github.com/Sirupsen/logrus"
 	"gopkg.in/labstack/echo.v3"

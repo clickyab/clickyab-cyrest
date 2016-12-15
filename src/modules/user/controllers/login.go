@@ -1,11 +1,11 @@
 package user
 
 import (
-	"common/controllers/base"
-	"fmt"
 	"modules/misc/trans"
 	"modules/user/aaa"
 	"modules/user/middlewares"
+
+	"modules/misc/base"
 
 	"gopkg.in/labstack/echo.v3"
 )
@@ -50,7 +50,6 @@ func (u *Controller) loginUser(ctx echo.Context) error {
 	m := aaa.NewAaaManager()
 
 	usr, err := m.FindUserByEmail(pl.Email)
-	fmt.Println(err)
 	if err != nil {
 		return u.BadResponse(ctx, userPasswordError)
 	}

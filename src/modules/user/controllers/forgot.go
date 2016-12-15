@@ -65,7 +65,7 @@ func (u *Controller) forgotGeneratePassword(ctx echo.Context) error {
 	m := aaa.NewAaaManager()
 	user, err := m.FindUserByEmail(email)
 	if err != nil {
-		return u.BadResponse(ctx, err)
+		return u.BadResponse(ctx, trans.E("email is not registered"))
 	}
 	pass := utils.PasswordGenerate(8)
 	// TODO : change password to string when we are ready for it

@@ -1,6 +1,12 @@
 package misc
 
-import "common/controllers/base"
+import (
+	"common/hub"
+	"modules/misc/base"
+
+	"github.com/Sirupsen/logrus"
+	"github.com/olebedev/emitter"
+)
 
 // Controller is the misc controller
 // @Route {
@@ -16,6 +22,14 @@ func (u *Controller) Initialize() {
 	//try.CatchHook(func(e error) error {
 	//	return fmt.Errorf(trans.T(e.Error()))
 	//})
+	go u.auditLoop(hub.Subscribe("audit"))
+
+}
+
+func (u *Controller) auditLoop(c <-chan emitter.Event) {
+	for a := range c {
+		logrus.Infof("Audit recieced %+v", a.Args)
+	}
 }
 
 func init() {

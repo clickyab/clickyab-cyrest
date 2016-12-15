@@ -120,28 +120,21 @@ watch: $(WATCH) tools-fswatch
 #
 
 swagger-ui:
-	$(GIT) clone --depth 1 https://github.com/swagger-api/swagger-ui.git $(ROOT)/tmp/swagger-ui || cd $(ROOT)/tmp/swagger-ui && $(GIT) pull
+	$(GIT) clone --depth 1 https://github.com/swagger-api/swagger-ui.git $(ROOT)/tmp/swagger-ui || true
 	cp -R $(ROOT)/tmp/swagger-ui/dist/* $(ROOT)/3rd/swagger
 
 
 #
 # Codegen
 #
-codegen-base: tools-codegen
-	@$(BIN)/codegen -p common/controllers/base
 
 codegen-user: tools-codegen
-	@$(BIN)/codegen -p modules/user/controllers
-	@$(BIN)/codegen -p modules/user/aaa
+	$(BIN)/codegen -p modules/user/controllers
+	$(BIN)/codegen -p modules/user/aaa
 
 codegen-category: tools-codegen
 	@$(BIN)/codegen -p modules/category/controllers
 	@$(BIN)/codegen -p modules/category/cat
-
-
-
-codegen-audit: tools-codegen
-	@$(BIN)/codegen -p modules/audit/controllers
 
 codegen-misc: tools-codegen
 	@$(BIN)/codegen -p modules/misc/controllers
@@ -154,9 +147,9 @@ swagger-cleaner:
 swagger-client: tools-swagger
 	GOPATH=$(ROOT) cd $(ROOT)/src && $(BIN)/swagger generate client -f $(ROOT)/3rd/swagger/cyrest.yaml
 
-codegen: swagger-ui swagger-cleaner codegen-base codegen-user codegen-audit codegen-misc codegen-category
-	@cp $(WORK_DIR)/swagger/cyrest.yaml $(ROOT)/3rd/swagger
-	@cp $(WORK_DIR)/swagger/cyrest.json $(ROOT)/3rd/swagger
+codegen: swagger-ui swagger-cleaner codegen-misc codegen-user codegen-category
+	@cp $(WORK_DIR)/swagger/out.yaml $(ROOT)/3rd/swagger/cyrest.yaml
+	@cp $(WORK_DIR)/swagger/out.json $(ROOT)/3rd/swagger/cyrest.json
 	@echo "Done"
 
 #
@@ -181,6 +174,9 @@ lint-mains: $(BIN)/gometalinter
 lint: lint-common lint-modules lint-mains
 	@echo "Done"
 
+mysql-createdb:
+	echo 'DROP DATABASE IF EXISTS cyrest;' | mysql -h $(DB_HOST) -u $(DB_USER) -p$(DBPASS)
+	echo 'CREATE DATABASE cyrest;' | mysql -h $(DB_HOST) -u $(DB_USER) -p$(DBPASS)
 
 mysql-setup: needroot
 	echo 'UPDATE user SET plugin="";' | mysql mysql
@@ -188,9 +184,6 @@ mysql-setup: needroot
 	echo 'FLUSH PRIVILEGES;' | mysql mysql
 	make mysql-createdb
 
-mysql-createdb:
-	echo 'DROP DATABASE cyrest;' | mysql -h $(DB_HOST) -u $(DB_USER) -p$(DBPASS)
-	echo 'CREATE DATABASE cyrest;' | mysql -h $(DB_HOST) -u $(DB_USER) -p$(DBPASS)
 
 setcap: $(BIN)/server needroot
 	setcap cap_net_bind_service=+ep $(BIN)/server

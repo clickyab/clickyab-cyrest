@@ -10,9 +10,6 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/go-playground/locales/en"
-	"github.com/go-playground/universal-translator"
-	"gopkg.in/go-playground/validator.v9"
 	echo "gopkg.in/labstack/echo.v3"
 )
 
@@ -23,7 +20,7 @@ const (
 
 type (
 	// GroupError is the type of error is used by route validators
-	GroupError map[string]string
+	GroupError map[string]trans.T9Error
 
 	// Validator is used to validate the input
 	Validator interface {
@@ -46,30 +43,20 @@ func (ge GroupError) Error() string {
 // Translate is a helper function to translate the error to map error required by the
 // middleware
 func translate(err error) interface{} {
+
 	if err == nil {
 		return nil
 	}
 	switch e := err.(type) {
 	case GroupError:
 		return e
-	case validator.ValidationErrors:
-		en := en.New()
-		uni := ut.New(en, en)
-		tran, _ := uni.GetTranslator("en")
-		tmp := make(GroupError)
-		for i := range e {
-			tmp[e[i].Field()] = e[i].Translate(tran)
-		}
-
-		return tmp
 	default:
 		return struct {
-			Error string `json:"error"`
+			Error error `json:"error"`
 		}{
-			Error: "invalid request body",
+			Error: trans.EE(err),
 		}
 	}
-
 }
 
 // PayloadUnMarshallerGenerator create a middleware base on the pattern for the request body
@@ -87,11 +74,11 @@ func PayloadUnMarshallerGenerator(pattern interface{}) echo.MiddlewareFunc {
 			decoder := json.NewDecoder(c.Request().Body)
 			err := decoder.Decode(cp)
 			if err != nil {
-				c.Request().Header.Set("error", trans.T("invalid request body"))
+				c.Request().Header.Set("error", trans.T("invalid request body").String())
 				e := struct {
-					Error string `json:"error"`
+					Error error `json:"error"`
 				}{
-					Error: "invalid request body",
+					Error: trans.E("invalid request body"),
 				}
 
 				c.JSON(http.StatusBadRequest, e)
@@ -101,7 +88,7 @@ func PayloadUnMarshallerGenerator(pattern interface{}) echo.MiddlewareFunc {
 				if errs := valid.Validate(c); errs == nil {
 					c.Set(ContextBody, cp)
 				} else {
-					c.Request().Header.Set("error", trans.T("invalid request body"))
+					c.Request().Header.Set("error", trans.T("invalid request body").String())
 					c.JSON(http.StatusBadRequest, translate(errs))
 
 					return trans.E("invalid request body")
