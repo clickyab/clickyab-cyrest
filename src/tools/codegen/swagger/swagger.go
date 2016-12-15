@@ -287,11 +287,11 @@ func (rg *swaggerGenerator) mix() error {
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(filepath.Join(rg.workDir, "malooch.json"), jsonData, 0644)
+	err = ioutil.WriteFile(filepath.Join(rg.workDir, "out.json"), jsonData, 0644)
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(filepath.Join(rg.workDir, "malooch.yaml"), data, 0644)
+	return ioutil.WriteFile(filepath.Join(rg.workDir, "out.yaml"), data, 0644)
 }
 
 // FunctionIsSupported check for a function signature and if the function is supported in this

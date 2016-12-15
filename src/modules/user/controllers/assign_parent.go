@@ -7,8 +7,6 @@ import (
 	"modules/user/aaa"
 
 	"gopkg.in/labstack/echo.v3"
-
-	"errors"
 )
 
 type assignParentPayload struct {
@@ -18,7 +16,7 @@ type assignParentPayload struct {
 
 func (pl *assignParentPayload) Validate(ctx echo.Context) error {
 	if pl.UserID == pl.ParentID || pl.UserID <= 0 || pl.ParentID <= 0 {
-		return errors.New("invalid payload")
+		return trans.E("invalid payload")
 	}
 	return nil
 }
@@ -38,11 +36,11 @@ func (u *Controller) assignParent(ctx echo.Context) error {
 	//var usr *aaa.User
 	usr, err := m.FindUserByID(pl.UserID)
 	if err != nil {
-		return u.BadResponse(ctx, errors.New("user not found"))
+		return u.BadResponse(ctx, trans.E("user not found"))
 	}
 	parent, err := m.FindUserByID(pl.ParentID)
 	if err != nil {
-		return u.BadResponse(ctx, errors.New("parent not found"))
+		return u.BadResponse(ctx, trans.E("parent not found"))
 	}
 
 	//check user has not parent

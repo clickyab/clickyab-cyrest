@@ -2,13 +2,11 @@ package base
 
 import (
 	"common/assert"
-	"common/middlewares"
-	"errors"
+	"modules/misc/middlewares"
+	"modules/misc/trans"
 	"net/http"
 
-	"common/try"
-
-	"gopkg.in/labstack/echo.v3"
+	echo "gopkg.in/labstack/echo.v3"
 )
 
 // NormalResponse is for 2X responses
@@ -16,14 +14,14 @@ type NormalResponse struct {
 }
 
 // ComplexResponse for the result, when the result type in not in the structure
-type ComplexResponse map[string]interface{}
+type ComplexResponse map[string]trans.T9Error
 
 // ErrorResponseMap is the map for the response with detail error mapping
-type ErrorResponseMap map[string]string
+type ErrorResponseMap map[string]trans.T9Error
 
 // ErrorResponseSimple is the type for response when the error is simply a string
 type ErrorResponseSimple struct {
-	Error string `json:"error"`
+	Error trans.T9Error `json:"error"`
 }
 
 // Controller is the base controller for all other controllers
@@ -32,10 +30,7 @@ type Controller struct {
 
 // BadResponse is 400 request
 func (c Controller) BadResponse(ctx echo.Context, err error) error {
-	err = try.Try(err)
-	ctx.Response().Header().Add("error", err.Error())
-	ctx.JSON(http.StatusBadRequest, ErrorResponseSimple{Error: err.Error()})
-
+	ctx.JSON(http.StatusBadRequest, ErrorResponseSimple{Error: trans.EE(err)})
 	return err
 }
 
@@ -43,14 +38,14 @@ func (c Controller) BadResponse(ctx echo.Context, err error) error {
 func (c Controller) NotFoundResponse(ctx echo.Context, err error) error {
 	var res = ErrorResponseSimple{}
 	if err != nil {
-		res.Error = try.Try(err).Error()
+		res.Error = trans.EE(err)
 	} else {
-		res.Error = http.StatusText(http.StatusNotFound)
+		res.Error = trans.E(http.StatusText(http.StatusNotFound))
 	}
-	ctx.Response().Header().Add("error", res.Error)
+	ctx.Response().Header().Add("error", res.Error.Error())
 	ctx.JSON(http.StatusNotFound, res)
 
-	return errors.New(res.Error)
+	return res.Error
 }
 
 // OKResponse is 200 request

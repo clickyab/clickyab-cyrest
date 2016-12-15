@@ -2,12 +2,12 @@ package aaa
 
 import (
 	"common/assert"
-	"common/controllers/base"
+	"common/models/common"
+	"errors"
 	"fmt"
+	"modules/misc/base"
 	"strings"
 	"time"
-	"errors"
-	"common/models/common"
 )
 
 // Role model
@@ -18,11 +18,11 @@ import (
 //		list = yes
 // }
 type Role struct {
-	ID          int64     `db:"id" json:"id" sort:"true"`
-	Name        string    `json:"name" db:"name" search:"true"`
-	Description common.NullString    `db:"description" json:"description"`
-	CreatedAt   time.Time `db:"created_at" json:"created_at" sort:"true"`
-	UpdatedAt   time.Time `db:"updated_at" json:"updated_at" sort:"true"`
+	ID          int64             `db:"id" json:"id" sort:"true"`
+	Name        string            `json:"name" db:"name" search:"true"`
+	Description common.NullString `db:"description" json:"description"`
+	CreatedAt   time.Time         `db:"created_at" json:"created_at" sort:"true"`
+	UpdatedAt   time.Time         `db:"updated_at" json:"updated_at" sort:"true"`
 }
 
 //RoleDataTable is the role full data in data table, after join with other field
@@ -44,7 +44,7 @@ type RoleDataTable struct {
 func (m *Manager) RegisterRole(name string, description string, perm map[base.UserScope][]string) (role *Role, err error) {
 	role = &Role{
 		Name:        name,
-		Description: common.NullString{String:description,Valid:true},
+		Description: common.NullString{String: description, Valid: true},
 	}
 	err = m.Begin()
 	if err != nil {
@@ -110,31 +110,29 @@ func (m *Manager) FillRoleDataTableArray(u base.PermInterfaceComplete, filters m
 	return res, count
 }
 
-func (m *Manager) CountRoleUserByID(roleID int64) (int64,error){
-	query:=fmt.Sprintf("SELECT COUNT(role_id) FROM %s WHERE role_id=?",UserRoleTableFull)
+func (m *Manager) CountRoleUserByID(roleID int64) (int64, error) {
+	query := fmt.Sprintf("SELECT COUNT(role_id) FROM %s WHERE role_id=?", UserRoleTableFull)
 	return m.GetDbMap().SelectInt(
 		query,
 		roleID,
 	)
 }
 
-
-func (m *Manager) DeleteRoleByID(roleID int64) (*Role,error){
-	role,err:=m.FindRoleByID(roleID)
-	if err!=nil{
-		return nil,errors.New("no role found")
+func (m *Manager) DeleteRoleByID(roleID int64) (*Role, error) {
+	role, err := m.FindRoleByID(roleID)
+	if err != nil {
+		return nil, errors.New("no role found")
 	}
-	_,err=m.GetDbMap().Delete(role)
-	return role,err
+	_, err = m.GetDbMap().Delete(role)
+	return role, err
 }
 
-
 // DeleteRole in transaction try delete role
-func (m *Manager) DeleteRole(ID int64)(r *Role,err error) {
-	r,err = m.FindRoleByID(ID)
+func (m *Manager) DeleteRole(ID int64) (r *Role, err error) {
+	r, err = m.FindRoleByID(ID)
 	err = m.Begin()
 	if err != nil {
-		return  nil,err
+		return nil, err
 	}
 
 	defer func() {
@@ -150,16 +148,14 @@ func (m *Manager) DeleteRole(ID int64)(r *Role,err error) {
 	}()
 
 	if err != nil {
-		r=nil
+		r = nil
 		return
 	}
 
-
-
 	//delete role_permission
-	err=m.DeleteRolePermissionByRoleID(ID)
+	err = m.DeleteRolePermissionByRoleID(ID)
 
 	//delete role
-	_,err=m.DeleteRoleByID(ID)
+	_, err = m.DeleteRoleByID(ID)
 	return
 }

@@ -2,7 +2,6 @@ package main
 
 import (
 	"common/config"
-	"common/controllers/base"
 	"common/models"
 	"common/redis"
 	"common/version"
@@ -10,6 +9,7 @@ import (
 	"time"
 
 	"github.com/Sirupsen/logrus"
+	"modules/misc/base"
 )
 
 func main() {

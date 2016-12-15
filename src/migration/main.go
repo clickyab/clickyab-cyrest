@@ -3,11 +3,12 @@ package main
 import (
 	"common/config"
 	"common/models"
-	"common/models/common"
 	"flag"
 	"fmt"
 	"os"
 	"text/tabwriter"
+
+	"common/models/common"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/rubenv/sql-migrate"

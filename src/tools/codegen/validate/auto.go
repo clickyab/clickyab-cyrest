@@ -49,6 +49,17 @@ import (
 
 	{{ range $m := .Data }}
 	func ({{ $m.Rec }} *{{ $m.Type }}) Validate(ctx echo.Context ) error {
+		err := func(in interface{}) error {
+			if v, ok := in.(interface {
+				ValidateExtra(echo.Context) error
+			}); ok {
+				return v.ValidateExtra(ctx)
+			}
+			return nil
+		}({{ $m.Rec }})
+		if err != nil {
+			return err
+		}
 		errs :=  validator.New().Struct({{ $m.Rec }})
 		if errs == nil {
 			return nil
@@ -57,7 +68,7 @@ import (
 		for _, i := range errs.(validator.ValidationErrors) {
 			switch i.Field() { {{ range $f := $m.Map }}
 				case "{{ $f.Name }}":
-					res["{{ $f.Json }}"] = "{{ $f.Err }}"
+					res["{{ $f.Json }}"] = trans.E("{{ $f.Err }}")
 			{{ end }}
 				default :
 					logrus.Panicf("the field %s is not translated", i)

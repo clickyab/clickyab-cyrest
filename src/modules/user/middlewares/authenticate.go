@@ -8,6 +8,8 @@ import (
 
 	"modules/user/config"
 
+	"modules/misc/trans"
+
 	"gopkg.in/labstack/echo.v3"
 )
 
@@ -19,19 +21,23 @@ func Authenticate(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		token := c.Request().Header.Get("token")
 		st := struct {
-			Error string `json:"error"`
+			Error error `json:"error"`
 		}{
-			Error: http.StatusText(http.StatusUnauthorized),
+			Error: trans.E(http.StatusText(http.StatusUnauthorized)),
 		}
 		if token != "" {
 			//get the token on redis
 			accessToken, err := aredis.GetHashKey(token, "token", true, ucfg.Cfg.TokenTimeout)
 			if err != nil { //user not authenticated
+				c.Request().Header.Set("error", st.Error.Error())
+
 				return c.JSON(http.StatusUnauthorized, st)
 			}
 			//check if the accessToken exists in users table
 			user, err := aaa.NewAaaManager().FindUserByAccessToken(accessToken)
 			if err != nil { //user not found
+				c.Request().Header.Set("error", st.Error.Error())
+
 				return c.JSON(http.StatusUnauthorized, st)
 			}
 			//all good put user in context
@@ -39,6 +45,8 @@ func Authenticate(next echo.HandlerFunc) echo.HandlerFunc {
 			c.Set(tokenData, token)
 			return next(c)
 		}
+		c.Request().Header.Set("error", st.Error.Error())
+
 		return c.JSON(http.StatusUnauthorized, st)
 	}
 }
