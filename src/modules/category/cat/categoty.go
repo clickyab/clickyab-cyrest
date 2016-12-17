@@ -15,11 +15,12 @@ import (
 //		list = yes
 // }
 type Category struct {
-	ID        int64     `db:"id" json:"id"`
-	Scope     string    `db:"scope" json:"scope"`
-	Title     string    `db:"title" json:"title"`
-	CreatedAt time.Time `db:"created_at" json:"created_at"`
-	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
+	ID          int64     `db:"id" json:"id"`
+	Scope       string    `db:"scope" json:"scope"`
+	Title       string    `db:"title" json:"title"`
+	Description string    `db:"Description" json:"Description"`
+	CreatedAt   time.Time `db:"created_at" json:"created_at"`
+	UpdatedAt   time.Time `db:"updated_at" json:"updated_at"`
 }
 
 func (c *Category) Initialize() {

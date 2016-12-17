@@ -1,4 +1,4 @@
-package controllers
+package category
 
 import "modules/misc/base"
 
