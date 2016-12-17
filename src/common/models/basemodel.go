@@ -13,6 +13,8 @@ import (
 
 	"strings"
 
+	"common/initializer"
+
 	"github.com/Sirupsen/logrus"
 	"gopkg.in/gorp.v1"
 )
@@ -33,12 +35,15 @@ type Hooker interface {
 type gorpLogger struct {
 }
 
+type modelsInitializer struct {
+}
+
 func (g gorpLogger) Printf(format string, v ...interface{}) {
 	logrus.Infof(format, v...)
 }
 
 // Initialize the modules, its safe to call this as many time as you want.
-func Initialize() {
+func (modelsInitializer) Initialize() {
 	once.Do(func() {
 		var err error
 		db, err = sql.Open("mysql", config.Config.Mysql.DSN)
@@ -82,8 +87,15 @@ func Initialize() {
 		})
 	})
 }
+func (modelsInitializer) Finalize() {
+	logrus.Debug("models are done")
+}
 
 // Register a new initializer module
 func Register(m ...utils.Initializer) {
 	all = append(all, m...)
+}
+
+func init() {
+	initializer.Register(&modelsInitializer{})
 }

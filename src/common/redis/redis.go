@@ -4,6 +4,7 @@ package aredis
 import (
 	"common/assert"
 	"common/config"
+	"common/initializer"
 	"sync"
 	"time"
 
@@ -17,8 +18,11 @@ var (
 	once   = &sync.Once{}
 )
 
+type redisInitializer struct {
+}
+
 // Initialize try to create a redis pool
-func Initialize() {
+func (redisInitializer) Initialize() {
 	once.Do(func() {
 		Client = redis.NewClient(
 			&redis.Options{
@@ -33,6 +37,10 @@ func Initialize() {
 		assert.Nil(Client.Ping().Err())
 		logrus.Debug("redis is ready.")
 	})
+}
+
+func (redisInitializer) Finalize() {
+	logrus.Debug("redis is done")
 }
 
 // StoreKey is a simple key value store with timeout
@@ -91,4 +99,8 @@ func RemoveKey(key string) error {
 func GetExpire(key string) (time.Duration, error) {
 	eCmd := Client.TTL(key)
 	return eCmd.Val(), eCmd.Err()
+}
+
+func init() {
+	initializer.Register(&redisInitializer{})
 }
