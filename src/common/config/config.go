@@ -24,6 +24,7 @@ type AppConfig struct {
 	CORS            bool   `onion:"cors"`
 	MaxCPUAvailable int    `onion:"max_cpu_available"`
 	MountPoint      string `onion:"mount_point"`
+	Profile         string
 
 	Site  string
 	Proto string
@@ -31,6 +32,7 @@ type AppConfig struct {
 	Port        string
 	StaticRoot  string `onion:"static_root"`
 	SwaggerRoot string `onion:"swagger_root"`
+	ProfileRoot string `onion:"profile_root"`
 	TimeZone    string `onion:"time_zone"`
 
 	Redis struct {
@@ -75,6 +77,7 @@ func defaultLayer() onion.DefaultLayer {
 	assert.Nil(res.SetDefault("mount_point", "/api"))
 	assert.Nil(res.SetDefault("devel_mode", true))
 	assert.Nil(res.SetDefault("cors", true))
+	assert.Nil(res.SetDefault("profile", "cpu"))
 	assert.Nil(res.SetDefault("max_cpu_available", runtime.NumCPU()))
 	assert.Nil(res.SetDefault("proto", "http"))
 	assert.Nil(res.SetDefault("port", ":80"))
@@ -87,6 +90,12 @@ func defaultLayer() onion.DefaultLayer {
 	path, err = filepath.Abs(path)
 	assert.Nil(err)
 	assert.Nil(res.SetDefault("swagger_root", path))
+
+	path, err = expand.Path("$PWD/../tmp/profiles/")
+	assert.Nil(err)
+	path, err = filepath.Abs(path)
+	assert.Nil(err)
+	assert.Nil(res.SetDefault("profile_root", path))
 
 	assert.Nil(res.SetDefault("redis.size", 10))
 	assert.Nil(res.SetDefault("redis.network", "tcp"))

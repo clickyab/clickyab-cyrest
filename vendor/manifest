@@ -374,9 +374,21 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "github.com/pkg/profile",
+			"repository": "https://github.com/pkg/profile",
+			"revision": "030571e6da0f040a04e94a9af0dd8b6dd0cce0eb",
+			"branch": "master"
+		},
+		{
 			"importpath": "github.com/rubenv/sql-migrate",
 			"repository": "https://github.com/rubenv/sql-migrate",
 			"revision": "969836b11ea791ff8335d8142eb96904db12d593",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/streadway/amqp",
+			"repository": "https://github.com/streadway/amqp",
+			"revision": "cb4fb930736ebd61a54da180a6aa4e92b206ff13",
 			"branch": "master"
 		},
 		{
