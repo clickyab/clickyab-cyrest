@@ -28,3 +28,14 @@ func (c *Category) Initialize() {
 		logrus.Panic("[BUG] you try to use a scope that is not valid in this app")
 	}
 }
+
+func (m *Manager) Create(title string, description string, scope string) (Category, error) {
+	c := &Category{Title: title, Description: description, Scope: scope}
+	err := m.CreateCategory(c)
+	return c, err
+}
+func (m *Manager) Update(title string, description string, scope string, id string) (Category, error) {
+	c := &Category{Title: title, Description: description, Scope: scope, ID: id}
+	err := m.UpdateCategory(c)
+	return c, err
+}
