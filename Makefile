@@ -137,6 +137,7 @@ codegen-category: tools-codegen
 	@$(BIN)/codegen -p modules/category/cat
 
 codegen-misc: tools-codegen
+	@$(BIN)/codegen -p modules/misc/base
 	@$(BIN)/codegen -p modules/misc/controllers
 	@$(BIN)/codegen -p modules/misc/t9n
 
