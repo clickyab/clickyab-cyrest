@@ -5,6 +5,7 @@ import (
 	"modules/category/cat"
 	_ "modules/misc" // misc controller
 	_ "modules/user" // user module
+	_ "modules/location" // location module
 )
 
 func init() {

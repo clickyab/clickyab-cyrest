@@ -1,5 +1,10 @@
 package loc
 
+import (
+	"fmt"
+	"common/assert"
+)
+
 // City model
 // @Model {
 //		table = city
@@ -13,4 +18,17 @@ type City struct {
 	ProvinceID int64  `db:"province_id" json:"province_id"`
 	Latitude   string `db:"latitude" json:"latitude"`
 	Longitude  string `db:"longitude" json:"longitude"`
+}
+
+// ListCityByProvinceID return the Provinces base on their country_id
+func (m *Manager) ListCityByProvinceID(pi int64) ([]City) {
+	var res []City
+	_, err := m.GetDbMap().Select(
+		&res,
+		fmt.Sprintf("SELECT * FROM %s WHERE province_id=?", CityTableFull),
+		pi,
+	)
+	assert.Nil(err)
+
+	return res
 }

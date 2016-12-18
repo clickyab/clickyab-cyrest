@@ -1,4 +1,4 @@
-package controllers
+package location
 
 import "modules/misc/base"
 
