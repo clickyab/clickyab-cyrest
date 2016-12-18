@@ -34,7 +34,7 @@ func (u *Controller) assignRoles2User(ctx echo.Context) error {
 	if err != nil {
 		return u.BadResponse(ctx, errors.New("user not found"))
 	}
-	ur := &aaa.UserRole{}
+
 	for _, v := range pl.RoleIDs {
 		role, err := m.FindRoleByID(v)
 		if err != nil {
@@ -44,6 +44,6 @@ func (u *Controller) assignRoles2User(ctx echo.Context) error {
 		assert.Nil(m.CreateUserRole(ur))
 	}
 
-	return u.OKResponse(ctx, ur)
+	return u.OKResponse(ctx, nil)
 
 }
