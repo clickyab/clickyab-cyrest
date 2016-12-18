@@ -60,7 +60,18 @@ func (t9 T9Error) Error() string {
 }
 
 // T is the universal translate function
-func T(translationID string, args ...interface{}) T9String {
+func T(translationID string, args ...interface{}) (res T9String) {
+	defer func() {
+		if e := recover(); e != nil {
+			logrus.Warn("Use trans module before Initialize models? maybe in global scope or init")
+			res = T9String{
+				t9Base{
+					Text:   translationID,
+					Params: args,
+				},
+			}
+		}
+	}()
 	lock.RLock()
 
 	if translations == nil {

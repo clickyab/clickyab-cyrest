@@ -2,13 +2,15 @@ package main
 
 import (
 	"common/config"
-	"common/models"
+	_ "common/models"
 	"flag"
 	"fmt"
 	"os"
 	"text/tabwriter"
 
 	"common/models/common"
+
+	"common/initializer"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/rubenv/sql-migrate"
@@ -18,6 +20,21 @@ var (
 	action = flag.String("action", "up", "up/down is supported, default is up")
 	n      int
 )
+
+//func createDatabase() error {
+//	db, err := sql.Open("mysql", config.Config.Mysql.DSN)
+//	if err != nil {
+//		return err
+//	}
+//	defer db.Close()
+//
+//	_, err = db.Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s", config.Config.Mysql.DataBase))
+//	if err != nil {
+//		return err
+//	}
+//
+//	return err
+//}
 
 // doMigration is my try to migrate on demand. but I don't know if there is more than
 // one ins is in memory
@@ -46,8 +63,11 @@ func doMigration(dir migrate.MigrationDirection, max int) error {
 func main() {
 	flag.Parse()
 	config.Initialize()
-	models.Initialize()
+
 	var err error
+
+	defer initializer.Initialize().Finalize()
+
 	if *action == "up" {
 		err = doMigration(migrate.Up, 0)
 		fmt.Printf("\n\n%d migration is applied\n", n)

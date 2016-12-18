@@ -7,7 +7,7 @@ import "time"
 // @Model {
 //		table = channels
 //		primary = true, id
-//		find_by = id, title
+//		find_by = id
 //		list = yes
 // }
 type Channel struct {

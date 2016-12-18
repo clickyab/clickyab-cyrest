@@ -46,7 +46,7 @@ func (g gorpLogger) Printf(format string, v ...interface{}) {
 func (modelsInitializer) Initialize() {
 	once.Do(func() {
 		var err error
-		db, err = sql.Open("mysql", config.Config.Mysql.DSN)
+		db, err = sql.Open("mysql", config.Config.Mysql.DSN+config.Config.Mysql.DataBase+"?parseTime=true")
 		assert.Nil(err)
 
 		db.SetMaxIdleConns(config.Config.Mysql.MaxIdleConnection)
