@@ -35,12 +35,12 @@ type uriParameter struct {
 
 var (
 	transferList = map[string]swaggerType{
-		"time.Time":                       swaggerType{"type": "string", "format": "dateTime"},
-		"sql.NullTime":                    swaggerType{"type": "string", "format": "dateTime"},
-		"common/models/common.NullTime":   swaggerType{"type": "string", "format": "dateTime"},
-		"common/models/common.NullString": swaggerType{"type": "string"},
-		"modules/balance/acc.Money":       swaggerType{"type": "integer"},
-		"modules/user/aaa.UserStatus":     swaggerType{"type": "string"},
+		"time.Time":                       {"type": "string", "format": "dateTime"},
+		"sql.NullTime":                    {"type": "string", "format": "dateTime"},
+		"common/models/common.NullTime":   {"type": "string", "format": "dateTime"},
+		"common/models/common.NullString": {"type": "string"},
+		"modules/balance/acc.Money":       {"type": "integer"},
+		"modules/user/aaa.UserStatus":     {"type": "string"},
 	}
 )
 
@@ -816,7 +816,7 @@ func identToRaml(pkg humanize.Package, i *humanize.IdentType) (swaggerType, erro
 
 func sliceToRml(pkg humanize.Package, arr *humanize.ArrayType) (swaggerType, error) {
 	var (
-		theName swaggerType
+		theName = swaggerType{"type": "string"}
 		err     error
 	)
 	switch t := arr.Type.(type) {
