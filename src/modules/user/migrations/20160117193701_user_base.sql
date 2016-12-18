@@ -75,7 +75,7 @@ CREATE INDEX user_financial_user_id_fk ON user_financial (user_id);
 
 CREATE TABLE user_profile_corporation
 (
-    user_id INT(11) NOT NULL,
+    user_id INT(11) UNIQUE NOT NULL,
     title VARCHAR(255) NOT NULL,
     economic_code VARCHAR(20),
     register_code VARCHAR(20) NOT NULL,
@@ -85,7 +85,7 @@ CREATE TABLE user_profile_corporation
     province_id INT(11),
     city_id INT(11),
     created_at DATETIME,
-    update_at DATETIME,
+    updated_at DATETIME,
     CONSTRAINT user_profile_corporation_users_id_fk FOREIGN KEY (user_id) REFERENCES users (id)
 );
 CREATE INDEX corporation_profile_city_id_fk ON user_profile_corporation (city_id);
@@ -95,7 +95,7 @@ CREATE UNIQUE INDEX corporation_profile_user_id_uindex ON user_profile_corporati
 
 CREATE TABLE user_profile_personal
 (
-    user_id INT(11) NOT NULL,
+    user_id INT(11) UNIQUE NOT NULL,
     first_name VARCHAR(255),
     last_name VARCHAR(255),
     birthday DATETIME,

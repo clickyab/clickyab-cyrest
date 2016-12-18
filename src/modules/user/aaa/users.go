@@ -41,7 +41,7 @@ const (
 	// UserTypePersonal is the personal profile
 	UserTypePersonal UserType = "personal"
 	// UserTypeCorporation is the corp profile
-	UserTypeCorporation UserType = "corpartion"
+	UserTypeCorporation UserType = "corporation"
 )
 
 // User model
@@ -396,4 +396,17 @@ func (m *Manager) EraseToken(t string) error {
 func (m *Manager) LogoutAllSession(u *User) error {
 	u.refreshToken = true
 	return m.UpdateUser(u)
+}
+
+// ChangeUserType change user type by user ID(personal-corporation)
+func (m *Manager) ChangeUserType(ID int64, userType UserType) error {
+	query := "UPDATE " + UserTableFull + " SET user_type=? WHERE id=?"
+	val, err := userType.Value()
+	assert.Nil(err)
+	_, err = m.GetDbMap().Exec(
+		query,
+		val,
+		ID,
+	)
+	return err
 }

@@ -1,6 +1,7 @@
 package aaa
 
 import (
+	"common/assert"
 	"common/models/common"
 	"time"
 )
@@ -34,4 +35,78 @@ func NewUserProfileCorporation(title string, phone string) *UserProfileCorporati
 			String: phone,
 		},
 	}
+}
+
+// DeleteCorporation delete the selected user profile corporation
+func (m *Manager) DeleteCorporation(upc *UserProfileCorporation) error {
+	_, err := m.GetDbMap().Delete(upc)
+	assert.Nil(err)
+	return err
+}
+
+// RegisterPersonal is try to register personal
+func (m *Manager) RegisterCorporation(userID int64,
+	title string,
+	economicCode,
+	registerCode string,
+	phone string,
+	address string,
+	countryID int64,
+	provinceID int64,
+	cityID int64) (cpp *UserProfileCorporation, err error) {
+
+	cpp = &UserProfileCorporation{
+		UserID:       userID,
+		Title:        title,
+		EconomicCode: common.NullString{Valid: len(economicCode) > 0, String: economicCode},
+		RegisterCode: common.NullString{Valid: len(registerCode) > 0, String: registerCode},
+		Phone:        common.NullString{Valid: len(phone) > 0, String: phone},
+		Address:      common.NullString{Valid: len(address) > 0, String: address},
+		CountryID:    common.NullInt64{Valid: countryID > 0, Int64: countryID},
+		ProvinceID:   common.NullInt64{Valid: provinceID > 0, Int64: provinceID},
+		CityID:       common.NullInt64{Valid: cityID > 0, Int64: cityID},
+	}
+
+	err = m.Begin()
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() {
+		if err != nil {
+			assert.Nil(m.Rollback())
+		} else {
+			err = m.Commit()
+		}
+
+		if err != nil {
+			cpp = nil
+		}
+	}()
+
+	//delete user profile
+	fupp, err := m.FindUserProfilePersonalByUserID(userID)
+	if err == nil {
+		//delete the user profile row
+		m.DeletePersonal(fupp)
+	}
+
+	//delete corporation profile row
+	fucp, err := m.FindUserProfileCorporationByUserID(userID)
+	if err == nil {
+		//delete the user corporation profile row
+		m.DeleteCorporation(fucp)
+	}
+
+	//create user profile personal
+	err = m.CreateUserProfileCorporation(cpp)
+
+	//update user type
+	err = m.ChangeUserType(userID, UserTypeCorporation)
+	if err != nil {
+		cpp = nil
+		return
+	}
+
+	return
 }
