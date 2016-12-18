@@ -156,7 +156,7 @@ swagger-cleaner:
 swagger-client: tools-swagger
 	GOPATH=$(ROOT) cd $(ROOT)/src && $(BIN)/swagger generate client -f $(ROOT)/3rd/swagger/cyrest.yaml
 
-codegen: swagger-ui swagger-cleaner codegen-misc codegen-user codegen-category codegen-location
+codegen: swagger-ui swagger-cleaner codegen-misc codegen-user codegen-category codegen-location codegen-channel
 	@cp $(WORK_DIR)/swagger/out.yaml $(ROOT)/3rd/swagger/cyrest.yaml
 	@cp $(WORK_DIR)/swagger/out.json $(ROOT)/3rd/swagger/cyrest.json
 	@echo "Done"
