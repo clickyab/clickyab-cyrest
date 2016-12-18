@@ -1,0 +1,53 @@
+package channel
+
+import (
+	"modules/channel/chn"
+
+	"modules/user/middlewares"
+
+	"modules/user/aaa"
+
+	"modules/misc/trans"
+	"net/http"
+
+	"gopkg.in/labstack/echo.v3"
+)
+
+// @Validate {
+// }
+type channelPayload struct {
+	UserID int64  `json:"user_id"`
+	Name   string `json:"name" validate:"required"`
+	Link   string `json:"link" `
+	Admin  string `json:"admin"`
+}
+
+//	createChannel
+//	@Route	{
+//	url	=	/create
+//	method	= post
+//	payload	= channelPayload
+//	resource = create_channel:self
+//	middleware = authz.Authenticate
+//	200 = chn.Channel
+//	400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) createChannel(ctx echo.Context) error {
+	pl := u.MustGetPayload(ctx).(*channelPayload)
+	m := chn.NewChnManager()
+	if pl.UserID == 0 {
+		usr, _ := authz.GetUser(ctx)
+		pl.UserID = usr.ID
+	}
+	user, err := aaa.NewAaaManager().FindUserByID(pl.UserID)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	_, b := user.HasPermOn("create_channel", pl.UserID, user.ParentID.Int64)
+	if !b {
+		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
+	}
+	ch := m.Create(pl.Admin, pl.Link, pl.Name, chn.ChannelStatusPending, pl.UserID)
+	return u.OKResponse(ctx, ch)
+
+}

@@ -1,4 +1,4 @@
-package category
+package channel
 
 import (
 	_ "modules/channel/chn"         // models
