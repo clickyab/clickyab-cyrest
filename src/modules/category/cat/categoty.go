@@ -4,6 +4,8 @@ package cat
 import (
 	"time"
 
+	"common/assert"
+
 	"github.com/Sirupsen/logrus"
 )
 
@@ -29,13 +31,13 @@ func (c *Category) Initialize() {
 	}
 }
 
-func (m *Manager) Create(title string, description string, scope string) (Category, error) {
-	c := &Category{Title: title, Description: description, Scope: scope}
-	err := m.CreateCategory(c)
-	return c, err
-}
-func (m *Manager) Update(title string, description string, scope string, id string) (Category, error) {
-	c := &Category{Title: title, Description: description, Scope: scope, ID: id}
-	err := m.UpdateCategory(c)
-	return c, err
+// Create is for create category
+func (m *Manager) Create(title string, description string, scope string) *Category {
+	c := &Category{
+		Title:       title,
+		Description: description,
+		Scope:       scope,
+	}
+	assert.Nil(m.CreateCategory(c))
+	return c
 }

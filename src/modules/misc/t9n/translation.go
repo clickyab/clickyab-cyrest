@@ -37,12 +37,12 @@ func (m *Manager) LoadAllInMap(force bool) map[string]bool {
 
 	tmp := m.ListTranslations()
 
-	res := make(map[string]bool)
+	allData := make(map[string]bool)
 	for i := range tmp {
-		res[tmp[i].String] = true
+		allData[tmp[i].String] = true
 	}
 
-	return res
+	return allData
 }
 
 // AddMissing Add missing translation

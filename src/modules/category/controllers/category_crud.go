@@ -41,8 +41,7 @@ func (pl *categoryPayload) ValidateExtra(ctx echo.Context) error {
 func (u *Controller) createCategory(ctx echo.Context) error {
 	pl := u.MustGetPayload(ctx).(*categoryPayload)
 	m := cat.NewCatManager()
-	c, err := m.Create(pl.Title, pl.Description, pl.Scope)
-	assert.Nil(err)
+	c := m.Create(pl.Title, pl.Description, pl.Scope)
 	return u.OKResponse(ctx, c)
 }
 
@@ -58,9 +57,22 @@ func (u *Controller) createCategory(ctx echo.Context) error {
 // }
 func (u *Controller) editCategory(ctx echo.Context) error {
 	pl := u.MustGetPayload(ctx).(*categoryPayload)
-	id := ctx.Param("id")
+	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+
 	m := cat.NewCatManager()
-	c, err := m.Update(pl.Title, pl.Description, pl.Scope, strconv.Atoi(id))
-	assert.Nil(err)
+	c, err := m.FindCategoryByID(id)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+
+	c.Title = pl.Title
+	c.Description = pl.Description
+	c.Scope = pl.Scope
+
+	assert.Nil(m.UpdateCategory(c))
+
 	return u.OKResponse(ctx, c)
 }

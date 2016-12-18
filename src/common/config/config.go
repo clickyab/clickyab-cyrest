@@ -45,8 +45,16 @@ type AppConfig struct {
 
 	Mysql struct {
 		DSN               string `onion:"dsn"`
+		DataBase          string `onion:"database"`
 		MaxConnection     int    `onion:"max_connection"`
 		MaxIdleConnection int    `onion:"max_idle_connection"`
+	}
+
+	AMQP struct {
+		DSN        string
+		Exchange   string
+		Publisher  int
+		ConfirmLen int
 	}
 
 	Page struct {
@@ -103,9 +111,15 @@ func defaultLayer() onion.DefaultLayer {
 	assert.Nil(res.SetDefault("redis.password", ""))
 	assert.Nil(res.SetDefault("redis.database", 0))
 
-	assert.Nil(res.SetDefault("mysql.dsn", "root:bita123@/cyrest?parseTime=true"))
+	assert.Nil(res.SetDefault("mysql.dsn", "root:bita123@/"))
+	assert.Nil(res.SetDefault("mysql.database", "cyrest"))
 	assert.Nil(res.SetDefault("mysql.max_connection", 100))
 	assert.Nil(res.SetDefault("mysql.max_idle_connection", 10))
+
+	assert.Nil(res.SetDefault("amqp.publisher", 30))
+	assert.Nil(res.SetDefault("amqp.exchange", "malooch"))
+	assert.Nil(res.SetDefault("amqp.dsn", "amqp://cyrest:bita123@127.0.0.1:5672/"))
+	assert.Nil(res.SetDefault("amqp.confirmlen", 50))
 
 	assert.Nil(res.SetDefault("page.per_Page", 10))
 	assert.Nil(res.SetDefault("page.max_per_page", 100))

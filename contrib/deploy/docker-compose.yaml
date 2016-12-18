@@ -1,0 +1,27 @@
+version: '2'
+services:
+  redis:
+    image: "registry.clickyab.ae/clickyab/redis"
+    ports:
+      - "6379:6379"
+
+  mysql:
+    image: "registry.clickyab.ae/clickyab/mariadb"
+    ports:
+      - "3306:3306"
+    volumes:
+      - "/home/cy/mariadb"
+    environment:
+      - MYSQL_ROOT_PASSWORD=bita123
+      - MYSQL_DATABASE=cyrest
+
+  app:
+    build: ./image
+    ports:
+      - "80:80"
+    volumes:
+      - "/home/cy/cyrest:/app"
+    command: /app/bin/server
+    links:
+      - mysql
+      - redis

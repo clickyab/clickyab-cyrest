@@ -141,6 +141,10 @@ codegen-misc: tools-codegen
 	@$(BIN)/codegen -p modules/misc/controllers
 	@$(BIN)/codegen -p modules/misc/t9n
 
+codegen-channel: tools-codegen
+	$(BIN)/codegen -p modules/channel/controllers
+	$(BIN)/codegen -p modules/channel/chn
+
 swagger-cleaner:
 	@rm -f $(WORK_DIR)/swagger/*.json
 	@rm -f $(WORK_DIR)/swagger/*.yaml
@@ -148,7 +152,7 @@ swagger-cleaner:
 swagger-client: tools-swagger
 	GOPATH=$(ROOT) cd $(ROOT)/src && $(BIN)/swagger generate client -f $(ROOT)/3rd/swagger/cyrest.yaml
 
-codegen: swagger-ui swagger-cleaner codegen-misc codegen-user codegen-category
+codegen: swagger-ui swagger-cleaner codegen-misc codegen-user codegen-category codegen-channel
 	@cp $(WORK_DIR)/swagger/out.yaml $(ROOT)/3rd/swagger/cyrest.yaml
 	@cp $(WORK_DIR)/swagger/out.json $(ROOT)/3rd/swagger/cyrest.json
 	@echo "Done"
