@@ -924,14 +924,19 @@ func mapToRaml(pkg humanize.Package, st *humanize.MapType) (swaggerType, error) 
 	res := make(swaggerType)
 	res["type"] = "object"
 	props := make(swaggerType)
-	if _, ok := st.Value.(*humanize.InterfaceType); !ok {
+	if _, ok := st.Value.(*humanize.InterfaceType); ok {
+		props["type"] = "string"
+	} else if arr, ok := st.Value.(*humanize.ArrayType); ok {
+		props, _ = sliceToRml(pkg, arr)
+	}
+
+	if len(props) == 0 {
 		props["type"] = "array"
 		props["items"], err = goToRaml(pkg, st.Value)
 		if err != nil {
 			return nil, err
 		}
-	} else {
-		props["type"] = "string"
+
 	}
 	res["additionalProperties"] = props
 
