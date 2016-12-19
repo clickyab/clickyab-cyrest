@@ -22,7 +22,7 @@ type (
 	ChannelStatus string
 )
 
-// Category model
+// Channel model
 // @Model {
 //		table = channels
 //		primary = true, id
