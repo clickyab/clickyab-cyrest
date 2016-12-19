@@ -85,8 +85,8 @@ func (m *Manager) FillRoleDataTableArray(u base.PermInterfaceComplete, filters m
 	}
 
 	for column, val := range search {
-		where = append(where, fmt.Sprintf("%s=%s", column, "?"))
-		params = append(params, val)
+		where = append(where, fmt.Sprintf("%s LIKE ?", column))
+		params = append(params, fmt.Sprintf("%s"+val+"%s","%","%"))
 	}
 
 	//check for perm
