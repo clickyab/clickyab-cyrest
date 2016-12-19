@@ -129,6 +129,10 @@ func (m *Manager) RegisterPersonal(userID int64,
 
 	//create user profile personal
 	err = m.CreateUserProfilePersonal(upp)
+	if err!=nil{
+		upp=nil
+		return
+	}
 
 	//update user type
 	err = m.ChangeUserType(userID, UserTypePersonal)

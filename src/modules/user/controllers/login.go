@@ -11,10 +11,11 @@ import (
 )
 
 type responseLoginOK struct {
-	UserID      int64                       `json:"user_id"`
-	Email       string                      `json:"email"`
-	AccessToken string                      `json:"token"`
-	Permissions map[base.UserScope][]string `json:"perm"`
+	UserID      int64                              `json:"user_id"`
+	Email       string                             `json:"email"`
+	AccessToken string                             `json:"token"`
+	Permissions map[base.UserScope][]string        `json:"perm"`
+	Profile     map[string]interface{}             `json:"profile"`
 }
 
 // @Validate {
@@ -33,11 +34,13 @@ func createLoginResponse(u *aaa.User, t string) responseLoginOK {
 			res[i] = append(res[i], j)
 		}
 	}
+	profile, _ := u.GetProfile()
 	return responseLoginOK{
 		UserID:      u.ID,
 		Email:       u.Email,
 		AccessToken: t,
 		Permissions: res,
+		Profile:     profile,
 	}
 }
 
