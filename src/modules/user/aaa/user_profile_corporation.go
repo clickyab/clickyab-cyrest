@@ -100,6 +100,10 @@ func (m *Manager) RegisterCorporation(userID int64,
 
 	//create user profile personal
 	err = m.CreateUserProfileCorporation(cpp)
+	if err != nil {
+		cpp = nil
+		return
+	}
 
 	//update user type
 	err = m.ChangeUserType(userID, UserTypeCorporation)
