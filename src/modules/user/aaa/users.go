@@ -63,7 +63,7 @@ type User struct {
 	Avatar      common.NullString                  `db:"avatar" json:"avatar" visible:"false"`
 	Status      UserStatus                         `db:"status" json:"status" filter:"true" title:"User status"`
 	CreatedAt   time.Time                          `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
-	UpdatedAt   time.Time                          `db:"updated_at" json:"updated_at" sort:"true" title:"Created at"`
+	UpdatedAt   time.Time                          `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at"`
 	resources   map[base.UserScope]map[string]bool `db:"-"`
 	roles       []Role                             `db:"-"`
 	//LastLogin   common.NullTime `db:"last_login" json:"last_login"`
@@ -212,7 +212,7 @@ func (u *User) HasPermOn(perm string, ownerID, parentID int64, scopes ...base.Us
 	}
 
 	if global {
-		if res[base.ScopeGlobal][perm] {
+		if res[base.ScopeGlobal][perm] || res[base.ScopeGlobal]["god"]{
 			return base.ScopeGlobal, true
 		}
 	}
@@ -240,7 +240,7 @@ func (m *Manager) FillUserDataTableArray(u base.PermInterfaceComplete, filters m
 
 	for column, val := range search {
 		where = append(where, fmt.Sprintf("%s=%s", column, "?"))
-		params = append(params, val)
+		params = append(params, fmt.Sprintf("%s"+val+"%s","%","%"))
 	}
 
 	currentUserID := u.GetID()
