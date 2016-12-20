@@ -60,6 +60,7 @@ type ColumnDef struct {
 	FieldTypeString string            `json:"-"`
 	FilterValidMap  map[string]string `json:"filter_valid_map"`
 	FilterValid     template.HTML     `json:"-"`
+	Transform       string            `json:"-"`
 }
 
 var (
@@ -158,7 +159,7 @@ func (u *Controller) list{{ .Data.Entity|ucfirst }}(ctx echo.Context) error {
 	{{ range $f := .Data.Column }}
 	{{ if $f.Filter }}
 	if e := ctx.Request().URL.Query().Get("{{ $f.Data }}"); e != "" && {{ $.PackageName }}.{{ $f.FieldTypeString }}(e).IsValid() {
-		filter["{{ $f.Data }}"] = e
+		filter["{{ if ne $f.Transform "" }}{{ $f.Transform }}{{else}}{{ $f.Data }}{{end}}"] = e
 	}
 	{{ end }}
 	{{ end }}
@@ -166,7 +167,7 @@ func (u *Controller) list{{ .Data.Entity|ucfirst }}(ctx echo.Context) error {
 	{{ range $f := .Data.Column }}
 	{{ if $f.Searchable }}
 	if e := ctx.Request().URL.Query().Get("{{ $f.Data }}"); e != "" {
-		search["{{ $f.Data }}"] = e
+		search["{{ if ne $f.Transform "" }}{{ $f.Transform }}{{else}}{{ $f.Data }}{{end}}"] = e
 	}
 	{{ end }}
 	{{ end }}
@@ -327,7 +328,7 @@ func extractValidFilter(p humanize.Package, t humanize.Type) (map[string]string,
 	return res, `"` + strings.Join(comma, `","`) + `"`
 }
 
-func handleField(p humanize.Package, f humanize.Field) (ColumnDef, error) {
+func handleField(p humanize.Package, f humanize.Field, mapPrefix string) (ColumnDef, error) {
 	clm := ColumnDef{}
 	tag := f.Tags.Get("json")
 	if tag == "" {
@@ -338,6 +339,12 @@ func handleField(p humanize.Package, f humanize.Field) (ColumnDef, error) {
 	clm.Searchable = strings.ToLower(f.Tags.Get("search")) == "true"
 	clm.Sortable = strings.ToLower(f.Tags.Get("sort")) == "true"
 	clm.Filter = strings.ToLower(f.Tags.Get("filter")) == "true"
+
+	clm.Transform = f.Tags.Get("map")
+	if clm.Transform == "" && mapPrefix != "" {
+		clm.Transform = mapPrefix + "." + tag
+	}
+
 	if clm.Filter && clm.Searchable {
 		return ColumnDef{}, fmt.Errorf("both filter and search can not set on one field : %s", f.Name)
 	}
@@ -395,9 +402,10 @@ func (e dataTablePlugin) Finalize(c interface{}, p humanize.Package) error {
 		ctx[i].Actions = res
 		columns := make([]ColumnDef, 0)
 		st := ctx[i].typ.Type.(*humanize.StructType)
+		mapPrefix := ctx[i].Ann.Items["map_prefix"]
 		for _, f := range st.Fields {
 			if isExported(f.Name) && f.Tags.Get("json") != "-" {
-				clm, err := handleField(p, f)
+				clm, err := handleField(p, f, mapPrefix)
 				if err != nil {
 					return err
 				}
@@ -413,7 +421,7 @@ func (e dataTablePlugin) Finalize(c interface{}, p humanize.Package) error {
 			}
 			for _, f := range tE.Type.(*humanize.StructType).Fields {
 				if isExported(f.Name) && f.Tags.Get("json") != "-" {
-					clm, err := handleField(p, f)
+					clm, err := handleField(p, f, mapPrefix)
 					if err != nil {
 						return err
 					}
