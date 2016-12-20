@@ -53,7 +53,7 @@ const (
 //		list = yes
 // }
 type User struct {
-	ID          int64                              `db:"id" json:"id" sort:"true" title:"ID"`
+	ID          int64                              `db:"id" json:"id" sort:"true" title:"ID" map:"users.id"`
 	Email       string                             `db:"email" json:"email" search:"true" title:"Email"`
 	Password    string                             `db:"password" json:"-"`
 	OldPassword common.NullString                  `db:"old_password" json:"-"`
@@ -75,6 +75,7 @@ type User struct {
 // @DataTable {
 //		url = /users
 //		entity = user
+//		map_prefix = users
 //		view = user_list:parent
 //		controller = modules/user/controllers
 //		fill = FillUserDataTableArray
@@ -264,9 +265,7 @@ func (m *Manager) FillUserDataTableArray(u base.PermInterfaceComplete, filters m
 	offset := (p - 1) * c
 
 	query += fmt.Sprintf(" ORDER BY %s %s LIMIT %d OFFSET %d", sort, order, limit, offset)
-	fmt.Println(query)
-	fmt.Println(countQuery)
-	/*_,err:=m.GetDbMap().Select(
+	_,err:=m.GetDbMap().Select(
 		&res,
 		query,
 		params...,
@@ -276,7 +275,7 @@ func (m *Manager) FillUserDataTableArray(u base.PermInterfaceComplete, filters m
 		query,
 		params...,
 	)
-	assert.Nil(err)*/
+	assert.Nil(err)
 	return res, count
 
 }
