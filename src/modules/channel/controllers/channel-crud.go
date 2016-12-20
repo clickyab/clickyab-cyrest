@@ -10,6 +10,8 @@ import (
 	"modules/misc/trans"
 	"net/http"
 
+	"strconv"
+
 	"gopkg.in/labstack/echo.v3"
 )
 
@@ -50,4 +52,77 @@ func (u *Controller) createChannel(ctx echo.Context) error {
 	ch := m.Create(pl.Admin, pl.Link, pl.Name, chn.ChannelStatusPending, pl.UserID)
 	return u.OKResponse(ctx, ch)
 
+}
+
+//	getChannel
+//	@Route	{
+//	url	=	/:id
+//	method	= get
+//	resource = list_channel:self
+//	middleware = authz.Authenticate
+//	200 = chn.Channel
+//	400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) getChannel(ctx echo.Context) error {
+	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	m := chn.NewChnManager()
+	channel, err := m.FindChannelByID(id)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	owner, err := aaa.NewAaaManager().FindUserByID(channel.UserID)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	currentUser, ok := authz.GetUser(ctx)
+	if !ok {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	_, b := currentUser.HasPermOn("list_channel", owner.ID, owner.ParentID.Int64)
+	if !b {
+		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
+	}
+	return u.OKResponse(ctx, channel)
+}
+
+//	editChannel
+//	@Route	{
+//	url	=	/:id
+//	method	= put
+//	payload	= channelPayload
+//	resource = edit_channel:self
+//	middleware = authz.Authenticate
+//	200 = chn.Channel
+//	400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) editChannel(ctx echo.Context) error {
+	pl := u.MustGetPayload(ctx).(*channelPayload)
+	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	m := chn.NewChnManager()
+	channel, err := m.FindChannelByID(id)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	owner, err := aaa.NewAaaManager().FindUserByID(channel.UserID)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	currentUser, ok := authz.GetUser(ctx)
+	if !ok {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	_, b := currentUser.HasPermOn("edit_channel", owner.ID, owner.ParentID.Int64)
+	if !b {
+		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
+	}
+
+	ch := m.EditChannel(pl.Admin, pl.Link, pl.Name, channel.Status, owner.ID, id)
+
+	return u.OKResponse(ctx, ch)
 }

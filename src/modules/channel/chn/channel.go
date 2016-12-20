@@ -93,7 +93,7 @@ func (m *Manager) FillChannelDataTableArray(u base.PermInterfaceComplete, filter
 
 	for column, val := range search {
 		where = append(where, fmt.Sprintf("%s LIKE ?", column))
-		params = append(params, fmt.Sprintf("%s"+val+"%s","%","%"))
+		params = append(params, fmt.Sprintf("%s"+val+"%s", "%", "%"))
 	}
 
 	currentUserID := u.GetID()
@@ -126,4 +126,19 @@ func (m *Manager) FillChannelDataTableArray(u base.PermInterfaceComplete, filter
 	_, err = m.GetDbMap().Select(&res, query, params...)
 	assert.Nil(err)
 	return res, count
+}
+
+// EditChannel function for channel editing
+func (m *Manager) EditChannel(admin, link, name string, status ChannelStatus, userID int64, id int64) *Channel {
+
+	ch := &Channel{
+		ID:     id,
+		UserID: userID,
+		Admin:  common.NullString{Valid: admin != "", String: admin},
+		Link:   common.NullString{Valid: link != "", String: link},
+		Status: status,
+		Name:   name,
+	}
+	assert.Nil(m.UpdateChannel(ch))
+	return ch
 }
