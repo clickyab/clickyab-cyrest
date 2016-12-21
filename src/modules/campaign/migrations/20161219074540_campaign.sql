@@ -6,9 +6,8 @@ CREATE TABLE campaigns
   id INT(11) PRIMARY KEY NOT NULL AUTO_INCREMENT,
   user_id INT(11)  NOT NULL,
   name VARCHAR(60) NOT NULL,
-  status ENUM('pending', 'rejected','accepted','archive'),
-  active ENUM('yes','no')
-  strart TIMESTAMP,
+  active ENUM('yes','no'),
+  start TIMESTAMP,
   end TIMESTAMP,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
   updated_at TIMESTAMP DEFAULT '0000-00-00 00:00:00' NOT NULL,
