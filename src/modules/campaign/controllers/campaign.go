@@ -1,4 +1,4 @@
-package channel
+package campaign
 
 import "modules/misc/base"
 
