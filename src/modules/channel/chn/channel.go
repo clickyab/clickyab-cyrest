@@ -11,12 +11,15 @@ import (
 	"time"
 )
 
-//'pending', 'rejected','accepted','archive'
+//'pending', 'rejected','accepted','archive','yes','no'
 const (
 	ChannelStatusPending  ChannelStatus = "pending"
 	ChannelStatusRejected ChannelStatus = "rejected"
 	ChannelStatusAccepted ChannelStatus = "accepted"
 	ChannelStatusArchive  ChannelStatus = "archive"
+
+	ActiveStatusYes ActiveStatus = "yes"
+	ActiveStatusNo  ActiveStatus = "no"
 )
 
 type (
@@ -24,6 +27,11 @@ type (
 	// @Enum{
 	// }
 	ChannelStatus string
+
+	// ActiveStatus is the channel active
+	// @Enum{
+	// }
+	ActiveStatus string
 )
 
 // Channel model
@@ -40,6 +48,7 @@ type Channel struct {
 	Link      common.NullString `json:"link" db:"link" search:"true" title:"Link"`
 	Admin     common.NullString `json:"admin" db:"admin" search:"true" title:"Admin"`
 	Status    ChannelStatus     `json:"status" db:"status" filter:"true" title:"Status"`
+	Active    ActiveStatus      `json:"active" db:"active" filter:"true" title:"Active"`
 	CreatedAt time.Time         `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
 	UpdatedAt time.Time         `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at"`
 }
@@ -48,13 +57,15 @@ func (c *Channel) Initialize() {
 
 }
 
-func (m *Manager) Create(admin, link, name string, status ChannelStatus, userID int64) *Channel {
+// Create
+func (m *Manager) Create(admin, link, name string, status ChannelStatus, active ActiveStatus, userID int64) *Channel {
 
 	ch := &Channel{
 		Admin:  common.NullString{Valid: admin != "", String: admin},
 		Link:   common.NullString{Valid: link != "", String: link},
 		Name:   name,
 		Status: status,
+		Active: active,
 		UserID: userID,
 	}
 	assert.Nil(m.CreateChannel(ch))
@@ -129,15 +140,37 @@ func (m *Manager) FillChannelDataTableArray(u base.PermInterfaceComplete, filter
 }
 
 // EditChannel function for channel editing
-func (m *Manager) EditChannel(admin, link, name string, status ChannelStatus, userID int64, id int64) *Channel {
+func (m *Manager) EditChannel(admin, link, name string, status ChannelStatus, activeStatus ActiveStatus, userID int64, createdAt time.Time, id int64) *Channel {
 
 	ch := &Channel{
-		ID:     id,
-		UserID: userID,
-		Admin:  common.NullString{Valid: admin != "", String: admin},
-		Link:   common.NullString{Valid: link != "", String: link},
-		Status: status,
-		Name:   name,
+		ID:        id,
+		UserID:    userID,
+		Admin:     common.NullString{Valid: admin != "", String: admin},
+		Link:      common.NullString{Valid: link != "", String: link},
+		Status:    status,
+		Active:    activeStatus,
+		Name:      name,
+		CreatedAt: createdAt,
+	}
+	assert.Nil(m.UpdateChannel(ch))
+	return ch
+}
+
+// ChangeActive toggle between active status
+func (m *Manager) ChangeActive(ID int64, userID int64, name string, link string, admin string, status ChannelStatus, currentStat ActiveStatus, createdAt time.Time) *Channel {
+	ch := &Channel{
+		ID:        ID,
+		UserID:    userID,
+		Name:      name,
+		Link:      common.NullString{Valid: link != "", String: link},
+		Admin:     common.NullString{Valid: admin != "", String: admin},
+		Status:    status,
+		CreatedAt: createdAt,
+	}
+	if currentStat == ActiveStatusYes {
+		ch.Active = ActiveStatusNo
+	} else {
+		ch.Active = ActiveStatusYes
 	}
 	assert.Nil(m.UpdateChannel(ch))
 	return ch

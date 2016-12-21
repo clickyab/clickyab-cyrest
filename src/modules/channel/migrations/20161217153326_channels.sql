@@ -10,6 +10,7 @@ CREATE TABLE channels
     link VARCHAR(100) ,
     admin VARCHAR(30)  ,
     status ENUM('pending', 'rejected','accepted','archive'),
+    active ENUM('yes', 'no'),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT '0000-00-00 00:00:00' NOT NULL,
     CONSTRAINT channels_id_users_id_fk FOREIGN KEY (user_id) REFERENCES users(id)
