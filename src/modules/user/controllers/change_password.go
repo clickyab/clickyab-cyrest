@@ -6,6 +6,9 @@ import (
 	"modules/user/aaa"
 	"modules/user/middlewares"
 
+	"common/redis"
+	"modules/user/config"
+
 	"gopkg.in/labstack/echo.v3"
 )
 
@@ -35,7 +38,10 @@ func (u *Controller) changePassword(ctx echo.Context) error {
 	}
 	usr.Password = pl.NewPassword
 
+	token := authz.MustGetToken(ctx)
 	m := aaa.NewAaaManager()
 	assert.Nil(m.UpdateUser(usr))
+	assert.Nil(aredis.StoreHashKey(token, "token", usr.AccessToken, ucfg.Cfg.TokenTimeout))
+
 	return u.OKResponse(ctx, nil)
 }
