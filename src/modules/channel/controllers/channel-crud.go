@@ -7,6 +7,7 @@ import (
 
 	"modules/user/aaa"
 
+	"modules/misc/middlewares"
 	"modules/misc/trans"
 	"net/http"
 
@@ -41,19 +42,22 @@ type channelPayload struct {
 func (u *Controller) createChannel(ctx echo.Context) error {
 	pl := u.MustGetPayload(ctx).(*channelPayload)
 	m := chn.NewChnManager()
-	if pl.UserID == 0 {
-		usr, _ := authz.GetUser(ctx)
-		pl.UserID = usr.ID
+	currentUser, ok := authz.GetUser(ctx)
+	if !ok{
+		return u.NotFoundResponse(ctx, nil)
 	}
-	user, err := aaa.NewAaaManager().FindUserByID(pl.UserID)
+	if pl.UserID == 0 {
+		pl.UserID = currentUser.ID
+	}
+	owner, err := aaa.NewAaaManager().FindUserByID(pl.UserID)
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
 	}
-	_, b := user.HasPermOn("create_channel", pl.UserID, user.DBParentID.Int64)
+	_, b := currentUser.HasPermOn("create_channel", owner.ID, owner.ParentID.Int64)
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
-	ch := m.Create(pl.Admin, pl.Link, pl.Name, chn.ChannelStatusPending, pl.UserID)
+	ch := m.Create(pl.Admin, pl.Link, pl.Name, chn.ChannelStatusPending, chn.ActiveStatusNo, pl.UserID)
 	return u.OKResponse(ctx, ch)
 
 }
@@ -126,8 +130,40 @@ func (u *Controller) editChannel(ctx echo.Context) error {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
 
-	ch := m.EditChannel(pl.Admin, pl.Link, pl.Name, channel.Status, owner.ID, id)
+	ch := m.EditChannel(pl.Admin, pl.Link, pl.Name, channel.Status, channel.Active, owner.ID, channel.CreatedAt, id)
 
+	return u.OKResponse(ctx, ch)
+}
+
+//	active
+//	@Route	{
+//	url	=	/active/:id
+//	method	= put
+//	resource = active_channel:self
+//	middleware = authz.Authenticate
+//	200 = chn.Channel
+//	400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) active(ctx echo.Context) error {
+	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	m := chn.NewChnManager()
+	channel, err := m.FindChannelByID(id)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	currentUser, ok := authz.GetUser(ctx)
+	if !ok {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	owner, err := aaa.NewAaaManager().FindUserByID(channel.UserID)
+	_, b := currentUser.HasPermOn("active_channel", owner.ID, owner.ParentID.Int64)
+	if !b {
+		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
+	}
+	ch := m.ChangeActive(channel.ID, channel.UserID, channel.Name, channel.Link.String, channel.Admin.String, channel.Status, channel.Active, channel.CreatedAt)
 	return u.OKResponse(ctx, ch)
 }
 
