@@ -12,6 +12,10 @@ import (
 
 	"strconv"
 
+	"common/assert"
+
+	"modules/misc/middlewares"
+
 	"gopkg.in/labstack/echo.v3"
 )
 
@@ -125,4 +129,62 @@ func (u *Controller) editChannel(ctx echo.Context) error {
 	ch := m.EditChannel(pl.Admin, pl.Link, pl.Name, channel.Status, owner.ID, id)
 
 	return u.OKResponse(ctx, ch)
+}
+
+// @Validate {
+// }
+type statusPayload struct {
+	Status chn.ChannelStatus `json:"status" validate:"required"`
+}
+
+// Validate custom validation for user scope
+func (lp *statusPayload) ValidateExtra(ctx echo.Context) error {
+	if !lp.Status.IsValid() {
+		return middlewares.GroupError{
+			"status": trans.E("is invalid"),
+		}
+	}
+	return nil
+}
+
+//	StatusChannel
+//	@Route	{
+//	url	=	/status/:id
+//	method	= put
+//	payload	= statusPayload
+//	resource = status_channel:parent
+//	middleware = authz.Authenticate
+//	200 = chn.Channel
+//	400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) StatusChannel(ctx echo.Context) error {
+	pl := u.MustGetPayload(ctx).(*statusPayload)
+	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	m := chn.NewChnManager()
+	cha, err := m.FindChannelByID(id)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	currentUser, ok := authz.GetUser(ctx)
+	if !ok {
+		return u.NotFoundResponse(ctx, nil)
+	}
+
+	owner, err := aaa.NewAaaManager().FindUserByID(cha.UserID)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	_, b := currentUser.HasPermOn("status_channel", owner.ID, owner.ParentID.Int64)
+	if !b {
+		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
+	}
+
+	cha.ID = id
+	cha.Status = pl.Status
+	assert.Nil(m.UpdateChannel(cha))
+	return u.OKResponse(ctx, cha)
+
 }
