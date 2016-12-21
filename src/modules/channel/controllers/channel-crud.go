@@ -45,7 +45,7 @@ func (u *Controller) createChannel(ctx echo.Context) error {
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
 	}
-	_, b := user.HasPermOn("create_channel", pl.UserID, user.ParentID.Int64)
+	_, b := user.HasPermOn("create_channel", pl.UserID, user.DBParentID.Int64)
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
@@ -81,7 +81,7 @@ func (u *Controller) getChannel(ctx echo.Context) error {
 	if !ok {
 		return u.NotFoundResponse(ctx, nil)
 	}
-	_, b := currentUser.HasPermOn("list_channel", owner.ID, owner.ParentID.Int64)
+	_, b := currentUser.HasPermOn("list_channel", owner.ID, owner.DBParentID.Int64)
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
@@ -117,7 +117,7 @@ func (u *Controller) editChannel(ctx echo.Context) error {
 	if !ok {
 		return u.NotFoundResponse(ctx, nil)
 	}
-	_, b := currentUser.HasPermOn("edit_channel", owner.ID, owner.ParentID.Int64)
+	_, b := currentUser.HasPermOn("edit_channel", owner.ID, owner.DBParentID.Int64)
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}

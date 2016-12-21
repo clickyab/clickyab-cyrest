@@ -59,7 +59,7 @@ type User struct {
 	OldPassword common.NullString                  `db:"old_password" json:"-"`
 	AccessToken string                             `db:"access_token" json:"-"`
 	Type        UserType                           `db:"user_type" json:"user_type" filter:"true" title:"User type"`
-	ParentID    common.NullInt64                   `db:"parent_id" json:"-"`
+	DBParentID  common.NullInt64                   `db:"parent_id" json:"-"`
 	Avatar      common.NullString                  `db:"avatar" json:"avatar" visible:"false"`
 	Status      UserStatus                         `db:"status" json:"status" filter:"true" title:"User status"`
 	CreatedAt   time.Time                          `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
@@ -212,7 +212,7 @@ func (u *User) HasPermOn(perm string, ownerID, parentID int64, scopes ...base.Us
 	}
 
 	if global {
-		if res[base.ScopeGlobal][perm] || res[base.ScopeGlobal]["god"]{
+		if res[base.ScopeGlobal][perm] || res[base.ScopeGlobal]["god"] {
 			return base.ScopeGlobal, true
 		}
 	}
@@ -232,7 +232,7 @@ func (m *Manager) FillUserDataTableArray(u base.PermInterfaceComplete, filters m
 	var where []string
 
 	countQuery := "SELECT COUNT(id) FROM users"
-	query := "SELECT users.*,users.id AS owner_id_dt,users.parent_id as parent_id_dt FROM users"
+	query := "SELECT users.*,users.id AS owner_id_dt,CASE WHEN users.parent_id IS NOT NULL THEN users.parent_id ELSE 0 END as parent_id_dt FROM users"
 	for field, value := range filters {
 		where = append(where, fmt.Sprintf("%s=%s", field, "?"))
 		params = append(params, value)
@@ -240,7 +240,7 @@ func (m *Manager) FillUserDataTableArray(u base.PermInterfaceComplete, filters m
 
 	for column, val := range search {
 		where = append(where, fmt.Sprintf("%s=%s", column, "?"))
-		params = append(params, fmt.Sprintf("%s"+val+"%s","%","%"))
+		params = append(params, fmt.Sprintf("%s"+val+"%s", "%", "%"))
 	}
 
 	currentUserID := u.GetID()
@@ -264,15 +264,18 @@ func (m *Manager) FillUserDataTableArray(u base.PermInterfaceComplete, filters m
 	limit := c
 	offset := (p - 1) * c
 
-	query += fmt.Sprintf(" ORDER BY %s %s LIMIT %d OFFSET %d", sort, order, limit, offset)
-	_,err:=m.GetDbMap().Select(
+	if sort != "" {
+		query += fmt.Sprintf(" ORDER BY %s %s ", sort, order)
+	}
+	query += fmt.Sprintf(" LIMIT %d OFFSET %d ", limit, offset)
+	_, err := m.GetDbMap().Select(
 		&res,
 		query,
 		params...,
 	)
 	assert.Nil(err)
-	count,err=m.GetDbMap().SelectInt(
-		query,
+	count, err = m.GetDbMap().SelectInt(
+		countQuery,
 		params...,
 	)
 	assert.Nil(err)
@@ -411,19 +414,19 @@ func (m *Manager) ChangeUserType(ID int64, userType UserType) error {
 }
 
 // GetProfile for this user
-func (u *User) GetProfile() (map[string]interface{},error) {
+func (u *User) GetProfile() (map[string]interface{}, error) {
 	var answer = make(map[string]interface{})
-	m:=NewAaaManager()
-	personal,err:=m.FindUserProfilePersonalByUserID(u.ID)
-	if err!=nil{
-		corporation,err:=m.FindUserProfileCorporationByUserID(u.ID)
-		if err!=nil{
-			return nil,nil
+	m := NewAaaManager()
+	personal, err := m.FindUserProfilePersonalByUserID(u.ID)
+	if err != nil {
+		corporation, err := m.FindUserProfileCorporationByUserID(u.ID)
+		if err != nil {
+			return nil, nil
 		}
-		answer["corporation"]=corporation
-		return answer,nil
-	}else{
-		answer["personal"]=personal
-		return answer,nil
+		answer["corporation"] = corporation
+		return answer, nil
+	} else {
+		answer["personal"] = personal
+		return answer, nil
 	}
 }

@@ -127,5 +127,10 @@ func defaultLayer() onion.DefaultLayer {
 
 	assert.Nil(res.SetDefault("time_zone", "Asia/Tehran"))
 
+	assert.Nil(res.SetDefault("slack.channel", "notifications"))
+	assert.Nil(res.SetDefault("slack.username", "BigBrother"))
+	assert.Nil(res.SetDefault("slack.webhookurl", "https://hooks.slack.com/services/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"))
+	assert.Nil(res.SetDefault("slack.active", false))
+
 	return res
 }
