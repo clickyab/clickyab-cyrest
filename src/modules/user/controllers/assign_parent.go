@@ -44,12 +44,12 @@ func (u *Controller) assignParent(ctx echo.Context) error {
 	}
 
 	//check user has not parent
-	if parent.ParentID.Valid {
+	if parent.DBParentID.Valid {
 		return u.BadResponse(ctx, trans.E("parent must not be child of another user"))
 	}
 
-	usr.ParentID.Int64 = pl.ParentID
-	usr.ParentID.Valid = true
+	usr.DBParentID.Int64 = pl.ParentID
+	usr.DBParentID.Valid = true
 
 	assert.Nil(m.UpdateUser(usr))
 	return u.OKResponse(ctx, nil)
