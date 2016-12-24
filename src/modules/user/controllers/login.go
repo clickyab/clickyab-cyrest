@@ -11,11 +11,11 @@ import (
 )
 
 type responseLoginOK struct {
-	UserID      int64                              `json:"user_id"`
-	Email       string                             `json:"email"`
-	AccessToken string                             `json:"token"`
-	Permissions map[base.UserScope][]string        `json:"perm"`
-	Profile     map[string]interface{}             `json:"profile"`
+	UserID      int64                       `json:"user_id"`
+	Email       string                      `json:"email"`
+	AccessToken string                      `json:"token"`
+	Permissions map[base.UserScope][]string `json:"perm"`
+	Profile     interface{}                 `json:"profile"`
 }
 
 // @Validate {

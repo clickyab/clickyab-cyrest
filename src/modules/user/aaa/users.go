@@ -414,8 +414,8 @@ func (m *Manager) ChangeUserType(ID int64, userType UserType) error {
 }
 
 // GetProfile for this user
-func (u *User) GetProfile() (map[string]interface{}, error) {
-	var answer = make(map[string]interface{})
+func (u *User) GetProfile() (interface{}, error) {
+	var answer interface{}
 	m := NewAaaManager()
 	personal, err := m.FindUserProfilePersonalByUserID(u.ID)
 	if err != nil {
@@ -423,10 +423,10 @@ func (u *User) GetProfile() (map[string]interface{}, error) {
 		if err != nil {
 			return nil, nil
 		}
-		answer["corporation"] = corporation
+		answer = corporation
 		return answer, nil
 	} else {
-		answer["personal"] = personal
+		answer = personal
 		return answer, nil
 	}
 }
