@@ -62,6 +62,7 @@ type CampaignDataTable struct {
 	Email    string `db:"email" json:"email" search:"true" title:"Email"`
 	ParentID int64  `db:"parent_id_dt" json:"parent_id" visible:"false"`
 	OwnerID  int64  `db:"owner_id_dt" json:"owner_id" visible:"false"`
+	Actions  string `db:"-" json:"_actions" visible:"false"`
 }
 
 // FillCampaignDataTableArray is the function to handle

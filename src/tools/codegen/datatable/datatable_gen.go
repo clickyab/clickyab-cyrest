@@ -82,8 +82,8 @@ type (
 
 {{ range $m := .Data }}
 
-func ({{ $m.Type|getvar }}a {{ $m.Type }}Array) Filter(u base.PermInterface) []map[string]interface{} {
-	res := make([]map[string]interface{}, len({{ $m.Type|getvar }}a))
+func ({{ $m.Type|getvar }}a {{ $m.Type }}Array) Filter(u base.PermInterface){{ $m.Type }}Array {
+	res := make({{ $m.Type }}Array, len({{ $m.Type|getvar }}a))
 	for i := range {{ $m.Type|getvar }}a {
 		res[i] = {{ $m.Type|getvar }}a[i].Filter(u)
 	}
@@ -92,16 +92,15 @@ func ({{ $m.Type|getvar }}a {{ $m.Type }}Array) Filter(u base.PermInterface) []m
 }
 
 // Filter is for filtering base on permission
-func ({{ $m.Type|getvar }} {{ $m.Type }}) Filter(u base.PermInterface) map[string]interface{} {
-	res := map[string]interface{}{
+func ({{ $m.Type|getvar }} {{ $m.Type }}) Filter(u base.PermInterface) {{ $m.Type }} {
+	res := {{ $m.Type }}{}
 	{{ range $clm := $m.Column }}
-	{{ if not $clm.HasPerm }}"{{ $clm.Data }}" : {{ if $clm.Format }} {{ $m.Type|getvar }}.Format{{ $clm.Name}}(),  {{ else }}{{ $m.Type|getvar }}.{{ $clm.Name}}, {{ end }}{{ end }}
+	{{ if not $clm.HasPerm }}res.{{ $clm.Name }} = {{ if $clm.Format }} {{ $m.Type|getvar }}.Format{{ $clm.Name}}(){{ else }}{{ $m.Type|getvar }}.{{ $clm.Name}}{{ end }}{{ end }}
 	{{ end }}
-	}
 	{{ range $clm := $m.Column }}
 	{{ if $clm.HasPerm }}
 	if _, ok := u.HasPermOn("{{ $clm.Perm.Perm }}", {{ $m.Type|getvar }}.OwnerID, {{ $m.Type|getvar }}.ParentID {{ $clm.Perm.Scope|scopeArg }}); ok {
-		res["{{ $clm.Data }}"] = {{ if $clm.Format }} {{ $m.Type|getvar }}.Format{{ $clm.Name}}()  {{ else }}{{ $m.Type|getvar }}.{{ $clm.Name}} {{ end }}
+		res.{{ $clm.Name }} = {{ if $clm.Format }} {{ $m.Type|getvar }}.Format{{ $clm.Name}}()  {{ else }}{{ $m.Type|getvar }}.{{ $clm.Name}} {{ end }}
 	}
 	{{ end }}
 	{{ end }}
@@ -111,7 +110,7 @@ func ({{ $m.Type|getvar }} {{ $m.Type }}) Filter(u base.PermInterface) map[strin
 		action = append(action, "{{ $act }}")
 	}
 	{{ end }}
-	res["_actions"] = strings.Join(action, ",")
+	res.Actions = strings.Join(action, ",")
 	return res
 }
 {{end}}
@@ -132,7 +131,7 @@ import (
 
 type list{{ .Data.Entity|ucfirst }}Response struct {
 	Total   int64                  ` + "`json:\"total\"`" + `
-	Data    []map[string]interface{} ` + "`json:\"data\"`" + `
+	Data    {{ .PackageName }}.{{ .Data.Type }}Array ` + "`json:\"data\"`" + `
 	Page    int                    ` + "`json:\"page\"`" + `
 	PerPage int                    ` + "`json:\"per_page\"`" + `
 	Definition base.Columns           ` + "`json:\"definition\"`" + `

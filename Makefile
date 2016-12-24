@@ -208,4 +208,4 @@ restore: $(GB)
 conditional-restore:
 	$(DIFF) $(ROOT)/vendor/manifest $(ROOT)/vendor/manifest.done || make restore
 
-docker-build: conditional-restore codegen all
+docker-build: conditional-restore codegen migration all

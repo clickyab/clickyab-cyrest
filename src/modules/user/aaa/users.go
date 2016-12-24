@@ -83,8 +83,9 @@ type User struct {
 // }
 type UserDataTable struct {
 	User
-	ParentID int64 `db:"parent_id_dt" json:"parent_id" visible:"false"`
-	OwnerID  int64 `db:"owner_id_dt" json:"owner_id" visible:"false"`
+	ParentID int64  `db:"parent_id_dt" json:"parent_id" visible:"false"`
+	OwnerID  int64  `db:"owner_id_dt" json:"owner_id" visible:"false"`
+	Actions  string `db:"-" json:"_actions" visible:"false"`
 }
 
 // CreateUserHook is the hook for create a user
@@ -217,11 +218,6 @@ func (u *User) HasPermOn(perm string, ownerID, parentID int64, scopes ...base.Us
 		}
 	}
 	return base.ScopeSelf, false
-}
-
-// FormatStatus is the example status formatter
-func (u UserDataTable) FormatStatus() string {
-	return string(u.Status)
 }
 
 // FillUserDataTableArray is the function to fill user data table array
@@ -414,7 +410,7 @@ func (m *Manager) ChangeUserType(ID int64, userType UserType) error {
 }
 
 // GetProfile for this user
-func (u *User) GetProfile() (interface{}) {
+func (u *User) GetProfile() interface{} {
 	m := NewAaaManager()
 	personal, err := m.FindUserProfilePersonalByUserID(u.ID)
 	if err != nil {

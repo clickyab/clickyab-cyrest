@@ -1,19 +1,14 @@
 package channel
 
 import (
+	"common/assert"
 	"modules/channel/chn"
-
-	"modules/user/middlewares"
-
-	"modules/user/aaa"
-
 	"modules/misc/middlewares"
 	"modules/misc/trans"
+	"modules/user/aaa"
+	"modules/user/middlewares"
 	"net/http"
-
 	"strconv"
-
-	"common/assert"
 
 	"gopkg.in/labstack/echo.v3"
 )
