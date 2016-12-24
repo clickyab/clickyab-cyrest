@@ -6,11 +6,11 @@ import (
 	"modules/misc/middlewares"
 	"modules/misc/trans"
 	"modules/user/aaa"
-	"modules/user/middlewares"
 	"net/http"
 	"strconv"
 
-	"gopkg.in/labstack/echo.v3"
+	echo "gopkg.in/labstack/echo.v3"
+	"modules/user/middlewares"
 )
 
 // @Validate {
