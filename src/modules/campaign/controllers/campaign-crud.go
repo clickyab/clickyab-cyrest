@@ -86,3 +86,40 @@ func (u *Controller) active(ctx echo.Context) error {
 	return u.OKResponse(ctx, ch)
 }
 
+//	editCampaign
+//	@Route	{
+//	url	=	/:id
+//	method	= put
+//	payload	= campaignPayload
+//	resource = edit_campaign:self
+//	middleware = authz.Authenticate
+//	200 = cmp.Campaign
+//	400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) editCampaign(ctx echo.Context) error {
+	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	pl := u.MustGetPayload(ctx).(*campaignPayload)
+	cmpManager := cmp.NewCmpManager()
+	usrManager := aaa.NewAaaManager()
+	currentUser, ok := authz.GetUser(ctx)
+	if !ok {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	campaign, err := cmpManager.FindCampaignByID(id)
+	if err != nil {
+		return u.ForbiddenResponse(ctx, nil)
+	}
+	owner, err := usrManager.FindUserByID(campaign.UserID)
+	if err != nil {
+		return u.ForbiddenResponse(ctx, nil)
+	}
+	_, b := currentUser.HasPermOn("edit_campaign", owner.ID, owner.DBParentID.Int64)
+	if !b {
+		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
+	}
+	campaign = cmpManager.EditCampaign(campaign.ID, campaign.UserID, pl.Name, pl.Start, pl.End, campaign.Active, campaign.CreatedAt)
+	return u.OKResponse(ctx, campaign)
+}
