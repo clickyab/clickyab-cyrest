@@ -8,8 +8,6 @@ import (
 	"modules/channel/chn"
 	"modules/user/middlewares"
 
-	"fmt"
-
 	"gopkg.in/labstack/echo.v3"
 )
 
@@ -57,7 +55,6 @@ func (u *Controller) assignBlack(ctx echo.Context) error {
 
 	//delete previous black-list
 	err = cmpManager.DeleteBlack(campaign.ID)
-	fmt.Println(err)
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
 	}
