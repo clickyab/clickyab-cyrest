@@ -213,7 +213,7 @@ func (u *Controller) StatusChannel(ctx echo.Context) error {
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
 	}
-	_, b := currentUser.HasPermOn("status_channel", owner.ID, owner.ParentID.Int64)
+	_, b := currentUser.HasPermOn("status_channel", owner.ID, owner.DBParentID.Int64)
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
