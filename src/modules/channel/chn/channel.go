@@ -87,6 +87,7 @@ type ChannelDataTable struct {
 	Email    string `db:"email" json:"email" search:"true" title:"Email"`
 	ParentID int64  `db:"-" json:"parent_id" visible:"false"`
 	OwnerID  int64  `db:"-" json:"owner_id" visible:"false"`
+	Actions  string `db:"-" json:"_actions" visible:"false"`
 }
 
 // FillChannelDataTableArray is the function to handle
