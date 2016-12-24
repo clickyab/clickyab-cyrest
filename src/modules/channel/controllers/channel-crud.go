@@ -15,8 +15,6 @@ import (
 
 	"common/assert"
 
-	"modules/misc/middlewares"
-
 	"gopkg.in/labstack/echo.v3"
 )
 
@@ -43,7 +41,7 @@ func (u *Controller) createChannel(ctx echo.Context) error {
 	pl := u.MustGetPayload(ctx).(*channelPayload)
 	m := chn.NewChnManager()
 	currentUser, ok := authz.GetUser(ctx)
-	if !ok{
+	if !ok {
 		return u.NotFoundResponse(ctx, nil)
 	}
 	if pl.UserID == 0 {
@@ -53,7 +51,7 @@ func (u *Controller) createChannel(ctx echo.Context) error {
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
 	}
-	_, b := currentUser.HasPermOn("create_channel", owner.ID, owner.ParentID.Int64)
+	_, b := currentUser.HasPermOn("create_channel", owner.ID, owner.DBParentID.Int64)
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
@@ -159,7 +157,7 @@ func (u *Controller) active(ctx echo.Context) error {
 		return u.NotFoundResponse(ctx, nil)
 	}
 	owner, err := aaa.NewAaaManager().FindUserByID(channel.UserID)
-	_, b := currentUser.HasPermOn("active_channel", owner.ID, owner.ParentID.Int64)
+	_, b := currentUser.HasPermOn("active_channel", owner.ID, owner.DBParentID.Int64)
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}

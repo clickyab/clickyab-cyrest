@@ -131,3 +131,19 @@ func (m *Manager) Create(user *aaa.User, name string, start, end time.Time) *Cam
 	assert.Nil(m.CreateCampaign(c))
 	return c
 }
+
+// ChangeActive toggle between active status
+func (m *Manager) ChangeActive(ID int64, userID int64, currentStat CampaignActive, createdAt time.Time) *Campaign {
+	ch := &Campaign{
+		ID:        ID,
+		UserID:    userID,
+		CreatedAt: createdAt,
+	}
+	if currentStat == CampaignActiveStart {
+		ch.Active = CampaignActiveStop
+	} else {
+		ch.Active = CampaignActiveStart
+	}
+	assert.Nil(m.UpdateCampaign(ch))
+	return ch
+}
