@@ -11,11 +11,12 @@ import (
 )
 
 type responseLoginOK struct {
-	UserID      int64                              `json:"user_id"`
-	Email       string                             `json:"email"`
-	AccessToken string                             `json:"token"`
-	Permissions map[base.UserScope][]string        `json:"perm"`
-	Profile     map[string]interface{}             `json:"profile"`
+	UserID      int64                       `json:"user_id"`
+	Email       string                      `json:"email"`
+	AccessToken string                      `json:"token"`
+	Permissions map[base.UserScope][]string `json:"perm"`
+	Personal    *aaa.UserProfilePersonal    `json:"personal,omitempty"`
+	Corporation *aaa.UserProfileCorporation `json:"corporation,omitempty"`
 }
 
 // @Validate {
@@ -34,14 +35,22 @@ func createLoginResponse(u *aaa.User, t string) responseLoginOK {
 			res[i] = append(res[i], j)
 		}
 	}
-	profile, _ := u.GetProfile()
-	return responseLoginOK{
+	profile := u.GetProfile()
+	result := responseLoginOK{
 		UserID:      u.ID,
 		Email:       u.Email,
 		AccessToken: t,
 		Permissions: res,
-		Profile:     profile,
 	}
+	switch v := profile.(type) {
+	case *aaa.UserProfilePersonal:
+		result.Personal = v
+
+	case *aaa.UserProfileCorporation:
+		result.Corporation = v
+	}
+
+	return result
 }
 
 // loginUser login user in system

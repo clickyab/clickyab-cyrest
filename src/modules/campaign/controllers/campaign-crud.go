@@ -45,7 +45,7 @@ func (u *Controller) createCampaign(ctx echo.Context) error {
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
 	}
-	_, b := currentUser.HasPermOn("create_campaign", owner.ID, owner.ParentID.Int64)
+	_, b := currentUser.HasPermOn("create_campaign", owner.ID, owner.DBParentID.Int64)
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
@@ -53,3 +53,4 @@ func (u *Controller) createCampaign(ctx echo.Context) error {
 	return u.OKResponse(ctx, c)
 
 }
+
