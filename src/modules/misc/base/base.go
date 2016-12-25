@@ -48,6 +48,20 @@ func (c Controller) NotFoundResponse(ctx echo.Context, err error) error {
 	return res.Error
 }
 
+// ForbiddenResponse is 403 request
+func (c Controller) ForbiddenResponse(ctx echo.Context, err error) error {
+	var res = ErrorResponseSimple{}
+	if err != nil {
+		res.Error = trans.EE(err)
+	} else {
+		res.Error = trans.E(http.StatusText(http.StatusForbidden))
+	}
+	ctx.Response().Header().Add("error", res.Error.Error())
+	ctx.JSON(http.StatusNotFound, res)
+
+	return res.Error
+}
+
 // OKResponse is 200 request
 func (c Controller) OKResponse(ctx echo.Context, res interface{}) error {
 	if res == nil {
