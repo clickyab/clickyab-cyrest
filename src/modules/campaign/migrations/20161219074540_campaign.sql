@@ -24,9 +24,20 @@ CREATE TABLE campaign_black
 CREATE INDEX campaign_channel_channel_id_fk ON campaign_black (channel_id);
 CREATE INDEX campaign_channel_campaign_id_id_fk ON campaign_black (campaign_id);
 
+CREATE TABLE campaign_category
+(
+  campaign_id INT(11) NOT NULL,
+  category_id INT(11) NOT NULL,
+  CONSTRAINT campaign_category_id_fk FOREIGN KEY (category_id) REFERENCES categories (id),
+  CONSTRAINT category_campaign_id_fk FOREIGN KEY (campaign_id) REFERENCES campaigns (id)
+);
+CREATE INDEX campaign_category_category_id_fk ON campaign_category (category_id);
+CREATE INDEX campaign_category_campaign_id_id_fk ON campaign_category (campaign_id);
+
 -- +migrate Down
 -- SQL section 'Down' is executed when this migration is rolled back
 DROP TABLE campaign_black;
+DROP TABLE campaign_category;
 DROP TABLE campaigns;
 
 
