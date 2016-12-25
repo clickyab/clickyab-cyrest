@@ -73,8 +73,9 @@ func (u *Controller) editProfile(ctx echo.Context) error {
 	pl := u.MustGetPayload(ctx).(*ProfilePayload)
 	m := aaa.NewAaaManager()
 	user := authz.MustGetUser(ctx)
+	token := authz.MustGetToken(ctx)
 	if pl.Personal != nil { //the personal profile has been selected
-		upp, err := m.RegisterPersonal(
+		_, err := m.RegisterPersonal(
 			user.ID,
 			pl.Personal.FirstName,
 			pl.Personal.LastName,
@@ -95,13 +96,13 @@ func (u *Controller) editProfile(ctx echo.Context) error {
 
 		return u.OKResponse(
 			ctx,
-			upp,
+			createLoginResponse(user, token),
 		)
 		return nil
 	}
 
 	if pl.Corporation != nil { ////the corporation profile has been selected
-		ucp, err := m.RegisterCorporation(
+		_, err := m.RegisterCorporation(
 			user.ID,
 			pl.Corporation.Title,
 			pl.Corporation.EconomicCode,
@@ -118,7 +119,7 @@ func (u *Controller) editProfile(ctx echo.Context) error {
 
 		return u.OKResponse(
 			ctx,
-			ucp,
+			createLoginResponse(user, token),
 		)
 		return nil
 	}
