@@ -806,12 +806,12 @@ func identToRaml(pkg humanize.Package, i *humanize.IdentType) (swaggerType, erro
 	} else if i.Ident == "bool" {
 		return swaggerType{"type": "boolean"}, nil
 	}
-	name, _, err := findType(pkg, i.Ident)
+	_, typ, err := findType(pkg, i.Ident)
 	if err != nil {
 		return nil, err
 	}
 
-	return swaggerType{"$ref": "#/definitions/" + name}, nil
+	return typ, nil
 }
 
 func sliceToRml(pkg humanize.Package, arr *humanize.ArrayType) (swaggerType, error) {
