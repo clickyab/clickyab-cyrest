@@ -9,6 +9,7 @@ import (
 	_ "modules/misc"     // misc controller
 
 	_ "modules/user" // user module
+	_ "modules/ad" // ad module
 )
 
 func init() {
