@@ -7,6 +7,7 @@ import (
 	"modules/misc/base"
 	"modules/user/aaa"
 	"strings"
+
 	"time"
 )
 
@@ -45,7 +46,7 @@ type Ad struct {
 	UserID      int64             `json:"user_id" db:"user_id" title:"UserID"`
 	Name        string            `json:"name" db:"name" search:"true" title:"Name"`
 	Media       common.NullString `json:"media" db:"media" title:"Media"`
-	Description string            `json:"description" db:"description" title:"Description"`
+	Description common.NullString `json:"description" db:"description" title:"Description"`
 	Link        common.NullString `json:"link" db:"link" search:"true" title:"Link"`
 	Type        AdType            `json:"type" db:"type" filter:"true" title:"Type"`
 	Status      AdStatus          `json:"status" db:"status" filter:"true" title:"Status"`
@@ -119,4 +120,24 @@ func (m *Manager) FillAdDataTableArray(u base.PermInterfaceComplete, filters map
 	_, err = m.GetDbMap().Select(&res, query, params...)
 	assert.Nil(err)
 	return res, count
+}
+
+// EditAd function for ad editing
+func (m *Manager) EditAd(usr *aaa.User, ad *Ad) *Ad {
+
+	ads := &Ad{
+		ID:          ad.ID,
+		UserID:      ad.UserID,
+		Name:        ad.Name,
+		Media:       ad.Media,
+		Description: ad.Description,
+		Link:        ad.Link,
+		Type:        ad.Type,
+		Status:      ad.Status,
+		CreatedAt:   ad.CreatedAt,
+		UpdatedAt:   ad.UpdatedAt,
+	}
+
+	assert.Nil(m.UpdateAd(ads))
+	return ads
 }
