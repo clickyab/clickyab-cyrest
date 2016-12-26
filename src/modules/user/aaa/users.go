@@ -235,7 +235,7 @@ func (m *Manager) FillUserDataTableArray(u base.PermInterfaceComplete, filters m
 	}
 
 	for column, val := range search {
-		where = append(where, fmt.Sprintf("%s=%s", column, "?"))
+		where = append(where, fmt.Sprintf("%s LIKE ?", column))
 		params = append(params, fmt.Sprintf("%s"+val+"%s", "%", "%"))
 	}
 
