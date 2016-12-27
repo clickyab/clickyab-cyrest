@@ -124,3 +124,36 @@ func (u *Controller) statusAd(ctx echo.Context) error {
 	return u.OKResponse(ctx, adds)
 
 }
+
+//	create create ad
+//	@Route	{
+//		url	=	/create
+//		method	= post
+//		payload	= AdPayload
+//		resource = create_ad:self
+//		middleware = authz.Authenticate
+//		200 = ads.Ad
+//		400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) create(ctx echo.Context) error {
+	pl := u.MustGetPayload(ctx).(*AdPayload)
+
+	m := ads.NewAdsManager()
+
+	currentUser, ok := authz.GetUser(ctx)
+
+	if !ok {
+		return u.NotFoundResponse(ctx, nil)
+	}
+
+	newAd := &ads.Ad{
+		Link:        common.MakeNullString(pl.Link),
+		Description: common.MakeNullString(pl.Description),
+		Name:        pl.Name,
+		Status:      ads.AdStatusPending,
+		Type:        ads.AdTypeImg,
+		UserID:      currentUser.ID,
+	}
+	assert.Nil(m.CreateAd(newAd))
+	return u.OKResponse(ctx, newAd)
+}
