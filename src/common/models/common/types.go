@@ -281,3 +281,7 @@ func (ns NullString) UnmarshalJSON(b []byte) error {
 	ns.Valid = true
 	return nil
 }
+
+func MakeNullString(s string) NullString {
+	return NullString{Valid: s != "", String: s}
+}
