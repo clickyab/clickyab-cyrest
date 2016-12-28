@@ -40,6 +40,12 @@ type TelegramCli interface {
 
 	//channel_list [limit=100] [offset=0]     List of last channels
 	ChannelList(limit, offset int) ([]ChannelList, error)
+
+	//resolve_username username       Searches user by username
+	ResolveUsername(chUser string) (*ChannelUser, error)
+
+	//channel_invite <channel> <user> Invites user to channel
+	ChannelInvite(channelId, user string) (*SuccessResp, error)
 }
 type TelegramCliFull interface {
 	TelegramCli
@@ -58,9 +64,6 @@ type TelegramCliFull interface {
 
 	//channel_get_members <channel> [limit=100] [offset=0]    Gets channel members
 	ChannelGetMembers()
-
-	//channel_invite <channel> <user> Invites user to channel
-	Channel_invite()
 
 	//channel_kick <channel> <user>   Kicks user from channel
 	Channel_kick()
@@ -225,7 +228,7 @@ type TelegramCliFull interface {
 	RenameChannel()
 
 	//rename_chat <chat> <new name>   Renames chat
-	//RenameChat()
+	RenameChat()
 
 	//rename_contact <user> <first name> <last name>  Renames contact
 	RenameContact()
@@ -253,9 +256,6 @@ type TelegramCliFull interface {
 
 	//reply_video <msg-id> <file>     Sends video to peer
 	ReplyVideo()
-
-	//resolve_username username       Searches user by username
-	ResolveUsername()
 
 	//safe_quit       Waits for all queries to end, then quits
 	SafeQuit()
@@ -612,7 +612,7 @@ func (t *telegram) ChannelJoin(channelId string) (*SuccessResp, error) {
 }
 func (t *telegram) ChannelList(limit, offset int) ([]ChannelList, error) {
 	var data []ChannelList
-	cmd := fmt.Sprintf("channel_list %d %d",limit,offset)
+	cmd := fmt.Sprintf("channel_list %d %d", limit, offset)
 	x, err := t.exec(cmd)
 	if err != nil {
 		return nil, err
@@ -623,3 +623,32 @@ func (t *telegram) ChannelList(limit, offset int) ([]ChannelList, error) {
 	}
 	return data, nil
 }
+
+func (t *telegram) ResolveUsername(chUser string) (*ChannelUser, error) {
+	var data ChannelUser
+	cmd := fmt.Sprintf("resolve_user %s", chUser)
+	x, err := t.exec(cmd)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(x, &data)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+func (t *telegram) ChannelInvite(channelId, user string) (*SuccessResp, error) {
+	var data SuccessResp
+	cmd := fmt.Sprintf("resolve_user %s %s", channelId,user)
+	x, err := t.exec(cmd)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(x, &data)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+

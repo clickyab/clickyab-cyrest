@@ -136,4 +136,20 @@ type Contact struct{
 	Phone string `json:"phone,omitempty"`
 	Username string `json:"username,omitempty"`
 }
+type ChannelUser struct {
+	ID string `json:"id"`
+	PeerType string `json:"peer_type"`
+	PeerID int `json:"peer_id"`
+	PrintName string `json:"print_name,omitempty"`
+	FirstName string `json:"first_name,omitempty"`
+	When string `json:"when"`
+	LastName string `json:"last_name"`
+	Flags int `json:"flags"`
+	Phone string `json:"phone,omitempty"` //friend
+	Username string `json:"username,omitempty"` //user
+	Title string `json:"title,omitempty"` //channel
+	ParticipantsCount int `json:"participants_count,omitempty"` //channel
+	AdminsCount int `json:"admins_count,omitempty"` //channel
+	KickedCount int `json:"kicked_count,omitempty"` //channel
+}
 
