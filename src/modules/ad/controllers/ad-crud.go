@@ -11,6 +11,10 @@ import (
 
 	"common/models/common"
 
+	"common/assert"
+
+	"modules/misc/middlewares"
+
 	echo "gopkg.in/labstack/echo.v3"
 )
 
@@ -61,4 +65,62 @@ func (u *Controller) editAd(ctx echo.Context) error {
 	ad.Name = pl.Name
 	ch := m.EditAd(owner, ad)
 	return u.OKResponse(ctx, ch)
+}
+
+// @Validate {
+// }
+type statusPayload struct {
+	Status ads.AdStatus `json:"status" validate:"required"`
+}
+
+// Validate custom validation for status
+func (lp *statusPayload) ValidateExtra(ctx echo.Context) error {
+	if !lp.Status.IsValid() {
+		return middlewares.GroupError{
+			"status": trans.E("is invalid"),
+		}
+	}
+	return nil
+}
+
+//	statusAd status ad
+//	@Route	{
+//	url	=	/status/:id
+//	method	= put
+//	payload	= statusPayload
+//	resource = status_ad:parent
+//	middleware = authz.Authenticate
+//	200 = ads.Ad
+//	400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) statusAd(ctx echo.Context) error {
+	pl := u.MustGetPayload(ctx).(*statusPayload)
+	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	m := ads.NewAdsManager()
+	adds, err := m.FindAdByID(id)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	currentUser, ok := authz.GetUser(ctx)
+	if !ok {
+		return u.NotFoundResponse(ctx, nil)
+	}
+
+	owner, err := aaa.NewAaaManager().FindUserByID(adds.UserID)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	_, b := currentUser.HasPermOn("status_ad", owner.ID, owner.DBParentID.Int64)
+	if !b {
+		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
+	}
+
+	adds.ID = id
+	adds.Status = pl.Status
+	assert.Nil(m.UpdateAd(adds))
+	return u.OKResponse(ctx, adds)
+
 }
