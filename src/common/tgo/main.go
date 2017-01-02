@@ -635,7 +635,7 @@ func (t *telegram) ResolveUsername(chUser string) (*ChannelUser, error) {
 	if err != nil {
 		return nil, err
 	}
-	return data, nil
+	return &data, nil
 }
 func (t *telegram) ChannelInvite(channelId, user string) (*SuccessResp, error) {
 	var data SuccessResp
@@ -648,12 +648,13 @@ func (t *telegram) ChannelInvite(channelId, user string) (*SuccessResp, error) {
 	if err != nil {
 		return nil, err
 	}
-	return data, nil
+	return &data, nil
 
 }
-func (t *telegram) GetSelf() (*UserInfo,error){
+
+func (t *telegram) GetSelf() (*UserInfo, error) {
 	var data UserInfo
-	cmd :="get_self"
+	cmd := "get_self"
 	x, err := t.exec(cmd)
 	if err != nil {
 		return nil, err
@@ -662,7 +663,5 @@ func (t *telegram) GetSelf() (*UserInfo,error){
 	if err != nil {
 		return nil, err
 	}
-	return data, nil
+	return &data, nil
 }
-
-
