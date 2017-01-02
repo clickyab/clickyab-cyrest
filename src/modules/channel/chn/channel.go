@@ -47,6 +47,7 @@ type Channel struct {
 	Name      string            `json:"name" db:"name" search:"true" title:"Name"`
 	Link      common.NullString `json:"link" db:"link" search:"true" title:"Link"`
 	Admin     common.NullString `json:"admin" db:"admin" search:"true" title:"Admin"`
+	Code      string            `json:"admin" db:"code" title:"code"`
 	Status    ChannelStatus     `json:"status" db:"status" filter:"true" title:"Status"`
 	Active    ActiveStatus      `json:"active" db:"active" filter:"true" title:"Active"`
 	CreatedAt time.Time         `db:"created_at" json:"created_at" sort:"true" title:"Created at"`

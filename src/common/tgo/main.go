@@ -639,7 +639,21 @@ func (t *telegram) ResolveUsername(chUser string) (*ChannelUser, error) {
 }
 func (t *telegram) ChannelInvite(channelId, user string) (*SuccessResp, error) {
 	var data SuccessResp
-	cmd := fmt.Sprintf("resolve_user %s %s", channelId,user)
+	cmd := fmt.Sprintf("resolve_user %s %s", channelId, user)
+	x, err := t.exec(cmd)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(x, &data)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+
+}
+func (t *telegram) GetSelf() (*UserInfo,error){
+	var data UserInfo
+	cmd :="get_self"
 	x, err := t.exec(cmd)
 	if err != nil {
 		return nil, err
