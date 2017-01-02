@@ -24,7 +24,7 @@ type channelPayload struct {
 
 //	createChannel
 //	@Route	{
-//	url	=	/create
+//	url	=	/
 //	method	= post
 //	payload	= channelPayload
 //	resource = create_channel:self

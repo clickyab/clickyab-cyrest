@@ -30,7 +30,7 @@ func (pl *categoryPayload) ValidateExtra(ctx echo.Context) error {
 
 // createCategory
 // @Route {
-//		url	=	/create
+//		url	=	/
 //		method	=	post
 //		payload	=	categoryPayload
 //		resource=	manage_category:global
@@ -47,7 +47,7 @@ func (u *Controller) createCategory(ctx echo.Context) error {
 
 // editCategory
 // @Route {
-//		url	=	/edit/:id
+//		url	=	/:id
 //		method	=	put
 //		payload	=	categoryPayload
 //		resource=	manage_category:global
@@ -75,4 +75,27 @@ func (u *Controller) editCategory(ctx echo.Context) error {
 	assert.Nil(m.UpdateCategory(c))
 
 	return u.OKResponse(ctx, c)
+}
+
+//	getCategory
+//	@Route	{
+//	url	=	/:id
+//	method	= get
+//	resource = list_Category:global
+//	middleware = authz.Authenticate
+//	200 = cat.Category
+//	400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) getCategory(ctx echo.Context) error {
+	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	m := cat.NewCatManager()
+	category, err := m.FindCategoryByID(id)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+
+	return u.OKResponse(ctx, category)
 }
