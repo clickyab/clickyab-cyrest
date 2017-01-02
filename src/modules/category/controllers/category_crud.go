@@ -76,4 +76,3 @@ func (u *Controller) editCategory(ctx echo.Context) error {
 
 	return u.OKResponse(ctx, c)
 }
-
