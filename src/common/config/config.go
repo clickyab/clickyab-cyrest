@@ -26,8 +26,9 @@ type AppConfig struct {
 	MountPoint      string `onion:"mount_point"`
 	Profile         string
 
-	Site  string
-	Proto string
+	Site      string
+	Proto     string
+	FrontPath string `onion:"front_path"`
 
 	Port        string
 	StaticRoot  string `onion:"static_root"`

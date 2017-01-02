@@ -9,42 +9,43 @@ import (
 	"sync"
 )
 
+// TelegramCli is the interface to handle the telegram cli
 type TelegramCli interface {
 
-	//channel_info <channel>  Prints info about channel (id, members, admin, etc.)
+	//ChannelInfo channel_info <channel>  Prints info about channel (id, members, admin, etc.)
 	ChannelInfo(channelId string) (*ChannelInfo, error)
 
-	//add_contact <phone> <first name> <last name>    Tries to add user to contact list
+	//AddContact add_contact <phone> <first name> <last name>    Tries to add user to contact list
 	AddContact(phone, firstName, lastName string) (*AddContact, error)
 
-	//contact_list()
+	//ContactList contact_list()
 	ContactList() ([]Contact, error)
 
-	//history <peer> [limit] [offset] Prints messages with this peer (most recent message lower). Also marks messages as read
+	//History history <peer> [limit] [offset] Prints messages with this peer (most recent message lower). Also marks messages as read
 	History(peer string, limit, offset int) (*History, error)
 
-	//fwd <peer> <msg-id>+    Forwards message to peer. Forward to secret chats is forbidden
+	// FwdMsg fwd <peer> <msg-id>+    Forwards message to peer. Forward to secret chats is forbidden
 	FwdMsg(peer string, msg string) (*SuccessResp, error)
 
-	//user_info <user>        Prints info about user (id, last online, phone)
+	// UserInfo user_info <user>        Prints info about user (id, last online, phone)
 	UserInfo(user string) (*UserInfo, error)
 
-	//channel_join <channel>  Joins to channel
+	// ChannelJoin channel_join <channel>  Joins to channel
 	ChannelJoin(channelId string) (*SuccessResp, error)
 
-	//msg <peer> <kbd> <text> Sends text message to peer with custom kbd
+	//Msg msg <peer> <kbd> <text> Sends text message to peer with custom kbd
 	Msg(peer string, msg string) (*SuccessResp, error)
 
-	//post <peer> <text>      Sends text message to peer as admin
+	//Post post <peer> <text>      Sends text message to peer as admin
 	Post(peer string, msg string) (*SuccessResp, error)
 
-	//channel_list [limit=100] [offset=0]     List of last channels
+	//ChannelList channel_list [limit=100] [offset=0]     List of last channels
 	ChannelList(limit, offset int) ([]ChannelList, error)
 
-	//resolve_username username       Searches user by username
+	//ResolveUsername resolve_username username       Searches user by username
 	ResolveUsername(chUser string) (*ChannelUser, error)
 
-	//channel_invite <channel> <user> Invites user to channel
+	//ChannelInvite channel_invite <channel> <user> Invites user to channel
 	ChannelInvite(channelId, user string) (*SuccessResp, error)
 }
 type TelegramCliFull interface {
@@ -469,7 +470,7 @@ func (t *telegram) ChannelInfo(channelId string) (*ChannelInfo, error) {
 	var data ChannelInfo
 	cmd := fmt.Sprintf("channel_info %s", channelId)
 	x, err := t.exec(cmd)
-	fmt.Print(string(x))
+	//fmt.Print(string(x))
 	if err != nil {
 		return nil, err
 	}
@@ -485,7 +486,7 @@ func (t *telegram) History(user string, limit, offset int) (*History, error) {
 	var data History
 	cmd := fmt.Sprintf("History %s %d %d", user, limit, offset)
 	x, err := t.exec(cmd)
-	fmt.Print(string(x))
+	//fmt.Print(string(x))
 	if err != nil {
 		return nil, err
 	}
@@ -501,7 +502,7 @@ func (t *telegram) UserInfo(user string) (*UserInfo, error) {
 	var data UserInfo
 	cmd := fmt.Sprintf("user_info %s", user)
 	x, err := t.exec(cmd)
-	fmt.Print(string(x))
+	//fmt.Print(string(x))
 	if err != nil {
 		return nil, err
 	}
@@ -517,7 +518,7 @@ func (t *telegram) AddContact(phone, firstName, lastName string) (*AddContact, e
 
 	cmd := fmt.Sprintf("add_contact %s %s %s", phone, firstName, lastName)
 	x, err := t.exec(cmd)
-	fmt.Print(string(x))
+	//fmt.Print(string(x))
 	if err != nil {
 		return nil, err
 	}
@@ -534,7 +535,7 @@ func (t *telegram) FwdMsg(peer string, msg string) (*SuccessResp, error) {
 
 	cmd := fmt.Sprintf("fwd %s %s", peer, msg)
 	x, err := t.exec(cmd)
-	fmt.Print(string(x))
+	//fmt.Print(string(x))
 	if err != nil {
 		return nil, err
 	}
@@ -551,7 +552,7 @@ func (t *telegram) Msg(peer string, msg string) (*SuccessResp, error) {
 
 	cmd := fmt.Sprintf("msg %s %s", peer, msg)
 	x, err := t.exec(cmd)
-	fmt.Print(string(x))
+	//fmt.Print(string(x))
 	if err != nil {
 		return nil, err
 	}
@@ -565,9 +566,9 @@ func (t *telegram) Msg(peer string, msg string) (*SuccessResp, error) {
 }
 func (t *telegram) ContactList() ([]Contact, error) {
 	var data []Contact
-	cmd := fmt.Sprintf("contact_list ")
+	cmd := fmt.Sprint("contact_list ")
 	x, err := t.exec(cmd)
-	fmt.Print(string(x))
+	//fmt.Print(string(x))
 	if err != nil {
 		return nil, err
 	}
@@ -582,7 +583,7 @@ func (t *telegram) Post(peer string, msg string) (*SuccessResp, error) {
 	var data SuccessResp
 	cmd := fmt.Sprintf("msg %s %s", peer, msg)
 	x, err := t.exec(cmd)
-	fmt.Print(string(x))
+	//fmt.Print(string(x))
 	if err != nil {
 		return nil, err
 	}
@@ -598,7 +599,7 @@ func (t *telegram) ChannelJoin(channelId string) (*SuccessResp, error) {
 	var data SuccessResp
 	cmd := fmt.Sprintf("channel_join %s", channelId)
 	x, err := t.exec(cmd)
-	fmt.Print(string(x))
+	//fmt.Print(string(x))
 	if err != nil {
 		return nil, err
 	}

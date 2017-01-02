@@ -24,6 +24,8 @@ export RUSER?=$(APPNAME)
 export RPASS?=$(DEFAULT_PASS)
 export WORK_DIR=$(ROOT)/tmp
 export LINTER=$(BIN)/gometalinter -e ".*src/modules/user/templates/mail.go.*" --cyclo-over=15 --line-length=120 --deadline=100s --disable-all --enable=structcheck --enable=aligncheck --enable=deadcode --enable=gocyclo --enable=ineffassign --enable=golint --enable=goimports --enable=errcheck --enable=varcheck --enable=interfacer --enable=goconst --enable=gosimple --enable=staticcheck --enable=unused --enable=misspell --enable=lll
+export CYREST_FRONT_PATH=$(ROOT)/front/public
+
 
 ifdef UPDATEGB
 export UPDATE=-u
@@ -213,3 +215,7 @@ conditional-restore:
 	$(DIFF) $(ROOT)/vendor/manifest $(ROOT)/vendor/manifest.done || make restore
 
 docker-build: conditional-restore codegen migration all
+
+build-telegram-cli:
+	cd $(ROOT)/contrib/tg && ./configure
+	cd $(ROOT)/contrib/tg && make
