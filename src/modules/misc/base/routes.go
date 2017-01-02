@@ -8,6 +8,8 @@ import (
 
 	"modules/misc/middlewares"
 
+	"fmt"
+
 	"github.com/Sirupsen/logrus"
 	"gopkg.in/labstack/echo.v3"
 )
@@ -41,20 +43,23 @@ func Initialize(mountPoint string) *echo.Echo {
 		for i := range all {
 			all[i].Routes(engine, mountPoint)
 		}
-	})
-	//engine.SetLogLevel(log.DEBUG)
-	if config.Config.DevelMode {
-		err := utils.ChangeInFile(filepath.Join(config.Config.SwaggerRoot, "cyrest.yaml"), "swaggerbase", config.Config.Site)
-		if err != nil {
-			logrus.Warnf(
-				"can not change the %s file and set the site %s",
-				filepath.Join(config.Config.SwaggerRoot, "cyrest.yaml"),
-				config.Config.Site,
-			)
-		}
+		engine.Static("/", config.Config.FrontPath)
+		fmt.Println(config.Config.FrontPath)
 
-		engine.Static("/swagger", config.Config.SwaggerRoot)
-	}
-	engine.Logger = NewLogger()
+		if config.Config.DevelMode {
+			err := utils.ChangeInFile(filepath.Join(config.Config.SwaggerRoot, "cyrest.yaml"), "swaggerbase", config.Config.Site)
+			if err != nil {
+				logrus.Warnf(
+					"can not change the %s file and set the site %s",
+					filepath.Join(config.Config.SwaggerRoot, "cyrest.yaml"),
+					config.Config.Site,
+				)
+			}
+
+			engine.Static("/swagger", config.Config.SwaggerRoot)
+		}
+		engine.Logger = NewLogger()
+	})
+
 	return engine
 }
