@@ -21,12 +21,12 @@ import (
 //		list = yes
 // }
 type Category struct {
-	ID          int64     `db:"id" json:"id"`
-	Scope       string    `db:"scope" json:"scope"`
-	Title       string    `db:"title" json:"title"`
-	Description string    `db:"Description" json:"Description"`
-	CreatedAt   time.Time `db:"created_at" json:"created_at"`
-	UpdatedAt   time.Time `db:"updated_at" json:"updated_at"`
+	ID          int64     `db:"id" json:"id" sort:"true" title:"ID"`
+	Scope       string    `db:"scope" json:"scope" search:"true" title:"Scope"`
+	Title       string    `db:"title" json:"title" search:"true" title:"Title"`
+	Description string    `db:"Description" json:"Description" title:"Description"`
+	CreatedAt   time.Time `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
+	UpdatedAt   time.Time `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at"`
 }
 
 //type (
@@ -37,17 +37,18 @@ type Category struct {
 //CategoryDataTable is the role full data in data table, after join with other field
 // @DataTable {
 //		url = /list
-//		entity = categories
+//		entity = category
 //		view = category_list:global
 //		controller = modules/category/controllers
 //		fill = FillCategoryDataTableArray
 //		_edit = category_edit:global
+//		_change = category_manage:global
 // }
 type CategoryDataTable struct {
 	Category
-	ParentID int64 `db:"-" json:"parent_id" visible:"false"`
-	OwnerID  int64 `db:"-" json:"owner_id" visible:"false"`
-	Actions	string `db:"-" json:"_actions" visible:"false"`
+	ParentID int64  `db:"-" json:"parent_id" visible:"false"`
+	OwnerID  int64  `db:"-" json:"owner_id" visible:"false"`
+	Actions  string `db:"-" json:"_actions" visible:"false"`
 }
 
 func (c *Category) Initialize() {
@@ -81,8 +82,8 @@ func (m *Manager) FillCategoryDataTableArray(u base.PermInterfaceComplete, filte
 	}
 
 	for column, val := range search {
-		where = append(where, fmt.Sprintf("%s=%s", column, "?"))
-		params = append(params, val)
+		where = append(where, fmt.Sprintf("%s LIKE ?", column))
+		params = append(params, fmt.Sprintf("%s"+val+"%s", "%", "%"))
 	}
 
 	//check for perm
