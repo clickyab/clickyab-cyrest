@@ -16,7 +16,6 @@ func Logger(next echo.HandlerFunc) echo.HandlerFunc {
 		start := time.Now()
 		// Process request
 		err := next(c)
-
 		latency := time.Since(start)
 		statusCode := c.Response().Status
 		logrus.WithFields(
