@@ -9,6 +9,7 @@ CREATE TABLE channels
     name VARCHAR(60) NOT NULL,
     link VARCHAR(100) ,
     admin VARCHAR(30)  ,
+    code VARCHAR(40)  ,
     status ENUM('pending', 'rejected','accepted','archive'),
     active ENUM('yes', 'no'),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
