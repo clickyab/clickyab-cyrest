@@ -12,5 +12,6 @@ sleep 5
 
 cd /home/develop/cyrest
 make -f /home/develop/cyrest/Makefile mysql-setup
+make -f /home/develop/cyrest/Makefile rabbitmq-setup
 
 sudo -u develop /home/develop/cyrest/bin/provision_user.sh

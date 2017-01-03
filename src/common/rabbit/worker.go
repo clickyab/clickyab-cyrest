@@ -8,6 +8,10 @@ import (
 	"reflect"
 	"sync"
 
+	"common/config"
+
+	"sync/atomic"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/streadway/amqp"
 )
@@ -48,8 +52,7 @@ func goodFunc(fn reflect.Value, rtrn int, types ...reflect.Type) (e bool) {
 
 // RunWorker listen on a topic in Amqp
 func RunWorker(
-	exchange, topic, queue string,
-	jobPattern interface{},
+	jobPattern Job,
 	function interface{},
 	prefetch int) error {
 
@@ -71,20 +74,20 @@ func RunWorker(
 		return err
 	}
 	err = c.ExchangeDeclare(
-		exchange, // name
-		"topic",  // type
-		true,     // durable
-		false,    // auto-deleted
-		false,    // internal
-		false,    // no-wait
-		nil,      // arguments
+		config.Config.AMQP.Exchange, // name
+		"topic",                     // type
+		true,                        // durable
+		false,                       // auto-deleted
+		false,                       // internal
+		false,                       // no-wait
+		nil,                         // arguments
 	)
 
 	if err != nil {
 		return err
 	}
 
-	q, err := c.QueueDeclare(queue, true, false, false, false, nil)
+	q, err := c.QueueDeclare(jobPattern.GetQueue(), true, false, false, false, nil)
 	if err != nil {
 		return err
 	}
@@ -100,9 +103,9 @@ func RunWorker(
 	}
 
 	err = c.QueueBind(
-		q.Name,   // queue name
-		topic,    // routing key
-		exchange, // exchange
+		q.Name,                      // queue name
+		jobPattern.GetTopic(),       // routing key
+		config.Config.AMQP.Exchange, // exchange
 		false,
 		nil,
 	)
@@ -127,6 +130,7 @@ func consume(
 	c *amqp.Channel,
 	consumerTag string) {
 	waiter := sync.WaitGroup{}
+	atomic.SwapInt64(&hasConsumer, 1)
 bigLoop:
 	for {
 		select {
@@ -161,6 +165,7 @@ bigLoop:
 				if out[1].Interface() == nil || out[1].Interface().(error) == nil {
 					assert.Nil(job.Ack(false))
 				} else {
+					logrus.Debug(out[1].Interface().(error))
 					assert.Nil(job.Nack(false, out[0].Interface().(bool)))
 				}
 			}()

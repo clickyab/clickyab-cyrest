@@ -30,7 +30,7 @@ type chnlLock struct {
 }
 
 // Publish try to publish an event
-func Publish(topic string, in interface{}) (err error) {
+func Publish(in Job) (err error) {
 	rng = rng.Next()
 	v := rng.Value.(*chnlLock)
 	v.lock.Lock()
@@ -57,13 +57,13 @@ func Publish(topic string, in interface{}) (err error) {
 		}
 	}()
 
-	err = v.chn.Publish(config.Config.AMQP.Exchange, topic, true, false, pub)
+	err = v.chn.Publish(config.Config.AMQP.Exchange, in.GetTopic(), true, false, pub)
 
 	return err
 }
 
 // PublishAfter is the function to publish message after a period of time
-func PublishAfter(topic string, in interface{}, after time.Duration) (err error) {
+func PublishAfter(in Job, after time.Duration) (err error) {
 	rng = rng.Next()
 	v := rng.Value.(*chnlLock)
 	v.lock.Lock()
@@ -96,17 +96,17 @@ func PublishAfter(topic string, in interface{}, after time.Duration) (err error)
 		}
 	}()
 
-	return v.chn.Publish(config.Config.AMQP.Exchange+retryPostfix, topic, true, false, pub)
+	return v.chn.Publish(config.Config.AMQP.Exchange+retryPostfix, in.GetTopic(), true, false, pub)
 }
 
 // MustPublish publish an event with force
-func MustPublish(topic string, ei interface{}) {
-	assert.Nil(Publish(topic, ei))
+func MustPublish(ei Job) {
+	assert.Nil(Publish(ei))
 }
 
 // MustPublishAfter publish an event with force
-func MustPublishAfter(topic string, ei interface{}, after time.Duration) {
-	assert.Nil(PublishAfter(topic, ei, after))
+func MustPublishAfter(ei Job, after time.Duration) {
+	assert.Nil(PublishAfter(ei, after))
 }
 
 // FinalizeWait is a function to wait for all publication to finish. after calling this,

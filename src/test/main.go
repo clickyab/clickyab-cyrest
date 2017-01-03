@@ -3,11 +3,10 @@ package main
 import (
 	"common/config"
 	"common/initializer"
-	"common/version"
-	"log"
-	"modules/bot"
 
-	"gopkg.in/telegram-bot-api.v4"
+	"common/rabbit"
+	"common/utils"
+	"modules/cyborg/commands"
 )
 
 func main() {
@@ -15,16 +14,9 @@ func main() {
 	config.InitApplication()
 
 	defer initializer.Initialize().Finalize()
-
-	version.LogVersion().Infof("Application started")
-
-	tBot, err := tgbotapi.NewBotAPI("315976738:AAGC_25yJ4jBN1zHzuR8fGlF_SXXNi6AXjI")
-	if err != nil {
-		log.Panic(err)
+	j := commands.GetLastCommand{
+		HashKey: <-utils.ID,
+		Channel: "tst1234567",
 	}
-
-	tBot.Debug = true
-
-	log.Printf("Authorized on account %s", tBot.Self.UserName)
-	verify.VerifyBot(tBot)
+	rabbit.MustPublish(j)
 }
