@@ -6,6 +6,7 @@ dpkg-reconfigure openssh-server
 
 /etc/init.d/mysql start
 /etc/init.d/redis-server start
+/etc/init.d/rabbitmq-server start
 /usr/local/bin/MailHog &
 /etc/init.d/ssh start
 EOGO

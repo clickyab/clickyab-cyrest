@@ -52,7 +52,7 @@ $(BIN)/gb:
 	[ -f $(BIN)/gb ] || make gb
 
 
-server:
+server: $(BIN)/gb
 	$(BUILD) server
 
 run-server: server
@@ -61,6 +61,15 @@ run-server: server
 
 watch-server: codegen
 	make watch WATCH=server
+
+cyborg: $(BIN)/gb
+	$(BUILD) cyborg
+
+run-cyborg: cyborg
+	$(BIN)/cyborg
+
+watch-cyborg:
+	make watch WATCH=cyborg
 
 #
 # Tools
@@ -159,6 +168,9 @@ codegen-ad: tools-codegen
 	$(BIN)/codegen -p modules/ad/controllers
 	$(BIN)/codegen -p modules/ad/ads
 
+codegen-cyborg: tools-codegen
+	$(BIN)/codegen -p modules/cyborg/bot
+
 swagger-cleaner:
 	@rm -f $(WORK_DIR)/swagger/*.json
 	@rm -f $(WORK_DIR)/swagger/*.yaml
@@ -166,7 +178,7 @@ swagger-cleaner:
 swagger-client: tools-swagger
 	GOPATH=$(ROOT) cd $(ROOT)/src && $(BIN)/swagger generate client -f $(ROOT)/3rd/swagger/cyrest.yaml
 
-codegen: swagger-ui swagger-cleaner codegen-misc codegen-user codegen-category codegen-location codegen-channel codegen-campaign codegen-ad
+codegen: swagger-ui swagger-cleaner codegen-misc codegen-user codegen-category codegen-location codegen-channel codegen-campaign codegen-ad codegen-cyborg
 	@cp $(WORK_DIR)/swagger/out.yaml $(ROOT)/3rd/swagger/cyrest.yaml
 	@cp $(WORK_DIR)/swagger/out.json $(ROOT)/3rd/swagger/cyrest.json
 	@echo "Done"
@@ -202,6 +214,20 @@ mysql-setup: needroot
 	echo 'UPDATE user SET password=PASSWORD("$(DBPASS)") WHERE user="$(DB_USER)";' | mysql mysql
 	echo 'FLUSH PRIVILEGES;' | mysql mysql
 	make mysql-createdb
+
+rabbitmq-setup: needroot
+	[ "1" -eq "$(shell rabbitmq-plugins enable rabbitmq_management | grep 'Plugin configuration unchanged' | wc -l)" ] || (rabbitmqctl stop_app && rabbitmqctl start_app)
+	rabbitmqctl add_user $(RUSER) $(RPASS) || rabbitmqctl change_password $(RUSER) $(RPASS)
+	rabbitmqctl set_user_tags $(RUSER) administrator
+	rabbitmqctl set_permissions -p / $(RUSER) ".*" ".*" ".*"
+	wget -O /usr/bin/rabbitmqadmin http://127.0.0.1:15672/cli/rabbitmqadmin
+	chmod a+x /usr/bin/rabbitmqadmin
+	rabbitmqadmin declare queue name=dlx-queue
+	rabbitmqadmin declare exchange name=dlx-exchange type=topic
+	rabbitmqctl set_policy DLX ".*" '{"dead-letter-exchange":"dlx-exchange"}' --apply-to queues
+	rabbitmqadmin declare binding source="dlx-exchange" destination_type="queue" destination="dlx-queue" routing_key="#"
+
+
 
 
 setcap: $(BIN)/server needroot

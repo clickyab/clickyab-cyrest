@@ -7,6 +7,8 @@ import (
 	"container/ring"
 	"sync"
 
+	"sync/atomic"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/streadway/amqp"
 )
@@ -128,11 +130,20 @@ type Connection interface {
 	Channel() (Channel, error)
 }
 
+// Job interface
+type Job interface {
+	// GetTopic return the topic of the current message to publish
+	GetTopic() string
+	// GetQueue return the queue to publish in
+	GetQueue() string
+}
+
 type rabbitInitializer struct {
 }
 
 var (
-	quit = make(chan chan struct{})
+	quit        = make(chan chan struct{})
+	hasConsumer int64
 )
 
 // Initialize the module at the beginning of the application to create a publish channel
@@ -210,9 +221,11 @@ func (rabbitInitializer) Initialize() {
 }
 
 func (r *rabbitInitializer) Finalize() {
-	tmp := make(chan struct{})
-	quit <- tmp
-	<-tmp
+	if atomic.CompareAndSwapInt64(&hasConsumer, 1, 0) {
+		tmp := make(chan struct{})
+		quit <- tmp
+		<-tmp
+	}
 	logrus.Debug("Rabbit finalized")
 }
 

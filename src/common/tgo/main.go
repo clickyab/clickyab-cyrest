@@ -7,6 +7,10 @@ import (
 	"net"
 	"strconv"
 	"sync"
+
+	"time"
+
+	"github.com/Sirupsen/logrus"
 )
 
 // TelegramCli is the interface to handle the telegram cli
@@ -22,7 +26,7 @@ type TelegramCli interface {
 	ContactList() ([]Contact, error)
 
 	//History history <peer> [limit] [offset] Prints messages with this peer (most recent message lower). Also marks messages as read
-	History(peer string, limit, offset int) (*History, error)
+	History(peer string, limit, offset int) ([]History, error)
 
 	// FwdMsg fwd <peer> <msg-id>+    Forwards message to peer. Forward to secret chats is forbidden
 	FwdMsg(peer string, msg string) (*SuccessResp, error)
@@ -47,7 +51,11 @@ type TelegramCli interface {
 
 	//ChannelInvite channel_invite <channel> <user> Invites user to channel
 	ChannelInvite(channelId, user string) (*SuccessResp, error)
+
+	//GetSelf get_self        Get our user info
+	GetSelf() (*UserInfo, error)
 }
+
 type TelegramCliFull interface {
 	TelegramCli
 
@@ -146,9 +154,6 @@ type TelegramCliFull interface {
 
 	//get_message <msg-id>    Get message by id
 	GetMessage()
-
-	//get_self        Get our user info
-	GetSelf()
 
 	//help [command]  Prints this help
 	Help()
@@ -418,14 +423,17 @@ func (t *telegram) disConnect() error {
 	return err
 }
 
-func (t *telegram) exec(cmd string) ([]byte, error) {
+func (t *telegram) exec(cmd string) (d []byte, e error) {
 	t.lock.Lock()
 	defer t.lock.Unlock()
+	defer time.Sleep(time.Second)
 
 	if t.Conn == nil {
 		return nil, errors.New("not connected")
 	}
-
+	defer func() {
+		logrus.Debugf("[TCLI] %s , err : %v result : %d", cmd, e, len(d))
+	}()
 	_, err := t.Conn.Write([]byte(cmd + "\n"))
 	if err != nil {
 		return nil, err
@@ -470,7 +478,6 @@ func (t *telegram) ChannelInfo(channelId string) (*ChannelInfo, error) {
 	var data ChannelInfo
 	cmd := fmt.Sprintf("channel_info %s", channelId)
 	x, err := t.exec(cmd)
-	//fmt.Print(string(x))
 	if err != nil {
 		return nil, err
 	}
@@ -478,24 +485,24 @@ func (t *telegram) ChannelInfo(channelId string) (*ChannelInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	//fmt.Println(data)
 	return &data, nil
 
 }
-func (t *telegram) History(user string, limit, offset int) (*History, error) {
-	var data History
-	cmd := fmt.Sprintf("History %s %d %d", user, limit, offset)
+func (t *telegram) History(user string, limit, offset int) ([]History, error) {
+	var data []History
+	cmd := fmt.Sprintf("history %s %d %d", user, limit, offset)
 	x, err := t.exec(cmd)
 	//fmt.Print(string(x))
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println(string(x))
 	err = json.Unmarshal(x, &data)
 	if err != nil {
 		return nil, err
 	}
 	//fmt.Println(data)
-	return &data, nil
+	return data, nil
 
 }
 func (t *telegram) UserInfo(user string) (*UserInfo, error) {
@@ -627,7 +634,7 @@ func (t *telegram) ChannelList(limit, offset int) ([]ChannelList, error) {
 
 func (t *telegram) ResolveUsername(chUser string) (*ChannelUser, error) {
 	var data ChannelUser
-	cmd := fmt.Sprintf("resolve_user %s", chUser)
+	cmd := fmt.Sprintf("resolve_username %s", chUser)
 	x, err := t.exec(cmd)
 	if err != nil {
 		return nil, err
@@ -640,7 +647,7 @@ func (t *telegram) ResolveUsername(chUser string) (*ChannelUser, error) {
 }
 func (t *telegram) ChannelInvite(channelId, user string) (*SuccessResp, error) {
 	var data SuccessResp
-	cmd := fmt.Sprintf("resolve_user %s %s", channelId, user)
+	cmd := fmt.Sprintf("channel_invite %s %s", channelId, user)
 	x, err := t.exec(cmd)
 	if err != nil {
 		return nil, err
