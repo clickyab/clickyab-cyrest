@@ -12,26 +12,32 @@ import (
 )
 
 const (
-	AdStatusPending  AdStatus = "pending"
-	AdStatusRejected AdStatus = "rejected"
-	AdStatusAccepted AdStatus = "accepted"
-	AdStatusArchive  AdStatus = "archive"
+	AdAdminStatusPending  AdAdminStatus = "pending"
+	AdAdminStatusRejected AdAdminStatus = "rejected"
+	AdAdminStatusAccepted AdAdminStatus = "accepted"
 
-	AdTypeImg      AdType = "img"
-	AdTypeDocument AdType = "document"
-	AdTypeVideo    AdType = "video"
+	AdArchiveStatusYes AdArchiveStatus = "yes"
+	AdArchiveStatusNo  AdArchiveStatus = "no"
+
+	AdPayStatusYes AdPayStatus = "yes"
+	AdPayStatusNo  AdPayStatus = "no"
 )
 
 type (
-	// AdStatus is the ad status
+	// AdAdminStatus is the ad admin status
 	// @Enum{
 	// }
-	AdStatus string
+	AdAdminStatus string
 
-	// AdType is the ad status
+	// AdArchiveStatus is the ad archive status
 	// @Enum{
 	// }
-	AdType string
+	AdArchiveStatus string
+
+	// AdPayStatus is the ad pay status
+	// @Enum{
+	// }
+	AdPayStatus string
 )
 
 // Ad model
@@ -42,16 +48,17 @@ type (
 //		list = yes
 // }
 type Ad struct {
-	ID          int64             `db:"id" json:"id" sort:"true" title:"ID"`
-	UserID      int64             `json:"user_id" db:"user_id" title:"UserID"`
-	Name        string            `json:"name" db:"name" search:"true" title:"Name"`
-	Media       common.NullString `json:"media" db:"media" title:"Media"`
-	Description common.NullString `json:"description" db:"description" title:"Description"`
-	Link        common.NullString `json:"link" db:"link" search:"true" title:"Link"`
-	Type        AdType            `json:"type" db:"type" filter:"true" title:"Type"`
-	Status      AdStatus          `json:"status" db:"status" filter:"true" title:"Status"`
-	CreatedAt   time.Time         `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
-	UpdatedAt   time.Time         `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at"`
+	ID              int64             `db:"id" json:"id" sort:"true" title:"ID"`
+	UserID          int64             `json:"user_id" db:"user_id" title:"UserID"`
+	PlanID          common.NullInt64  `json:"plan_id" db:"plan_id" title:"PlanID"`
+	Name            string            `json:"name" db:"name" title:"Name"`
+	Description     common.NullString `json:"description" db:"description" title:"Description"`
+	Src             common.NullString `json:"src" db:"src" title:"Src"`
+	AdAdminStatus   AdAdminStatus     `json:"admin_status" db:"admin_status" filter:"true" title:"AdminStatus"`
+	AdArchiveStatus AdArchiveStatus   `json:"archive_status" db:"archive_status" filter:"true" title:"ArchiveStatus"`
+	AdPayStatus     AdPayStatus       `json:"pay_status" db:"pay_status" filter:"true" title:"PayStatus"`
+	CreatedAt       time.Time         `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
+	UpdatedAt       time.Time         `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at"`
 }
 
 //AdDataTable is the ad full data in data table, after join with other field
@@ -122,22 +129,6 @@ func (m *Manager) FillAdDataTableArray(u base.PermInterfaceComplete, filters map
 	return res, count
 }
 
-// EditAd function for ad editing
-func (m *Manager) EditAd(usr *aaa.User, ad *Ad) *Ad {
+func (c *Ad) Initialize() {
 
-	ads := &Ad{
-		ID:          ad.ID,
-		UserID:      ad.UserID,
-		Name:        ad.Name,
-		Media:       ad.Media,
-		Description: ad.Description,
-		Link:        ad.Link,
-		Type:        ad.Type,
-		Status:      ad.Status,
-		CreatedAt:   ad.CreatedAt,
-		UpdatedAt:   ad.UpdatedAt,
-	}
-
-	assert.Nil(m.UpdateAd(ads))
-	return ads
 }
