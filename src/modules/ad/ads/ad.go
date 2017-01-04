@@ -11,6 +11,7 @@ import (
 	"time"
 )
 
+//'pending', 'rejected','accepted','yes','no','yes','no'
 const (
 	AdAdminStatusPending  AdAdminStatus = "pending"
 	AdAdminStatusRejected AdAdminStatus = "rejected"
