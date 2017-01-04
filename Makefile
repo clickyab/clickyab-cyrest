@@ -159,6 +159,10 @@ codegen-ad: tools-codegen
 	$(BIN)/codegen -p modules/ad/controllers
 	$(BIN)/codegen -p modules/ad/ads
 
+codegen-plan: tools-codegen
+	$(BIN)/codegen -p modules/plan/controllers
+	$(BIN)/codegen -p modules/plan/pln
+
 swagger-cleaner:
 	@rm -f $(WORK_DIR)/swagger/*.json
 	@rm -f $(WORK_DIR)/swagger/*.yaml
