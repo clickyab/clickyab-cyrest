@@ -109,6 +109,13 @@ func WaitExitSignal() os.Signal {
 // Used mainly at generating payment token
 var ID = make(chan string)
 
+// Sha1 is the sha1 generation func
+func Sha1(k string) string {
+	h := sha1.New()
+	_, _ = h.Write([]byte(k))
+	return fmt.Sprintf("%x", h.Sum(nil))
+}
+
 func init() {
 	// Make sure random generator is a bit fair random :)
 	rand.Seed(int64(time.Now().Nanosecond()))
