@@ -10,6 +10,7 @@ import (
 
 	_ "modules/user" // user module
 	_ "modules/ad" // ad module
+	_ "modules/plan" // plan module
 )
 
 func init() {
