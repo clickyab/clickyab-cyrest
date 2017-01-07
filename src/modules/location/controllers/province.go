@@ -4,8 +4,8 @@ import (
 	"modules/location/loc"
 	"strconv"
 
-	"gopkg.in/labstack/echo.v3"
 	"fmt"
+	"gopkg.in/labstack/echo.v3"
 )
 
 // listProvince

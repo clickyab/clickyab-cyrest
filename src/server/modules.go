@@ -8,8 +8,8 @@ import (
 	_ "modules/location" // location module
 	_ "modules/misc"     // misc controller
 
+	_ "modules/ad"   // ad module
 	_ "modules/user" // user module
-	_ "modules/ad" // ad module
 )
 
 func init() {

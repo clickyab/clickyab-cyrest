@@ -36,9 +36,9 @@ type Role struct {
 // }
 type RoleDataTable struct {
 	Role
-	ParentID int64 `db:"-" json:"parent_id" visible:"false"`
-	OwnerID  int64 `db:"-" json:"owner_id" visible:"false"`
-	Actions string `db:"-" json:"_actions" visible:"false"`
+	ParentID int64  `db:"-" json:"parent_id" visible:"false"`
+	OwnerID  int64  `db:"-" json:"owner_id" visible:"false"`
+	Actions  string `db:"-" json:"_actions" visible:"false"`
 }
 
 // RegisterRole is try to register role
@@ -71,6 +71,7 @@ func (m *Manager) RegisterRole(name string, description string, perm map[base.Us
 
 	return
 }
+
 // FillRoleDataTableArray is the function to handle
 func (m *Manager) FillRoleDataTableArray(u base.PermInterfaceComplete, filters map[string]string, search map[string]string, sort, order string, p, c int) (RoleDataTableArray, int64) {
 	var params []interface{}
@@ -86,7 +87,7 @@ func (m *Manager) FillRoleDataTableArray(u base.PermInterfaceComplete, filters m
 
 	for column, val := range search {
 		where = append(where, fmt.Sprintf("%s LIKE ?", column))
-		params = append(params, fmt.Sprintf("%s"+val+"%s","%","%"))
+		params = append(params, fmt.Sprintf("%s"+val+"%s", "%", "%"))
 	}
 
 	//check for perm

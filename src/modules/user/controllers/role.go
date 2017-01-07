@@ -14,9 +14,9 @@ import (
 // @Validate {
 // }
 type rolePayLoad struct {
-	Name string `json:"name" validate:"gt=3" error:"name must be valid"`
-	Description string `json:"description" validate:"gt=3" error:"description must be valid"`
-	Perm map[base.UserScope][]string `json:"perm"`
+	Name        string                      `json:"name" validate:"gt=3" error:"name must be valid"`
+	Description string                      `json:"description" validate:"gt=3" error:"description must be valid"`
+	Perm        map[base.UserScope][]string `json:"perm"`
 }
 
 // Validate custom validation for user scope
