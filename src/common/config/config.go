@@ -106,6 +106,12 @@ func defaultLayer() onion.DefaultLayer {
 	assert.Nil(err)
 	assert.Nil(res.SetDefault("swagger_root", path))
 
+	path, err = expand.Path("$PWD/../front/public/")
+	assert.Nil(err)
+	path, err = filepath.Abs(path)
+	assert.Nil(err)
+	assert.Nil(res.SetDefault("front_path", path))
+
 	path, err = expand.Path("$PWD/../tmp/profiles/")
 	assert.Nil(err)
 	path, err = filepath.Abs(path)
