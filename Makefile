@@ -227,8 +227,15 @@ rabbitmq-setup: needroot
 	rabbitmqctl set_policy DLX ".*" '{"dead-letter-exchange":"dlx-exchange"}' --apply-to queues
 	rabbitmqadmin declare binding source="dlx-exchange" destination_type="queue" destination="dlx-queue" routing_key="#"
 
+$(ROOT)/bin/swagger-codegen-cli-2.2.1.jar:
+	wget -c -O $(ROOT)/bin/swagger-codegen-cli-2.2.1.jar https://oss.sonatype.org/content/repositories/releases/io/swagger/swagger-codegen-cli/2.2.1/swagger-codegen-cli-2.2.1.jar
 
-
+build-js: $(ROOT)/bin/swagger-codegen-cli-2.2.1.jar
+	rm -rf $(ROOT)/front/tmp/swagger/webpack-output
+	JAVA_OPTS="$(JAVA_OPTS) -Xmx1024M -DloggerPath=conf/log4j.properties"
+	java -DappName=PetstoreClient $(JAVA_OPTS) -jar $(ROOT)/bin/swagger-codegen-cli-2.2.1.jar $$@ generate -t $(ROOT)/front/contrib/swagger-template -i $(ROOT)/3rd/swagger/cyrest.yaml -l javascript -o $(ROOT)/front/tmp/swagger/webpack-output
+	cp -a $(ROOT)/front/tmp/swagger/webpack-output/src/. $(ROOT)/front/src/app/swagger/
+	cd $(ROOT)/front && npm run build
 
 setcap: $(BIN)/server needroot
 	setcap cap_net_bind_service=+ep $(BIN)/server
