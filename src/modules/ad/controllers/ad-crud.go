@@ -181,3 +181,26 @@ func (u *Controller) addDescription(ctx echo.Context) error {
 	assert.Nil(m.UpdateAd(currentAd))
 	return u.OKResponse(ctx, currentAd)
 }
+
+//	view  ad
+//	@Route	{
+//		url	=	/:id
+//		method	= get
+//		resource = create_ad:self
+//		middleware = authz.Authenticate
+//		200 = ads.Ad
+//		400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) view(ctx echo.Context) error {
+
+	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	m := ads.NewAdsManager()
+	ad, err := m.FindAdByID(id)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	return u.OKResponse(ctx, ad)
+}
