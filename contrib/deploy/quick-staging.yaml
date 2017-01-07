@@ -23,6 +23,11 @@
         target: all
         chdir: /home/develop/cyrest
 
+    - name: build front end
+      make:
+        target: build-js
+        chdir: /home/develop/cyrest
+
 # This is the staging build. it will build the app (using golang docker image) and run it with docker-compose
 - name: staging build
   hosts: staging
@@ -44,6 +49,14 @@
         delete: yes
         checksum: yes
         times: no
+
+    - name: copy frontend files
+      synchronize:
+        src: "{{ playbook_dir }}/../../front/public/"
+        dest: "/home/cy/cyrest/public/"
+        delete: yes
+        checksum: yes
+        times: no        
 
     - name: copy compose file to server
       synchronize:
