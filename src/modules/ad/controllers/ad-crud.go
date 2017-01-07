@@ -7,6 +7,7 @@ import (
 
 	"common/assert"
 
+	"common/models/common"
 	"modules/misc/middlewares"
 	"modules/misc/trans"
 	"modules/user/aaa"
@@ -25,6 +26,12 @@ type AdPayload struct {
 // }
 type AdAdminStatusPayload struct {
 	AdAdminStatus ads.AdAdminStatus `json:"admin_status" validate:"required" error:"status is required"`
+}
+
+// @Validate {
+// }
+type AdDescriptionPayLoad struct {
+	Body string `json:"body" validate:"required" error:"body is required"`
 }
 
 // Validate custom validation for user scope
@@ -131,11 +138,46 @@ func (u *Controller) changeArchiveStatus(ctx echo.Context) error {
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
-	if currentAd.AdArchiveStatus==ads.AdArchiveStatusYes{
-		currentAd.AdArchiveStatus=ads.AdArchiveStatusNo
-	}else{
-		currentAd.AdArchiveStatus=ads.AdArchiveStatusYes
+	if currentAd.AdArchiveStatus == ads.AdArchiveStatusYes {
+		currentAd.AdArchiveStatus = ads.AdArchiveStatusNo
+	} else {
+		currentAd.AdArchiveStatus = ads.AdArchiveStatusYes
 	}
+	assert.Nil(m.UpdateAd(currentAd))
+	return u.OKResponse(ctx, currentAd)
+}
+
+//	addDescription add description to ad
+//	@Route	{
+//		url	=	/desc/:id
+//		method	= put
+//		payload	= AdDescriptionPayLoad
+//		resource = add_description_ad:self
+//		middleware = authz.Authenticate
+//		200 = ads.Ad
+//		400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) addDescription(ctx echo.Context) error {
+	pl := u.MustGetPayload(ctx).(*AdDescriptionPayLoad)
+	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	m := ads.NewAdsManager()
+	currentAd, err := m.FindAdByID(id)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	currentUser, ok := authz.GetUser(ctx)
+	if !ok {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	owner, err := aaa.NewAaaManager().FindUserByID(currentAd.UserID)
+	_, b := currentUser.HasPermOn("add_description_ad", owner.ID, owner.DBParentID.Int64)
+	if !b {
+		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
+	}
+	currentAd.Description = common.MakeNullString(pl.Body)
 	assert.Nil(m.UpdateAd(currentAd))
 	return u.OKResponse(ctx, currentAd)
 }
