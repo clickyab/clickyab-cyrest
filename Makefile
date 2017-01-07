@@ -52,7 +52,7 @@ $(BIN)/gb:
 	[ -f $(BIN)/gb ] || make gb
 
 
-server: $(BIN)/gb
+server:
 	$(BUILD) server
 
 run-server: server
@@ -171,6 +171,10 @@ codegen-ad: tools-codegen
 codegen-cyborg: tools-codegen
 	$(BIN)/codegen -p modules/cyborg/bot
 
+codegen-plan: tools-codegen
+	$(BIN)/codegen -p modules/plan/controllers
+	$(BIN)/codegen -p modules/plan/pln
+
 swagger-cleaner:
 	@rm -f $(WORK_DIR)/swagger/*.json
 	@rm -f $(WORK_DIR)/swagger/*.yaml
@@ -178,7 +182,7 @@ swagger-cleaner:
 swagger-client: tools-swagger
 	GOPATH=$(ROOT) cd $(ROOT)/src && $(BIN)/swagger generate client -f $(ROOT)/3rd/swagger/cyrest.yaml
 
-codegen: swagger-ui swagger-cleaner codegen-misc codegen-user codegen-category codegen-location codegen-channel codegen-campaign codegen-ad codegen-cyborg
+codegen: swagger-ui swagger-cleaner codegen-misc codegen-user codegen-category codegen-location codegen-channel codegen-campaign codegen-ad
 	@cp $(WORK_DIR)/swagger/out.yaml $(ROOT)/3rd/swagger/cyrest.yaml
 	@cp $(WORK_DIR)/swagger/out.json $(ROOT)/3rd/swagger/cyrest.json
 	@echo "Done"
