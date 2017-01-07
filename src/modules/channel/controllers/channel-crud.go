@@ -2,14 +2,20 @@ package channel
 
 import (
 	"common/assert"
+	"common/rabbit"
+	"common/redis"
+	"common/tgo"
+	"common/utils"
+	"encoding/json"
 	"modules/channel/chn"
+	"modules/cyborg/commands"
 	"modules/misc/middlewares"
 	"modules/misc/trans"
 	"modules/user/aaa"
+	"modules/user/middlewares"
 	"net/http"
 	"strconv"
-
-	"modules/user/middlewares"
+	"time"
 
 	echo "gopkg.in/labstack/echo.v3"
 )
@@ -167,6 +173,11 @@ type statusPayload struct {
 	Status chn.ChannelStatus `json:"status" validate:"required"`
 }
 
+type GetLastResponse struct {
+	Data   []tgo.History
+	Status string
+}
+
 // Validate custom validation for user scope
 func (lp *statusPayload) ValidateExtra(ctx echo.Context) error {
 	if !lp.Status.IsValid() {
@@ -217,4 +228,63 @@ func (u *Controller) StatusChannel(ctx echo.Context) error {
 	assert.Nil(m.UpdateChannel(cha))
 	return u.OKResponse(ctx, cha)
 
+}
+
+//	getLast get last messages for the specified channel
+//	@Route	{
+//	url	=	/last/:name/:count
+//	method	= get
+//	resource = get_last_channel:parent
+//	middleware = authz.Authenticate
+//	200 = GetLastResponse
+//	400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) getLast(ctx echo.Context) error {
+	var res []tgo.History
+
+	count, err := strconv.Atoi(ctx.Param("count"))
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+
+	//validate count between 1 - 99
+	if count < 1 || count > 99 {
+		return u.BadResponse(ctx, trans.E("count out of range"))
+	}
+	name := ctx.Param("name")
+	hash := utils.Sha1(name)
+	//check if the key exists in redis
+	b, err := aredis.GetHashKey(hash, "STATUS", true, 2*time.Hour)
+	if b == "" || err != nil { //key not exists
+		err = aredis.StoreHashKey(hash, "STATUS", "pending", 2*time.Hour)
+		assert.Nil(err)
+		rabbit.MustPublish(
+			commands.GetLastCommand{
+				Channel: name,
+				Count:   count,
+				HashKey: hash,
+			},
+		)
+		return u.OKResponse(ctx, res)
+	}
+	if b == "pending" {
+		return u.OKResponse(ctx, res)
+	} else if b == "done" {
+		stringRes, err := aredis.GetHashKey(hash, "DATA", true, 2*time.Hour)
+		if err != nil {
+			return u.BadResponse(ctx, trans.E("failed job"))
+		}
+		err = json.Unmarshal([]byte(stringRes), &res)
+		if err != nil {
+			return u.BadResponse(ctx, trans.E("failed job"))
+		}
+		return u.OKResponse(ctx, GetLastResponse{
+			Status: "done",
+			Data:   res,
+		})
+	} else if b == "failed" {
+		return u.BadResponse(ctx, trans.E("failed job"))
+	} else {
+		return u.BadResponse(ctx, trans.E("failed job"))
+	}
 }
