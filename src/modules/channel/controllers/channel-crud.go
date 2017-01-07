@@ -9,8 +9,9 @@ import (
 	"net/http"
 	"strconv"
 
-	echo "gopkg.in/labstack/echo.v3"
 	"modules/user/middlewares"
+
+	echo "gopkg.in/labstack/echo.v3"
 )
 
 // @Validate {
