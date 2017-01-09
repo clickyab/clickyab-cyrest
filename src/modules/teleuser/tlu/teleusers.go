@@ -7,6 +7,7 @@ import (
 	"modules/user/aaa"
 	"strings"
 
+	"common/models/common"
 	"time"
 )
 
@@ -39,14 +40,18 @@ type (
 //		list = yes
 // }
 type Teleuser struct {
-	ID         int64         `db:"id" json:"id" sort:"true" title:"ID"`
-	UserID     int64         `json:"user_id" db:"user_id" title:"UserID"`
-	TelegramID string        `json:"telegram_id" db:"telegram_id" title:"TelegramID"`
-	Username   string        `json:"username" db:"username" title:"UserName"`
-	Resolve    ResolveStatus `json:"resolve" db:"resolve" title:"Resolve"`
-	Remove     RemoveStatus  `json:"remove" db:"remove" title:"Remove"`
-	CreatedAt  time.Time     `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
-	UpdatedAt  time.Time     `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at"`
+	ID         int64             `db:"id" json:"id" sort:"true" title:"ID"`
+	UserID     int64             `json:"user_id" db:"user_id" title:"UserID"`
+	TelegramID string            `json:"telegram_id" db:"telegram_id" title:"TelegramID"`
+	Username   common.NullString `json:"username" db:"username" title:"UserName"`
+	Resolve    ResolveStatus     `json:"resolve" db:"resolve" title:"Resolve"`
+	Remove     RemoveStatus      `json:"remove" db:"remove" title:"Remove"`
+	CreatedAt  time.Time         `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
+	UpdatedAt  time.Time         `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at"`
+}
+
+type Verifycode struct {
+	Key string `json:"key"`
 }
 
 //TeleuserDataTable is the teleuser full data in data table, after join with other field
