@@ -2,17 +2,6 @@
 -- +migrate Up
 -- SQL in section 'Up' is executed when this migration is applied
 
-
-CREATE TABLE plans
-(
-  id INT(11) PRIMARY KEY NOT NULL AUTO_INCREMENT,
-  name VARCHAR(60) NOT NULL,
-  description TEXT,
-  price INT(11),
-  view INT(11)
-
-);
-
 CREATE TABLE ads
 (
   id INT(11) PRIMARY KEY NOT NULL AUTO_INCREMENT,
@@ -34,6 +23,5 @@ CREATE TABLE ads
 -- +migrate Down
 -- SQL section 'Down' is executed when this migration is rolled back
 
-DROP TABLE plans;
 DROP TABLE ads;
 
