@@ -1,6 +1,3 @@
 [submodule "contrib/tg"]
 	path = contrib/tg
 	url = git@github.com:fzerorubigd/tg.git
-[submodule "front"]
-	path = front
-	url = git@github.com:clickyab/clickyab-console-front.git

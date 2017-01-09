@@ -1,10 +1,10 @@
-package campaign
+package teleuser
 
 import "modules/misc/base"
 
-// Controller is the controller for the campaign package
+// Controller is the controller for the teleuser package
 // @Route {
-//		group = /campaign
+//		group = /teleuser
 // }
 type Controller struct {
 	base.Controller
