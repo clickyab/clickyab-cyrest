@@ -1,7 +1,6 @@
 package main
 
 import (
-	_ "modules/campaign" // campaign module
 	_ "modules/category" // category module
 	"modules/category/cat"
 	_ "modules/channel"  // channel module
