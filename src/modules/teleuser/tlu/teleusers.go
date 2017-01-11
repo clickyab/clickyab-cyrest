@@ -41,7 +41,7 @@ type (
 type Teleuser struct {
 	ID         int64         `db:"id" json:"id" sort:"true" title:"ID"`
 	UserID     int64         `json:"user_id" db:"user_id" title:"UserID"`
-	TelegramID string        `json:"telegram_id" db:"telegram_id" title:"TelegramID"`
+	TelegramID int64         `json:"telegram_id" db:"telegram_id" title:"TelegramID"`
 	Username   string        `json:"username" db:"username" title:"UserName"`
 	Resolve    ResolveStatus `json:"resolve" db:"resolve" title:"Resolve"`
 	Remove     RemoveStatus  `json:"remove" db:"remove" title:"Remove"`
