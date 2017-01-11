@@ -1,30 +1,27 @@
-package main
+package bot
 
 import (
 	"common/assert"
-	"common/config"
-	"common/initializer"
-	"common/redis"
+	"common/models/common"
 	"common/tgbot"
 	"modules/teleuser/tlu"
+	"strconv"
 	"strings"
 	"time"
 
-	"strconv"
+	"common/redis"
+
+	"common/initializer"
 
 	"gopkg.in/telegram-bot-api.v4"
 )
 
-func main() {
-	config.Initialize()
-	config.InitApplication()
+type Bot struct {
+}
 
-	defer initializer.Initialize().Finalize()
+func (bb *Bot) Initialize() {
 
-	//b := tgbot.NewTelegramBot("273335144:AAEv4uPeo68X7Scc3MLKxwMO1YI3JFkWiJM")
-	b := tgbot.NewTelegramBot("232630313:AAHRVcaQxFvs3u2-VGAAlsD3Xe1TIUr5rhk")
-
-	b.RegisterMessageHandler("/verify", func(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
+	tgbot.RegisterMessageHandler("/verify", func(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 		//sample code  /verify-1:12123
 
 		if !strings.Contains(m.Text, "-") && !strings.Contains(m.Text, ":") {
@@ -51,7 +48,7 @@ func main() {
 			tl := &tlu.Teleuser{
 				UserID:     id,
 				TelegramID: m.Chat.ID,
-				Username:   m.Chat.UserName,
+				Username:   common.NullString{m.Chat.UserName != "", m.Chat.UserName},
 				Remove:     tlu.RemoveStatusNo,
 				Resolve:    tlu.ResolveStatusYes,
 			}
@@ -61,5 +58,9 @@ func main() {
 			assert.Nil(err)
 		}
 	})
-	assert.Nil(b.Start())
+	//assert.Nil(b.Start())
+}
+
+func init() {
+	initializer.Register(&Bot{})
 }

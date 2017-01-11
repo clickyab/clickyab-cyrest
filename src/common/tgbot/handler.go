@@ -8,8 +8,8 @@ type tgbotInitializer struct {
 
 var handler TelegramBot
 
-func (*tgbotInitializer) Initialzie() {
-
+func (*tgbotInitializer) Initialize() {
+	handler = NewTelegramBot(config.Config.Telegram.APIKey)
 }
 
 // RegisterMessageHandler try to register a handler in system, the first is the command to match the
@@ -24,6 +24,5 @@ func Start() error {
 }
 
 func init() {
-	handler = NewTelegramBot(config.Config.Telegram.APIKey)
 	initializer.Register(&tgbotInitializer{})
 }
