@@ -65,6 +65,10 @@ type AppConfig struct {
 		MinPerPage int `onion:"min_per_page"`
 	}
 
+	Telegram struct {
+		APIKey string `onion:"api_key"`
+	}
+
 	Redmine struct {
 		APIKey         string
 		URL            string
@@ -127,6 +131,8 @@ func defaultLayer() onion.DefaultLayer {
 	assert.Nil(res.SetDefault("page.per_Page", 10))
 	assert.Nil(res.SetDefault("page.max_per_page", 100))
 	assert.Nil(res.SetDefault("page.min_per_Page", 1))
+
+	assert.Nil(res.SetDefault("telegram.api_key", "273335144:AAEv4uPeo68X7Scc3MLKxwMO1YI3JFkWiJM"))
 
 	assert.Nil(res.SetDefault("time_zone", "Asia/Tehran"))
 
