@@ -14,6 +14,9 @@ import (
 	"modules/user/middlewares"
 	"net/http"
 	"strconv"
+
+	"modules/file/fila"
+	"net/url"
 )
 
 // @Validate {
@@ -182,25 +185,47 @@ func (u *Controller) addDescription(ctx echo.Context) error {
 	return u.OKResponse(ctx, currentAd)
 }
 
-//	view  ad
+//	uploadBanner uploadBanner for ad
 //	@Route	{
-//		url	=	/:id
-//		method	= get
-//		resource = list_ad:self
+//		url	=	/upload
+//		method	= put
+//		resource = upload_ad:self
 //		middleware = authz.Authenticate
 //		200 = ads.Ad
 //		400 = base.ErrorResponseSimple
 //	}
-func (u *Controller) view(ctx echo.Context) error {
-
-	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
+func (u *Controller) uploadBanner(ctx echo.Context) error {
+	adID, err := strconv.ParseInt(ctx.FormValue("id"), 10, 64)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	dUrl := ctx.FormValue("url")
+	_, err = url.Parse(dUrl)
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
 	}
 	m := ads.NewAdsManager()
-	ad, err := m.FindAdByID(id)
+	currentAd, err := m.FindAdByID(adID)
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
 	}
-	return u.OKResponse(ctx, ad)
+	currentUser, ok := authz.GetUser(ctx)
+	if !ok {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	owner, err := aaa.NewAaaManager().FindUserByID(currentAd.UserID)
+	_, b := currentUser.HasPermOn("upload_ad", owner.ID, owner.DBParentID.Int64)
+	if !b {
+		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
+	}
+
+	//upload
+	file, err := fila.CheckUpload(dUrl, currentUser.ID)
+	if err!=nil{
+		return u.NotFoundResponse(ctx, nil)
+	}
+	currentAd.Src = common.MakeNullString(file)
+	assert.Nil(m.UpdateAd(currentAd))
+	return u.OKResponse(ctx, currentAd)
+
 }

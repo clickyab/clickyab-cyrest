@@ -97,7 +97,7 @@ func defaultLayer() onion.DefaultLayer {
 	assert.Nil(res.SetDefault("proto", "http"))
 	assert.Nil(res.SetDefault("port", ":80"))
 
-	path, err := expand.Path("$PWD/statics")
+	path, err := expand.Path("$PWD/../statics/")
 	assert.Nil(err)
 	assert.Nil(res.SetDefault("static_root", path))
 	path, err = expand.Path("$PWD/../3rd/swagger/")
