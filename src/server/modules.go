@@ -1,7 +1,6 @@
 package main
 
 import (
-	_ "modules/campaign" // campaign module
 	_ "modules/category" // category module
 	"modules/category/cat"
 	_ "modules/channel"  // channel module
@@ -10,6 +9,8 @@ import (
 	_ "modules/teleuser" // teleuser module
 
 	_ "modules/ad"   // ad module
+	_ "modules/file" // file module
+	_ "modules/plan" // plan module
 	_ "modules/user" // user module
 )
 
