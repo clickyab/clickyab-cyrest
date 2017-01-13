@@ -12,3 +12,4 @@ pkg/
 *.gen.go
 3rd/swagger/cyrest.*
 npm-debug.log
+statics/

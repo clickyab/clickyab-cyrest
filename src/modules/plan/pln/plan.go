@@ -1,5 +1,5 @@
 // Package plan is the models for plan module
-package plan
+package pln
 
 import (
 	"common/assert"
