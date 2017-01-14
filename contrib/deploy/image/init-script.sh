@@ -16,6 +16,8 @@ export CYREST_MYSQL_DSN="${MYSQL_USER}:${MYSQL_PASSWORD}@tcp(mysql:3306)/"
 export CYREST_MYSQL_DATABASE="${MYSQL_DB}"
 export CYREST_PROFILE=disable
 export CYREST_SLACK_ACTIVE=true
+export CYREST_AMQP_DSN="amqp://cyrest:bita123@rabbitmq:5672/"
+export CYREST_AMQP_EXCHANGE="cy"
 
 if [ "$1" = '/app/bin/server' ];
 then
