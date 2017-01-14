@@ -27,6 +27,12 @@ type AdPayload struct {
 
 // @Validate {
 // }
+type AdUploadPayload struct {
+	Url string `json:"url" validate:"required" error:"url is required"`
+}
+
+// @Validate {
+// }
 type AdAdminStatusPayload struct {
 	AdAdminStatus ads.AdAdminStatus `json:"admin_status" validate:"required" error:"status is required"`
 }
@@ -187,32 +193,31 @@ func (u *Controller) addDescription(ctx echo.Context) error {
 
 //	uploadBanner uploadBanner for ad
 //	@Route	{
-//		url	=	/upload
+//		url	=	/upload/:id
 //		method	= put
+//		payload	= AdUploadPayload
 //		resource = upload_ad:self
 //		middleware = authz.Authenticate
 //		200 = ads.Ad
 //		400 = base.ErrorResponseSimple
 //	}
 func (u *Controller) uploadBanner(ctx echo.Context) error {
-	adID, err := strconv.ParseInt(ctx.FormValue("id"), 10, 64)
+	pl := u.MustGetPayload(ctx).(*AdUploadPayload)
+	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
 	}
-	dUrl := ctx.FormValue("url")
+	dUrl := pl.Url
 	_, err = url.Parse(dUrl)
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
 	}
 	m := ads.NewAdsManager()
-	currentAd, err := m.FindAdByID(adID)
+	currentAd, err := m.FindAdByID(id)
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
 	}
-	currentUser, ok := authz.GetUser(ctx)
-	if !ok {
-		return u.NotFoundResponse(ctx, nil)
-	}
+	currentUser := authz.MustGetUser(ctx)
 	owner, err := aaa.NewAaaManager().FindUserByID(currentAd.UserID)
 	_, b := currentUser.HasPermOn("upload_ad", owner.ID, owner.DBParentID.Int64)
 	if !b {
@@ -221,7 +226,7 @@ func (u *Controller) uploadBanner(ctx echo.Context) error {
 
 	//upload
 	file, err := fila.CheckUpload(dUrl, currentUser.ID)
-	if err!=nil{
+	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
 	}
 	currentAd.Src = common.MakeNullString(file)
