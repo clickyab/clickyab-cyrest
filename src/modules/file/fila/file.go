@@ -417,34 +417,31 @@ func UploadFromUrl(link string, uID int64) (string, error) {
 		os.Remove(filePath)
 		return "", errors.New("error while uploading file")
 	}
-	// the total file size to download
-	size, err := strconv.Atoi(resp.Header.Get("Content-Length"))
 	if err != nil {
 		os.Remove(filePath)
 		return "", errors.New("error while uploading file")
-	}
-	downloadSize := int64(size)
-	if downloadSize > fcfg.Fcfg.Size.MaxDownload {
-		os.Remove(filePath)
-		return "", errors.New("size not valid")
 	}
 	defer resp.Body.Close()
 	if err != nil {
 		os.Remove(filePath)
 		return "", errors.New("error while uploading file")
 	}
-	_, err = io.Copy(out, resp.Body)
+	downSize, err := io.Copy(out, resp.Body)
 	if err != nil {
 		os.Remove(filePath)
 		return "", errors.New("error while uploading file")
 	}
 	srcPath := filepath.Join(year, month, newFileName)
+	if downSize > fcfg.Fcfg.Size.MaxDownload {
+		os.Remove(filePath)
+		return "", errors.New("size not valid")
+	}
 	newFile := &File{
 		DBName:   newFileName,
 		RealName: realFileName,
 		Src:      srcPath,
 		Type:     typ,
-		Size:     downloadSize,
+		Size:     downSize,
 		UserID:   uID,
 	}
 	assert.Nil(NewFilaManager().CreateFile(newFile))
