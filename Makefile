@@ -46,6 +46,7 @@ gb:
 clean:
 	rm -rf $(ROOT)/pkg $(ROOT)/vendor/pkg
 	cd $(ROOT) && git clean -fX ./bin
+	cd $(ROOT) && git clean -fX ./src
 	@echo "Done"
 
 $(BIN)/gb:
@@ -186,7 +187,7 @@ swagger-cleaner:
 swagger-client: tools-swagger
 	GOPATH=$(ROOT) cd $(ROOT)/src && $(BIN)/swagger generate client -f $(ROOT)/3rd/swagger/cyrest.yaml
 
-codegen: swagger-ui swagger-cleaner codegen-misc codegen-user codegen-category codegen-location codegen-channel codegen-ad codegen-teleuser codegen-plan codegen-file
+codegen: swagger-ui swagger-cleaner migration codegen-misc codegen-user codegen-category codegen-location codegen-channel codegen-ad codegen-teleuser codegen-plan codegen-file codegen-cyborg
 	@cp $(WORK_DIR)/swagger/out.yaml $(ROOT)/3rd/swagger/cyrest.yaml
 	@cp $(WORK_DIR)/swagger/out.json $(ROOT)/3rd/swagger/cyrest.json
 	@echo "Done"

@@ -15,6 +15,15 @@ services:
       - MYSQL_ROOT_PASSWORD=bita123
       - MYSQL_DATABASE=cyrest
 
+  rabbitmq:
+    image: "registry.clickyab.ae/clicyab/rabbitmq:3-management"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=cyrest
+      - RABBITMQ_DEFAULT_PASS=bita123
+
   app:
     build: ./image
     ports:
@@ -25,3 +34,4 @@ services:
     links:
       - mysql
       - redis
+      - rabbitmq
