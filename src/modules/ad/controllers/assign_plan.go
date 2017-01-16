@@ -6,10 +6,8 @@ import (
 	"modules/plan/pln"
 
 	"common/models/common"
-	"modules/misc/trans"
 	"modules/user/aaa"
 	"modules/user/middlewares"
-	"net/http"
 
 	"gopkg.in/labstack/echo.v3"
 )
@@ -18,7 +16,7 @@ import (
 // }
 type assignPlanPayload struct {
 	AdID   int64 `json:"Ad_id" validate:"required"`
-	PlanID int64 `json:"plan_id" vaSlidate:"required"`
+	PlanID int64 `json:"plan_id" validate:"required"`
 }
 
 // assignPlan
@@ -27,7 +25,6 @@ type assignPlanPayload struct {
 //		method	=	post
 //		payload	=	assignPlanPayload
 //		resource=	assign_plan:self
-//		middleware = authz.Authenticate
 //		200	=	ads.Ad
 //		400	=	base.ErrorResponseSimple
 //// }
@@ -43,9 +40,7 @@ func (u *Controller) assignPlan(ctx echo.Context) error {
 	}
 	//find ads
 	ads, err := adManager.FindAdByID(pl.AdID)
-	if err != nil {
-		return u.NotFoundResponse(ctx, nil)
-	}
+	assert.Nil(err)
 
 	//find owner of ads
 	owner, err := aaa.NewAaaManager().FindUserByID(ads.UserID)
@@ -53,15 +48,13 @@ func (u *Controller) assignPlan(ctx echo.Context) error {
 		return u.NotFoundResponse(ctx, nil)
 	}
 	//current user
-	currentUser, ok := authz.GetUser(ctx)
-	if !ok {
-		return u.NotFoundResponse(ctx, nil)
-	}
+	currentUser, _ := authz.GetUser(ctx)
 
 	//check current user has permisiion
 	_, b := currentUser.HasPermOn("assign_plan", owner.ID, owner.DBParentID.Int64)
 	if !b {
-		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
+		return u.ForbiddenResponse(ctx, nil)
+
 	}
 	ads.PlanID = common.NullInt64{Valid: true, Int64: plan.ID}
 	assert.Nil(adManager.UpdateAd(ads))
