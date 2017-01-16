@@ -40,13 +40,13 @@ func (u *Controller) assignPlan(ctx echo.Context) error {
 	}
 	//find ads
 	ads, err := adManager.FindAdByID(pl.AdID)
-	assert.Nil(err)
-
-	//find owner of ads
-	owner, err := aaa.NewAaaManager().FindUserByID(ads.UserID)
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
 	}
+
+	//find owner of ads
+	owner, err := aaa.NewAaaManager().FindUserByID(ads.UserID)
+	assert.Nil(err)
 	//current user
 	currentUser, _ := authz.GetUser(ctx)
 
