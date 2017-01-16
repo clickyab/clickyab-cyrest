@@ -6,8 +6,7 @@ import (
 	"errors"
 )
 
-//channel_info
-//
+// ChannelInfo is the channel informmation from cli
 type ChannelInfo struct {
 	ID                string `json:"id"`
 	PeerType          string `json:"peer_type"`
@@ -44,8 +43,7 @@ func (ci ChannelInfo) Value() (driver.Value, error) {
 	return json.Marshal(ci)
 }
 
-//history
-//
+// History is a single history record
 type History struct {
 	Event string `json:"event"`
 	ID    string `json:"id"`
@@ -100,8 +98,7 @@ type History struct {
 	Text    string `json:"text,omitempty"`
 }
 
-//user_info
-//
+// UserInfo is the user information
 type UserInfo struct {
 	ID        string `json:"id"`
 	PeerType  string `json:"peer_type"`
@@ -115,8 +112,7 @@ type UserInfo struct {
 	Username  string `json:"username"`
 }
 
-//add_contact - duplicate userInfo struct
-//
+//AddContact - duplicate userInfo struct
 type AddContact struct {
 	ID        string `json:"id"`
 	PeerType  string `json:"peer_type"`
@@ -129,6 +125,8 @@ type AddContact struct {
 	Phone     string `json:"phone"`
 	Username  string `json:"username"`
 }
+
+// ChannelList is the list of channel
 type ChannelList struct {
 	ID                string `json:"id"`
 	PeerType          string `json:"peer_type"`
@@ -141,18 +139,17 @@ type ChannelList struct {
 	KickedCount       int    `json:"kicked_count"`
 }
 
-//fwd maza_fard 0100000014a3800108000000000000003a9701a88a853261
-//fwd -
+// SuccessResp is the message for success status
 type SuccessResp struct {
 	Result string `json:"result"`
 }
 
-//msg maza_fard hi
+// MsgResp is the message response
 type MsgResp struct {
 	Result string `json:"result"`
 }
 
-//contact_list
+// Contact is the single contact
 type Contact struct {
 	ID        string `json:"id"`
 	PeerType  string `json:"peer_type"`
@@ -165,6 +162,8 @@ type Contact struct {
 	Phone     string `json:"phone,omitempty"`
 	Username  string `json:"username,omitempty"`
 }
+
+// ChannelUser is the user for a channel
 type ChannelUser struct {
 	ID                string `json:"id"`
 	PeerType          string `json:"peer_type"`

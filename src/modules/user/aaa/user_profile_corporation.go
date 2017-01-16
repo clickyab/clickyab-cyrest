@@ -44,7 +44,7 @@ func (m *Manager) DeleteCorporation(upc *UserProfileCorporation) error {
 	return err
 }
 
-// RegisterPersonal is try to register personal
+// RegisterCorporation is try to register personal
 func (m *Manager) RegisterCorporation(userID int64,
 	title string,
 	economicCode,

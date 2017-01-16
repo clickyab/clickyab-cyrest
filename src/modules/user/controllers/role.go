@@ -14,9 +14,9 @@ import (
 // @Validate {
 // }
 type rolePayLoad struct {
-	Name string `json:"name" validate:"gt=3" error:"name must be valid"`
-	Description string `json:"description" validate:"gt=3" error:"description must be valid"`
-	Perm map[base.UserScope][]string `json:"perm"`
+	Name        string                      `json:"name" validate:"gt=3" error:"name must be valid"`
+	Description string                      `json:"description" validate:"gt=3" error:"description must be valid"`
+	Perm        map[base.UserScope][]string `json:"perm"`
 }
 
 // Validate custom validation for user scope
@@ -71,6 +71,10 @@ func (u *Controller) deleteRole(ctx echo.Context) (err error) {
 	//var role *aaa.Role
 	var m = aaa.NewAaaManager()
 	ID, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+
 	role, err := m.DeleteRole(ID)
 	if err != nil {
 		return u.BadResponse(ctx, trans.E("can not delete role"))

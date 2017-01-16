@@ -2,31 +2,31 @@ package bot
 
 import (
 	"common/assert"
+	"common/initializer"
 	"common/models/common"
+	"common/redis"
 	"common/tgbot"
 	"modules/teleuser/tlu"
 	"strconv"
 	"strings"
 	"time"
 
-	"common/redis"
-
-	"common/initializer"
-
 	"gopkg.in/telegram-bot-api.v4"
 )
 
-type Bot struct {
+const htmlMode = "HTML"
+
+type bot struct {
 }
 
-func (bb *Bot) Initialize() {
+func (bb *bot) Initialize() {
 
 	tgbot.RegisterMessageHandler("/verify", func(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 		//sample code  /verify-1:12123
 
 		if !strings.Contains(m.Text, "-") && !strings.Contains(m.Text, ":") {
 			msg := tgbotapi.NewMessage(m.Chat.ID, "your code is not <b>valid</b>")
-			msg.ParseMode = "HTML"
+			msg.ParseMode = htmlMode
 			_, err := bot.Send(msg)
 			assert.Nil(err)
 			return
@@ -35,7 +35,7 @@ func (bb *Bot) Initialize() {
 		str, err := aredis.GetKey(result, false, time.Hour)
 		if str == "" || err != nil {
 			msg := tgbotapi.NewMessage(m.Chat.ID, "your code is not <b>valid</b>")
-			msg.ParseMode = "HTML"
+			msg.ParseMode = htmlMode
 			_, err := bot.Send(msg)
 			assert.Nil(err)
 			return
@@ -45,15 +45,15 @@ func (bb *Bot) Initialize() {
 		if err == nil {
 			msg := tgbotapi.NewMessage(m.Chat.ID, "your account is <b>accepted</b>")
 			n := tlu.NewTluManager()
-			tl := &tlu.Teleuser{
+			tl := &tlu.TeleUser{
 				UserID:     id,
 				TelegramID: m.Chat.ID,
-				Username:   common.NullString{m.Chat.UserName != "", m.Chat.UserName},
+				Username:   common.MakeNullString(m.Chat.UserName),
 				Remove:     tlu.RemoveStatusNo,
 				Resolve:    tlu.ResolveStatusYes,
 			}
 			assert.Nil(n.CreateTeleuser(tl))
-			msg.ParseMode = "HTML"
+			msg.ParseMode = htmlMode
 			_, err := bot.Send(msg)
 			assert.Nil(err)
 		}
@@ -62,5 +62,5 @@ func (bb *Bot) Initialize() {
 }
 
 func init() {
-	initializer.Register(&Bot{})
+	initializer.Register(&bot{})
 }

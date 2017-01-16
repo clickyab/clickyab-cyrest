@@ -1,4 +1,3 @@
-// Package cat is the models for category module
 package chn
 
 import (
@@ -54,16 +53,12 @@ type Channel struct {
 	UpdatedAt time.Time         `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at"`
 }
 
-func (c *Channel) Initialize() {
-
-}
-
-// Create
-func (m *Manager) Create(admin, link, name string, status ChannelStatus, active ActiveStatus, userID int64) *Channel {
+// ChannelCreate a new channel
+func (m *Manager) ChannelCreate(admin, link, name string, status ChannelStatus, active ActiveStatus, userID int64) *Channel {
 
 	ch := &Channel{
-		Admin:  common.NullString{Valid: admin != "", String: admin},
-		Link:   common.NullString{Valid: link != "", String: link},
+		Admin:  common.MakeNullString(admin),
+		Link:   common.MakeNullString(link),
 		Name:   name,
 		Status: status,
 		Active: active,

@@ -1,15 +1,12 @@
 package user
 
 import (
-	"modules/user/aaa"
-
+	"common/assert"
 	"common/redis"
 	"common/utils"
-	"modules/user/config"
-
-	"common/assert"
-
 	"modules/misc/trans"
+	"modules/user/aaa"
+	"modules/user/config"
 
 	"gopkg.in/labstack/echo.v3"
 )
@@ -62,6 +59,7 @@ func sendEmailCodeGen() {
 func (u *Controller) forgotGeneratePassword(ctx echo.Context) error {
 	code := ctx.Param("code")
 	email, err := aredis.GetKey(code, false, 0)
+	assert.Nil(err)
 	m := aaa.NewAaaManager()
 	user, err := m.FindUserByEmail(email)
 	if err != nil {

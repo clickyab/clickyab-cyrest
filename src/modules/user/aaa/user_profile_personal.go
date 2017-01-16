@@ -21,7 +21,7 @@ const (
 	ProfileGenderFemale ProfileGender = "female"
 )
 
-// UserProfileCorporation model
+// UserProfilePersonal model
 // @Model {
 //		table = user_profile_personal
 //		primary = false, user_id
@@ -58,7 +58,7 @@ func NewUserProfilePersonal(first, last string, gender ProfileGender, cell strin
 	}
 }
 
-// DeletePersonalByID delete the user personal profile
+// DeletePersonal delete the user personal profile
 func (m *Manager) DeletePersonal(upp *UserProfilePersonal) error {
 	_, err := m.GetDbMap().Delete(upp)
 	assert.Nil(err)
@@ -129,8 +129,8 @@ func (m *Manager) RegisterPersonal(userID int64,
 
 	//create user profile personal
 	err = m.CreateUserProfilePersonal(upp)
-	if err!=nil{
-		upp=nil
+	if err != nil {
+		upp = nil
 		return
 	}
 

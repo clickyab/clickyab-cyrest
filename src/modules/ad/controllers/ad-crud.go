@@ -1,50 +1,47 @@
 package ad
 
 import (
-	"modules/ad/ads"
-
-	echo "gopkg.in/labstack/echo.v3"
-
 	"common/assert"
-
 	"common/models/common"
+	"modules/ad/ads"
+	"modules/file/fila"
 	"modules/misc/middlewares"
 	"modules/misc/trans"
 	"modules/user/aaa"
 	"modules/user/middlewares"
 	"net/http"
+	"net/url"
 	"strconv"
 
-	"modules/file/fila"
-	"net/url"
+	echo "gopkg.in/labstack/echo.v3"
 )
 
 // @Validate {
 // }
-type AdPayload struct {
+type adPayload struct {
 	Name string `json:"name" validate:"required" error:"name is required"`
 }
 
 // @Validate {
 // }
-type AdUploadPayload struct {
-	Url string `json:"url" validate:"required" error:"url is required"`
+type adUploadPayload struct {
+	URL string `json:"url" validate:"required" error:"url is required"`
 }
 
 // @Validate {
 // }
-type AdAdminStatusPayload struct {
+type adAdminStatusPayload struct {
 	AdAdminStatus ads.AdAdminStatus `json:"admin_status" validate:"required" error:"status is required"`
 }
 
 // @Validate {
 // }
-type AdDescriptionPayLoad struct {
+type adDescriptionPayLoad struct {
 	Body string `json:"body" validate:"required" error:"body is required"`
 }
 
 // Validate custom validation for user scope
-func (lp *AdAdminStatusPayload) ValidateExtra(ctx echo.Context) error {
+func (lp *adAdminStatusPayload) ValidateExtra(ctx echo.Context) error {
 	if !lp.AdAdminStatus.IsValid() {
 		return middlewares.GroupError{
 			"status": trans.E("status is invalid"),
@@ -64,7 +61,7 @@ func (lp *AdAdminStatusPayload) ValidateExtra(ctx echo.Context) error {
 //		400 = base.ErrorResponseSimple
 //	}
 func (u *Controller) create(ctx echo.Context) error {
-	pl := u.MustGetPayload(ctx).(*AdPayload)
+	pl := u.MustGetPayload(ctx).(*adPayload)
 	m := ads.NewAdsManager()
 	currentUser, ok := authz.GetUser(ctx)
 
@@ -94,7 +91,7 @@ func (u *Controller) create(ctx echo.Context) error {
 //		400 = base.ErrorResponseSimple
 //	}
 func (u *Controller) changeAdminStatus(ctx echo.Context) error {
-	pl := u.MustGetPayload(ctx).(*AdAdminStatusPayload)
+	pl := u.MustGetPayload(ctx).(*adAdminStatusPayload)
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
@@ -109,6 +106,7 @@ func (u *Controller) changeAdminStatus(ctx echo.Context) error {
 		return u.NotFoundResponse(ctx, nil)
 	}
 	owner, err := aaa.NewAaaManager().FindUserByID(currentAd.UserID)
+	assert.Nil(err)
 	_, b := currentUser.HasPermOn("change_admin_ad", owner.ID, owner.DBParentID.Int64)
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
@@ -143,6 +141,7 @@ func (u *Controller) changeArchiveStatus(ctx echo.Context) error {
 		return u.NotFoundResponse(ctx, nil)
 	}
 	owner, err := aaa.NewAaaManager().FindUserByID(currentAd.UserID)
+	assert.Nil(err)
 	_, b := currentUser.HasPermOn("change_admin_ad", owner.ID, owner.DBParentID.Int64)
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
@@ -167,7 +166,7 @@ func (u *Controller) changeArchiveStatus(ctx echo.Context) error {
 //		400 = base.ErrorResponseSimple
 //	}
 func (u *Controller) addDescription(ctx echo.Context) error {
-	pl := u.MustGetPayload(ctx).(*AdDescriptionPayLoad)
+	pl := u.MustGetPayload(ctx).(*adDescriptionPayLoad)
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
@@ -182,6 +181,7 @@ func (u *Controller) addDescription(ctx echo.Context) error {
 		return u.NotFoundResponse(ctx, nil)
 	}
 	owner, err := aaa.NewAaaManager().FindUserByID(currentAd.UserID)
+	assert.Nil(err)
 	_, b := currentUser.HasPermOn("add_description_ad", owner.ID, owner.DBParentID.Int64)
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
@@ -202,13 +202,13 @@ func (u *Controller) addDescription(ctx echo.Context) error {
 //		400 = base.ErrorResponseSimple
 //	}
 func (u *Controller) uploadBanner(ctx echo.Context) error {
-	pl := u.MustGetPayload(ctx).(*AdUploadPayload)
+	pl := u.MustGetPayload(ctx).(*adUploadPayload)
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
 	}
-	dUrl := pl.Url
-	_, err = url.Parse(dUrl)
+	dURL := pl.URL
+	_, err = url.Parse(dURL)
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
 	}
@@ -219,13 +219,14 @@ func (u *Controller) uploadBanner(ctx echo.Context) error {
 	}
 	currentUser := authz.MustGetUser(ctx)
 	owner, err := aaa.NewAaaManager().FindUserByID(currentAd.UserID)
+	assert.Nil(err)
 	_, b := currentUser.HasPermOn("upload_ad", owner.ID, owner.DBParentID.Int64)
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
 
 	//upload
-	file, err := fila.CheckUpload(dUrl, currentUser.ID)
+	file, err := fila.CheckUpload(dURL, currentUser.ID)
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
 	}

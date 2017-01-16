@@ -6,19 +6,21 @@ import (
 	"fmt"
 	"modules/misc/base"
 	"modules/user/aaa"
-
-	"common/models/common"
 	"strings"
 	"time"
 )
 
 //'yes', 'no','yes','no'
 const (
+	// ResolveStatusYes means the channel is resolved
 	ResolveStatusYes ResolveStatus = "yes"
-	ResolveStatusNo  ResolveStatus = "no"
+	// ResolveStatusNo means the channel is not resolved
+	ResolveStatusNo ResolveStatus = "no"
 
+	// RemoveStatusYes means the channel is removed
 	RemoveStatusYes RemoveStatus = "yes"
-	RemoveStatusNo  RemoveStatus = "no"
+	// RemoveStatusNo means the channel is not removed
+	RemoveStatusNo RemoveStatus = "no"
 )
 
 type (
@@ -40,7 +42,7 @@ type (
 //		find_by = id,user_id
 //		list = yes
 // }
-type Teleuser struct {
+type TeleUser struct {
 	ID         int64             `db:"id" json:"id" sort:"true" title:"ID"`
 	UserID     int64             `json:"user_id" db:"user_id" title:"UserID"`
 	TelegramID int64             `json:"telegram_id" db:"telegram_id" title:"TelegramID"`
@@ -51,6 +53,7 @@ type Teleuser struct {
 	UpdatedAt  time.Time         `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at"`
 }
 
+// Verifycode is the verify code payload
 type Verifycode struct {
 	Key string `json:"key"`
 }
@@ -65,14 +68,14 @@ type Verifycode struct {
 //		_edit = teleuser_edit:self
 // }
 type TeleuserDataTable struct {
-	Teleuser
+	TeleUser
 	Email    string `db:"email" json:"email" search:"true" title:"Email"`
 	ParentID int64  `db:"-" json:"parent_id" visible:"false"`
 	OwnerID  int64  `db:"-" json:"owner_id" visible:"false"`
 	Actions  string `db:"-" json:"_actions" visible:"false"`
 }
 
-// FillTeleUserDataTableArray is the function to handle
+// FillTeleuserDataTableArray is the function to handle the user data table
 func (m *Manager) FillTeleuserDataTableArray(u base.PermInterfaceComplete, filters map[string]string, search map[string]string, sort, order string, p, c int) (TeleuserDataTableArray, int64) {
 	var params []interface{}
 	var res TeleuserDataTableArray
@@ -120,8 +123,4 @@ func (m *Manager) FillTeleuserDataTableArray(u base.PermInterfaceComplete, filte
 	_, err = m.GetDbMap().Select(&res, query, params...)
 	assert.Nil(err)
 	return res, count
-}
-
-func (c *Teleuser) Initialize() {
-
 }

@@ -11,6 +11,7 @@ import (
 var (
 	translations map[string]bool
 	lock         = &sync.RWMutex{}
+	_            = new(baseTranslated) // Make the stupid unused stop the warning
 )
 
 type baseTranslated interface {
@@ -20,11 +21,13 @@ type baseTranslated interface {
 	GetParams() []interface{}
 }
 
+// Translated is the interface to handle the translation
 type Translated interface {
 	fmt.Stringer
 	baseTranslated
 }
 
+// TranslatedError is the error type translator
 type TranslatedError interface {
 	error
 	baseTranslated
@@ -35,10 +38,12 @@ type t9Base struct {
 	Params []interface{} `json:"params"`
 }
 
+// T9String is the Translation string
 type T9String struct {
 	t9Base
 }
 
+// T9Error is translation error
 type T9Error struct {
 	t9Base
 }

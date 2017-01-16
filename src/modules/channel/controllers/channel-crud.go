@@ -57,7 +57,7 @@ func (u *Controller) createChannel(ctx echo.Context) error {
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
-	ch := m.Create(pl.Admin, pl.Link, pl.Name, chn.ChannelStatusPending, chn.ActiveStatusNo, pl.UserID)
+	ch := m.ChannelCreate(pl.Admin, pl.Link, pl.Name, chn.ChannelStatusPending, chn.ActiveStatusNo, pl.UserID)
 	return u.OKResponse(ctx, ch)
 
 }
@@ -159,6 +159,7 @@ func (u *Controller) active(ctx echo.Context) error {
 		return u.NotFoundResponse(ctx, nil)
 	}
 	owner, err := aaa.NewAaaManager().FindUserByID(channel.UserID)
+	assert.Nil(err)
 	_, b := currentUser.HasPermOn("active_channel", owner.ID, owner.DBParentID.Int64)
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
@@ -173,6 +174,7 @@ type statusPayload struct {
 	Status chn.ChannelStatus `json:"status" validate:"required"`
 }
 
+// GetLastResponse is the lst response command
 type GetLastResponse struct {
 	Data   []tgo.History
 	Status string
@@ -188,7 +190,7 @@ func (lp *statusPayload) ValidateExtra(ctx echo.Context) error {
 	return nil
 }
 
-//	StatusChannel
+//	statusChannel the route for get status channel
 //	@Route	{
 //	url	=	/status/:id
 //	method	= put
@@ -198,7 +200,7 @@ func (lp *statusPayload) ValidateExtra(ctx echo.Context) error {
 //	200 = chn.Channel
 //	400 = base.ErrorResponseSimple
 //	}
-func (u *Controller) StatusChannel(ctx echo.Context) error {
+func (u *Controller) statusChannel(ctx echo.Context) error {
 	pl := u.MustGetPayload(ctx).(*statusPayload)
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
 	if err != nil {
@@ -284,7 +286,6 @@ func (u *Controller) getLast(ctx echo.Context) error {
 		})
 	} else if b == "failed" {
 		return u.BadResponse(ctx, trans.E("failed job"))
-	} else {
-		return u.BadResponse(ctx, trans.E("failed job"))
 	}
+	return u.BadResponse(ctx, trans.E("failed job"))
 }

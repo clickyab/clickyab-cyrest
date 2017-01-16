@@ -81,7 +81,11 @@ type AdDataTable struct {
 }
 
 // FillAdDataTableArray is the function to handle
-func (m *Manager) FillAdDataTableArray(u base.PermInterfaceComplete, filters map[string]string, search map[string]string, sort, order string, p, c int) (AdDataTableArray, int64) {
+func (m *Manager) FillAdDataTableArray(
+	u base.PermInterfaceComplete,
+	filters map[string]string,
+	search map[string]string,
+	sort, order string, p, c int) (AdDataTableArray, int64) {
 	var params []interface{}
 	var res AdDataTableArray
 	var where []string
@@ -128,8 +132,4 @@ func (m *Manager) FillAdDataTableArray(u base.PermInterfaceComplete, filters map
 	_, err = m.GetDbMap().Select(&res, query, params...)
 	assert.Nil(err)
 	return res, count
-}
-
-func (c *Ad) Initialize() {
-
 }

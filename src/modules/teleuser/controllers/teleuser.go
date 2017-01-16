@@ -1,10 +1,10 @@
-package teleuser
+package telegram
 
 import "modules/misc/base"
 
 // Controller is the controller for the teleuser package
 // @Route {
-//		group = /teleuser
+//		group = /telegram
 // }
 type Controller struct {
 	base.Controller

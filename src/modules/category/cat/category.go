@@ -2,13 +2,11 @@
 package cat
 
 import (
-	"time"
-
 	"common/assert"
-
 	"fmt"
 	"modules/misc/base"
 	"strings"
+	"time"
 
 	"github.com/Sirupsen/logrus"
 )
@@ -51,6 +49,7 @@ type CategoryDataTable struct {
 	Actions  string `db:"-" json:"_actions" visible:"false"`
 }
 
+// Initialize the mcategory
 func (c *Category) Initialize() {
 	if !IsValidScope(c.Scope) {
 		logrus.Panic("[BUG] you try to use a scope that is not valid in this app")
@@ -68,7 +67,7 @@ func (m *Manager) Create(title string, description string, scope string) *Catego
 	return c
 }
 
-// FillRoleDataTableArray is the function to handle
+// FillCategoryDataTableArray is the function to handle
 func (m *Manager) FillCategoryDataTableArray(u base.PermInterfaceComplete, filters map[string]string, search map[string]string, sort, order string, p, c int) (CategoryDataTableArray, int64) {
 	var params []interface{}
 	var res CategoryDataTableArray
