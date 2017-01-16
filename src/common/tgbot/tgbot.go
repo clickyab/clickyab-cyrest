@@ -11,6 +11,8 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"time"
+
 	"github.com/Sirupsen/logrus"
 	"gopkg.in/telegram-bot-api.v4"
 )
@@ -22,6 +24,10 @@ type TelegramBot interface {
 	RegisterMessageHandler(string, HandleMessage) error
 	// Start the handler
 	Start() error
+	// RegisterUserHandler redirect all user message to a chat
+	RegisterUserHandler(int64, HandleMessage, time.Duration)
+	// UnRegisterUserHandler redirect all user message to a chat
+	UnRegisterUserHandler(int64)
 }
 
 // HandleMessage is the callback for message with router
@@ -32,6 +38,7 @@ type telegramBot struct {
 	lock     *sync.RWMutex
 	commands map[string]HandleMessage
 	started  int32
+	users    map[int64]HandleMessage
 }
 
 // NewTelegramBot return the telegram bot api
@@ -40,6 +47,7 @@ func NewTelegramBot(token string) TelegramBot {
 		token:    token,
 		lock:     &sync.RWMutex{},
 		commands: make(map[string]HandleMessage),
+		users:    make(map[int64]HandleMessage),
 	}
 }
 
@@ -53,6 +61,27 @@ func (tb *telegramBot) RegisterMessageHandler(cmd string, handler HandleMessage)
 	}
 	tb.commands[cmd] = handler
 	return nil
+}
+
+// RegisterUserHandler redirect all user message to a chat
+func (tb *telegramBot) RegisterUserHandler(cid int64, hh HandleMessage, t time.Duration) {
+	tb.lock.Lock()
+	defer tb.lock.Unlock()
+
+	tb.users[cid] = hh
+
+	go func() {
+		<-time.After(t)
+		tb.UnRegisterUserHandler(cid)
+	}()
+}
+
+// UnRegisterUserHandler redirect all user message to a chat
+func (tb *telegramBot) UnRegisterUserHandler(cid int64) {
+	tb.lock.Lock()
+	defer tb.lock.Unlock()
+
+	delete(tb.users, cid)
 }
 
 func (tb *telegramBot) Start() error {
@@ -74,6 +103,7 @@ func (tb *telegramBot) Start() error {
 		return err
 	}
 
+bigLoop:
 	for update := range updates {
 		// currently we only support messages
 		if update.Message == nil || !update.Message.IsCommand() {
@@ -81,6 +111,29 @@ func (tb *telegramBot) Start() error {
 		}
 		txt := strings.Trim(strings.ToLower(update.Message.Text), " \t\n")
 		tb.lock.RLock()
+		if h, ok := tb.users[update.Message.Chat.ID]; ok {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				defer func() {
+					if e := recover(); e != nil {
+						stack := debug.Stack()
+						dump, _ := json.MarshalIndent(update, "\t", "\t")
+						data := fmt.Sprintf("Request : \n %s \n\nStack : \n %s", dump, stack)
+						logrus.WithField("error", err).Warn(err, data)
+						if config.Config.Redmine.Active {
+							go utils.RedmineDoError(err, []byte(data))
+						}
+
+						if config.Config.Slack.Active {
+							go utils.SlackDoMessage(err, ":shit:", utils.SlackAttachment{Text: data, Color: "#AA3939"})
+						}
+					}
+				}()
+				h(bot, update.Message)
+			}()
+			continue bigLoop
+		}
 		for i := range tb.commands {
 			if strings.HasPrefix(txt, i) {
 				wg.Add(1)
