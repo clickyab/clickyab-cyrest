@@ -127,6 +127,7 @@ import (
 	"modules/user/middlewares"
 	"net/http"
 	"gopkg.in/labstack/echo.v3"
+	"{{ .Model }}"
 )
 
 type list{{ .Data.Entity|ucfirst }}Response struct {
@@ -448,6 +449,7 @@ func (e dataTablePlugin) Finalize(c interface{}, p humanize.Package) error {
 	if err != nil {
 		return err
 	}
+	model := p.Path
 	f := filepath.Dir(p.Files[0].FileName)
 	f = filepath.Join(f, "datatables.gen.go")
 	res, err := imports.Process("", buf.Bytes(), nil)
@@ -481,12 +483,14 @@ func (e dataTablePlugin) Finalize(c interface{}, p humanize.Package) error {
 			ControllerPackageName string
 			ValidSorts            template.HTML
 			HasSort               bool
+			Model                 string
 		}{
 			Data:                  ctx[i],
 			PackageName:           p.Name,
 			ControllerPackageName: pp.Name,
 			ValidSorts:            template.HTML(`"` + strings.Join(sorts, `","`) + `"`),
 			HasSort:               len(sorts) > 0,
+			Model:                 model,
 		})
 		if err != nil {
 			return err

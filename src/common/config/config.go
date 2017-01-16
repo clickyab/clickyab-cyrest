@@ -65,6 +65,10 @@ type AppConfig struct {
 		MinPerPage int `onion:"min_per_page"`
 	}
 
+	Telegram struct {
+		APIKey string `onion:"api_key"`
+	}
+
 	Redmine struct {
 		APIKey         string
 		URL            string
@@ -93,7 +97,7 @@ func defaultLayer() onion.DefaultLayer {
 	assert.Nil(res.SetDefault("proto", "http"))
 	assert.Nil(res.SetDefault("port", ":80"))
 
-	path, err := expand.Path("$PWD/statics")
+	path, err := expand.Path("$PWD/../statics/")
 	assert.Nil(err)
 	assert.Nil(res.SetDefault("static_root", path))
 	path, err = expand.Path("$PWD/../3rd/swagger/")
@@ -101,6 +105,12 @@ func defaultLayer() onion.DefaultLayer {
 	path, err = filepath.Abs(path)
 	assert.Nil(err)
 	assert.Nil(res.SetDefault("swagger_root", path))
+
+	path, err = expand.Path("$PWD/../front/public/")
+	assert.Nil(err)
+	path, err = filepath.Abs(path)
+	assert.Nil(err)
+	assert.Nil(res.SetDefault("front_path", path))
 
 	path, err = expand.Path("$PWD/../tmp/profiles/")
 	assert.Nil(err)
@@ -120,13 +130,15 @@ func defaultLayer() onion.DefaultLayer {
 	assert.Nil(res.SetDefault("mysql.max_idle_connection", 10))
 
 	assert.Nil(res.SetDefault("amqp.publisher", 30))
-	assert.Nil(res.SetDefault("amqp.exchange", "malooch"))
+	assert.Nil(res.SetDefault("amqp.exchange", "cy"))
 	assert.Nil(res.SetDefault("amqp.dsn", "amqp://cyrest:bita123@127.0.0.1:5672/"))
 	assert.Nil(res.SetDefault("amqp.confirmlen", 50))
 
 	assert.Nil(res.SetDefault("page.per_Page", 10))
 	assert.Nil(res.SetDefault("page.max_per_page", 100))
 	assert.Nil(res.SetDefault("page.min_per_Page", 1))
+
+	assert.Nil(res.SetDefault("telegram.api_key", "273335144:AAEv4uPeo68X7Scc3MLKxwMO1YI3JFkWiJM"))
 
 	assert.Nil(res.SetDefault("time_zone", "Asia/Tehran"))
 

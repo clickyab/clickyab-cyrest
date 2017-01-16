@@ -14,12 +14,21 @@ import (
 	"modules/user/middlewares"
 	"net/http"
 	"strconv"
+
+	"modules/file/fila"
+	"net/url"
 )
 
 // @Validate {
 // }
 type AdPayload struct {
 	Name string `json:"name" validate:"required" error:"name is required"`
+}
+
+// @Validate {
+// }
+type AdUploadPayload struct {
+	Url string `json:"url" validate:"required" error:"url is required"`
 }
 
 // @Validate {
@@ -180,4 +189,48 @@ func (u *Controller) addDescription(ctx echo.Context) error {
 	currentAd.Description = common.MakeNullString(pl.Body)
 	assert.Nil(m.UpdateAd(currentAd))
 	return u.OKResponse(ctx, currentAd)
+}
+
+//	uploadBanner uploadBanner for ad
+//	@Route	{
+//		url	=	/upload/:id
+//		method	= put
+//		payload	= AdUploadPayload
+//		resource = upload_ad:self
+//		middleware = authz.Authenticate
+//		200 = ads.Ad
+//		400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) uploadBanner(ctx echo.Context) error {
+	pl := u.MustGetPayload(ctx).(*AdUploadPayload)
+	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	dUrl := pl.Url
+	_, err = url.Parse(dUrl)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	m := ads.NewAdsManager()
+	currentAd, err := m.FindAdByID(id)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	currentUser := authz.MustGetUser(ctx)
+	owner, err := aaa.NewAaaManager().FindUserByID(currentAd.UserID)
+	_, b := currentUser.HasPermOn("upload_ad", owner.ID, owner.DBParentID.Int64)
+	if !b {
+		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
+	}
+
+	//upload
+	file, err := fila.CheckUpload(dUrl, currentUser.ID)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	currentAd.Src = common.MakeNullString(file)
+	assert.Nil(m.UpdateAd(currentAd))
+	return u.OKResponse(ctx, currentAd)
+
 }

@@ -1,10 +1,10 @@
-package campaign
+package file
 
 import "modules/misc/base"
 
-// Controller is the controller for the campaign package
+// Controller is the controller for the file package
 // @Route {
-//		group = /campaign
+//		group = /file
 // }
 type Controller struct {
 	base.Controller
