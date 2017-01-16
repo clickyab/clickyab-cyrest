@@ -6,6 +6,7 @@ import (
 	"common/initializer"
 	"common/tgbot"
 	"common/version"
+	"common/utils"
 )
 
 func main() {
@@ -18,6 +19,7 @@ func main() {
 	go func() {
 		assert.Nil(tgbot.Start())
 	}()
+	utils.WaitExitSignal()
 
 	version.LogVersion().Info("Goodbye")
 }

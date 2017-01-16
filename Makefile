@@ -72,6 +72,24 @@ run-cyborg: cyborg
 watch-cyborg:
 	make watch WATCH=cyborg
 
+got: $(BIN)/gb
+	$(BUILD) got
+
+run-got: got
+	$(BIN)/got
+
+watch-got:
+	make watch WATCH=got
+
+test: $(BIN)/gb
+	$(BUILD) test
+
+run-test: test
+	$(BIN)/test
+
+watch-test:
+	make watch WATCH=test
+
 #
 # Tools
 #

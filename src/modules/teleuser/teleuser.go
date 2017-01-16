@@ -1,7 +1,7 @@
 package teleuser
 
 import (
-	_ "modules/teleuser/tlu"         // Models
+	_ "modules/teleuser/bot"         // bot
 	_ "modules/teleuser/controllers" // Controllers
+	_ "modules/teleuser/tlu"         // Models
 )
-
