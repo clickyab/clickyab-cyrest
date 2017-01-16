@@ -3,6 +3,9 @@ package fcfg
 import (
 	"common/config"
 
+	"os"
+	"path/filepath"
+
 	"gopkg.in/fzerorubigd/onion.v2"
 )
 
@@ -16,8 +19,10 @@ type Config struct {
 		MaxDownload int64 `onion:"max_download"`
 	} `onion:"size"`
 	File struct {
-		ValidExtension []string `onion:"valid_extension"`
-		ServerPath     string   `onion:"server_path"`
+		ValidExtension    []string `onion:"valid_extension"`
+		ServerPath        string   `onion:"server_path"`
+		TempDirectoryPath string   `onion:"temp_directory_path"`
+		UploadPath        string   `onion:"upload_path"`
 	} `onion:"file"`
 }
 
@@ -33,6 +38,8 @@ func (c *configLoader) Initialize(o *onion.Onion) []onion.Layer {
 	_ = def.SetDefault("size.max_download", 104857600)
 	_ = def.SetDefault("file.valid_extension", []string{".jpg", ".jpeg", ".mp4", ".png", ".pdf"})
 	_ = def.SetDefault("file.server_path", "statics.clickgram.com")
+	_ = def.SetDefault("file.upload_path", "http://static.rubik.com/")
+	_ = def.SetDefault("file.temp_directory_path", filepath.Join(os.TempDir(), "upload"))
 	return []onion.Layer{def}
 }
 

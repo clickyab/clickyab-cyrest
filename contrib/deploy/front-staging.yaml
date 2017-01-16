@@ -1,0 +1,40 @@
+---
+- name: build the code
+  hosts: vagrant
+
+  tasks:
+    - name: build front end
+      make:
+        target: build-js
+        chdir: /home/develop/cyrest
+
+# This is the staging build. it will build the app (using golang docker image) and run it with docker-compose
+- name: staging build
+  hosts: staging
+
+  tasks:
+
+    - name: copy frontend files
+      synchronize:
+        src: "{{ playbook_dir }}/../../front/public/"
+        dest: "/home/cy/cyrest/public/"
+        delete: yes
+        checksum: yes
+        times: no        
+
+    - name: copy compose file to server
+      synchronize:
+        src: "{{ playbook_dir }}/"
+        dest: "/home/cy/compose/"
+        rsync_opts: "--exclude=.git --exclude=*.retry --exclude=staging*"
+        delete: yes
+        checksum: yes
+        times: no
+
+    - shell: /home/cy/.local/bin/docker-compose up -d
+      args:
+        chdir: /home/cy/compose/
+
+    - shell: /home/cy/.local/bin/docker-compose restart app
+      args:
+        chdir: /home/cy/compose/

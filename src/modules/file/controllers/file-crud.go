@@ -21,6 +21,8 @@ import (
 
 	"strings"
 
+	"io"
+
 	"gopkg.in/labstack/echo.v3"
 )
 
@@ -48,12 +50,15 @@ func (u *Controller) upload(ctx echo.Context) error {
 	if _, err := os.Stat(tmpPath); os.IsNotExist(err) {
 		os.MkdirAll(tmpPath, fila.DefaultDirPermissions)
 	}*/
-	file, err := fila.ChunkUpload("tmp", flowData, ctx)
-	if file == "" {
-		return u.OKResponse(ctx, nil)
+	if _, err := os.Stat(fcfg.Fcfg.File.TempDirectoryPath); os.IsNotExist(err) {
+		os.MkdirAll(fcfg.Fcfg.File.TempDirectoryPath, fila.DefaultDirPermissions)
 	}
+	file, err := fila.ChunkUpload(fcfg.Fcfg.File.TempDirectoryPath, flowData, ctx)
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
+	}
+	if file == "" {
+		return u.OKResponse(ctx, nil)
 	}
 	fileObj, err := os.Open(file)
 	defer fileObj.Close()
@@ -89,13 +94,24 @@ func (u *Controller) upload(ctx echo.Context) error {
 	if _, err := os.Stat(basePath); os.IsNotExist(err) {
 		os.MkdirAll(basePath, fila.DefaultDirPermissions)
 	}
+
 	hash := utils.Sha1(fmt.Sprintf("%d", time.Now().UnixNano()))
 	newFilename := fmt.Sprintf("%s%s", hash, extension)
-	err = os.Rename(file, path.Join(basePath, newFilename))
+	out, err := os.Create(path.Join(basePath, newFilename))
+	if err != nil {
+		os.Remove(path.Join(basePath, newFilename))
+		return u.NotFoundResponse(ctx, nil)
+	}
+	defer out.Close()
+	_, err = io.Copy(out, fileObj)
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
 	}
-	srcPath := filepath.Join(year, month, newFilename)
+	err = os.RemoveAll(filepath.Dir(fileObj.Name()))
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	srcPath := fmt.Sprintf("%s%s", fcfg.Fcfg.File.UploadPath, filepath.Join(year, month, newFilename))
 	m := fila.NewFilaManager()
 	newFile := &fila.File{
 		RealName: fileInfo.Name(),
