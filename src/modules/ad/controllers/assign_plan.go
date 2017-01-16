@@ -48,7 +48,7 @@ func (u *Controller) assignPlan(ctx echo.Context) error {
 	owner, err := aaa.NewAaaManager().FindUserByID(ads.UserID)
 	assert.Nil(err)
 	//current user
-	currentUser, _ := authz.GetUser(ctx)
+	currentUser := authz.MustGetUser(ctx)
 
 	//check current user has permisiion
 	_, b := currentUser.HasPermOn("assign_plan", owner.ID, owner.DBParentID.Int64)
@@ -56,7 +56,7 @@ func (u *Controller) assignPlan(ctx echo.Context) error {
 		return u.ForbiddenResponse(ctx, nil)
 
 	}
-	ads.PlanID = common.NullInt64{Valid: true, Int64: plan.ID}
+	ads.PlanID = common.MakeNullInt64(plan.ID)
 	assert.Nil(adManager.UpdateAd(ads))
 
 	return u.OKResponse(ctx, ads)
