@@ -13,6 +13,8 @@ import (
 	_ "modules/file" // file module
 	_ "modules/plan" // plan module
 	_ "modules/user" // user module
+	_ "modules/plan" // plan module
+
 )
 
 func init() {

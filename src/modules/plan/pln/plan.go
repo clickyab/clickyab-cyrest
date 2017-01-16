@@ -43,9 +43,9 @@ func (c *Plan) Initialize() {
 
 //
 //// Create
-//func (m *Manager) Create(name, description string, active ActiveStatus) *pLAN {
+//func (m *Manager) Create(name, description string, active ActiveStatus) *Plan {
 //
-//	pln := &pLAN{
+//	pln := &Plan{
 //		Name:        name,
 //		Description: description,
 //		Active:      active,
