@@ -54,7 +54,7 @@ func (lp *adAdminStatusPayload) ValidateExtra(ctx echo.Context) error {
 //	@Route	{
 //		url	=	/
 //		method	= post
-//		payload	= AdPayload
+//		payload	= adPayload
 //		resource = create_ad:self
 //		middleware = authz.Authenticate
 //		200 = ads.Ad
@@ -84,7 +84,7 @@ func (u *Controller) create(ctx echo.Context) error {
 //	@Route	{
 //		url	=	/change-admin/:id
 //		method	= put
-//		payload	= AdAdminStatusPayload
+//		payload	= adAdminStatusPayload
 //		resource = change_admin_ad:parent
 //		middleware = authz.Authenticate
 //		200 = ads.Ad
@@ -159,7 +159,7 @@ func (u *Controller) changeArchiveStatus(ctx echo.Context) error {
 //	@Route	{
 //		url	=	/desc/:id
 //		method	= put
-//		payload	= AdDescriptionPayLoad
+//		payload	= adDescriptionPayLoad
 //		resource = add_description_ad:self
 //		middleware = authz.Authenticate
 //		200 = ads.Ad
@@ -195,7 +195,7 @@ func (u *Controller) addDescription(ctx echo.Context) error {
 //	@Route	{
 //		url	=	/upload/:id
 //		method	= put
-//		payload	= AdUploadPayload
+//		payload	= adUploadPayload
 //		resource = upload_ad:self
 //		middleware = authz.Authenticate
 //		200 = ads.Ad
