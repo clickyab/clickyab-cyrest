@@ -17,18 +17,19 @@ import (
 
 	"common/assert"
 	"common/utils"
-
 	"net/url"
-	"strings"
-
 	"sort"
+	"strings"
 
 	"gopkg.in/labstack/echo.v3"
 )
 
 const (
-	FileTypeImage    FileType = "image"
-	FileTypeVideo    FileType = "video"
+	// FileTypeImage is the image type
+	FileTypeImage FileType = "image"
+	// FileTypeVideo is the video type
+	FileTypeVideo FileType = "video"
+	// FileTypeDocument is the document type
 	FileTypeDocument FileType = "document"
 )
 
@@ -75,9 +76,12 @@ var (
 	ErrCantDelete                   = errors.New("gongflow: can't delete a file/directory under the temp directory")
 	alreadyCheckedDirectory         = false
 	lastCheckedDirectoryError error // = nil
-	ValidImgExtension         = []string{".jpg", ".jpeg", ".png"}
-	ValidVideoExtension       = []string{".mov", ".mp4"}
-	ValidDocumentExtension    = []string{".pdf"}
+	// ValidImgExtension is the image valid ext
+	ValidImgExtension = []string{".jpg", ".jpeg", ".png"}
+	// ValidVideoExtension is the valid video ext
+	ValidVideoExtension = []string{".mov", ".mp4"}
+	// ValidDocumentExtension is the valid document ext
+	ValidDocumentExtension = []string{".pdf"}
 )
 
 // NgFlowData is all the data listed in the "How do I set it up with my server?" section of the ng-flow
@@ -99,6 +103,7 @@ type NgFlowData struct {
 	RelativePath string
 }
 
+// ByChunk is the sortable mode
 type ByChunk []os.FileInfo
 
 func (a ByChunk) Len() int      { return len(a) }
@@ -376,7 +381,8 @@ func directoryExists(d string) bool {
 	return false
 }
 
-func UploadFromUrl(link string, uID int64) (string, error) {
+// UploadFromURL is the upload main route
+func UploadFromURL(link string, uID int64) (string, error) {
 	year := fmt.Sprintf("%d", time.Now().Year())
 	month := time.Now().Month().String()
 	basePath := filepath.Join(config.Config.StaticRoot, year, month)
@@ -448,6 +454,7 @@ func UploadFromUrl(link string, uID int64) (string, error) {
 	return newFile.Src, nil
 }
 
+// CheckUpload is the check upload func
 func CheckUpload(link string, uID int64) (string, error) {
 	urlObj, err := url.Parse(link)
 	if err != nil {
@@ -459,11 +466,6 @@ func CheckUpload(link string, uID int64) (string, error) {
 	}
 	if host == fcfg.Fcfg.File.ServerPath {
 		return link, nil
-	} else {
-		return UploadFromUrl(link, uID)
 	}
-}
-
-func (c *File) Initialize() {
-
+	return UploadFromURL(link, uID)
 }

@@ -1,26 +1,23 @@
 package user
 
 import (
-	"modules/user/aaa"
-	"time"
-
-	"modules/user/middlewares"
-
-	"modules/misc/trans"
-
 	"modules/misc/middlewares"
+	"modules/misc/trans"
+	"modules/user/aaa"
+	"modules/user/middlewares"
+	"time"
 
 	"gopkg.in/go-playground/validator.v9"
 	"gopkg.in/labstack/echo.v3"
 )
 
-type ProfilePayload struct {
-	Personal    *Personal    `json:"personal"`
-	Corporation *Corporation `json:"corporation"`
+type profilePayload struct {
+	Personal    *personal    `json:"personal"`
+	Corporation *corporation `json:"corporation"`
 }
 
 // Validate custom validation for editing profile
-func (lp *ProfilePayload) Validate(ctx echo.Context) error {
+func (lp *profilePayload) Validate(ctx echo.Context) error {
 	if (lp.Personal == nil && lp.Corporation == nil) || (lp.Personal != nil && lp.Corporation != nil) {
 		return middlewares.GroupError{
 			"personal":    trans.E("invalid payload body"),
@@ -32,7 +29,7 @@ func (lp *ProfilePayload) Validate(ctx echo.Context) error {
 
 // @Validate {
 // }
-type Personal struct {
+type personal struct {
 	FirstName    string            `json:"first_name" validate:"gt=2" error:"first name must be valid"`
 	LastName     string            `json:"last_name" validate:"gt=2" error:"last name must be valid"`
 	Birthday     time.Time         `json:"birthday"`
@@ -49,7 +46,7 @@ type Personal struct {
 
 // @Validate {
 // }
-type Corporation struct {
+type corporation struct {
 	Title        string `json:"title" validate:"gt=3" error:"title must be valid"`
 	EconomicCode string `json:"economic_code"`
 	RegisterCode string `json:"register_code"`
@@ -64,13 +61,13 @@ type Corporation struct {
 // @Route {
 //		url	=	/profile
 //		method	=	post
-//		payload	= ProfilePayload
+//		payload	= profilePayload
 //		middleware = authz.Authenticate
 //		200	=	base.NormalResponse
 //		400	=	base.ErrorResponseSimple
 // }
 func (u *Controller) editProfile(ctx echo.Context) error {
-	pl := u.MustGetPayload(ctx).(*ProfilePayload)
+	pl := u.MustGetPayload(ctx).(*profilePayload)
 	m := aaa.NewAaaManager()
 	user := authz.MustGetUser(ctx)
 	token := authz.MustGetToken(ctx)

@@ -1,4 +1,4 @@
-// Package plan is the models for plan module
+// Package pln is the models for plan module
 package pln
 
 import (
@@ -10,8 +10,10 @@ import (
 )
 
 const (
+	// ActiveStatusYes is the yes status
 	ActiveStatusYes ActiveStatus = "yes"
-	ActiveStatusNo  ActiveStatus = "no"
+	// ActiveStatusNo is the no status
+	ActiveStatusNo ActiveStatus = "no"
 )
 
 type (
@@ -21,7 +23,7 @@ type (
 	ActiveStatus string
 )
 
-// plan model
+// Plan model
 // @Model {
 //		table = plans
 //		primary = true, id
@@ -37,10 +39,6 @@ type Plan struct {
 	UpdatedAt   time.Time    `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at"`
 }
 
-func (c *Plan) Initialize() {
-
-}
-
 //
 //// Create
 //func (m *Manager) Create(name, description string, active ActiveStatus) *pLAN {
@@ -54,7 +52,7 @@ func (c *Plan) Initialize() {
 //	return pln
 //}
 
-//planDataTable is the role full data in data table, after join with other field
+//PlanDataTable is the role full data in data table, after join with other field
 // @DataTable {
 //		url = /list
 //		entity = plan
@@ -66,39 +64,27 @@ func (c *Plan) Initialize() {
 // }
 type PlanDataTable struct {
 	Plan
-	Email    string `db:"email" json:"email" search:"true" title:"Email"`
 	ParentID int64  `db:"-" json:"parent_id" visible:"false"`
 	OwnerID  int64  `db:"-" json:"owner_id" visible:"false"`
 	Actions  string `db:"-" json:"_actions" visible:"false"`
 }
 
-// FillplanDataTableArray is the function to handle
+// FillPlanDataTableArray is the function to handle
 func (m *Manager) FillPlanDataTableArray(u base.PermInterfaceComplete, filters map[string]string, search map[string]string, sort, order string, p, c int) (PlanDataTableArray, int64) {
 	var params []interface{}
 	var res PlanDataTableArray
 	var where []string
 
 	countQuery := fmt.Sprintf("SELECT COUNT(plan.id) FROM %s ", PlanTableFull)
-	query := fmt.Sprintf("SELECT plan.*,users.email FROM %s LEFT JOIN %s ON %s.id=%s.user_id", PlanTableFull)
+	query := fmt.Sprintf("SELECT plan.* FROM %s", PlanTableFull)
 	for field, value := range filters {
-		where = append(where, fmt.Sprintf(PlanTableFull+".%s=%s", field, "?"))
+		where = append(where, fmt.Sprintf(PlanTableFull+".%s=?", field))
 		params = append(params, value)
 	}
 
 	for column, val := range search {
 		where = append(where, fmt.Sprintf("%s LIKE ?", column))
-		params = append(params, fmt.Sprintf("%s"+val+"%s", "%", "%"))
-	}
-
-	currentUserID := u.GetID()
-	highestScope := u.GetCurrentScope()
-
-	if highestScope == base.ScopeSelf {
-		where = append(where, fmt.Sprintf("%s.user_id=?", PlanTableFull))
-		params = append(params, currentUserID)
-	} else if highestScope == base.ScopeParent {
-		where = append(where, "users.parent_id=?")
-		params = append(params, currentUserID)
+		params = append(params, "%"+val+"%")
 	}
 
 	//check for perm

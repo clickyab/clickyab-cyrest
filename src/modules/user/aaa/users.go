@@ -6,12 +6,11 @@ import (
 	"common/redis"
 	"common/utils"
 	"fmt"
+	"modules/misc/base"
 	"modules/user/config"
 	"regexp"
 	"strings"
 	"time"
-
-	"modules/misc/base"
 
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/gorp.v1"
@@ -120,7 +119,7 @@ func (u *User) Initialize() {
 	}
 }
 
-// GetResources for this user
+// GetPermission for this user
 func (u *User) GetPermission() map[base.UserScope]map[string]bool {
 	if u.resources == nil {
 		r := u.GetRoles()
@@ -148,7 +147,7 @@ func (u *User) HasPerm(scope base.UserScope, perm string) (base.UserScope, bool)
 		return base.ScopeSelf, false
 	}
 	var (
-		rScope base.UserScope = base.ScopeSelf
+		rScope = base.ScopeSelf
 		rHas   bool
 	)
 	res := u.GetPermission()
@@ -419,8 +418,6 @@ func (u *User) GetProfile() interface{} {
 			return nil
 		}
 		return corporation
-	} else {
-
-		return personal
 	}
+	return personal
 }

@@ -1,8 +1,8 @@
 package loc
 
 import (
-	"fmt"
 	"common/assert"
+	"fmt"
 )
 
 // Province model
@@ -21,7 +21,7 @@ type Province struct {
 }
 
 // ListProvinceByCountryID return the Provinces base on their country_id
-func (m *Manager) ListProvinceByCountryID(ci int64) ([]Province) {
+func (m *Manager) ListProvinceByCountryID(ci int64) []Province {
 	var res []Province
 	_, err := m.GetDbMap().Select(
 		&res,

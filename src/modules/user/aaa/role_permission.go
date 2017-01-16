@@ -25,7 +25,7 @@ type RolePermission struct {
 	UpdatedAt  time.Time      `json:"updated_at" db:"updated_at"`
 }
 
-// GetResourceMap return resource map for some roles
+// GetPermissionMap return resource map for some roles
 func (m *Manager) GetPermissionMap(r ...Role) map[base.UserScope]map[string]bool {
 	res := make(map[base.UserScope]map[string]bool)
 	res[base.ScopeGlobal] = make(map[string]bool)
@@ -70,6 +70,7 @@ func (m *Manager) RegisterRolePermission(roleID int64, perm map[base.UserScope][
 	return m.GetDbMap().Insert(rolePermission...)
 }
 
+// DeleteRolePermissionByRoleID delete role permission by role id
 func (m *Manager) DeleteRolePermissionByRoleID(roleID int64) error {
 	query := fmt.Sprintf("DELETE FROM %s WHERE role_id=?", RolePermissionTableFull)
 	_, err := m.GetDbMap().Exec(

@@ -4,7 +4,7 @@ import "modules/misc/base"
 
 // Controller is the controller for the ad package
 // @Route {
-//		group = /ad
+//		group = /campaign
 // }
 type Controller struct {
 	base.Controller

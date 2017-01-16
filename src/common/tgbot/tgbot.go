@@ -55,14 +55,14 @@ func (tb *telegramBot) RegisterMessageHandler(cmd string, handler HandleMessage)
 	return nil
 }
 
-func (tg *telegramBot) Start() error {
-	if !atomic.CompareAndSwapInt32(&tg.started, 0, 1) {
+func (tb *telegramBot) Start() error {
+	if !atomic.CompareAndSwapInt32(&tb.started, 0, 1) {
 		return errors.New("already started")
 	}
-	defer atomic.SwapInt32(&tg.started, 0)
+	defer atomic.SwapInt32(&tb.started, 0)
 
 	wg := sync.WaitGroup{}
-	bot, err := tgbotapi.NewBotAPI(tg.token)
+	bot, err := tgbotapi.NewBotAPI(tb.token)
 	if err != nil {
 		return err
 	}
@@ -80,8 +80,8 @@ func (tg *telegramBot) Start() error {
 			continue
 		}
 		txt := strings.Trim(strings.ToLower(update.Message.Text), " \t\n")
-		tg.lock.RLock()
-		for i := range tg.commands {
+		tb.lock.RLock()
+		for i := range tb.commands {
 			if strings.HasPrefix(txt, i) {
 				wg.Add(1)
 				go func() {
@@ -101,11 +101,11 @@ func (tg *telegramBot) Start() error {
 							}
 						}
 					}()
-					tg.commands[i](bot, update.Message)
+					tb.commands[i](bot, update.Message)
 				}()
 			}
 		}
-		tg.lock.RUnlock()
+		tb.lock.RUnlock()
 	}
 
 	wg.Wait()

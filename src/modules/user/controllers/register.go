@@ -3,8 +3,9 @@ package user
 import (
 	"modules/user/aaa"
 
-	"gopkg.in/labstack/echo.v3"
 	"modules/misc/trans"
+
+	"gopkg.in/labstack/echo.v3"
 )
 
 //@Validate{

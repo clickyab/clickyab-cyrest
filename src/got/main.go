@@ -5,8 +5,8 @@ import (
 	"common/config"
 	"common/initializer"
 	"common/tgbot"
-	"common/version"
 	"common/utils"
+	"common/version"
 )
 
 func main() {
