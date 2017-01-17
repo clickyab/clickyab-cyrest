@@ -13,6 +13,11 @@
         target: codegen
         chdir: /home/develop/cyrest
 
+    - name: generate codes
+      make:
+        target: codegen
+        chdir: /home/develop/cyrest
+
     - name: create migration
       make:
         target: migration
@@ -52,7 +57,7 @@
         dest: "/home/cy/cyrest/public/"
         delete: yes
         checksum: yes
-        times: no        
+        times: no
 
     - name: copy compose file to server
       synchronize:
