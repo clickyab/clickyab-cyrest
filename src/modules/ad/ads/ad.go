@@ -55,6 +55,9 @@ type Ad struct {
 	Name            string            `json:"name" db:"name" title:"Name"`
 	Description     common.NullString `json:"description" db:"description" title:"Description"`
 	Src             common.NullString `json:"src" db:"src" title:"Src"`
+	CliChatID       common.NullString `json:"cli_chat_id" db:"cli_chat_id" title:"CliChatID"`
+	BotChatID       common.NullString `json:"bot_chat_id" db:"bot_chat_id" title:"BotChatID"`
+	BotMessageID    common.NullString `json:"bot_message_id" db:"bot_message_id" title:"BotMessageID"`
 	AdAdminStatus   AdAdminStatus     `json:"admin_status" db:"admin_status" filter:"true" title:"AdminStatus"`
 	AdArchiveStatus AdArchiveStatus   `json:"archive_status" db:"archive_status" filter:"true" title:"ArchiveStatus"`
 	AdPayStatus     AdPayStatus       `json:"pay_status" db:"pay_status" filter:"true" title:"PayStatus"`

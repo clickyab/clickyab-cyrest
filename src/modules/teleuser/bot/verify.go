@@ -11,6 +11,8 @@ import (
 	"strings"
 	"time"
 
+	"modules/ad/ads"
+
 	"gopkg.in/telegram-bot-api.v4"
 )
 
@@ -57,9 +59,30 @@ func (bb *bot) verify(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 	}
 }
 
+func (bb *bot) updateAD(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
+	result := strings.Replace(m.Text, "/updatead-", "", 1)
+	id, err := strconv.ParseInt(result, 0, 10)
+	if err == nil {
+		tgbot.RegisterUserHandler(m.Chat.ID, func(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
+			defer tgbot.UnRegisterUserHandler(m.Chat.ID)
+			botChatID := strconv.FormatInt(m.Chat.ID,10)
+			botMsgID := strconv.Itoa(m.MessageID)
+			n := ads.NewAdsManager()
+			currentAd, err := n.FindAdByID(id)
+			assert.Nil(err)
+			currentAd.BotChatID = common.MakeNullString(botChatID)
+			currentAd.BotMessageID = common.MakeNullString(botMsgID)
+			assert.Nil(n.UpdateAd(currentAd))
+
+		}, time.Minute)
+	}
+
+}
+
 func (bb *bot) Initialize() {
 
 	tgbot.RegisterMessageHandler("/verify", bb.verify)
+	tgbot.RegisterMessageHandler("/updatead", bb.updateAD)
 	//assert.Nil(b.Start())
 }
 
