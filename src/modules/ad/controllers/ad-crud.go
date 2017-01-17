@@ -101,12 +101,10 @@ func (u *Controller) changeAdminStatus(ctx echo.Context) error {
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
 	}
-	currentUser, ok := authz.GetUser(ctx)
-	if !ok {
-		return u.NotFoundResponse(ctx, nil)
-	}
+	currentUser := authz.MustGetUser(ctx)
 	owner, err := aaa.NewAaaManager().FindUserByID(currentAd.UserID)
 	assert.Nil(err)
+
 	_, b := currentUser.HasPermOn("change_admin_ad", owner.ID, owner.DBParentID.Int64)
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
@@ -119,8 +117,8 @@ func (u *Controller) changeAdminStatus(ctx echo.Context) error {
 
 //	changeArchiveStatus change archive status for ad
 //	@Route	{
-//		url	=	/change-archive/:id
-//		method	= put
+//		url = /change-archive/:id
+//		method = put
 //		resource = change_archive_ad:self
 //		middleware = authz.Authenticate
 //		200 = ads.Ad
@@ -136,10 +134,7 @@ func (u *Controller) changeArchiveStatus(ctx echo.Context) error {
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
 	}
-	currentUser, ok := authz.GetUser(ctx)
-	if !ok {
-		return u.NotFoundResponse(ctx, nil)
-	}
+	currentUser := authz.MustGetUser(ctx)
 	owner, err := aaa.NewAaaManager().FindUserByID(currentAd.UserID)
 	assert.Nil(err)
 	_, b := currentUser.HasPermOn("change_admin_ad", owner.ID, owner.DBParentID.Int64)
@@ -176,10 +171,7 @@ func (u *Controller) addDescription(ctx echo.Context) error {
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
 	}
-	currentUser, ok := authz.GetUser(ctx)
-	if !ok {
-		return u.NotFoundResponse(ctx, nil)
-	}
+	currentUser := authz.MustGetUser(ctx)
 	owner, err := aaa.NewAaaManager().FindUserByID(currentAd.UserID)
 	assert.Nil(err)
 	_, b := currentUser.HasPermOn("add_description_ad", owner.ID, owner.DBParentID.Int64)
@@ -233,5 +225,4 @@ func (u *Controller) uploadBanner(ctx echo.Context) error {
 	currentAd.Src = common.MakeNullString(file)
 	assert.Nil(m.UpdateAd(currentAd))
 	return u.OKResponse(ctx, currentAd)
-
 }

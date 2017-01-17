@@ -50,7 +50,7 @@ func (bb *bot) verify(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 			Remove:     tlu.RemoveStatusNo,
 			Resolve:    tlu.ResolveStatusYes,
 		}
-		assert.Nil(n.CreateTeleuser(tl))
+		assert.Nil(n.CreateTeleUser(tl))
 		msg.ParseMode = htmlMode
 		_, err := bot.Send(msg)
 		assert.Nil(err)
