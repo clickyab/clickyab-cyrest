@@ -83,7 +83,7 @@ type swaggerGenerator struct {
 var (
 	typeCache  = make(map[string]swaggerType)
 	parameters = regexp.MustCompile("/:([^/]+)")
-	query      = regexp.MustCompile("^_([a-zA-Z0-9]+)_$")
+	query      = regexp.MustCompile("^_([a-zA-Z0-9_]+)_$")
 )
 
 func ucFirst(s string) string {
