@@ -13,6 +13,12 @@ import (
 	"sync"
 	"time"
 
+	"modules/ad/ads"
+
+	"common/config"
+
+	"fmt"
+
 	"github.com/Sirupsen/logrus"
 )
 
@@ -65,6 +71,16 @@ func (mw *MultiWorker) getLastMessages(telegramID string, count int, offset int)
 	}
 	return mw.client.History(telegramID, count, offset)
 }
+func (mw *MultiWorker) fwdMessage(telegramID string, messageID string) (*tgo.SuccessResp, error) {
+	mw.lock.Lock()
+	defer mw.lock.Unlock()
+	return mw.client.FwdMsg(telegramID, messageID)
+}
+func (mw *MultiWorker) sendMessage(telegramID string, messageID string) (*tgo.SuccessResp, error) {
+	mw.lock.Lock()
+	defer mw.lock.Unlock()
+	return mw.client.Msg(telegramID, messageID)
+}
 
 func (mw *MultiWorker) getLast(in *commands.GetLastCommand) (bool, error) {
 	// first try to resolve the channel
@@ -89,12 +105,25 @@ func (mw *MultiWorker) getLast(in *commands.GetLastCommand) (bool, error) {
 		assert.Nil(aredis.StoreHashKey(in.HashKey, "STATUS", "failed", time.Hour))
 		return false, err
 	}
-
 	b, err := json.Marshal(h)
 	assert.Nil(err)
 	assert.Nil(aredis.StoreHashKey(in.HashKey, "DATA", string(b), time.Hour))
 	assert.Nil(aredis.StoreHashKey(in.HashKey, "STATUS", "done", time.Hour))
+	return false, nil
+}
 
+func (mw *MultiWorker) IdentifyAD(in *commands.IdentifyAD) (bool, error) {
+	// first try to resolve the channel
+	m := ads.NewAdsManager()
+	ad, err := m.FindAdByID(in.AddID)
+	assert.Nil(err)
+	if !ad.CliMessageID.Valid {
+		return false, nil
+	}
+	_, err = mw.sendMessage(config.Config.Telegram.BotID, fmt.Sprintf("/updatead-%d", in.AddID))
+	assert.Nil(err)
+	_, err = mw.fwdMessage(config.Config.Telegram.BotID, ad.CliMessageID.String)
+	assert.Nil(err)
 	return false, nil
 }
 
@@ -104,17 +133,14 @@ func NewMultiWorker(ip net.IP, port int) (*MultiWorker, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	res := &MultiWorker{
 		client: t,
 		lock:   &sync.Mutex{},
 	}
-
 	if err := res.Ping(); err != nil {
 		return nil, err
 	}
-
-	rabbit.RunWorker(&commands.GetLastCommand{}, res.getLast, 1)
-
+	go rabbit.RunWorker(&commands.GetLastCommand{}, res.getLast, 1)
+	go rabbit.RunWorker(&commands.IdentifyAD{}, res.IdentifyAD, 1)
 	return res, nil
 }

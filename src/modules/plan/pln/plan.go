@@ -75,8 +75,8 @@ func (m *Manager) FillPlanDataTableArray(u base.PermInterfaceComplete, filters m
 	var res PlanDataTableArray
 	var where []string
 
-	countQuery := fmt.Sprintf("SELECT COUNT(plan.id) FROM %s ", PlanTableFull)
-	query := fmt.Sprintf("SELECT plan.* FROM %s", PlanTableFull)
+	countQuery := fmt.Sprintf("SELECT COUNT(plans.id) FROM %s ", PlanTableFull)
+	query := fmt.Sprintf("SELECT plans.* FROM %s", PlanTableFull)
 	for field, value := range filters {
 		where = append(where, fmt.Sprintf(PlanTableFull+".%s=?", field))
 		params = append(params, value)
