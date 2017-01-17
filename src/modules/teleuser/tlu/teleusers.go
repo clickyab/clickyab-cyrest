@@ -81,10 +81,10 @@ func (m *Manager) FillTeleuserDataTableArray(u base.PermInterfaceComplete, filte
 	var res TeleuserDataTableArray
 	var where []string
 
-	countQuery := fmt.Sprintf("SELECT COUNT(telegram_users.id) FROM %s LEFT JOIN %s ON %s.id=%s.user_id", TeleuserTableFull, aaa.UserTableFull, aaa.UserTableFull, TeleuserTableFull)
-	query := fmt.Sprintf("SELECT telegram_users.*,users.email FROM %s LEFT JOIN %s ON %s.id=%s.user_id", TeleuserTableFull, aaa.UserTableFull, aaa.UserTableFull, TeleuserTableFull)
+	countQuery := fmt.Sprintf("SELECT COUNT(telegram_users.id) FROM %s LEFT JOIN %s ON %s.id=%s.user_id", TeleUserTableFull, aaa.UserTableFull, aaa.UserTableFull, TeleUserTableFull)
+	query := fmt.Sprintf("SELECT telegram_users.*,users.email FROM %s LEFT JOIN %s ON %s.id=%s.user_id", TeleUserTableFull, aaa.UserTableFull, aaa.UserTableFull, TeleUserTableFull)
 	for field, value := range filters {
-		where = append(where, fmt.Sprintf(TeleuserTableFull+".%s=%s", field, "?"))
+		where = append(where, fmt.Sprintf(TeleUserTableFull+".%s=%s", field, "?"))
 		params = append(params, value)
 	}
 
@@ -97,7 +97,7 @@ func (m *Manager) FillTeleuserDataTableArray(u base.PermInterfaceComplete, filte
 	highestScope := u.GetCurrentScope()
 
 	if highestScope == base.ScopeSelf {
-		where = append(where, fmt.Sprintf("%s.user_id=?", TeleuserTableFull))
+		where = append(where, fmt.Sprintf("%s.user_id=?", TeleUserTableFull))
 		params = append(params, currentUserID)
 	} else if highestScope == base.ScopeParent {
 		where = append(where, "users.parent_id=?")

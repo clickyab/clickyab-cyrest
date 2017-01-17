@@ -12,13 +12,19 @@ import (
 
 //'pending', 'rejected','accepted','archive','yes','no'
 const (
-	ChannelStatusPending  ChannelStatus = "pending"
+	// ChannelStatusPending is the pending status
+	ChannelStatusPending ChannelStatus = "pending"
+	// ChannelStatusRejected is the rejected status
 	ChannelStatusRejected ChannelStatus = "rejected"
+	// ChannelStatusAccepted is the accepted status
 	ChannelStatusAccepted ChannelStatus = "accepted"
-	ChannelStatusArchive  ChannelStatus = "archive"
+	// ChannelStatusArchive is the archive status
+	ChannelStatusArchive ChannelStatus = "archive"
 
+	//ActiveStatusYes is teh yes status
 	ActiveStatusYes ActiveStatus = "yes"
-	ActiveStatusNo  ActiveStatus = "no"
+	// ActiveStatusNo is the no status
+	ActiveStatusNo ActiveStatus = "no"
 )
 
 type (

@@ -93,13 +93,13 @@ func (m *Manager) FillAdDataTableArray(
 	countQuery := fmt.Sprintf("SELECT COUNT(ads.id) FROM %s LEFT JOIN %s ON %s.id=%s.user_id", AdTableFull, aaa.UserTableFull, aaa.UserTableFull, AdTableFull)
 	query := fmt.Sprintf("SELECT ads.*,users.email FROM %s LEFT JOIN %s ON %s.id=%s.user_id", AdTableFull, aaa.UserTableFull, aaa.UserTableFull, AdTableFull)
 	for field, value := range filters {
-		where = append(where, fmt.Sprintf(AdTableFull+".%s=%s", field, "?"))
+		where = append(where, fmt.Sprintf("%s.%s=?", AdTableFull, field))
 		params = append(params, value)
 	}
 
 	for column, val := range search {
 		where = append(where, fmt.Sprintf("%s LIKE ?", column))
-		params = append(params, fmt.Sprintf("%s"+val+"%s", "%", "%"))
+		params = append(params, "%"+val+"%")
 	}
 
 	currentUserID := u.GetID()
