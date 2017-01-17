@@ -33,6 +33,12 @@ else
 export UPDATE=
 endif
 
+ifdef VERBOSE
+export VERB=-vvvv
+else
+export VERB=-vvvv
+endif
+
 
 all:  $(BIN)/gb
 	$(BUILD)
@@ -277,5 +283,22 @@ conditional-restore:
 docker-build: conditional-restore codegen migration all
 
 build-telegram-cli:
-	cd $(ROOT)/contrib/tg && ./configure
+	cd $(ROOT)/contrmakeib/tg && ./configure
 	cd $(ROOT)/contrib/tg && make
+
+ansible:
+	ansible-playbook $(VERB) -i $(HOSTS) $(YAML)
+
+staging-full:
+	make ansible HOSTS=$(ROOT)/contrib/deploy/staging-hosts.ini YAML=$(ROOT)/contrib/deploy/staging.yaml
+
+staging-quick:
+	make ansible HOSTS=$(ROOT)/contrib/deploy/staging-hosts.ini YAML=$(ROOT)/contrib/deploy/quick-staging.yaml
+
+staging-front:
+	make ansible HOSTS=$(ROOT)/contrib/deploy/staging-hosts.ini YAML=$(ROOT)/contrib/deploy/front-staging.yaml
+
+staging-back:
+	make ansible HOSTS=$(ROOT)/contrib/deploy/staging-hosts.ini YAML=$(ROOT)/contrib/deploy/back-staging.yaml
+
+

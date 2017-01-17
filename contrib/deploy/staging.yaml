@@ -13,6 +13,11 @@
         target: codegen
         chdir: /home/develop/cyrest
 
+    - name: generate codes
+      make:
+        target: codegen
+        chdir: /home/develop/cyrest
+
     - name: create migration
       make:
         target: migration
