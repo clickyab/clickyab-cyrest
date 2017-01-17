@@ -49,6 +49,7 @@ func NewTelegramBot(token string) TelegramBot {
 		lock:     &sync.RWMutex{},
 		commands: make(map[string]HandleMessage),
 		users:    make(map[int64]HandleMessage),
+		sessions: make(map[int64]string),
 	}
 }
 
