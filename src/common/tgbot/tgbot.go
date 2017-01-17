@@ -39,6 +39,7 @@ type telegramBot struct {
 	commands map[string]HandleMessage
 	started  int32
 	users    map[int64]HandleMessage
+	sessions map[int64]string
 }
 
 // NewTelegramBot return the telegram bot api
@@ -69,10 +70,18 @@ func (tb *telegramBot) RegisterUserHandler(cid int64, hh HandleMessage, t time.D
 	defer tb.lock.Unlock()
 
 	tb.users[cid] = hh
+	lockID := <-utils.ID
+	tb.sessions[cid] = lockID
 
 	go func() {
 		<-time.After(t)
-		tb.UnRegisterUserHandler(cid)
+		tb.lock.Lock()
+		defer tb.lock.Unlock()
+
+		if tb.sessions[cid] == lockID {
+			delete(tb.sessions, cid)
+			delete(tb.users, cid)
+		}
 	}()
 }
 
@@ -81,6 +90,7 @@ func (tb *telegramBot) UnRegisterUserHandler(cid int64) {
 	tb.lock.Lock()
 	defer tb.lock.Unlock()
 
+	delete(tb.sessions, cid)
 	delete(tb.users, cid)
 }
 
@@ -106,10 +116,9 @@ func (tb *telegramBot) Start() error {
 bigLoop:
 	for update := range updates {
 		// currently we only support messages
-		if update.Message == nil || !update.Message.IsCommand() {
+		if update.Message == nil {
 			continue
 		}
-		txt := strings.Trim(strings.ToLower(update.Message.Text), " \t\n")
 		tb.lock.RLock()
 		if h, ok := tb.users[update.Message.Chat.ID]; ok {
 			wg.Add(1)
@@ -134,6 +143,11 @@ bigLoop:
 			}()
 			continue bigLoop
 		}
+		// currently we only support messages
+		if !update.Message.IsCommand() {
+			continue
+		}
+		txt := strings.Trim(strings.ToLower(update.Message.Text), " \t\n")
 		for i := range tb.commands {
 			if strings.HasPrefix(txt, i) {
 				wg.Add(1)
