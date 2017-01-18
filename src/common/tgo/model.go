@@ -82,7 +82,7 @@ type History struct {
 	Media   struct {
 		Type string `json:"type"`
 	} `json:"media,omitempty"`
-	FwdFrom struct {
+	FwdFrom *struct {
 		ID                string `json:"id"`
 		PeerType          string `json:"peer_type"`
 		PeerID            int    `json:"peer_id"`

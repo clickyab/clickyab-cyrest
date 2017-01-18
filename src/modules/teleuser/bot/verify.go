@@ -65,7 +65,7 @@ func (bb *bot) updateAD(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 	if err == nil {
 		tgbot.RegisterUserHandler(m.Chat.ID, func(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 			defer tgbot.UnRegisterUserHandler(m.Chat.ID)
-			botChatID := strconv.FormatInt(m.Chat.ID,10)
+			botChatID := strconv.FormatInt(m.Chat.ID, 10)
 			botMsgID := strconv.Itoa(m.MessageID)
 			n := ads.NewAdsManager()
 			currentAd, err := n.FindAdByID(id)

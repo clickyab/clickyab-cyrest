@@ -19,6 +19,8 @@ import (
 
 	"fmt"
 
+	"modules/channel/chn"
+
 	"github.com/Sirupsen/logrus"
 )
 
@@ -127,6 +129,59 @@ func (mw *MultiWorker) IdentifyAD(in *commands.IdentifyAD) (bool, error) {
 	return false, nil
 }
 
+func (mw *MultiWorker) getChanStat(in *commands.GetChanCommand) (bool, error) {
+	//find channel
+	chnManager := chn.NewChnManager()
+	channel, err := chnManager.FindChannelByID(in.ChannelID)
+	assert.Nil(err)
+	//check if rhe channel exists in known channel
+	knownManger := bot.NewBotManager()
+	c, err := knownManger.FindKnownChannelByName(channel.Name)
+	if err != nil {
+		//known channel not found
+		ch, err := mw.discoverChannel(channel.Name)
+		if err != nil {
+			// Oh crap. can not resolve this :/
+			return false, err
+		}
+
+		c, err = bot.NewBotManager().CreateChannelByRawData(ch)
+		if err != nil {
+			return false, err
+		}
+	}
+	var sumView int
+	var totalCount int
+	h, err := mw.getLastMessages(c.TelegramID, in.Count, 0)
+	if err != nil {
+		return false, err
+	}
+	for i := range h {
+		if h[i].FwdFrom == nil {
+			sumView += h[i].Views
+			totalCount++
+		}
+
+	}
+	cd := &bot.ChanDetail{
+		Name:       c.Name,
+		Title:      c.Title,
+		Info:       c.Info,
+		UserCount:  c.UserCount,
+		TelegramID: c.TelegramID,
+		AdminCount: c.RawData.AdminsCount,
+		Num:        totalCount,
+		TotalView:  sumView,
+		ChannelID:  channel.ID,
+	}
+	err = knownManger.CreateChanDetail(cd)
+	assert.Nil(err)
+	rabbit.PublishAfter(in, 24*time.Hour)
+	//ch, err := mw.discoverChannel(in.Channel)
+	return false, nil
+
+}
+
 // NewMultiWorker create a multi worker that listen on all commands
 func NewMultiWorker(ip net.IP, port int) (*MultiWorker, error) {
 	t, err := tgo.NewTelegramCli(ip, port)
@@ -142,5 +197,6 @@ func NewMultiWorker(ip net.IP, port int) (*MultiWorker, error) {
 	}
 	go rabbit.RunWorker(&commands.GetLastCommand{}, res.getLast, 1)
 	go rabbit.RunWorker(&commands.IdentifyAD{}, res.IdentifyAD, 1)
+	go rabbit.RunWorker(&commands.GetChanCommand{}, res.getChanStat, 1)
 	return res, nil
 }
