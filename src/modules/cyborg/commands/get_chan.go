@@ -1,6 +1,6 @@
 package commands
 
-// GetLastCommand is the command for last items and verify if they are available in the list or not
+// GetChanCommand is the command for last items and verify if they are available in the list or not
 // also update the view in database
 type GetChanCommand struct {
 	// The channel name

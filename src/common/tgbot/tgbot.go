@@ -10,10 +10,10 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
-
 	"time"
 
 	"github.com/Sirupsen/logrus"
+
 	"gopkg.in/telegram-bot-api.v4"
 )
 
@@ -95,25 +95,8 @@ func (tb *telegramBot) UnRegisterUserHandler(cid int64) {
 	delete(tb.users, cid)
 }
 
-func (tb *telegramBot) Start() error {
-	if !atomic.CompareAndSwapInt32(&tb.started, 0, 1) {
-		return errors.New("already started")
-	}
-	defer atomic.SwapInt32(&tb.started, 0)
-
+func (tb *telegramBot) internalStart(bot *tgbotapi.BotAPI, updates <-chan tgbotapi.Update) {
 	wg := sync.WaitGroup{}
-	bot, err := tgbotapi.NewBotAPI(tb.token)
-	if err != nil {
-		return err
-	}
-	u := tgbotapi.NewUpdate(0)
-	u.Timeout = 60
-
-	updates, err := bot.GetUpdatesChan(u)
-	if err != nil {
-		return err
-	}
-
 bigLoop:
 	for update := range updates {
 		// currently we only support messages
@@ -130,13 +113,13 @@ bigLoop:
 						stack := debug.Stack()
 						dump, _ := json.MarshalIndent(update, "\t", "\t")
 						data := fmt.Sprintf("Request : \n %s \n\nStack : \n %s", dump, stack)
-						logrus.WithField("error", err).Warn(err, data)
+						logrus.WithField("error", e).Warn(e, data)
 						if config.Config.Redmine.Active {
-							go utils.RedmineDoError(err, []byte(data))
+							go utils.RedmineDoError(e, []byte(data))
 						}
 
 						if config.Config.Slack.Active {
-							go utils.SlackDoMessage(err, ":shit:", utils.SlackAttachment{Text: data, Color: "#AA3939"})
+							go utils.SlackDoMessage(e, ":shit:", utils.SlackAttachment{Text: data, Color: "#AA3939"})
 						}
 					}
 				}()
@@ -159,13 +142,13 @@ bigLoop:
 							stack := debug.Stack()
 							dump, _ := json.MarshalIndent(update, "\t", "\t")
 							data := fmt.Sprintf("Request : \n %s \n\nStack : \n %s", dump, stack)
-							logrus.WithField("error", err).Warn(err, data)
+							logrus.WithField("error", e).Warn(e, data)
 							if config.Config.Redmine.Active {
-								go utils.RedmineDoError(err, []byte(data))
+								go utils.RedmineDoError(e, []byte(data))
 							}
 
 							if config.Config.Slack.Active {
-								go utils.SlackDoMessage(err, ":shit:", utils.SlackAttachment{Text: data, Color: "#AA3939"})
+								go utils.SlackDoMessage(e, ":shit:", utils.SlackAttachment{Text: data, Color: "#AA3939"})
 							}
 						}
 					}()
@@ -177,5 +160,27 @@ bigLoop:
 	}
 
 	wg.Wait()
+}
+
+func (tb *telegramBot) Start() error {
+	if !atomic.CompareAndSwapInt32(&tb.started, 0, 1) {
+		return errors.New("already started")
+	}
+	defer atomic.SwapInt32(&tb.started, 0)
+
+	bot, err := tgbotapi.NewBotAPI(tb.token)
+	if err != nil {
+		return err
+	}
+	u := tgbotapi.NewUpdate(0)
+	u.Timeout = 60
+
+	updates, err := bot.GetUpdatesChan(u)
+	if err != nil {
+		return err
+	}
+
+	tb.internalStart(bot, updates)
+
 	return nil
 }

@@ -40,8 +40,8 @@ type Plan struct {
 	UpdatedAt   time.Time    `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at"`
 }
 
-// GetAllPlans return all the plans
-func (m *Manager) GetAllActivePlans() (*[]Plan, error) {
+// GetAllActivePlans return all the active plans
+func (m *Manager) GetAllActivePlans() ([]Plan, error) {
 	var res []Plan
 	query := fmt.Sprintf("SELECT * FROM %s WHERE active=?", PlanTableFull)
 	_, err := m.GetDbMap().Select(
@@ -53,21 +53,8 @@ func (m *Manager) GetAllActivePlans() (*[]Plan, error) {
 		return nil, err
 	}
 
-	return &res, nil
+	return res, nil
 }
-
-//
-//// Create
-//func (m *Manager) Create(name, description string, active ActiveStatus) *pLAN {
-//
-//	pln := &pLAN{
-//		Name:        name,
-//		Description: description,
-//		Active:      active,
-//	}
-//	assert.Nil(m.CreatePlan(pln))
-//	return pln
-//}
 
 //PlanDataTable is the role full data in data table, after join with other field
 // @DataTable {
