@@ -2,7 +2,7 @@ package bot
 
 import "time"
 
-// ChanDetails is the list of all known channels for cyborg
+// ChanDetail is the list of all known channels for cyborg
 // @Model {
 //		table = channel_details
 //		primary = true, id

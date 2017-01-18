@@ -21,7 +21,7 @@ const (
 	// ChannelStatusArchive is the archive status
 	ChannelStatusArchive ChannelStatus = "archive"
 
-	//ActiveStatusYes is teh yes status
+	//ActiveStatusYes is the yes status
 	ActiveStatusYes ActiveStatus = "yes"
 	// ActiveStatusNo is the no status
 	ActiveStatusNo ActiveStatus = "no"

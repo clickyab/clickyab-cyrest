@@ -110,7 +110,7 @@ func (mw *MultiWorker) getLast(in *commands.GetLastCommand) (bool, error) {
 	return false, nil
 }
 
-func (mw *MultiWorker) IdentifyAD(in *commands.IdentifyAD) (bool, error) {
+func (mw *MultiWorker) identifyAD(in *commands.IdentifyAD) (bool, error) {
 	// first try to resolve the channel
 	m := ads.NewAdsManager()
 	ad, err := m.FindAdByID(in.AddID)
@@ -192,7 +192,7 @@ func NewMultiWorker(ip net.IP, port int) (*MultiWorker, error) {
 		return nil, err
 	}
 	go rabbit.RunWorker(&commands.GetLastCommand{}, res.getLast, 1)
-	go rabbit.RunWorker(&commands.IdentifyAD{}, res.IdentifyAD, 1)
+	go rabbit.RunWorker(&commands.IdentifyAD{}, res.identifyAD, 1)
 	go rabbit.RunWorker(&commands.GetChanCommand{}, res.getChanStat, 1)
 	return res, nil
 }
