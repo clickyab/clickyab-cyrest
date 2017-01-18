@@ -34,9 +34,26 @@ type Plan struct {
 	ID          int64        `db:"id" json:"id" sort:"true" title:"ID"`
 	Name        string       `json:"name" db:"name" search:"true" title:"Name"`
 	Description string       `json:"description" db:"description" search:"true" title:"description"`
+	Price       int64        `db:"price" json:"price" title:"Price"`
 	Active      ActiveStatus `json:"active" db:"active" filter:"true" title:"Active"`
 	CreatedAt   time.Time    `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
 	UpdatedAt   time.Time    `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at"`
+}
+
+// GetAllPlans return all the plans
+func (m *Manager) GetAllActivePlans() (*[]Plan, error) {
+	var res []Plan
+	query := fmt.Sprintf("SELECT * FROM %s WHERE active=?", PlanTableFull)
+	_, err := m.GetDbMap().Select(
+		&res,
+		query,
+		ActiveStatusYes,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &res, nil
 }
 
 //
