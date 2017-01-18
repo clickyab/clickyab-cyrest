@@ -36,7 +36,7 @@ endif
 ifdef VERBOSE
 export VERB=-vvvv
 else
-export VERB=-vvvv
+export VERB=
 endif
 
 
@@ -158,6 +158,7 @@ watch: $(WATCH) tools-fswatch
 swagger-ui:
 	$(GIT) clone --depth 1 https://github.com/swagger-api/swagger-ui.git $(ROOT)/tmp/swagger-ui || true
 	cp -R $(ROOT)/tmp/swagger-ui/dist/* $(ROOT)/3rd/swagger
+	sed -i "s/http:\/\/petstore.swagger.io\/v2\/swagger.json/cyrest.json/g" $(ROOT)/3rd/swagger/index.html
 
 
 #
