@@ -24,6 +24,12 @@ services:
       - RABBITMQ_DEFAULT_USER=cyrest
       - RABBITMQ_DEFAULT_PASS=bita123
 
+  tgcli:
+    build: ./tgcli
+    volumes:
+      - "/home/cy/.telegram-cli:/root/.telegram-cli"
+    command: tg
+
   app:
     build: ./image
     ports:
@@ -35,3 +41,24 @@ services:
       - mysql
       - redis
       - rabbitmq
+
+  got:
+    build: ./image
+    volumes:
+      - "/home/cy/cyrest:/app"
+    command: /app/bin/got
+    links:
+      - mysql
+      - redis
+      - rabbitmq
+
+  cyborg:
+    build: ./image
+    volumes:
+      - "/home/cy/cyrest:/app"
+    command: /app/bin/cyborg
+    links:
+      - mysql
+      - redis
+      - rabbitmq
+      - tgcli

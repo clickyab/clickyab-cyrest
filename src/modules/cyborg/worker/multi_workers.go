@@ -2,24 +2,20 @@ package worker
 
 import (
 	"common/assert"
+	"common/config"
 	"common/rabbit"
 	"common/redis"
 	"common/tgo"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"modules/ad/ads"
+	"modules/channel/chn"
 	"modules/cyborg/bot"
 	"modules/cyborg/commands"
 	"net"
 	"sync"
 	"time"
-
-	"modules/ad/ads"
-
-	"common/config"
-
-	"fmt"
-
-	"modules/channel/chn"
 
 	"github.com/Sirupsen/logrus"
 )

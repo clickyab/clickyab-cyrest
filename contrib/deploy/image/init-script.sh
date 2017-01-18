@@ -18,6 +18,10 @@ export CYREST_PROFILE=disable
 export CYREST_SLACK_ACTIVE=true
 export CYREST_AMQP_DSN="amqp://cyrest:bita123@rabbitmq:5672/"
 export CYREST_AMQP_EXCHANGE="cy"
+export CYREST_TELEGRAM_API_KEY="273335144:AAEv4uPeo68X7Scc3MLKxwMO1YI3JFkWiJM"
+export CYREST_TELEGRAM_BOT_ID='$0100000068c34a10ed72226be64e8d4d'
+export CYREST_TELEGRAM_CLI_HOST=tgcli
+export CYREST_TELEGRAM_CLI_PORT=9999
 
 if [ "$1" = '/app/bin/server' ];
 then
