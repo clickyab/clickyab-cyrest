@@ -18,10 +18,21 @@ func main() {
 	defer initializer.Initialize().Finalize()
 
 	version.LogVersion().Infof("Application started")
-	ip, err := net.LookupIP(config.Config.Telegram.CLIAddress)
+	ips, err := net.LookupIP(config.Config.Telegram.CLIAddress)
 	assert.Nil(err)
-	assert.True(len(ip) > 0, "no ip found")
-	_, err = worker.NewMultiWorker(ip[0], config.Config.Telegram.CLIPort)
+	var (
+		ip    net.IP
+		found bool
+	)
+	for i := range ips {
+		if ips[i].To4() != nil {
+			ip = ips[i]
+			found = true
+			break
+		}
+	}
+	assert.True(found, "no ip found")
+	_, err = worker.NewMultiWorker(ip, config.Config.Telegram.CLIPort)
 	assert.Nil(err)
 
 	utils.WaitExitSignal()
