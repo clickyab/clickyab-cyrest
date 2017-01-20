@@ -5,6 +5,7 @@ import (
 	"common/models/common"
 	"fmt"
 	"modules/misc/base"
+	"modules/telegram/teleuser/tlu"
 	"modules/user/aaa"
 	"strings"
 	"time"
@@ -92,6 +93,37 @@ func (m *Manager) FindChannelsByChatID(chatID int64) ([]Channel, error) {
 	}
 
 	return res, nil
+}
+
+// FindChannelsByChatIDName return the Channel base on its chatId and name
+func (m *Manager) FindChannelsByChatIDName(chatID int64, name string) (*Channel, error) {
+	var res Channel
+	query := "SELECT channels.* FROM channels" +
+		" INNER JOIN telegram_users ON telegram_users.user_id=channels.user_id" +
+		" WHERE telegram_users.bot_chat_id=?" +
+		" AND channels.name=?" +
+		" AND telegram_users.remove=?" +
+		" AND telegram_users.resolve=?" +
+		" AND channels.admin_status=?" +
+		" AND channels.archive_status=?" +
+		" AND channels.active=?"
+	err := m.GetDbMap().SelectOne(
+		&res,
+		query,
+		chatID,
+		name,
+		tlu.RemoveStatusNo,
+		tlu.ResolveStatusYes,
+		AdminStatusAccepted,
+		ArchiveStatusNo,
+		ActiveStatusYes,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &res, nil
 }
 
 //ChannelDataTable is the role full data in data table, after join with other field
