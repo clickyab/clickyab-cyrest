@@ -135,7 +135,7 @@ bigLoop:
 		for i := range tb.commands {
 			if strings.HasPrefix(txt, i) {
 				wg.Add(1)
-				go func() {
+				go func(cmd string) {
 					defer wg.Done()
 					defer func() {
 						if e := recover(); e != nil {
@@ -152,8 +152,8 @@ bigLoop:
 							}
 						}
 					}()
-					tb.commands[i](bot, update.Message)
-				}()
+					tb.commands[cmd](bot, update.Message)
+				}(i)
 			}
 		}
 		tb.lock.RUnlock()
