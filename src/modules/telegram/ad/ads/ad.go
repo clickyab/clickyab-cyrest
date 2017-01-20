@@ -70,7 +70,7 @@ type Ad struct {
 //		url = /list
 //		entity = ad
 //		view = ad_list:self
-//		controller = modules/ad/controllers
+//		controller = modules/telegram/ad/controllers
 //		fill = FillAdDataTableArray
 //		_edit = ad_edit:self
 //		_change = ad_manage:global

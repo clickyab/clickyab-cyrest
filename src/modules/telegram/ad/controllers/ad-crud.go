@@ -3,10 +3,10 @@ package ad
 import (
 	"common/assert"
 	"common/models/common"
-	"modules/ad/ads"
 	"modules/file/fila"
 	"modules/misc/middlewares"
 	"modules/misc/trans"
+	"modules/telegram/ad/ads"
 	"modules/user/aaa"
 	"modules/user/middlewares"
 	"net/http"

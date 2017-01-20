@@ -61,7 +61,7 @@ func (m *Manager) GetAllActivePlans() ([]Plan, error) {
 //		url = /list
 //		entity = plan
 //		view = plan_list:global
-//		controller = modules/plan/controllers
+//		controller = modules/telegram/plan/controllers
 //		fill = FillPlanDataTableArray
 //		_edit = plan_edit:self
 //		_change = plan_manage:global

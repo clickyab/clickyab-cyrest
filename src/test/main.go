@@ -4,7 +4,7 @@ import (
 	"common/config"
 	"common/initializer"
 	"common/rabbit"
-	"modules/cyborg/commands"
+	"modules/telegram/cyborg/commands"
 )
 
 func main() {

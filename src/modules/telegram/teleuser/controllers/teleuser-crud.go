@@ -5,7 +5,7 @@ import (
 	aredis "common/redis"
 	"fmt"
 	"math/rand"
-	"modules/teleuser/tlu"
+	"modules/telegram/teleuser/tlu"
 	"modules/user/middlewares"
 	"time"
 
