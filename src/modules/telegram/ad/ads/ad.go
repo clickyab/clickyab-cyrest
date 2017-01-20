@@ -52,6 +52,7 @@ type Ad struct {
 	ID              int64             `db:"id" json:"id" sort:"true" title:"ID"`
 	UserID          int64             `json:"user_id" db:"user_id" title:"UserID"`
 	PlanID          common.NullInt64  `json:"plan_id" db:"plan_id" title:"PlanID"`
+	Position        common.NullInt64  `json:"position" db:"position" title:"Position"`
 	Name            string            `json:"name" db:"name" title:"Name"`
 	Description     common.NullString `json:"description" db:"description" title:"Description"`
 	Src             common.NullString `json:"src" db:"src" title:"Src"`

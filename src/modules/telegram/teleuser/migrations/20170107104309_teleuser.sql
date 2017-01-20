@@ -7,7 +7,7 @@ CREATE TABLE telegram_users
   id INT(11) PRIMARY KEY NOT NULL AUTO_INCREMENT,
   user_id INT(11)  NOT NULL,
   username VARCHAR(60) NOT NULL,
-  telegram_id VARCHAR(50) NOT NULL,
+  bot_chat_id INT,
   resolve ENUM('yes','no'),
   remove ENUM('yes','no'),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,

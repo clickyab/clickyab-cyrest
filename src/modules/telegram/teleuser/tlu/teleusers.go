@@ -43,14 +43,14 @@ type (
 //		list = yes
 // }
 type TeleUser struct {
-	ID         int64             `db:"id" json:"id" sort:"true" title:"ID"`
-	UserID     int64             `json:"user_id" db:"user_id" title:"UserID"`
-	TelegramID int64             `json:"telegram_id" db:"telegram_id" title:"TelegramID"`
-	Username   common.NullString `json:"username" db:"username" title:"UserName"`
-	Resolve    ResolveStatus     `json:"resolve" db:"resolve" title:"Resolve"`
-	Remove     RemoveStatus      `json:"remove" db:"remove" title:"Remove"`
-	CreatedAt  time.Time         `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
-	UpdatedAt  time.Time         `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at"`
+	ID        int64             `db:"id" json:"id" sort:"true" title:"ID"`
+	UserID    int64             `json:"user_id" db:"user_id" title:"UserID"`
+	BotChatID int64             `json:"bot_chat_id" db:"bot_chat_id" title:"BotChatID"`
+	Username  common.NullString `json:"username" db:"username" title:"UserName"`
+	Resolve   ResolveStatus     `json:"resolve" db:"resolve" title:"Resolve"`
+	Remove    RemoveStatus      `json:"remove" db:"remove" title:"Remove"`
+	CreatedAt time.Time         `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
+	UpdatedAt time.Time         `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at"`
 }
 
 // Verifycode is the verify code payload
