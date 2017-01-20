@@ -10,6 +10,7 @@ CREATE TABLE ads
   name VARCHAR(60) NOT NULL,
   description TEXT,
   src TEXT,
+  position INT(11),
   admin_status ENUM('pending', 'rejected','accepted'),
   archive_status ENUM('yes', 'no'),
   pay_status ENUM('yes', 'no'),

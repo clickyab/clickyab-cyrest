@@ -9,7 +9,7 @@ CREATE TABLE known_channels
     title VARCHAR(60)NOT NULL ,
     info VARCHAR(160),
     user_count INT(11),
-    telegram_id VARCHAR(60),
+    cli_telegram_id VARCHAR(60),
     raw_data TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT '0000-00-00 00:00:00' NOT NULL

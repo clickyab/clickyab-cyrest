@@ -57,7 +57,7 @@ func (u *Controller) createChannel(ctx echo.Context) error {
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
-	ch := m.ChannelCreate(pl.Admin, pl.Link, pl.Name, chn.ChannelStatusPending, chn.ActiveStatusNo, pl.UserID)
+	ch := m.ChannelCreate(pl.Admin, pl.Link, pl.Name, chn.AdminStatusPending, chn.ActiveStatusNo, pl.UserID)
 	return u.OKResponse(ctx, ch)
 
 }
@@ -130,7 +130,7 @@ func (u *Controller) editChannel(ctx echo.Context) error {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
 
-	ch := m.EditChannel(pl.Admin, pl.Link, pl.Name, channel.Status, channel.Active, owner.ID, channel.CreatedAt, id)
+	ch := m.EditChannel(pl.Admin, pl.Link, pl.Name, channel.AdminStatus, channel.Active, owner.ID, channel.CreatedAt, id)
 
 	return u.OKResponse(ctx, ch)
 }
@@ -164,14 +164,14 @@ func (u *Controller) active(ctx echo.Context) error {
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
-	ch := m.ChangeActive(channel.ID, channel.UserID, channel.Name, channel.Link.String, channel.Admin.String, channel.Status, channel.Active, channel.CreatedAt)
+	ch := m.ChangeActive(channel.ID, channel.UserID, channel.Name, channel.Link.String, channel.AdminStatus, channel.Active, channel.CreatedAt)
 	return u.OKResponse(ctx, ch)
 }
 
 // @Validate {
 // }
 type statusPayload struct {
-	Status chn.ChannelStatus `json:"status" validate:"required"`
+	Status chn.AdminStatus `json:"status" validate:"required"`
 }
 
 // GetLastResponse is the lst response command
@@ -226,7 +226,7 @@ func (u *Controller) statusChannel(ctx echo.Context) error {
 	}
 
 	cha.ID = id
-	cha.Status = pl.Status
+	cha.AdminStatus = pl.Status
 	assert.Nil(m.UpdateChannel(cha))
 	return u.OKResponse(ctx, cha)
 
