@@ -5,8 +5,6 @@ import (
 	"common/initializer"
 	"common/models/common"
 	"common/redis"
-	"fmt"
-	"modules/telegram/channel/chn"
 	"modules/telegram/common/tgbot"
 	"modules/telegram/teleuser/tlu"
 	"strconv"
@@ -58,35 +56,9 @@ func (bb *bot) verify(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 	}
 }
 
-func (bb *bot) wantAD(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
-	//find channels
-	chnManger := chn.NewChnManager()
-	fmt.Println(m.Chat.ID)
-	channels, err := chnManger.FindChannelsByChatID(m.Chat.ID)
-	assert.Nil(err)
-	if len(channels) == 0 {
-		msg := tgbotapi.NewMessage(m.Chat.ID, "no channels for you")
-		msg.ParseMode = htmlMode
-		_, err := bot.Send(msg)
-		assert.Nil(err)
-		return
-	}
-	textMsg := ""
-	for i := range channels {
-		textMsg += fmt.Sprintf("/ad-%d\n", channels[i].ID)
-	}
-	msg := tgbotapi.NewMessage(m.Chat.ID, textMsg)
-	msg.ParseMode = htmlMode
-	_, err = bot.Send(msg)
-	assert.Nil(err)
-	return
-
-}
-
 func (bb *bot) Initialize() {
 
 	tgbot.RegisterMessageHandler("/verify", bb.verify)
-	tgbot.RegisterMessageHandler("/ad", bb.wantAD)
 }
 
 func init() {
