@@ -1,3 +1,3 @@
 package main
 
-import _ "modules/teleuser/bot"
+import _ "modules/telegram/teleuser/bot"

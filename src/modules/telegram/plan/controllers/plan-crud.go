@@ -2,7 +2,7 @@ package plan
 
 import (
 	"common/assert"
-	"modules/plan/pln"
+	"modules/telegram/plan/pln"
 
 	"gopkg.in/labstack/echo.v3"
 )

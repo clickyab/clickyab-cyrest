@@ -79,7 +79,7 @@ func (m *Manager) ChannelCreate(admin, link, name string, status ChannelStatus, 
 //		url = /list
 //		entity = channel
 //		view = channel_list:self
-//		controller = modules/channel/controllers
+//		controller = modules/telegram/channel/controllers
 //		fill = FillChannelDataTableArray
 //		_edit = channel_edit:self
 //		_change = channel_manage:global

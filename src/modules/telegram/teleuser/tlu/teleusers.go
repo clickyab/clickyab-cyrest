@@ -63,7 +63,7 @@ type Verifycode struct {
 //		url = /list
 //		entity = teleuser
 //		view = teleuser_list:self
-//		controller = modules/teleuser/controllers
+//		controller = modules/telegram/teleuser/controllers
 //		fill = FillTeleuserDataTableArray
 //		_edit = teleuser_edit:self
 // }
