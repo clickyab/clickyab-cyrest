@@ -2,15 +2,15 @@ package worker
 
 import (
 	"common/assert"
-	"common/config"
 	"common/rabbit"
 	"common/redis"
-	"common/tgo"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"modules/telegram/ad/ads"
 	"modules/telegram/channel/chn"
+	"modules/telegram/common/tgo"
+	"modules/telegram/config"
 	"modules/telegram/cyborg/bot"
 	"modules/telegram/cyborg/commands"
 	"net"
@@ -118,9 +118,9 @@ func (mw *MultiWorker) identifyAD(in *commands.IdentifyAD) (bool, error) {
 	if !ad.CliMessageID.Valid {
 		return false, nil
 	}
-	_, err = mw.sendMessage(config.Config.Telegram.BotID, fmt.Sprintf("/updatead-%d", in.AddID))
+	_, err = mw.sendMessage(tcfg.Cfg.Telegram.BotID, fmt.Sprintf("/updatead-%d", in.AddID))
 	assert.Nil(err)
-	_, err = mw.fwdMessage(config.Config.Telegram.BotID, ad.CliMessageID.String)
+	_, err = mw.fwdMessage(tcfg.Cfg.Telegram.BotID, ad.CliMessageID.String)
 	assert.Nil(err)
 	return false, nil
 }

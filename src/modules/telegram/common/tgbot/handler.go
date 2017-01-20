@@ -1,8 +1,10 @@
 package tgbot
 
-import "common/initializer"
-import "common/config"
-import "time"
+import (
+	"common/initializer"
+	"modules/telegram/config"
+	"time"
+)
 
 type tgbotInitializer struct {
 }
@@ -10,7 +12,7 @@ type tgbotInitializer struct {
 var handler TelegramBot
 
 func (*tgbotInitializer) Initialize() {
-	handler = NewTelegramBot(config.Config.Telegram.APIKey)
+	handler = NewTelegramBot(tcfg.Cfg.Telegram.APIKey)
 }
 
 // RegisterMessageHandler try to register a handler in system, the first is the command to match the
