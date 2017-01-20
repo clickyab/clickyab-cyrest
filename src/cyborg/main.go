@@ -6,7 +6,7 @@ import (
 	"common/initializer"
 	"common/utils"
 	"common/version"
-	"modules/cyborg/worker"
+	"modules/telegram/cyborg/worker"
 	"net"
 )
 
