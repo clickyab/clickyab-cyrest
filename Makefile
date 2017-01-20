@@ -284,7 +284,7 @@ conditional-restore:
 docker-build: conditional-restore codegen migration all
 
 build-telegram-cli:
-	cd $(ROOT)/contrmakeib/tg && ./configure
+	cd $(ROOT)/contrib/tg && ./configure
 	cd $(ROOT)/contrib/tg && make
 
 ansible:
