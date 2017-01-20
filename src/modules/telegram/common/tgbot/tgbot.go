@@ -153,6 +153,7 @@ bigLoop:
 						}
 					}()
 					tb.commands[cmd](bot, update.Message)
+
 				}(i)
 			}
 		}

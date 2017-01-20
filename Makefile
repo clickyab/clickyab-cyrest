@@ -141,6 +141,7 @@ migcp:
 	mkdir -p $(ROOT)/db/migrations
 	cd $(ROOT)/db/migrations && rm -f *.sql
 	cp $(ROOT)/src/modules/*/migrations/*.sql $(ROOT)/db/migrations
+	cp $(ROOT)/src/modules/telegram/*/migrations/*.sql $(ROOT)/db/migrations
 
 migration: migcp tools-gobindata
 	cd $(ROOT) && $(BIN)/go-bindata -o ./src/migration/migration.gen.go -nomemcopy=true -pkg=main ./db/migrations/...
