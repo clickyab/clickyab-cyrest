@@ -78,7 +78,7 @@ func (m *Manager) ChannelCreate(admin, link, name string, status AdminStatus, ac
 	return ch
 }
 
-// FindChannelByUserID return the Channel base on its user_id
+// FindChannelsByChatID return the Channel base on its user_id
 func (m *Manager) FindChannelsByChatID(chatID int64) ([]Channel, error) {
 	var res []Channel
 	query := "SELECT channels.* FROM channels INNER JOIN telegram_users ON telegram_users.user_id=channels.user_id WHERE telegram_users.bot_chat_id=?"
