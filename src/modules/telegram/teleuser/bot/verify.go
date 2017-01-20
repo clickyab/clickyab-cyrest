@@ -6,12 +6,12 @@ import (
 	"common/models/common"
 	"common/redis"
 	"common/tgbot"
-	"modules/teleuser/tlu"
+	"modules/telegram/teleuser/tlu"
 	"strconv"
 	"strings"
 	"time"
 
-	"modules/ad/ads"
+	"modules/telegram/ad/ads"
 
 	"gopkg.in/telegram-bot-api.v4"
 )

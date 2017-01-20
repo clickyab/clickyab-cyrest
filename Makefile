@@ -183,23 +183,23 @@ codegen-misc: tools-codegen
 	@$(BIN)/codegen -p modules/misc/t9n
 
 codegen-channel: tools-codegen
-	$(BIN)/codegen -p modules/channel/controllers
-	$(BIN)/codegen -p modules/channel/chn
+	$(BIN)/codegen -p modules/telegram/channel/controllers
+	$(BIN)/codegen -p modules/telegram/channel/chn
 
 codegen-ad: tools-codegen
-	$(BIN)/codegen -p modules/ad/controllers
-	$(BIN)/codegen -p modules/ad/ads
+	$(BIN)/codegen -p modules/telegram/ad/controllers
+	$(BIN)/codegen -p modules/telegram/ad/ads
 
 codegen-cyborg: tools-codegen
-	$(BIN)/codegen -p modules/cyborg/bot
+	$(BIN)/codegen -p modules/telegram/cyborg/bot
 
 codegen-plan: tools-codegen
-	$(BIN)/codegen -p modules/plan/controllers
-	$(BIN)/codegen -p modules/plan/pln
+	$(BIN)/codegen -p modules/telegram/plan/controllers
+	$(BIN)/codegen -p modules/telegram/plan/pln
 
 codegen-teleuser: tools-codegen
-	$(BIN)/codegen -p modules/teleuser/controllers
-	$(BIN)/codegen -p modules/teleuser/tlu
+	$(BIN)/codegen -p modules/telegram/teleuser/controllers
+	$(BIN)/codegen -p modules/telegram/teleuser/tlu
 
 codegen-file: tools-codegen
 	$(BIN)/codegen -p modules/file/controllers
