@@ -17,6 +17,8 @@ import (
 	"sync"
 	"time"
 
+	"common/models/common"
+
 	"github.com/Sirupsen/logrus"
 )
 
@@ -48,11 +50,9 @@ func (mw *MultiWorker) discoverChannel(c string) (*tgo.ChannelInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	if ch.PeerType != "channel" {
 		return nil, errors.New("invalid channel type")
 	}
-
 	return mw.client.ChannelInfo(ch.ID)
 }
 
@@ -113,14 +113,15 @@ func (mw *MultiWorker) getLast(in *commands.GetLastCommand) (bool, error) {
 func (mw *MultiWorker) identifyAD(in *commands.IdentifyAD) (bool, error) {
 	// first try to resolve the channel
 	m := ads.NewAdsManager()
-	ad, err := m.FindAdByID(in.AddID)
+	ad, err := m.FindAdByID(in.AdID)
 	assert.Nil(err)
 	if !ad.CliMessageID.Valid {
 		return false, nil
 	}
-	_, err = mw.sendMessage(tcfg.Cfg.Telegram.BotID, fmt.Sprintf("/updatead-%d", in.AddID))
+	_, err = mw.sendMessage(tcfg.Cfg.Telegram.BotID, fmt.Sprintf("/updatead-%d", in.AdID))
 	assert.Nil(err)
 	_, err = mw.fwdMessage(tcfg.Cfg.Telegram.BotID, ad.CliMessageID.String)
+
 	assert.Nil(err)
 	return false, nil
 }
@@ -177,6 +178,130 @@ func (mw *MultiWorker) getChanStat(in *commands.GetChanCommand) (bool, error) {
 	return false, nil
 
 }
+func (mw *MultiWorker) transaction(m *bot.Manager, chad *bot.ChannelAd, channelAdDetail *bot.ChannelAdDetail) (bool, error) {
+	err := m.Begin()
+	if err != nil {
+		return true, err
+	}
+	defer func() {
+		if err != nil {
+			assert.Nil(m.Rollback())
+		} else {
+			err = m.Commit()
+		}
+
+		if err != nil {
+			chad = nil
+		}
+	}()
+	err = m.UpdateChannelAd(chad)
+	if err != nil {
+		return true, err
+	}
+	err = m.CreateChannelAdDetail(channelAdDetail)
+	if err != nil {
+		return true, err
+	}
+	return false, err
+}
+
+func (mw *MultiWorker) existChannelAdFor(h []tgo.History, cliMessageID string, len int) (int64, int64, int64) {
+	var pos int64
+	var view int64
+	var warning int64
+	warning = 1
+	for k := range h {
+		if h[k].Event == "message" && h[k].Service == false {
+			if h[k].FwdFrom != nil {
+				if h[k].ID == cliMessageID {
+					warning = 0
+					view = int64(h[k].Views)
+					pos = int64(len - k)
+				}
+			}
+		}
+	}
+	return pos, view, warning
+}
+
+func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error) {
+	m := bot.NewBotManager()
+	chad, err := m.FindChannelIDAdByAdID(in.ChannelID, in.AdID)
+	assert.Nil(err)
+	if chad.Active == "no" || !chad.Active.IsValid() {
+		return false, nil
+	}
+	if chad.CliMessageID == "" {
+		rabbit.PublishAfter(&commands.ExistChannelAd{
+			ChannelID: in.ChannelID,
+			AdID:      in.AdID,
+		}, tcfg.Cfg.Telegram.TimeReQueUe)
+	}
+	if !chad.End.Valid {
+		return false, nil
+	}
+	ch := chn.NewChnManager()
+	channel, err := ch.FindChannelByID(in.ChannelID)
+	assert.Nil(err)
+	c, err := m.FindKnownChannelByName(channel.Name)
+	assert.Nil(err)
+	a := ads.NewAdsManager()
+	ad, err := a.FindAdByID(chad.AdID)
+	assert.Nil(err)
+	if err != nil {
+		ch, err := mw.discoverChannel(channel.Name)
+		assert.Nil(err)
+		c, err = bot.NewBotManager().CreateChannelByRawData(ch)
+		assert.Nil(err)
+	}
+	h, err := mw.getLastMessages(c.TelegramID, tcfg.Cfg.Telegram.LastPostChannel, 0)
+	assert.Nil(err)
+	chde, err := m.FindChanDetailByChannelID(chad.ChannelID)
+	assert.Nil(err)
+	//var len int64
+	len := len(h)
+	depos := tcfg.Cfg.Telegram.PositionAdDefault
+	if ad.Position.Valid {
+		depos = ad.Position.Int64
+	}
+	/*var pos int64
+	var view int64
+	var warning int64
+	warning = 1*/
+	var possible int64
+	pos, view, warning := mw.existChannelAdFor(h, chad.CliMessageID, len)
+
+	possible = int64(chde.TotalView / chde.Num)
+	channelAdDetail := &bot.ChannelAdDetail{}
+	chad.View = view
+	chad.PossibleView = possible
+	if pos < depos {
+		warning = 1
+	}
+	chad.Warning = chad.Warning + warning
+	if chad.Warning >= tcfg.Cfg.Telegram.LimitCountWarning {
+		//todo send message to user
+		chad.End = common.NullTime{Valid: true, Time: time.Now()}
+	}
+
+	channelAdDetail.AdID = chad.AdID
+	channelAdDetail.AdID = chad.ChannelID
+	channelAdDetail.Warning = warning
+	channelAdDetail.Position = common.NullInt64{Valid: pos != 0, Int64: pos}
+	channelAdDetail.View = view
+	//transaction
+	res, err := mw.transaction(m, chad, channelAdDetail)
+	if res == true {
+		return true, err
+	}
+
+	rabbit.PublishAfter(&commands.ExistChannelAd{
+		ChannelID: in.ChannelID,
+		AdID:      in.AdID,
+	}, tcfg.Cfg.Telegram.TimeReQueUe)
+
+	return false, nil
+}
 
 // NewMultiWorker create a multi worker that listen on all commands
 func NewMultiWorker(ip net.IP, port int) (*MultiWorker, error) {
@@ -192,7 +317,9 @@ func NewMultiWorker(ip net.IP, port int) (*MultiWorker, error) {
 		return nil, err
 	}
 	go rabbit.RunWorker(&commands.GetLastCommand{}, res.getLast, 1)
-	go rabbit.RunWorker(&commands.IdentifyAD{}, res.identifyAD, 1)
 	go rabbit.RunWorker(&commands.GetChanCommand{}, res.getChanStat, 1)
+	go rabbit.RunWorker(&commands.IdentifyAD{}, res.identifyAD, 1)
+	go rabbit.RunWorker(&commands.ExistChannelAd{}, res.existChannelAd, 1)
+
 	return res, nil
 }
