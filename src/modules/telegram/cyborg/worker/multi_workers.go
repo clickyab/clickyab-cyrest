@@ -22,6 +22,8 @@ import (
 	"sort"
 
 	"github.com/Sirupsen/logrus"
+	"strconv"
+	"regexp"
 )
 
 // MultiWorker is a worker for all commands but share a single tcli client
@@ -29,6 +31,7 @@ type MultiWorker struct {
 	client tgo.TelegramCli
 	lock   *sync.Mutex
 }
+var ChnAdPattern = regexp.MustCompile(`^([0-9])/([0-9])$`)
 
 // Ping command verify if the client is alive
 func (mw *MultiWorker) Ping() error {
@@ -328,6 +331,42 @@ func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error)
 	return false, nil
 }
 
+func (mw *MultiWorker) updateMessage(in *commands.UpdateMessage) (bool, error) {
+	channel, _ := mw.discoverChannel(in.CLiChannelID)
+
+	caManager := bot.NewBotManager()
+	offset, count := 0, 50
+
+	history, err := mw.getLastMessages(channel.ID, count, offset)
+	if err != nil {
+		return false, err
+	}
+	for i, h := range history {
+		codes := ChnAdPattern.FindStringSubmatch(h.Text)
+		adID, _ := strconv.ParseInt(codes[1], 10, 0)
+		channelID := codes[2]
+		//@todo query find ad and channel
+		chn, err := caManager.FindChannelAdByAdIDAndChnID(adID, channelID)
+
+		if err != nil {
+			logrus.Warn(err)
+			continue
+		}
+		if chn.CliMessageID == h.ID {
+			//@todo break and reqeue --already fill
+			break
+
+		}
+		//@todo update telegramcliID
+		chn.CliMessageID = history[i - 1].ID
+		assert.Nil(caManager.UpdateChannelAd(chn))
+
+	}
+	err = rabbit.PublishAfter(in, 2 * time.Minute)
+	return false, err
+}
+
+
 // NewMultiWorker create a multi worker that listen on all commands
 func NewMultiWorker(ip net.IP, port int) (*MultiWorker, error) {
 	t, err := tgo.NewTelegramCli(ip, port)
@@ -346,6 +385,6 @@ func NewMultiWorker(ip net.IP, port int) (*MultiWorker, error) {
 	go rabbit.RunWorker(&commands.IdentifyAD{}, res.identifyAD, 1)
 	go rabbit.RunWorker(&commands.ExistChannelAd{}, res.existChannelAd, 1)
 	go rabbit.RunWorker(&commands.SelectAd{}, res.selectAd, 1)
-
+	go rabbit.RunWorker(&commands.UpdateMessage{}, res.updateMessage, 1)
 	return res, nil
 }
