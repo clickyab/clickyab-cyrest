@@ -41,3 +41,24 @@ func (u *Controller) listCityByProvince(ctx echo.Context) error {
 	}
 	return u.OKResponse(ctx, city)
 }
+
+// listCityByID
+// @Route {
+//		url	=	/city/get/:id
+//		method	=	get
+//		middleware = authz.Authenticate
+//		200	=	loc.City
+//		400	=	base.ErrorResponseSimple
+// }
+func (u *Controller) listCityByID(ctx echo.Context) error {
+	m := loc.NewLocManager()
+	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	city, err := m.FindCityByID(id)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	return u.OKResponse(ctx, city)
+}
