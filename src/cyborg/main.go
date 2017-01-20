@@ -6,6 +6,7 @@ import (
 	"common/initializer"
 	"common/utils"
 	"common/version"
+	"modules/telegram/config"
 	"modules/telegram/cyborg/worker"
 	"net"
 )
@@ -18,7 +19,7 @@ func main() {
 	defer initializer.Initialize().Finalize()
 
 	version.LogVersion().Infof("Application started")
-	ips, err := net.LookupIP(config.Config.Telegram.CLIAddress)
+	ips, err := net.LookupIP(tcfg.Cfg.Telegram.CLIAddress)
 	assert.Nil(err)
 	var (
 		ip    net.IP
@@ -32,7 +33,7 @@ func main() {
 		}
 	}
 	assert.True(found, "no ip found")
-	_, err = worker.NewMultiWorker(ip, config.Config.Telegram.CLIPort)
+	_, err = worker.NewMultiWorker(ip, tcfg.Cfg.Telegram.CLIPort)
 	assert.Nil(err)
 
 	utils.WaitExitSignal()

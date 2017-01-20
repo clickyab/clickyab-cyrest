@@ -4,9 +4,9 @@ import (
 	"common/assert"
 	"common/config"
 	"common/initializer"
-	"common/tgbot"
 	"common/utils"
 	"common/version"
+	"modules/telegram/common/tgbot"
 )
 
 func main() {

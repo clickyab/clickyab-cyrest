@@ -1,8 +1,8 @@
 package bot
 
 import (
-	"common/tgo"
 	"errors"
+	"modules/telegram/common/tgo"
 	"time"
 )
 

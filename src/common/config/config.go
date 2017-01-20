@@ -65,14 +65,6 @@ type AppConfig struct {
 		MinPerPage int `onion:"min_per_page"`
 	}
 
-	Telegram struct {
-		APIKey string `onion:"api_key"`
-		BotID  string `onion:"bot_id"`
-
-		CLIAddress string `onion:"cli_host"`
-		CLIPort    int    `onion:"cli_port"`
-	}
-
 	Redmine struct {
 		APIKey         string
 		URL            string
@@ -141,11 +133,6 @@ func defaultLayer() onion.DefaultLayer {
 	assert.Nil(res.SetDefault("page.per_Page", 10))
 	assert.Nil(res.SetDefault("page.max_per_page", 100))
 	assert.Nil(res.SetDefault("page.min_per_Page", 1))
-
-	assert.Nil(res.SetDefault("telegram.api_key", "273335144:AAEv4uPeo68X7Scc3MLKxwMO1YI3JFkWiJM"))
-	assert.Nil(res.SetDefault("telegram.bot_id", "$0100000068c34a10ed72226be64e8d4d"))
-	assert.Nil(res.SetDefault("telegram.cli_host", "localhost"))
-	assert.Nil(res.SetDefault("telegram.cli_port", 9999))
 
 	assert.Nil(res.SetDefault("time_zone", "Asia/Tehran"))
 
