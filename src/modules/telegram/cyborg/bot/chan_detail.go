@@ -6,7 +6,7 @@ import "time"
 // @Model {
 //		table = channel_details
 //		primary = true, id
-//		find_by = id, name
+//		find_by = id, name,channel_id
 // }
 type ChanDetail struct {
 	ID         int64     `db:"id" json:"id"`

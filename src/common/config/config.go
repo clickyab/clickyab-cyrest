@@ -134,11 +134,6 @@ func defaultLayer() onion.DefaultLayer {
 	assert.Nil(res.SetDefault("page.max_per_page", 100))
 	assert.Nil(res.SetDefault("page.min_per_Page", 1))
 
-	assert.Nil(res.SetDefault("telegram.api_key", "231355079:AAF9gyIPhWNBB0l3_vI2d32o3SRGYzuqJvQ"))
-	assert.Nil(res.SetDefault("telegram.bot_id", "$0100000068c34a10ed72226be64e8d4d"))
-	assert.Nil(res.SetDefault("telegram.cli_host", "localhost"))
-	assert.Nil(res.SetDefault("telegram.cli_port", 9999))
-
 	assert.Nil(res.SetDefault("time_zone", "Asia/Tehran"))
 
 	assert.Nil(res.SetDefault("slack.channel", "notifications"))

@@ -3,7 +3,7 @@ package commands
 // IdentifyAD is the command for forward message
 type IdentifyAD struct {
 	// The ad ID
-	AddID int64
+	AdID int64
 }
 
 // GetTopic return this message topic
