@@ -57,7 +57,7 @@ type Channel struct {
 	UserID        int64             `json:"user_id" db:"user_id" title:"UserID"`
 	Name          string            `json:"name" db:"name" search:"true" title:"Name"`
 	Link          common.NullString `json:"link" db:"link" search:"true" title:"Link"`
-	AdminStatus   AdminStatus     `json:"admin_status" db:"admin_status" filter:"true" title:"AdminStatus"`
+	AdminStatus   AdminStatus       `json:"admin_status" db:"admin_status" filter:"true" title:"AdminStatus"`
 	ArchiveStatus ArchiveStatus     `json:"archive_status" db:"archive_status" filter:"true" title:"ArchiveStatus"`
 	Active        ActiveStatus      `json:"active" db:"active" filter:"true" title:"Active"`
 	CreatedAt     time.Time         `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
