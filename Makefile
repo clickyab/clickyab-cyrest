@@ -93,6 +93,9 @@ test: $(BIN)/gb
 run-test: test
 	$(BIN)/test
 
+run-pretty: pretty
+	$(BIN)/pretty
+
 watch-test:
 	make watch WATCH=test
 
