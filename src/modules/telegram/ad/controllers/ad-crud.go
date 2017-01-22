@@ -13,6 +13,9 @@ import (
 	"net/url"
 	"strconv"
 
+	"common/rabbit"
+	"modules/telegram/cyborg/commands"
+
 	echo "gopkg.in/labstack/echo.v3"
 )
 
@@ -20,6 +23,12 @@ import (
 // }
 type adPayload struct {
 	Name string `json:"name" validate:"required" error:"name is required"`
+}
+
+// @Validate {
+// }
+type adPromotePayload struct {
+	CliMessageID string `json:"cli_message_id" validate:"required" error:"cli_message_id is required"`
 }
 
 // @Validate {
@@ -63,17 +72,13 @@ func (lp *adAdminStatusPayload) ValidateExtra(ctx echo.Context) error {
 func (u *Controller) create(ctx echo.Context) error {
 	pl := u.MustGetPayload(ctx).(*adPayload)
 	m := ads.NewAdsManager()
-	currentUser, ok := authz.GetUser(ctx)
-
-	if !ok {
-		return u.NotFoundResponse(ctx, nil)
-	}
-
+	currentUser := authz.MustGetUser(ctx)
 	newAd := &ads.Ad{
 		Name:            pl.Name,
 		AdArchiveStatus: ads.AdArchiveStatusNo,
 		AdPayStatus:     ads.AdPayStatusNo,
 		AdAdminStatus:   ads.AdAdminStatusPending,
+		AdActiveStatus:  ads.AdActiveStatusNo,
 		UserID:          currentUser.ID,
 	}
 	assert.Nil(m.CreateAd(newAd))
@@ -179,6 +184,7 @@ func (u *Controller) addDescription(ctx echo.Context) error {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
 	currentAd.Description = common.MakeNullString(pl.Body)
+	currentAd.CliMessageID = common.MakeNullString("")
 	assert.Nil(m.UpdateAd(currentAd))
 	return u.OKResponse(ctx, currentAd)
 }
@@ -223,6 +229,84 @@ func (u *Controller) uploadBanner(ctx echo.Context) error {
 		return u.NotFoundResponse(ctx, nil)
 	}
 	currentAd.Src = common.MakeNullString(file)
+	currentAd.CliMessageID = common.MakeNullString("")
+	assert.Nil(m.UpdateAd(currentAd))
+	return u.OKResponse(ctx, currentAd)
+}
+
+//	promoteAd promoteAd for ad
+//	@Route	{
+//		url	=	/promote/:id
+//		method	= put
+//		payload	= adPromotePayload
+//		resource = promote_ad:self
+//		middleware = authz.Authenticate
+//		200 = ads.Ad
+//		400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) promoteAd(ctx echo.Context) error {
+	pl := u.MustGetPayload(ctx).(*adPromotePayload)
+	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	m := ads.NewAdsManager()
+	currentAd, err := m.FindAdByID(id)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	currentUser := authz.MustGetUser(ctx)
+	owner, err := aaa.NewAaaManager().FindUserByID(currentAd.UserID)
+	assert.Nil(err)
+	_, b := currentUser.HasPermOn("promote_ad", owner.ID, owner.DBParentID.Int64)
+	if !b {
+		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
+	}
+	currentAd.CliMessageID = common.MakeNullString(pl.CliMessageID)
+	currentAd.Src = common.MakeNullString("")
+	currentAd.BotChatID = common.MakeNullString("")
+	currentAd.BotMessageID = common.MakeNullString("")
+	currentAd.Description = common.MakeNullString("")
+	assert.Nil(m.UpdateAd(currentAd))
+	return u.OKResponse(ctx, currentAd)
+}
+
+//	changeActiveStatus change active status for ad
+//	@Route	{
+//		url = /change-active/:id
+//		method = put
+//		resource = change_active_ad:self
+//		middleware = authz.Authenticate
+//		200 = ads.Ad
+//		400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) changeActiveStatus(ctx echo.Context) error {
+	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	m := ads.NewAdsManager()
+	currentAd, err := m.FindAdByID(id)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	currentUser := authz.MustGetUser(ctx)
+	owner, err := aaa.NewAaaManager().FindUserByID(currentAd.UserID)
+	assert.Nil(err)
+	_, b := currentUser.HasPermOn("change_active_ad", owner.ID, owner.DBParentID.Int64)
+	if !b {
+		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
+	}
+	//check everything is good TODO: check pay status later
+	if currentAd.AdAdminStatus == "accepted" && currentAd.AdArchiveStatus == "no" && currentAd.Name != "" && currentAd.AdActiveStatus == ads.AdActiveStatusNo {
+		currentAd.AdActiveStatus = ads.AdActiveStatusYes
+		//check to add job
+		if currentAd.CliMessageID.Valid {
+			rabbit.MustPublish(commands.IdentifyAD{AdID: currentAd.ID})
+		}
+	} else {
+		currentAd.AdActiveStatus = ads.AdActiveStatusNo
+	}
 	assert.Nil(m.UpdateAd(currentAd))
 	return u.OKResponse(ctx, currentAd)
 }

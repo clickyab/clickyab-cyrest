@@ -67,7 +67,8 @@ func (mw *MultiWorker) getLastMessages(telegramID string, count int, offset int)
 	if count < 1 {
 		count = 20
 	}
-	return mw.client.History(telegramID, count, offset)
+	logrus.Warn(count, offset)
+	return mw.client.MessageHistory(telegramID, count, offset)
 }
 func (mw *MultiWorker) fwdMessage(telegramID string, messageID string) (*tgo.SuccessResp, error) {
 	mw.lock.Lock()
@@ -98,7 +99,7 @@ func (mw *MultiWorker) getLast(in *commands.GetLastCommand) (bool, error) {
 			return false, err
 		}
 	}
-	h, err := mw.getLastMessages(c.TelegramID, in.Count, 0)
+	h, err := mw.getLastMessages(c.CliTelegramID, in.Count, 0)
 	if err != nil {
 		assert.Nil(aredis.StoreHashKey(in.HashKey, "STATUS", "failed", time.Hour))
 		return false, err
@@ -149,7 +150,7 @@ func (mw *MultiWorker) getChanStat(in *commands.GetChanCommand) (bool, error) {
 	}
 	var sumView int
 	var totalCount int
-	h, err := mw.getLastMessages(c.TelegramID, in.Count, 0)
+	h, err := mw.getLastMessages(c.CliTelegramID, in.Count, 0)
 	if err != nil {
 		return false, err
 	}
@@ -165,7 +166,7 @@ func (mw *MultiWorker) getChanStat(in *commands.GetChanCommand) (bool, error) {
 		Title:      c.Title,
 		Info:       c.Info,
 		UserCount:  c.UserCount,
-		TelegramID: c.TelegramID,
+		TelegramID: c.CliTelegramID,
 		AdminCount: c.RawData.AdminsCount,
 		Num:        totalCount,
 		TotalView:  sumView,
@@ -254,7 +255,7 @@ func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error)
 		c, err = bot.NewBotManager().CreateChannelByRawData(ch)
 		assert.Nil(err)
 	}
-	h, err := mw.getLastMessages(c.TelegramID, tcfg.Cfg.Telegram.LastPostChannel, 0)
+	h, err := mw.getLastMessages(c.CliTelegramID, tcfg.Cfg.Telegram.LastPostChannel, 0)
 	assert.Nil(err)
 	chde, err := m.FindChanDetailByChannelID(chad.ChannelID)
 	assert.Nil(err)

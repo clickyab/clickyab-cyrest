@@ -13,6 +13,12 @@ import (
 	"github.com/Sirupsen/logrus"
 )
 
+// Message type const
+const Message string = "message"
+
+// Photo type const
+const Photo string = "photo"
+
 // TelegramCli is the interface to handle the telegram cli
 type TelegramCli interface {
 
@@ -28,6 +34,9 @@ type TelegramCli interface {
 	//History history <peer> [limit] [offset] Prints messages with this peer
 	// (most recent message lower). Also marks messages as read
 	History(peer string, limit, offset int) ([]History, error)
+
+	// history of just event with message
+	MessageHistory(peer string, limit, offset int) ([]History, error)
 
 	// FwdMsg fwd <peer> <msg-id>+    Forwards message to peer. Forward to secret chats is forbidden
 	FwdMsg(peer string, msg string) (*SuccessResp, error)
@@ -185,6 +194,31 @@ func (t *telegram) History(user string, limit, offset int) ([]History, error) {
 	return data, nil
 
 }
+
+func (t *telegram) MessageHistory(user string, limit, offset int) ([]History, error) {
+	var data []History
+	var res []History
+	cmd := fmt.Sprintf("history %s %d %d", user, limit, offset)
+	x, err := t.exec(cmd)
+	//fmt.Print(string(x))
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println(string(x))
+	err = json.Unmarshal(x, &data)
+	for i := range data {
+		if data[i].Event == Message {
+			res = append(res, data[i])
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	//fmt.Println(data)
+	return res, nil
+
+}
+
 func (t *telegram) UserInfo(user string) (*UserInfo, error) {
 	var data UserInfo
 	cmd := fmt.Sprintf("user_info %s", user)
