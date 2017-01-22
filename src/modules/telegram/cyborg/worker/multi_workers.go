@@ -19,6 +19,8 @@ import (
 
 	"common/models/common"
 
+	"sort"
+
 	"github.com/Sirupsen/logrus"
 )
 
@@ -124,6 +126,28 @@ func (mw *MultiWorker) identifyAD(in *commands.IdentifyAD) (bool, error) {
 
 	assert.Nil(err)
 	return false, nil
+}
+
+func (mw *MultiWorker) selectAd(in *commands.SelectAd) (bool, error) {
+	b := bot.NewBotManager()
+	chad, err := b.FindChannelAdByAdIDActive(in.ChannelID)
+	assert.Nil(err)
+	if len(chad) > 0 {
+		return false, nil
+	}
+	chooseAds, err := b.ChooseAd(in.ChannelID)
+	logrus.Info("chooseAds", chooseAds)
+	assert.Nil(err)
+	if len(chooseAds) == 0 {
+		return false, nil
+	}
+	for k := range chooseAds {
+		chooseAds[k].AffectiveView = chooseAds[k].View - chooseAds[k].PossibleView
+	}
+	sort.Sort(bot.ByAffectiveView(chooseAds))
+	logrus.Info(chooseAds)
+	return false, nil
+
 }
 
 func (mw *MultiWorker) getChanStat(in *commands.GetChanCommand) (bool, error) {
@@ -320,6 +344,7 @@ func NewMultiWorker(ip net.IP, port int) (*MultiWorker, error) {
 	go rabbit.RunWorker(&commands.GetChanCommand{}, res.getChanStat, 1)
 	go rabbit.RunWorker(&commands.IdentifyAD{}, res.identifyAD, 1)
 	go rabbit.RunWorker(&commands.ExistChannelAd{}, res.existChannelAd, 1)
+	go rabbit.RunWorker(&commands.SelectAd{}, res.selectAd, 1)
 
 	return res, nil
 }
