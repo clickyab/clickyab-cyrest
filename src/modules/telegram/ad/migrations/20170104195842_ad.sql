@@ -14,6 +14,7 @@ CREATE TABLE ads
   admin_status ENUM('pending', 'rejected','accepted'),
   archive_status ENUM('yes', 'no'),
   pay_status ENUM('yes', 'no'),
+  active_status ENUM('yes','no'),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
   updated_at TIMESTAMP DEFAULT '0000-00-00 00:00:00' NOT NULL,
   CONSTRAINT ads_id_users_id_fk FOREIGN KEY (user_id) REFERENCES users(id),

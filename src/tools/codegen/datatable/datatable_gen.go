@@ -144,6 +144,8 @@ var list{{ .Data.Entity|ucfirst }}Definition base.Columns
 // 		url = {{ .Data.URL }}
 //		method = get
 //		resource = {{ .Data.View.Total }}{{ if .HasSort }}
+//		_c_ = int , count per page
+//		_p_ = int , page number
 //		_sort_ = string, the sort and order like id:asc or id:desc available column {{ .ValidSorts }}{{end}}{{ range $f := .Data.Column }}{{ if $f.Filter }}
 //		_{{ $f.Data }}_ = string , filter the {{ $f.Data }} field valid values are {{ $f.FilterValid }}{{ end }}{{ end }}{{ range $f := .Data.Column }}{{ if $f.Searchable }}
 //		_{{ $f.Data }}_ = string , search the {{ $f.Data }} field {{ end }}{{ end }}

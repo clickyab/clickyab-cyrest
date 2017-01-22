@@ -22,6 +22,9 @@ const (
 
 	AdPayStatusYes AdPayStatus = "yes"
 	AdPayStatusNo  AdPayStatus = "no"
+
+	AdActiveStatusYes AdActiveStatus = "yes"
+	AdActiveStatusNo  AdActiveStatus = "no"
 )
 
 type (
@@ -39,6 +42,11 @@ type (
 	// @Enum{
 	// }
 	AdPayStatus string
+
+	// AdActiveStatus is the ad active status
+	// @Enum{
+	// }
+	AdActiveStatus string
 )
 
 // Ad model
@@ -62,6 +70,7 @@ type Ad struct {
 	AdAdminStatus   AdAdminStatus     `json:"admin_status" db:"admin_status" filter:"true" title:"AdminStatus"`
 	AdArchiveStatus AdArchiveStatus   `json:"archive_status" db:"archive_status" filter:"true" title:"ArchiveStatus"`
 	AdPayStatus     AdPayStatus       `json:"pay_status" db:"pay_status" filter:"true" title:"PayStatus"`
+	AdActiveStatus  AdActiveStatus    `json:"active_status" db:"active_status" filter:"true" title:"ActiveStatus"`
 	CreatedAt       time.Time         `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
 	UpdatedAt       time.Time         `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at"`
 }

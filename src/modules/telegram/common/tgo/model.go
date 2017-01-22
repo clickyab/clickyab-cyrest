@@ -79,8 +79,9 @@ type History struct {
 	Views   int    `json:"views"`
 	PostID  int    `json:"post_id"`
 	Link    string `json:"link"`
-	Media   struct {
-		Type string `json:"type"`
+	Media   *struct {
+		Type    string `json:"type"`
+		Caption string `json:"caption"`
 	} `json:"media,omitempty"`
 	FwdFrom *struct {
 		ID                string `json:"id"`

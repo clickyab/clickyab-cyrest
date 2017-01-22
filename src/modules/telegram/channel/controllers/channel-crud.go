@@ -174,9 +174,16 @@ type statusPayload struct {
 	Status chn.AdminStatus `json:"status" validate:"required"`
 }
 
+// MsgInfo is msg info
+type MsgInfo struct {
+	CliID string
+	Type  string
+	Text  string
+}
+
 // GetLastResponse is the lst response command
 type GetLastResponse struct {
-	Data   []tgo.History
+	Data   []MsgInfo
 	Status string
 }
 
@@ -243,6 +250,7 @@ func (u *Controller) statusChannel(ctx echo.Context) error {
 //	}
 func (u *Controller) getLast(ctx echo.Context) error {
 	var res []tgo.History
+	var finalRes []MsgInfo
 
 	count, err := strconv.Atoi(ctx.Param("count"))
 	if err != nil {
@@ -270,7 +278,7 @@ func (u *Controller) getLast(ctx echo.Context) error {
 		return u.OKResponse(ctx, res)
 	}
 	if b == "pending" {
-		return u.OKResponse(ctx, res)
+		return u.OKResponse(ctx, GetLastResponse{Status: "failed", Data: []MsgInfo{}})
 	} else if b == "done" {
 		stringRes, err := aredis.GetHashKey(hash, "DATA", true, 2*time.Hour)
 		if err != nil {
@@ -280,9 +288,17 @@ func (u *Controller) getLast(ctx echo.Context) error {
 		if err != nil {
 			return u.BadResponse(ctx, trans.E("failed job"))
 		}
+		for i := range res {
+			if res[i].Media == nil {
+				finalRes = append(finalRes, MsgInfo{CliID: res[i].ID, Text: res[i].Text, Type: tgo.Message})
+
+			} else if res[i].Media.Type == tgo.Photo {
+				finalRes = append(finalRes, MsgInfo{CliID: res[i].ID, Text: res[i].Media.Caption, Type: res[i].Media.Type})
+			}
+		}
 		return u.OKResponse(ctx, GetLastResponse{
 			Status: "done",
-			Data:   res,
+			Data:   finalRes,
 		})
 	} else if b == "failed" {
 		return u.BadResponse(ctx, trans.E("failed job"))
