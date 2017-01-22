@@ -19,6 +19,7 @@ type Config struct {
 	o *onion.Onion
 	// Chat id of admins
 	admins []int64
+	verify []int64
 
 	Telegram struct {
 		APIKey string `onion:"api_key"`
@@ -38,6 +39,7 @@ func (c *Config) Initialize(o *onion.Onion) []onion.Layer {
 	c.o = o
 	d := onion.NewDefaultLayer()
 	assert.Nil(d.SetDefault("telegram.admins", "70018667"))
+	assert.Nil(d.SetDefault("telegram.verify", "70018667"))
 
 	assert.Nil(d.SetDefault("telegram.api_key", "231355079:AAF9gyIPhWNBB0l3_vI2d32o3SRGYzuqJvQ"))
 	assert.Nil(d.SetDefault("telegram.bot_id", "$0100000068c34a10ed72226be64e8d4d"))
@@ -60,6 +62,14 @@ func (c *Config) Loaded() {
 		c.admins = append(c.admins, x)
 	}
 
+	verify := c.o.GetString("telegram.verify")
+	verifyArray := strings.Split(verify, ",")
+	for i := range verifyArray {
+		x, err := strconv.ParseInt(verifyArray[i], 10, 0)
+		assert.Nil(err)
+		c.verify = append(c.verify, x)
+	}
+
 	c.o.GetStruct("", c)
 }
 
@@ -67,6 +77,17 @@ func (c *Config) Loaded() {
 func (c *Config) IsAdmin(chID int64) bool {
 	for i := range c.admins {
 		if c.admins[i] == chID {
+			return true
+		}
+	}
+
+	return false
+}
+
+// IsVerify check if the current user is admin
+func (c *Config) IsVerify(chID int64) bool {
+	for i := range c.verify {
+		if c.verify[i] == chID {
 			return true
 		}
 	}
