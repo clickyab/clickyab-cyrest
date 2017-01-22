@@ -437,21 +437,22 @@ func UploadFromURL(link string, uID int64) (string, error) {
 		os.Remove(filePath)
 		return "", errors.New("error while uploading file")
 	}
-	srcPath := fmt.Sprintf("%s%s", fcfg.Fcfg.File.UploadPath, filepath.Join(year, month, newFileName))
 	if downSize > fcfg.Fcfg.Size.MaxDownload {
 		os.Remove(filePath)
 		return "", errors.New("size not valid")
 	}
+	fpath := filepath.Join(year, month, newFileName)
+
 	newFile := &File{
 		DBName:   newFileName,
 		RealName: realFileName,
-		Src:      srcPath,
+		Src:      fpath,
 		Type:     typ,
 		Size:     downSize,
 		UserID:   uID,
 	}
 	assert.Nil(NewFilaManager().CreateFile(newFile))
-	return newFile.Src, nil
+	return fpath, nil
 }
 
 // CheckUpload is the check upload func
@@ -465,7 +466,7 @@ func CheckUpload(link string, uID int64) (string, error) {
 		return "", errors.New("url not valid")
 	}
 	if host == fcfg.Fcfg.File.UploadPath {
-		return link, nil
+		return urlObj.Path, nil
 	}
 	return UploadFromURL(link, uID)
 }

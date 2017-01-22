@@ -27,13 +27,12 @@ func (bb *bot) updateAD(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 	if err == nil {
 		tgbot.RegisterUserHandler(m.Chat.ID, func(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 			defer tgbot.UnRegisterUserHandler(m.Chat.ID)
-			botChatID := strconv.FormatInt(m.Chat.ID, 10)
-			botMsgID := strconv.Itoa(m.MessageID)
+
 			n := ads.NewAdsManager()
 			currentAd, err := n.FindAdByID(id)
 			assert.Nil(err)
-			currentAd.BotChatID = common.MakeNullString(botChatID)
-			currentAd.BotMessageID = common.MakeNullString(botMsgID)
+			currentAd.BotChatID = common.NullInt64{Valid: true, Int64: m.Chat.ID}
+			currentAd.BotMessageID = common.NullInt64{Valid: true, Int64: int64(m.MessageID)}
 			assert.Nil(n.UpdateAd(currentAd))
 
 		}, time.Minute)

@@ -111,7 +111,7 @@ func (u *Controller) upload(ctx echo.Context) error {
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
 	}
-	srcPath := fmt.Sprintf("%s%s", fcfg.Fcfg.File.UploadPath, filepath.Join(year, month, newFilename))
+	srcPath := filepath.Join(year, month, newFilename)
 	m := fila.NewFilaManager()
 	newFile := &fila.File{
 		RealName: fileInfo.Name(),
@@ -122,5 +122,7 @@ func (u *Controller) upload(ctx echo.Context) error {
 		Size:     size,
 	}
 	assert.Nil(m.CreateFile(newFile))
+	// TODO : Dirty hack to handle upload
+	newFile.Src = fmt.Sprintf("%s%s", fcfg.Fcfg.File.UploadPath, filepath.Join(year, month, newFilename))
 	return u.OKResponse(ctx, newFile)
 }
