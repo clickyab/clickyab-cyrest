@@ -93,7 +93,7 @@ test: $(BIN)/gb
 run-test: test
 	$(BIN)/test
 
-run-pretty: pretty
+run-pretty:
 	$(BIN)/pretty
 
 watch-test:
