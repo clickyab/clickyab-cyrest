@@ -66,7 +66,7 @@ type Channel struct {
 }
 
 // ChannelCreate a new channel
-func (m *Manager) ChannelCreate(admin, link, name string, status AdminStatus, active ActiveStatus, userID int64) *Channel {
+func (m *Manager) ChannelCreate(link, name string, status AdminStatus, active ActiveStatus, userID int64) *Channel {
 
 	ch := &Channel{
 		Link:        common.MakeNullString(link),
@@ -195,7 +195,7 @@ func (m *Manager) FillChannelDataTableArray(u base.PermInterfaceComplete, filter
 }
 
 // EditChannel function for channel editing
-func (m *Manager) EditChannel(admin, link, name string, status AdminStatus, activeStatus ActiveStatus, userID int64, createdAt time.Time, id int64) *Channel {
+func (m *Manager) EditChannel(link, name string, status AdminStatus, activeStatus ActiveStatus, userID int64, createdAt time.Time, id int64) *Channel {
 
 	ch := &Channel{
 		ID:          id,
