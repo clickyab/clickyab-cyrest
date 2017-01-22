@@ -146,3 +146,15 @@ func (m *Manager) FillAdDataTableArray(
 	assert.Nil(err)
 	return res, count
 }
+
+// LoadNextAd return the next ad in the system
+func (m *Manager) LoadNextAd(last int64) (*Ad, error) {
+	q := fmt.Sprintf("SELECT * FROM %s WHERE pay_status = ? AND admin_status = ? AND active_status = ? AND id > ? LIMIT 1", AdTableFull)
+	res := Ad{}
+	err := m.GetDbMap().SelectOne(&res, q, AdPayStatusYes, AdAdminStatusPending, AdActiveStatusYes, last)
+	if err != nil && last > 0 {
+		return m.LoadNextAd(0)
+	}
+
+	return &res, err
+}

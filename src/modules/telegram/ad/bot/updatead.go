@@ -86,7 +86,7 @@ func (bb *bot) Initialize() {
 
 	tgbot.RegisterMessageHandler("/updatead", bb.updateAD)
 	tgbot.RegisterMessageHandler("/ad", bb.wantAD)
-	//assert.Nil(b.Start())
+	tgbot.RegisterMessageHandler("/confirm", bb.confirm)
 }
 
 func init() {
