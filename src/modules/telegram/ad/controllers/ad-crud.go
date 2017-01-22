@@ -264,8 +264,8 @@ func (u *Controller) promoteAd(ctx echo.Context) error {
 	}
 	currentAd.CliMessageID = common.MakeNullString(pl.CliMessageID)
 	currentAd.Src = common.MakeNullString("")
-	currentAd.BotChatID = common.MakeNullString("")
-	currentAd.BotMessageID = common.MakeNullString("")
+	currentAd.BotChatID = common.NullInt64{}
+	currentAd.BotMessageID = common.NullInt64{}
 	currentAd.Description = common.MakeNullString("")
 	assert.Nil(m.UpdateAd(currentAd))
 	return u.OKResponse(ctx, currentAd)
