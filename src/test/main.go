@@ -12,9 +12,9 @@ func main() {
 	config.InitApplication()
 
 	defer initializer.Initialize().Finalize()
-	rabbit.MustPublish(commands.GetChanCommand{
-		ChannelID: 1,
-		Count:     20,
+	rabbit.MustPublish(commands.SelectAd{
+		ChannelID: 2,
+		ChatID:    1,
 	})
 
 }
