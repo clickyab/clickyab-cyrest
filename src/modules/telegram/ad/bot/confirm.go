@@ -2,7 +2,6 @@ package bot
 
 import (
 	"common/assert"
-	tcfg "modules/telegram/config"
 
 	"modules/telegram/ad/ads"
 
@@ -11,6 +10,9 @@ import (
 	"strconv"
 
 	"fmt"
+
+	"modules/misc/base"
+	"modules/telegram/teleuser/tlu"
 
 	"gopkg.in/telegram-bot-api.v4"
 )
@@ -27,7 +29,13 @@ func doMessage(bot *tgbotapi.BotAPI, chatID int64, m string) {
 }
 
 func (bb *bot) confirm(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
-	if !tcfg.Cfg.IsVerify(m.Chat.ID) {
+	u, err := tlu.NewTluManager().GetUser(m.Chat.ID)
+	if err != nil {
+		// No action
+		doMessage(bot, m.Chat.ID, "<b>Not authorized</b>")
+		return
+	}
+	if _, ok := u.HasPerm(base.ScopeGlobal, "confirm_ad"); !ok {
 		// No action
 		doMessage(bot, m.Chat.ID, "<b>Not authorized</b>")
 		return
