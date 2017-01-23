@@ -1,9 +1,12 @@
 package tgbot
 
 import (
+	"common/assert"
 	"common/initializer"
 	"modules/telegram/config"
 	"time"
+
+	"gopkg.in/telegram-bot-api.v4"
 )
 
 type tgbotInitializer struct {
@@ -34,6 +37,12 @@ func UnRegisterUserHandler(i int64) {
 // Start the handler
 func Start() error {
 	return handler.Start()
+}
+
+// Send a message using the global handler
+func Send(c tgbotapi.Chattable) (tgbotapi.Message, error) {
+	assert.NotNil(handler, "[BUG] call this to early")
+	return handler.Send(c)
 }
 
 func init() {

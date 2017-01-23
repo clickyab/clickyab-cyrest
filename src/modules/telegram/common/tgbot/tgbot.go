@@ -28,6 +28,8 @@ type TelegramBot interface {
 	RegisterUserHandler(int64, HandleMessage, time.Duration)
 	// UnRegisterUserHandler redirect all user message to a chat
 	UnRegisterUserHandler(int64)
+	// Send a message using this interface to a user
+	Send(c tgbotapi.Chattable) (tgbotapi.Message, error)
 }
 
 // HandleMessage is the callback for message with router
@@ -40,6 +42,7 @@ type telegramBot struct {
 	started  int32
 	users    map[int64]HandleMessage
 	sessions map[int64]string
+	bot      *tgbotapi.BotAPI
 }
 
 // NewTelegramBot return the telegram bot api
@@ -169,19 +172,28 @@ func (tb *telegramBot) Start() error {
 	}
 	defer atomic.SwapInt32(&tb.started, 0)
 
-	bot, err := tgbotapi.NewBotAPI(tb.token)
+	var err error
+	tb.bot, err = tgbotapi.NewBotAPI(tb.token)
 	if err != nil {
 		return err
 	}
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
-	updates, err := bot.GetUpdatesChan(u)
+	updates, err := tb.bot.GetUpdatesChan(u)
 	if err != nil {
 		return err
 	}
 
-	tb.internalStart(bot, updates)
+	tb.internalStart(tb.bot, updates)
 
 	return nil
+}
+
+func (tb *telegramBot) Send(c tgbotapi.Chattable) (tgbotapi.Message, error) {
+	if atomic.CompareAndSwapInt32(&tb.started, 0, 1) {
+		return tgbotapi.Message{}, errors.New("not yet started")
+	}
+
+	return tb.bot.Send(c)
 }
