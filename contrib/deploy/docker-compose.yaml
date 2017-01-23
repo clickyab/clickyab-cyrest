@@ -27,7 +27,7 @@ services:
   tgcli:
     build: ./tgcli
     volumes:
-      - "/home/cy/.telegram-cli:/root/.telegram-cli"
+      - "/home/cy/.telegram-cli:/home/telegramd/.telegram-cli"
     command: tg
 
   app:
