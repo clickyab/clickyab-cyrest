@@ -351,7 +351,7 @@ func (mw *MultiWorker) updateMessage(in *commands.UpdateMessage) (bool, error) {
 			return false, err
 		}
 	}
-	caManager := bot.NewBotManager()
+	caManager := ads.NewAdsManager()
 
 	history, err := mw.getLastMessages(c.CliTelegramID, in.Count, in.Offset)
 	assert.Nil(err)
