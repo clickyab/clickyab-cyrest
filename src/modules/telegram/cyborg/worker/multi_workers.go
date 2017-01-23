@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"modules/telegram/ad/ads"
-	"modules/telegram/channel/chn"
 	"modules/telegram/common/tgo"
 	"modules/telegram/config"
 	"modules/telegram/cyborg/bot"
@@ -136,7 +135,7 @@ func (mw *MultiWorker) identifyAD(in *commands.IdentifyAD) (bool, error) {
 }
 
 func (mw *MultiWorker) selectAd(in *commands.SelectAd) (bool, error) {
-	b := bot.NewBotManager()
+	b := ads.NewAdsManager()
 	chad, err := b.FindChannelAdByAdIDActive(in.ChannelID)
 	assert.Nil(err)
 	if len(chad) > 0 {
@@ -151,7 +150,7 @@ func (mw *MultiWorker) selectAd(in *commands.SelectAd) (bool, error) {
 	for k := range chooseAds {
 		chooseAds[k].AffectiveView = chooseAds[k].View - chooseAds[k].PossibleView
 	}
-	sort.Sort(bot.ByAffectiveView(chooseAds))
+	sort.Sort(ads.ByAffectiveView(chooseAds))
 	//todo send ad to user
 	return false, nil
 
@@ -159,7 +158,7 @@ func (mw *MultiWorker) selectAd(in *commands.SelectAd) (bool, error) {
 
 func (mw *MultiWorker) getChanStat(in *commands.GetChanCommand) (bool, error) {
 	//find channel
-	chnManager := chn.NewChnManager()
+	chnManager := ads.NewAdsManager()
 	channel, err := chnManager.FindChannelByID(in.ChannelID)
 	assert.Nil(err)
 	//check if rhe channel exists in known channel
@@ -191,7 +190,7 @@ func (mw *MultiWorker) getChanStat(in *commands.GetChanCommand) (bool, error) {
 		}
 
 	}
-	cd := &bot.ChanDetail{
+	cd := &ads.ChanDetail{
 		Name:       c.Name,
 		Title:      c.Title,
 		Info:       c.Info,
@@ -202,14 +201,14 @@ func (mw *MultiWorker) getChanStat(in *commands.GetChanCommand) (bool, error) {
 		TotalView:  sumView,
 		ChannelID:  channel.ID,
 	}
-	err = knownManger.CreateChanDetail(cd)
+	err = ads.NewAdsManager().CreateChanDetail(cd)
 	assert.Nil(err)
 	rabbit.PublishAfter(in, 24*time.Hour)
 	//ch, err := mw.discoverChannel(in.Channel)
 	return false, nil
 
 }
-func (mw *MultiWorker) transaction(m *bot.Manager, chad *bot.ChannelAd, channelAdDetail *bot.ChannelAdDetail) (bool, error) {
+func (mw *MultiWorker) transaction(m *ads.Manager, chad *ads.ChannelAd, channelAdDetail *ads.ChannelAdDetail) (bool, error) {
 	err := m.Begin()
 	if err != nil {
 		return true, err
@@ -256,7 +255,7 @@ func (mw *MultiWorker) existChannelAdFor(h []tgo.History, cliMessageID string, l
 }
 
 func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error) {
-	m := bot.NewBotManager()
+	m := ads.NewAdsManager()
 	chad, err := m.FindChannelIDAdByAdID(in.ChannelID, in.AdID)
 	assert.Nil(err)
 	if chad.Active == "no" || !chad.Active.IsValid() {
@@ -271,10 +270,9 @@ func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error)
 	if !chad.End.Valid {
 		return false, nil
 	}
-	ch := chn.NewChnManager()
-	channel, err := ch.FindChannelByID(in.ChannelID)
+	channel, err := m.FindChannelByID(in.ChannelID)
 	assert.Nil(err)
-	c, err := m.FindKnownChannelByName(channel.Name)
+	c, err := bot.NewBotManager().FindKnownChannelByName(channel.Name)
 	assert.Nil(err)
 	a := ads.NewAdsManager()
 	ad, err := a.FindAdByID(chad.AdID)
@@ -303,7 +301,7 @@ func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error)
 	pos, view, warning := mw.existChannelAdFor(h, chad.CliMessageID, len)
 
 	possible = int64(chde.TotalView / chde.Num)
-	channelAdDetail := &bot.ChannelAdDetail{}
+	channelAdDetail := &ads.ChannelAdDetail{}
 	chad.View = view
 	chad.PossibleView = possible
 	if pos < depos {

@@ -1,10 +1,8 @@
-package bot
+package ads
 
 import (
 	"common/models/common"
 	"fmt"
-	"modules/telegram/ad/ads"
-
 	"time"
 )
 
@@ -42,7 +40,7 @@ type ChannelAd struct {
 
 //SelectAd choose ad
 type SelectAd struct {
-	ads.Ad
+	Ad
 	View          int64 `db:"view" json:"view"`
 	Viewed        int64 `db:"viewed" json:"viewed"`
 	PossibleView  int64 `db:"possible_view" json:"possible_view"`
@@ -106,20 +104,20 @@ func (m *Manager) ChooseAd(channelID int64) ([]SelectAd, error) {
 			"INNER JOIN %s on %s.ad_id = %s.id "+
 			"WHERE %s.channel_id != ? "+
 			"GROUP BY %s.ad_id ",
-			ads.AdTableFull,
+			AdTableFull,
 			ChannelAdTableFull,
 			ChannelAdTableFull,
-			ads.PlanTableFull,
+			PlanTableFull,
 
-			ads.AdTableFull,
+			AdTableFull,
 
-			ads.PlanTableFull,
-			ads.PlanTableFull,
-			ads.AdTableFull,
+			PlanTableFull,
+			PlanTableFull,
+			AdTableFull,
 
 			ChannelAdTableFull,
 			ChannelAdTableFull,
-			ads.AdTableFull,
+			AdTableFull,
 			ChannelAdTableFull,
 			ChannelAdTableFull,
 		),

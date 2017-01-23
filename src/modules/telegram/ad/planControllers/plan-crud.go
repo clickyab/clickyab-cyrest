@@ -2,7 +2,8 @@ package plan
 
 import (
 	"common/assert"
-	"modules/telegram/plan/pln"
+
+	"modules/telegram/ad/ads"
 
 	"gopkg.in/labstack/echo.v3"
 )
@@ -17,7 +18,7 @@ import (
 //	400 = base.ErrorResponseSimple
 //	}
 func (u *Controller) allPlan(ctx echo.Context) error {
-	m := pln.NewPlnManager()
+	m := ads.NewAdsManager()
 	plns, err := m.GetAllActivePlans()
 	assert.Nil(err)
 	return u.OKResponse(ctx, plns)

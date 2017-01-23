@@ -1,4 +1,4 @@
-package chn
+package ads
 
 import (
 	"common/assert"
@@ -22,11 +22,6 @@ const (
 
 	ArchiveStatusYes ArchiveStatus = "yes"
 	ArchiveStatusNo  ArchiveStatus = "no"
-
-	//ActiveStatusYes is the yes status
-	ActiveStatusYes ActiveStatus = "yes"
-	// ActiveStatusNo is the no status
-	ActiveStatusNo ActiveStatus = "no"
 )
 
 type (
@@ -34,11 +29,6 @@ type (
 	// @Enum{
 	// }
 	AdminStatus string
-
-	// ActiveStatus is the channel active
-	// @Enum{
-	// }
-	ActiveStatus string
 
 	// ArchiveStatus is the channel active
 	// @Enum{
@@ -131,7 +121,7 @@ func (m *Manager) FindChannelsByChatIDName(chatID int64, name string) (*Channel,
 //		url = /list
 //		entity = channel
 //		view = channel_list:self
-//		controller = modules/telegram/channel/controllers
+//		controller = modules/telegram/ad/chanControllers
 //		fill = FillChannelDataTableArray
 //		_edit = channel_edit:self
 //		_change = channel_manage:global
