@@ -17,6 +17,8 @@ import (
 	"strconv"
 	"time"
 
+	"common/models/common"
+
 	echo "gopkg.in/labstack/echo.v3"
 )
 
@@ -26,6 +28,13 @@ type channelPayload struct {
 	UserID int64  `json:"user_id"`
 	Name   string `json:"name" validate:"required"`
 	Link   string `json:"link" `
+}
+
+// @Validate {
+// }
+type editChannelPayload struct {
+	Name string `json:"name" validate:"required"`
+	Link string `json:"link" `
 }
 
 //	createChannel
@@ -56,7 +65,15 @@ func (u *Controller) createChannel(ctx echo.Context) error {
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
-	ch := m.ChannelCreate(pl.Link, pl.Name, chn.AdminStatusPending, chn.ActiveStatusNo, pl.UserID)
+	ch := &chn.Channel{
+		Name:          pl.Name,
+		ArchiveStatus: chn.ArchiveStatusNo,
+		AdminStatus:   chn.AdminStatusPending,
+		Link:          common.MakeNullString(pl.Link),
+		Active:        chn.ActiveStatusNo,
+		UserID:        currentUser.ID,
+	}
+	assert.Nil(m.CreateChannel(ch))
 	return u.OKResponse(ctx, ch)
 
 }
@@ -99,14 +116,14 @@ func (u *Controller) getChannel(ctx echo.Context) error {
 //	@Route	{
 //	url	=	/:id
 //	method	= put
-//	payload	= channelPayload
+//	payload	= editChannelPayload
 //	resource = edit_channel:self
 //	middleware = authz.Authenticate
 //	200 = chn.Channel
 //	400 = base.ErrorResponseSimple
 //	}
 func (u *Controller) editChannel(ctx echo.Context) error {
-	pl := u.MustGetPayload(ctx).(*channelPayload)
+	pl := u.MustGetPayload(ctx).(*editChannelPayload)
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
@@ -120,18 +137,17 @@ func (u *Controller) editChannel(ctx echo.Context) error {
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
 	}
-	currentUser, ok := authz.GetUser(ctx)
-	if !ok {
-		return u.NotFoundResponse(ctx, nil)
-	}
+	currentUser := authz.MustGetUser(ctx)
 	_, b := currentUser.HasPermOn("edit_channel", owner.ID, owner.DBParentID.Int64)
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
+	channel.Name = pl.Name
+	channel.Link = common.MakeNullString(pl.Link)
 
-	ch := m.EditChannel(pl.Link, pl.Name, channel.AdminStatus, channel.Active, owner.ID, channel.CreatedAt, id)
+	m.UpdateChannel(channel)
 
-	return u.OKResponse(ctx, ch)
+	return u.OKResponse(ctx, channel)
 }
 
 //	active
@@ -153,18 +169,55 @@ func (u *Controller) active(ctx echo.Context) error {
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
 	}
-	currentUser, ok := authz.GetUser(ctx)
-	if !ok {
-		return u.NotFoundResponse(ctx, nil)
-	}
+	currentUser := authz.MustGetUser(ctx)
 	owner, err := aaa.NewAaaManager().FindUserByID(channel.UserID)
 	assert.Nil(err)
 	_, b := currentUser.HasPermOn("active_channel", owner.ID, owner.DBParentID.Int64)
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
-	ch := m.ChangeActive(channel.ID, channel.UserID, channel.Name, channel.Link.String, channel.AdminStatus, channel.Active, channel.CreatedAt)
-	return u.OKResponse(ctx, ch)
+	if channel.Active == chn.ActiveStatusNo {
+		channel.Active = chn.ActiveStatusYes
+	} else {
+		channel.Active = chn.ActiveStatusNo
+	}
+	assert.Nil(m.UpdateChannel(channel))
+	return u.OKResponse(ctx, channel)
+}
+
+//	changeArchive toggle archiving channel
+//	@Route	{
+//	url	=	/change-archive/:id
+//	method	= put
+//	resource = archive_channel:self
+//	middleware = authz.Authenticate
+//	200 = chn.Channel
+//	400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) changeArchive(ctx echo.Context) error {
+	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	m := chn.NewChnManager()
+	channel, err := m.FindChannelByID(id)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	currentUser := authz.MustGetUser(ctx)
+	owner, err := aaa.NewAaaManager().FindUserByID(channel.UserID)
+	assert.Nil(err)
+	_, b := currentUser.HasPermOn("archive_channel", owner.ID, owner.DBParentID.Int64)
+	if !b {
+		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
+	}
+	if channel.ArchiveStatus == chn.ArchiveStatusNo {
+		channel.ArchiveStatus = chn.ArchiveStatusYes
+	} else {
+		channel.ArchiveStatus = chn.ArchiveStatusNo
+	}
+	assert.Nil(m.UpdateChannel(channel))
+	return u.OKResponse(ctx, channel)
 }
 
 // @Validate {
@@ -217,10 +270,7 @@ func (u *Controller) statusChannel(ctx echo.Context) error {
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
 	}
-	currentUser, ok := authz.GetUser(ctx)
-	if !ok {
-		return u.NotFoundResponse(ctx, nil)
-	}
+	currentUser := authz.MustGetUser(ctx)
 
 	owner, err := aaa.NewAaaManager().FindUserByID(cha.UserID)
 	if err != nil {
@@ -300,6 +350,7 @@ func (u *Controller) getLast(ctx echo.Context) error {
 			Data:   finalRes,
 		})
 	} else if b == "failed" {
+		aredis.RemoveKey(hash)
 		return u.BadResponse(ctx, trans.E("failed job"))
 	}
 	return u.BadResponse(ctx, trans.E("failed job"))

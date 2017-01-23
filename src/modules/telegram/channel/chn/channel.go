@@ -66,7 +66,7 @@ type Channel struct {
 }
 
 // ChannelCreate a new channel
-func (m *Manager) ChannelCreate(link, name string, status AdminStatus, active ActiveStatus, userID int64) *Channel {
+func (m *Manager) ChannelCreate(link, name string, status AdminStatus, archive ArchiveStatus, active ActiveStatus, userID int64) *Channel {
 
 	ch := &Channel{
 		Link:        common.MakeNullString(link),
@@ -186,6 +186,7 @@ func (m *Manager) FillChannelDataTableArray(u base.PermInterfaceComplete, filter
 		query += fmt.Sprintf(" ORDER BY %s %s ", sort, order)
 	}
 	query += fmt.Sprintf(" LIMIT %d OFFSET %d ", limit, offset)
+	fmt.Println(countQuery)
 	count, err := m.GetDbMap().SelectInt(countQuery, params...)
 	assert.Nil(err)
 
