@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"modules/misc/middlewares"
 	"modules/misc/trans"
-	"modules/telegram/channel/chn"
 	"modules/telegram/common/tgo"
 	"modules/telegram/cyborg/commands"
 	"modules/user/aaa"
@@ -18,6 +17,8 @@ import (
 	"time"
 
 	"common/models/common"
+
+	"modules/telegram/ad/ads"
 
 	echo "gopkg.in/labstack/echo.v3"
 )
@@ -44,12 +45,12 @@ type editChannelPayload struct {
 //	payload	= channelPayload
 //	resource = create_channel:self
 //	middleware = authz.Authenticate
-//	200 = chn.Channel
+//	200 = ads.Channel
 //	400 = base.ErrorResponseSimple
 //	}
 func (u *Controller) createChannel(ctx echo.Context) error {
 	pl := u.MustGetPayload(ctx).(*channelPayload)
-	m := chn.NewChnManager()
+	m := ads.NewAdsManager()
 	currentUser, ok := authz.GetUser(ctx)
 	if !ok {
 		return u.NotFoundResponse(ctx, nil)
@@ -65,12 +66,12 @@ func (u *Controller) createChannel(ctx echo.Context) error {
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
-	ch := &chn.Channel{
+	ch := &ads.Channel{
 		Name:          pl.Name,
-		ArchiveStatus: chn.ArchiveStatusNo,
-		AdminStatus:   chn.AdminStatusPending,
+		ArchiveStatus: ads.ArchiveStatusNo,
+		AdminStatus:   ads.AdminStatusPending,
 		Link:          common.MakeNullString(pl.Link),
-		Active:        chn.ActiveStatusNo,
+		Active:        ads.ActiveStatusNo,
 		UserID:        currentUser.ID,
 	}
 	assert.Nil(m.CreateChannel(ch))
@@ -84,7 +85,7 @@ func (u *Controller) createChannel(ctx echo.Context) error {
 //	method	= get
 //	resource = list_channel:self
 //	middleware = authz.Authenticate
-//	200 = chn.Channel
+//	200 = ads.Channel
 //	400 = base.ErrorResponseSimple
 //	}
 func (u *Controller) getChannel(ctx echo.Context) error {
@@ -92,7 +93,7 @@ func (u *Controller) getChannel(ctx echo.Context) error {
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
 	}
-	m := chn.NewChnManager()
+	m := ads.NewAdsManager()
 	channel, err := m.FindChannelByID(id)
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
@@ -119,7 +120,7 @@ func (u *Controller) getChannel(ctx echo.Context) error {
 //	payload	= editChannelPayload
 //	resource = edit_channel:self
 //	middleware = authz.Authenticate
-//	200 = chn.Channel
+//	200 = ads.Channel
 //	400 = base.ErrorResponseSimple
 //	}
 func (u *Controller) editChannel(ctx echo.Context) error {
@@ -128,7 +129,7 @@ func (u *Controller) editChannel(ctx echo.Context) error {
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
 	}
-	m := chn.NewChnManager()
+	m := ads.NewAdsManager()
 	channel, err := m.FindChannelByID(id)
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
@@ -156,7 +157,7 @@ func (u *Controller) editChannel(ctx echo.Context) error {
 //	method	= put
 //	resource = active_channel:self
 //	middleware = authz.Authenticate
-//	200 = chn.Channel
+//	200 = ads.Channel
 //	400 = base.ErrorResponseSimple
 //	}
 func (u *Controller) active(ctx echo.Context) error {
@@ -164,7 +165,7 @@ func (u *Controller) active(ctx echo.Context) error {
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
 	}
-	m := chn.NewChnManager()
+	m := ads.NewAdsManager()
 	channel, err := m.FindChannelByID(id)
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
@@ -176,10 +177,10 @@ func (u *Controller) active(ctx echo.Context) error {
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
-	if channel.Active == chn.ActiveStatusNo {
-		channel.Active = chn.ActiveStatusYes
+	if channel.Active == ads.ActiveStatusNo {
+		channel.Active = ads.ActiveStatusYes
 	} else {
-		channel.Active = chn.ActiveStatusNo
+		channel.Active = ads.ActiveStatusNo
 	}
 	assert.Nil(m.UpdateChannel(channel))
 	return u.OKResponse(ctx, channel)
@@ -191,7 +192,7 @@ func (u *Controller) active(ctx echo.Context) error {
 //	method	= put
 //	resource = archive_channel:self
 //	middleware = authz.Authenticate
-//	200 = chn.Channel
+//	200 = ads.Channel
 //	400 = base.ErrorResponseSimple
 //	}
 func (u *Controller) changeArchive(ctx echo.Context) error {
@@ -199,7 +200,7 @@ func (u *Controller) changeArchive(ctx echo.Context) error {
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
 	}
-	m := chn.NewChnManager()
+	m := ads.NewAdsManager()
 	channel, err := m.FindChannelByID(id)
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
@@ -211,10 +212,10 @@ func (u *Controller) changeArchive(ctx echo.Context) error {
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
-	if channel.ArchiveStatus == chn.ArchiveStatusNo {
-		channel.ArchiveStatus = chn.ArchiveStatusYes
+	if channel.ArchiveStatus == ads.ArchiveStatusNo {
+		channel.ArchiveStatus = ads.ArchiveStatusYes
 	} else {
-		channel.ArchiveStatus = chn.ArchiveStatusNo
+		channel.ArchiveStatus = ads.ArchiveStatusNo
 	}
 	assert.Nil(m.UpdateChannel(channel))
 	return u.OKResponse(ctx, channel)
@@ -223,7 +224,7 @@ func (u *Controller) changeArchive(ctx echo.Context) error {
 // @Validate {
 // }
 type statusPayload struct {
-	Status chn.AdminStatus `json:"status" validate:"required"`
+	Status ads.AdminStatus `json:"status" validate:"required"`
 }
 
 // MsgInfo is msg info
@@ -256,7 +257,7 @@ func (lp *statusPayload) ValidateExtra(ctx echo.Context) error {
 //	payload	= statusPayload
 //	resource = status_channel:parent
 //	middleware = authz.Authenticate
-//	200 = chn.Channel
+//	200 = ads.Channel
 //	400 = base.ErrorResponseSimple
 //	}
 func (u *Controller) statusChannel(ctx echo.Context) error {
@@ -265,7 +266,7 @@ func (u *Controller) statusChannel(ctx echo.Context) error {
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
 	}
-	m := chn.NewChnManager()
+	m := ads.NewAdsManager()
 	cha, err := m.FindChannelByID(id)
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)

@@ -4,14 +4,12 @@ import (
 	"common/assert"
 	"common/initializer"
 	"common/models/common"
+	"fmt"
 	"modules/telegram/ad/ads"
 	"modules/telegram/common/tgbot"
 	"strconv"
 	"strings"
 	"time"
-
-	"fmt"
-	"modules/telegram/channel/chn"
 
 	"gopkg.in/telegram-bot-api.v4"
 )
@@ -42,7 +40,7 @@ func (bb *bot) updateAD(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 
 func (bb *bot) wantAD(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 	//find channels
-	chnManger := chn.NewChnManager()
+	chnManger := ads.NewAdsManager()
 	if strings.Contains(m.Text, "_") {
 		res := strings.Split(m.Text, "_")
 		if len(res) != 2 {

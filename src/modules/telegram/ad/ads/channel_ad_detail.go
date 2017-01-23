@@ -1,4 +1,4 @@
-package bot
+package ads
 
 import (
 	"common/models/common"

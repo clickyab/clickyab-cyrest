@@ -186,20 +186,14 @@ codegen-misc: tools-codegen
 	@$(BIN)/codegen -p modules/misc/controllers
 	@$(BIN)/codegen -p modules/misc/t9n
 
-codegen-channel: tools-codegen
-	$(BIN)/codegen -p modules/telegram/channel/controllers
-	$(BIN)/codegen -p modules/telegram/channel/chn
-
 codegen-ad: tools-codegen
-	$(BIN)/codegen -p modules/telegram/ad/controllers
+	$(BIN)/codegen -p modules/telegram/ad/adControllers
+	$(BIN)/codegen -p modules/telegram/ad/chanControllers
+	$(BIN)/codegen -p modules/telegram/ad/planControllers
 	$(BIN)/codegen -p modules/telegram/ad/ads
 
 codegen-cyborg: tools-codegen
 	$(BIN)/codegen -p modules/telegram/cyborg/bot
-
-codegen-plan: tools-codegen
-	$(BIN)/codegen -p modules/telegram/plan/controllers
-	$(BIN)/codegen -p modules/telegram/plan/pln
 
 codegen-teleuser: tools-codegen
 	$(BIN)/codegen -p modules/telegram/teleuser/controllers
@@ -216,7 +210,7 @@ swagger-cleaner:
 swagger-client: tools-swagger
 	GOPATH=$(ROOT) cd $(ROOT)/src && $(BIN)/swagger generate client -f $(ROOT)/3rd/swagger/cyrest.yaml
 
-codegen: swagger-ui swagger-cleaner migration codegen-misc codegen-user codegen-category codegen-location codegen-channel codegen-ad codegen-teleuser codegen-plan codegen-file codegen-cyborg
+codegen: swagger-ui swagger-cleaner migration codegen-misc codegen-user codegen-category codegen-location codegen-ad codegen-teleuser codegen-file codegen-cyborg
 	@cp $(WORK_DIR)/swagger/out.yaml $(ROOT)/3rd/swagger/cyrest.yaml
 	@cp $(WORK_DIR)/swagger/out.json $(ROOT)/3rd/swagger/cyrest.json
 	@echo "Done"
