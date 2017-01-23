@@ -144,5 +144,11 @@ func defaultLayer() onion.DefaultLayer {
 	)
 	assert.Nil(res.SetDefault("slack.active", false))
 
+	assert.Nil(res.SetDefault("redmine.apikey", "a41b3d786eb2f1bae8c7749983dfe140a45684b8"))
+	assert.Nil(res.SetDefault("redmine.url", "https://tracker.clickyab.com"))
+	assert.Nil(res.SetDefault("redmine.project_id", 3))
+	assert.Nil(res.SetDefault("redmine.new_issue_type_id", 1))
+	assert.Nil(res.SetDefault("redmine.active", false))
+
 	return res
 }
