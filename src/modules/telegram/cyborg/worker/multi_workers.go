@@ -33,6 +33,7 @@ type MultiWorker struct {
 	lock   *sync.Mutex
 }
 
+//ChnAdPattern is a pattern for message
 var ChnAdPattern = regexp.MustCompile(`^([0-9]+)/([0-9]+)$`)
 
 // Ping command verify if the client is alive
@@ -336,13 +337,13 @@ func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error)
 //updateMessage get channel id and read each post on it then if not save on db,
 //save it
 func (mw *MultiWorker) updateMessage(in *commands.UpdateMessage) (bool, error) {
-	var chID string
+	defer rabbit.MustPublishAfter(in, 2*time.Minute)
 	knownManger := bot.NewBotManager()
 	c, err := knownManger.FindKnownChannelByName(in.CLiChannelName)
 	if err != nil {
 		//known channel not found
 		ch, err := mw.discoverChannel(in.CLiChannelName)
-		chID = ch.ID
+
 		if err != nil {
 			// Oh crap. can not resolve this :/
 			return false, err
@@ -352,15 +353,10 @@ func (mw *MultiWorker) updateMessage(in *commands.UpdateMessage) (bool, error) {
 			return false, err
 		}
 	}
-	chID = c.CliTelegramID
 	caManager := bot.NewBotManager()
-	offset, count := 0, 50
 
-	history, err := mw.getLastMessages(chID, count, offset)
-	if err != nil {
-
-		return false, err
-	}
+	history, err := mw.getLastMessages(c.CliTelegramID, in.Count, in.Offset)
+	assert.Nil(err)
 
 	if len(history) == 0 {
 		return true, nil
@@ -370,25 +366,30 @@ func (mw *MultiWorker) updateMessage(in *commands.UpdateMessage) (bool, error) {
 		if len(codes) == 0 {
 			continue
 		}
-		adID, _ := strconv.ParseInt(codes[1], 10, 0)
-		channelID, _ := strconv.ParseInt(codes[2], 10, 0)
-		//@todo query find ad and channel
+		adID, err := strconv.ParseInt(codes[1], 10, 0)
+		if err != nil {
+			//logrus.Warn(err)
+			continue
+		}
+		channelID, err := strconv.ParseInt(codes[2], 10, 0)
+		if err != nil {
+			//logrus.Warn(err)
+			continue
+		}
+
 		chn, err := caManager.FindChannelIDAdByAdID(adID, channelID)
 		if err != nil {
-			logrus.Warn(err)
+			//logrus.Warn(err)
 			continue
 		}
 		if chn.CliMessageID == h.ID {
-			//@todo break and reqeue --already fill
 			break
 
 		}
-		//@todo update telegramcliID
 		chn.CliMessageID = history[i-1].ID
 		assert.Nil(caManager.UpdateChannelAd(chn))
 
 	}
-	err = rabbit.PublishAfter(in, 2*time.Minute)
 	return false, err
 }
 

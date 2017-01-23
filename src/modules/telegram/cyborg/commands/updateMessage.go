@@ -1,9 +1,11 @@
 package commands
 
-// IdentifyAD is the command for forward message
+// UpdateMessage is the command for forward message
 type UpdateMessage struct {
 	// The ad ID
 	CLiChannelName string
+	Count          int
+	Offset         int
 }
 
 // GetTopic return this message topic
