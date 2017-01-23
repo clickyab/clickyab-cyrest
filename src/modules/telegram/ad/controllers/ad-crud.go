@@ -310,3 +310,40 @@ func (u *Controller) changeActiveStatus(ctx echo.Context) error {
 	assert.Nil(m.UpdateAd(currentAd))
 	return u.OKResponse(ctx, currentAd)
 }
+
+//	edit edit ad
+//	@Route	{
+//		url	=	/:id
+//		method	= put
+//		payload	= adPayload
+//		resource = edit_ad:self
+//		middleware = authz.Authenticate
+//		200 = ads.Ad
+//		400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) edit(ctx echo.Context) error {
+	pl := u.MustGetPayload(ctx).(*adPayload)
+	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	m := ads.NewAdsManager()
+	currentAd, err := m.FindAdByID(id)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	currentUser := authz.MustGetUser(ctx)
+	owner, err := aaa.NewAaaManager().FindUserByID(currentAd.UserID)
+	assert.Nil(err)
+	_, b := currentUser.HasPermOn("edit_ad", owner.ID, owner.DBParentID.Int64)
+	if !b {
+		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
+	}
+	//check if it can be edited
+	if currentAd.AdActiveStatus == ads.AdActiveStatusYes || currentAd.AdAdminStatus == ads.AdAdminStatusAccepted {
+		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
+	}
+	currentAd.Name = pl.Name
+	assert.Nil(m.UpdateAd(currentAd))
+	return u.OKResponse(ctx, currentAd)
+}
