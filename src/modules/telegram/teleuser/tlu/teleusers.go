@@ -124,3 +124,15 @@ func (m *Manager) FillTeleuserDataTableArray(u base.PermInterfaceComplete, filte
 	assert.Nil(err)
 	return res, count
 }
+
+// GetUser try to return a user with the current bot session
+func (m *Manager) GetUser(chatID int64) (*aaa.User, error) {
+	var res aaa.User
+	q := fmt.Sprintf("SELECT u.* FROM %s tu LEFT JOIN %s u ON u.id = tu.user_id WHERE tu.bot_chat_id = ?", TeleUserTableFull, aaa.UserTableFull)
+	err := m.GetDbMap().SelectOne(&res, q, chatID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
