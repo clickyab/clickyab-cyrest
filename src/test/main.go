@@ -16,5 +16,8 @@ func main() {
 		ChannelID: 2,
 		ChatID:    1,
 	})
+	rabbit.MustPublish(commands.UpdateMessage{
+		CLiChannelName: "daratest",
+	})
 
 }

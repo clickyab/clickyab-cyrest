@@ -21,9 +21,10 @@ import (
 
 	"sort"
 
-	"github.com/Sirupsen/logrus"
-	"strconv"
 	"regexp"
+	"strconv"
+
+	"github.com/Sirupsen/logrus"
 )
 
 // MultiWorker is a worker for all commands but share a single tcli client
@@ -31,7 +32,8 @@ type MultiWorker struct {
 	client tgo.TelegramCli
 	lock   *sync.Mutex
 }
-var ChnAdPattern = regexp.MustCompile(`^([0-9])/([0-9])$`)
+
+var ChnAdPattern = regexp.MustCompile(`^([0-9]+)/([0-9]+)$`)
 
 // Ping command verify if the client is alive
 func (mw *MultiWorker) Ping() error {
@@ -331,23 +333,47 @@ func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error)
 	return false, nil
 }
 
+//updateMessage get channel id and read each post on it then if not save on db,
+//save it
 func (mw *MultiWorker) updateMessage(in *commands.UpdateMessage) (bool, error) {
-	channel, _ := mw.discoverChannel(in.CLiChannelID)
-
+	var chID string
+	knownManger := bot.NewBotManager()
+	c, err := knownManger.FindKnownChannelByName(in.CLiChannelName)
+	if err != nil {
+		//known channel not found
+		ch, err := mw.discoverChannel(in.CLiChannelName)
+		chID = ch.ID
+		if err != nil {
+			// Oh crap. can not resolve this :/
+			return false, err
+		}
+		c, err = bot.NewBotManager().CreateChannelByRawData(ch)
+		if err != nil {
+			return false, err
+		}
+	}
+	chID = c.CliTelegramID
 	caManager := bot.NewBotManager()
 	offset, count := 0, 50
 
-	history, err := mw.getLastMessages(channel.ID, count, offset)
+	history, err := mw.getLastMessages(chID, count, offset)
 	if err != nil {
+
 		return false, err
+	}
+
+	if len(history) == 0 {
+		return true, nil
 	}
 	for i, h := range history {
 		codes := ChnAdPattern.FindStringSubmatch(h.Text)
+		if len(codes) == 0 {
+			continue
+		}
 		adID, _ := strconv.ParseInt(codes[1], 10, 0)
-		channelID := codes[2]
+		channelID, _ := strconv.ParseInt(codes[2], 10, 0)
 		//@todo query find ad and channel
-		chn, err := caManager.FindChannelAdByAdIDAndChnID(adID, channelID)
-
+		chn, err := caManager.FindChannelIDAdByAdID(adID, channelID)
 		if err != nil {
 			logrus.Warn(err)
 			continue
@@ -358,14 +384,13 @@ func (mw *MultiWorker) updateMessage(in *commands.UpdateMessage) (bool, error) {
 
 		}
 		//@todo update telegramcliID
-		chn.CliMessageID = history[i - 1].ID
+		chn.CliMessageID = history[i-1].ID
 		assert.Nil(caManager.UpdateChannelAd(chn))
 
 	}
-	err = rabbit.PublishAfter(in, 2 * time.Minute)
+	err = rabbit.PublishAfter(in, 2*time.Minute)
 	return false, err
 }
-
 
 // NewMultiWorker create a multi worker that listen on all commands
 func NewMultiWorker(ip net.IP, port int) (*MultiWorker, error) {
