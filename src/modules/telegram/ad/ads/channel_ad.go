@@ -37,6 +37,8 @@ type ChannelAd struct {
 	ChannelID    int64           `db:"channel_id" json:"channel_id"`
 	AdID         int64           `db:"ad_id" json:"ad_id"`
 	View         int64           `db:"view" json:"view"`
+	BotChatID    int64           `db:"bot_chat_id" json:"bot_chat_id"`
+	BotMessageID int64           `db:"bot_message_id" json:"bot_message_id"`
 	CliMessageID string          `db:"cli_message_id" json:"cli_message_id"`
 	Active       ActiveStatus    `db:"active" json:"active"`
 	Start        common.NullTime `db:"start" json:"start"`

@@ -8,6 +8,8 @@ CREATE TABLE channel_ad
     view INT,
     cli_message_id VARCHAR(70),
     warning TINYINT,
+    bot_message_id INT(11) NOT NULL,
+    bot_chat_id INT(11) NOT NULL,
     active ENUM('yes','no'),
     start TIMESTAMP  ,
     end TIMESTAMP ,
