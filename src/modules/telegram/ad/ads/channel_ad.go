@@ -1,8 +1,12 @@
 package ads
 
 import (
+	"common/assert"
 	"common/models/common"
 	"fmt"
+	"modules/misc/base"
+	"modules/user/aaa"
+	"strings"
 	"time"
 )
 
@@ -140,4 +144,121 @@ func (m *Manager) ChooseAd(channelID int64) ([]SelectAd, error) {
 	}
 
 	return res, nil
+}
+
+//ChannelAdDataTable is the ad full data in data table, after join with other field
+// @DataTable {
+//		url = /report/ad
+//		entity = ad
+//		view = report_ad:self
+//		controller = modules/telegram/ad/chanControllers
+//		fill = FillChannelAdDataTableArray
+//		_edit = ad_edit:self
+//		_change = ad_manage:global
+// }
+type ChannelAdDataTable struct {
+	Ad
+	View         int64           `db:"view" json:"view" sort:"true" title:"View"`
+	Active       ActiveStatus    `db:"active" json:"active" title:"ActiveStatus" filter:"true"`
+	Start        common.NullTime `db:"start" json:"start" sort:"true" title:"Start"`
+	End          common.NullTime `db:"end" json:"end" sort:"true" title:"End"`
+	Warning      int64           `db:"warning" json:"warning" sort:"true" title:"Warning"`
+	PossibleView int64           `db:"possible_view" json:"possible_view" sort:"true" title:"PossibleView"`
+	Email        string          `db:"email" json:"email" search:"true" title:"Email"`
+	ParentID     int64           `db:"-" json:"parent_id" visible:"false"`
+	OwnerID      int64           `db:"-" json:"owner_id" visible:"false"`
+	Actions      string          `db:"-" json:"_actions" visible:"false"`
+}
+
+// FillChannelAdDataTableArray is the function to handle
+func (m *Manager) FillChannelAdDataTableArray(
+	u base.PermInterfaceComplete,
+	filters map[string]string,
+	search map[string]string,
+	sort, order string, p, c int) (ChannelAdDataTableArray, int64) {
+	var params []interface{}
+	var res ChannelAdDataTableArray
+	var where []string
+
+	countQuery := fmt.Sprintf("SELECT COUNT(%s.ad_id) FROM %s "+
+		"LEFT JOIN %s ON %s.id=%s.ad_id "+
+		"LEFT JOIN %s ON %s.id=%s.user_id "+
+		"GROUP BY %s.ad_id",
+		ChannelAdTableFull,
+		ChannelAdTableFull,
+
+		AdTableFull,
+		AdTableFull,
+		ChannelAdTableFull,
+
+		aaa.UserTableFull,
+		aaa.UserTableFull,
+		AdTableFull,
+
+		ChannelAdTableFull,
+	)
+	query := fmt.Sprintf("SELECT %s.*,%s.view,%s.warning,%s.active,%s.start,%s.possible_view,%s.end,%s.email FROM %s "+
+		"LEFT JOIN %s ON %s.id=%s.ad_id "+
+		"LEFT JOIN %s ON %s.id=%s.user_id "+
+		"GROUP BY %s.ad_id",
+		AdTableFull,
+		ChannelAdTableFull,
+		ChannelAdTableFull,
+		ChannelAdTableFull,
+		ChannelAdTableFull,
+		ChannelAdTableFull,
+		ChannelAdTableFull,
+		aaa.UserTableFull,
+		ChannelAdTableFull,
+
+		AdTableFull,
+		AdTableFull,
+		ChannelAdTableFull,
+
+		aaa.UserTableFull,
+		aaa.UserTableFull,
+		AdTableFull,
+
+		ChannelAdTableFull,
+	)
+	for field, value := range filters {
+		where = append(where, fmt.Sprintf("%s.%s=?", ChannelAdTableFull, field))
+		params = append(params, value)
+	}
+
+	for column, val := range search {
+		where = append(where, fmt.Sprintf("%s LIKE ?", column))
+		params = append(params, "%"+val+"%")
+	}
+
+	currentUserID := u.GetID()
+	highestScope := u.GetCurrentScope()
+
+	if highestScope == base.ScopeSelf {
+		where = append(where, fmt.Sprintf("%s.user_id=?", ChannelAdTableFull))
+		params = append(params, currentUserID)
+	} else if highestScope == base.ScopeParent {
+		where = append(where, fmt.Sprintf("%s.parent_id=?", aaa.UserTableFull))
+		params = append(params, currentUserID)
+	}
+
+	//check for perm
+	if len(where) > 0 {
+		query += " WHERE "
+		countQuery += " WHERE "
+	}
+	query += strings.Join(where, " AND ")
+	countQuery += strings.Join(where, " AND ")
+	limit := c
+	offset := (p - 1) * c
+	if sort != "" {
+		query += fmt.Sprintf(" ORDER BY %s %s ", sort, order)
+	}
+	query += fmt.Sprintf(" LIMIT %d OFFSET %d ", limit, offset)
+	count, err := m.GetDbMap().SelectInt(countQuery, params...)
+	assert.Nil(err)
+
+	_, err = m.GetDbMap().Select(&res, query, params...)
+	assert.Nil(err)
+	return res, count
 }
