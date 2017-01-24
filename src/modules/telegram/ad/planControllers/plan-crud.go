@@ -5,6 +5,8 @@ import (
 
 	"modules/telegram/ad/ads"
 
+	"strconv"
+
 	"gopkg.in/labstack/echo.v3"
 )
 
@@ -19,7 +21,29 @@ import (
 //	}
 func (u *Controller) allPlan(ctx echo.Context) error {
 	m := ads.NewAdsManager()
-	plns, err := m.GetAllActivePlans()
+	plans, err := m.GetAllActivePlans()
 	assert.Nil(err)
-	return u.OKResponse(ctx, plns)
+	return u.OKResponse(ctx, plans)
+}
+
+//	allPlan get all plans
+//	@Route	{
+//	url	=	/:id
+//	method	= get
+//	resource = get_plan:self
+//	middleware = authz.Authenticate
+//	200 = plans
+//	400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) getPlan(ctx echo.Context) error {
+	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	m := ads.NewAdsManager()
+	plan, err := m.FindPlanByID(id)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	return u.OKResponse(ctx, plan)
 }

@@ -20,6 +20,8 @@ type Plan struct {
 	Name        string       `json:"name" db:"name" search:"true" title:"Name"`
 	Description string       `json:"description" db:"description" search:"true" title:"description"`
 	Price       int64        `db:"price" json:"price" title:"Price"`
+	View        int64        `db:"view" json:"view" title:"View"`
+	Type        PlanType     `json:"type" db:"type" filter:"true" title:"Type"`
 	Active      ActiveStatus `json:"active" db:"active" filter:"true" title:"Active"`
 	CreatedAt   time.Time    `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
 	UpdatedAt   time.Time    `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at"`

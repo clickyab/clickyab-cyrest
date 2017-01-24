@@ -11,11 +11,20 @@ import (
 // }
 type ActiveStatus string
 
+// PlanType is the plan type
+// @Enum {
+// }
+type PlanType string
+
 const (
 	//ActiveStatusYes is the yes status
 	ActiveStatusYes ActiveStatus = "yes"
 	// ActiveStatusNo is the no status
 	ActiveStatusNo ActiveStatus = "no"
+	// PlanTypePromotion is the promotion status
+	PlanTypePromotion PlanType = "promotion"
+	// PlanTypeIndividual is the individual status
+	PlanTypeIndividual PlanType = "individual"
 )
 
 // ChannelAd is the list of ad in channel for cyborg
