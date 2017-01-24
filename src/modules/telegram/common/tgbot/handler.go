@@ -45,6 +45,11 @@ func Send(c tgbotapi.Chattable) (tgbotapi.Message, error) {
 	return handler.Send(c)
 }
 
+// GetBot return the bot object.
+func GetBot() *tgbotapi.BotAPI {
+	return handler.GetBot()
+}
+
 func init() {
 	initializer.Register(&tgbotInitializer{})
 }
