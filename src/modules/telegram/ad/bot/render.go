@@ -42,7 +42,8 @@ func createMessage(bot *tgbotapi.BotAPI, chatID int64, ad *ads.Ad) tgbotapi.Mess
 
 }
 
-func renderMessage(bot *tgbotapi.BotAPI, chatID int64, ad *ads.Ad) tgbotapi.Message {
+// RenderMessage render message
+func RenderMessage(bot *tgbotapi.BotAPI, chatID int64, ad *ads.Ad) tgbotapi.Message {
 	if ad.CliMessageID.Valid {
 		return forwardCli(bot, chatID, ad)
 	}
