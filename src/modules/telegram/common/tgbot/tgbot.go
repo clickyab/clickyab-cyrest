@@ -30,6 +30,8 @@ type TelegramBot interface {
 	UnRegisterUserHandler(int64)
 	// Send a message using this interface to a user
 	Send(c tgbotapi.Chattable) (tgbotapi.Message, error)
+	// GetBot return the current bot
+	GetBot() *tgbotapi.BotAPI
 }
 
 // HandleMessage is the callback for message with router
@@ -196,4 +198,8 @@ func (tb *telegramBot) Send(c tgbotapi.Chattable) (tgbotapi.Message, error) {
 	}
 
 	return tb.bot.Send(c)
+}
+
+func (tb *telegramBot) GetBot() *tgbotapi.BotAPI {
+	return tb.bot
 }
