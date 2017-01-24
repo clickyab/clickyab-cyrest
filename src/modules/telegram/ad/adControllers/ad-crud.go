@@ -347,3 +347,32 @@ func (u *Controller) edit(ctx echo.Context) error {
 	assert.Nil(m.UpdateAd(currentAd))
 	return u.OKResponse(ctx, currentAd)
 }
+
+//	getAd getAd for ad
+//	@Route	{
+//		url	=	/:id
+//		method	= get
+//		resource = get_ad:self
+//		middleware = authz.Authenticate
+//		200 = ads.Ad
+//		400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) getAd(ctx echo.Context) error {
+	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	m := ads.NewAdsManager()
+	currentAd, err := m.FindAdByID(id)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	currentUser := authz.MustGetUser(ctx)
+	owner, err := aaa.NewAaaManager().FindUserByID(currentAd.UserID)
+	assert.Nil(err)
+	_, b := currentUser.HasPermOn("promote_ad", owner.ID, owner.DBParentID.Int64)
+	if !b {
+		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
+	}
+	return u.OKResponse(ctx, currentAd)
+}

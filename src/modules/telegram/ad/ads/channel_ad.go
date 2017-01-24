@@ -34,17 +34,19 @@ const (
 //		find_by = channel_id, ad_id
 // }
 type ChannelAd struct {
-	ChannelID    int64           `db:"channel_id" json:"channel_id"`
-	AdID         int64           `db:"ad_id" json:"ad_id"`
-	View         int64           `db:"view" json:"view"`
-	CliMessageID string          `db:"cli_message_id" json:"cli_message_id"`
-	Active       ActiveStatus    `db:"active" json:"active"`
-	Start        common.NullTime `db:"start" json:"start"`
-	End          common.NullTime `db:"end" json:"end"`
-	Warning      int64           `db:"warning" json:"warning"`
-	PossibleView int64           `db:"possible_view" json:"possible_view"`
-	CreatedAt    time.Time       `db:"created_at" json:"created_at" sort:"true"`
-	UpdatedAt    time.Time       `db:"updated_at" json:"updated_at" sort:"true"`
+	ChannelID    int64             `db:"channel_id" json:"channel_id"`
+	AdID         int64             `db:"ad_id" json:"ad_id"`
+	View         int64             `db:"view" json:"view"`
+	CliMessageID common.NullString `db:"cli_message_id" json:"cli_message_id"`
+	BotChatID    int64             `db:"bot_chat_id" json:"bot_chat_id"`
+	BotMessageID int               `db:"bot_message_id" json:"bot_message_id"`
+	Active       ActiveStatus      `db:"active" json:"active"`
+	Start        common.NullTime   `db:"start" json:"start"`
+	End          common.NullTime   `db:"end" json:"end"`
+	Warning      int64             `db:"warning" json:"warning"`
+	PossibleView int64             `db:"possible_view" json:"possible_view"`
+	CreatedAt    time.Time         `db:"created_at" json:"created_at" sort:"true"`
+	UpdatedAt    time.Time         `db:"updated_at" json:"updated_at" sort:"true"`
 }
 
 //SelectAd choose ad

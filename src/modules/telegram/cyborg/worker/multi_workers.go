@@ -235,7 +235,7 @@ func (mw *MultiWorker) transaction(m *ads.Manager, chad *ads.ChannelAd, channelA
 	return false, err
 }
 
-func (mw *MultiWorker) existChannelAdFor(h []tgo.History, cliMessageID string, len int) (int64, int64, int64) {
+func (mw *MultiWorker) existChannelAdFor(h []tgo.History, cliMessageID common.NullString, len int) (int64, int64, int64) {
 	var pos int64
 	var view int64
 	var warning int64
@@ -243,7 +243,7 @@ func (mw *MultiWorker) existChannelAdFor(h []tgo.History, cliMessageID string, l
 	for k := range h {
 		if h[k].Event == "message" && h[k].Service == false {
 			if h[k].FwdFrom != nil {
-				if h[k].ID == cliMessageID {
+				if h[k].ID == cliMessageID.String {
 					warning = 0
 					view = int64(h[k].Views)
 					pos = int64(len - k)
@@ -261,7 +261,7 @@ func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error)
 	if chad.Active == "no" || !chad.Active.IsValid() {
 		return false, nil
 	}
-	if chad.CliMessageID == "" {
+	if chad.CliMessageID.Valid {
 		rabbit.PublishAfter(&commands.ExistChannelAd{
 			ChannelID: in.ChannelID,
 			AdID:      in.AdID,
@@ -380,11 +380,12 @@ func (mw *MultiWorker) updateMessage(in *commands.UpdateMessage) (bool, error) {
 			//logrus.Warn(err)
 			continue
 		}
-		if chn.CliMessageID == h.ID {
+		if chn.CliMessageID.Valid && chn.CliMessageID.String == h.ID {
 			break
 
 		}
-		chn.CliMessageID = history[i-1].ID
+		chn.CliMessageID = common.MakeNullString(history[i-1].ID)
+
 		assert.Nil(caManager.UpdateChannelAd(chn))
 
 	}

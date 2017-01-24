@@ -22,8 +22,9 @@ type Config struct {
 	verify []int64
 
 	Telegram struct {
-		APIKey string `onion:"api_key"`
-		BotID  string `onion:"bot_id"`
+		APIKey    string `onion:"api_key"`
+		BotID     string `onion:"bot_id"`
+		ChannelID int64  `onion:"channel_id"`
 
 		CLIAddress        string        `onion:"cli_host"`
 		CLIPort           int           `onion:"cli_port"`
@@ -41,7 +42,8 @@ func (c *Config) Initialize(o *onion.Onion) []onion.Layer {
 	assert.Nil(d.SetDefault("telegram.admins", "70018667"))
 	assert.Nil(d.SetDefault("telegram.verify", "70018667"))
 
-	assert.Nil(d.SetDefault("telegram.api_key", "231355079:AAF9gyIPhWNBB0l3_vI2d32o3SRGYzuqJvQ"))
+	assert.Nil(d.SetDefault("telegram.channel_id", ""))
+	assert.Nil(d.SetDefault("telegram.api_key", "169197433:AAEHSXjrCldhvC6vzdAbHdRDHcMsqaWySEg"))
 	assert.Nil(d.SetDefault("telegram.bot_id", "$0100000068c34a10ed72226be64e8d4d"))
 	assert.Nil(d.SetDefault("telegram.cli_host", "localhost"))
 	assert.Nil(d.SetDefault("telegram.cli_port", 9999))

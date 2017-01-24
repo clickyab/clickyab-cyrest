@@ -4,7 +4,7 @@ import (
 	"common/config"
 	"common/initializer"
 	"common/rabbit"
-	"modules/telegram/cyborg/commands"
+	"modules/telegram/ad/bot/worker"
 )
 
 func main() {
@@ -12,12 +12,11 @@ func main() {
 	config.InitApplication()
 
 	defer initializer.Initialize().Finalize()
-	rabbit.MustPublish(commands.SelectAd{
-		ChannelID: 2,
-		ChatID:    1,
-	})
-	rabbit.MustPublish(commands.UpdateMessage{
-		CLiChannelName: "daratest",
+	rabbit.MustPublish(bot.SendWarn{
+		Msg:       "erhabi",
+		ChatID:    70018667,
+		ChannelID: 1,
+		AdID:      1,
 	})
 
 }

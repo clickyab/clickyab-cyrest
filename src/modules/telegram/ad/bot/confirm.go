@@ -76,7 +76,7 @@ func (bb *bot) confirm(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 			return
 		}
 
-		renderMessage(bot, m.Chat.ID, ad)
+		RenderMessage(bot, m.Chat.ID, ad)
 		doMessage(bot, m.Chat.ID, fmt.Sprintf("Accept /confirm_%s_%d", "accept", ad.ID))
 		doMessage(bot, m.Chat.ID, fmt.Sprintf("Reject /confirm_%s_%d", "reject", ad.ID))
 		doMessage(bot, m.Chat.ID, fmt.Sprintf("Next /confirm_%s_%d", "next", ad.ID))
