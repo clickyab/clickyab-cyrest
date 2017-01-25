@@ -158,3 +158,77 @@ func (m *Manager) LoadNextAd(last int64) (*Ad, error) {
 
 	return &res, err
 }
+
+//UserAdDataTable is the ad full data in data table, after join with other field
+// @DataTable {
+//		url = /user-ad/:id
+//		entity = ad
+//		view = user_ad_list:parent
+//		controller = modules/telegram/ad/adControllers
+//		fill = FillUserAdDataTableArray
+//		_edit = user_ad_edit:parent
+//		_change = user_ad_manage:global
+// }
+type UserAdDataTable struct {
+	Ad
+	Email    string `db:"email" json:"email" search:"true" title:"Email"`
+	ParentID int64  `db:"-" json:"parent_id" visible:"false"`
+	OwnerID  int64  `db:"-" json:"owner_id" visible:"false"`
+	Actions  string `db:"-" json:"_actions" visible:"false"`
+}
+
+// FillUserAdDataTableArray is the function to handle
+func (m *Manager) FillUserAdDataTableArray(
+	u base.PermInterfaceComplete,
+	filters map[string]string,
+	search map[string]string,
+	sort, order string,
+	p, c int) (UserAdDataTableArray, int64) {
+	var params []interface{}
+	var res UserAdDataTableArray
+	var where []string
+	var userID int64 ////
+
+	countQuery := fmt.Sprintf("SELECT COUNT(ads.id) FROM %s LEFT JOIN %s ON %s.id=%s.user_id where UserID=", AdTableFull, aaa.UserTableFull, aaa.UserTableFull, AdTableFull, userID)
+	query := fmt.Sprintf("SELECT ads.*,users.email FROM %s LEFT JOIN %s ON %s.id=%s.user_id where UserID=", AdTableFull, aaa.UserTableFull, aaa.UserTableFull, AdTableFull, userID)
+	for field, value := range filters {
+		where = append(where, fmt.Sprintf("%s.%s=?", AdTableFull, field))
+		params = append(params, value)
+	}
+
+	for column, val := range search {
+		where = append(where, fmt.Sprintf("%s LIKE ?", column))
+		params = append(params, "%"+val+"%")
+	}
+
+	currentUserID := u.GetID()
+	highestScope := u.GetCurrentScope()
+
+	if highestScope == base.ScopeSelf {
+		where = append(where, fmt.Sprintf("%s.user_id=?", AdTableFull))
+		params = append(params, currentUserID)
+	} else if highestScope == base.ScopeParent {
+		where = append(where, "users.parent_id=?")
+		params = append(params, currentUserID)
+	}
+
+	//check for perm
+	if len(where) > 0 {
+		query += " WHERE "
+		countQuery += " WHERE "
+	}
+	query += strings.Join(where, " AND ")
+	countQuery += strings.Join(where, " AND ")
+	limit := c
+	offset := (p - 1) * c
+	if sort != "" {
+		query += fmt.Sprintf(" ORDER BY %s %s ", sort, order)
+	}
+	query += fmt.Sprintf(" LIMIT %d OFFSET %d ", limit, offset)
+	count, err := m.GetDbMap().SelectInt(countQuery, params...)
+	assert.Nil(err)
+
+	_, err = m.GetDbMap().Select(&res, query, params...)
+	assert.Nil(err)
+	return res, count
+}
