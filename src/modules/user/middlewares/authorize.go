@@ -11,14 +11,12 @@ import (
 )
 
 const (
-	godResource string = "god"
-
 	scopeGranted = "__granted_scope"
 	permGranted  = "__granted_perm"
 )
 
 // AuthorizeGenerator generate middleware for specified action
-func AuthorizeGenerator(resource string, scope base.UserScope) echo.MiddlewareFunc {
+func AuthorizeGenerator(resource base.Permission, scope base.UserScope) echo.MiddlewareFunc {
 	assert.True(scope.IsValid(), "[BUG] invalid scope")
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
@@ -34,7 +32,7 @@ func AuthorizeGenerator(resource string, scope base.UserScope) echo.MiddlewareFu
 			granted := resource
 			grantedScope, ok := u.HasPerm(scope, granted)
 			if !ok {
-				granted = godResource
+				granted = base.PermissionGod
 				grantedScope, ok = u.HasPerm(base.ScopeGlobal, granted)
 			}
 			if !ok {

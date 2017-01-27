@@ -83,5 +83,4 @@ func (u *Controller) deleteRole(ctx echo.Context) (err error) {
 		ctx,
 		role,
 	)
-
 }

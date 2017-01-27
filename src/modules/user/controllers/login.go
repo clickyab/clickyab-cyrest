@@ -11,12 +11,12 @@ import (
 )
 
 type responseLoginOK struct {
-	UserID      int64                       `json:"user_id"`
-	Email       string                      `json:"email"`
-	AccessToken string                      `json:"token"`
-	Permissions map[base.UserScope][]string `json:"perm"`
-	Personal    *aaa.UserProfilePersonal    `json:"personal,omitempty"`
-	Corporation *aaa.UserProfileCorporation `json:"corporation,omitempty"`
+	UserID      int64                                `json:"user_id"`
+	Email       string                               `json:"email"`
+	AccessToken string                               `json:"token"`
+	Permissions map[base.UserScope][]base.Permission `json:"perm"`
+	Personal    *aaa.UserProfilePersonal             `json:"personal,omitempty"`
+	Corporation *aaa.UserProfileCorporation          `json:"corporation,omitempty"`
 }
 
 // @Validate {
@@ -28,7 +28,7 @@ type loginPayload struct {
 
 func createLoginResponse(u *aaa.User, t string) responseLoginOK {
 	x := u.GetPermission()
-	res := make(map[base.UserScope][]string)
+	res := make(map[base.UserScope][]base.Permission)
 
 	for i := range x {
 		for j := range x[i] {

@@ -26,11 +26,11 @@ type RolePermission struct {
 }
 
 // GetPermissionMap return resource map for some roles
-func (m *Manager) GetPermissionMap(r ...Role) map[base.UserScope]map[string]bool {
-	res := make(map[base.UserScope]map[string]bool)
-	res[base.ScopeGlobal] = make(map[string]bool)
-	res[base.ScopeSelf] = make(map[string]bool)
-	res[base.ScopeParent] = make(map[string]bool)
+func (m *Manager) GetPermissionMap(r ...Role) map[base.UserScope]map[base.Permission]bool {
+	res := make(map[base.UserScope]map[base.Permission]bool)
+	res[base.ScopeGlobal] = make(map[base.Permission]bool)
+	res[base.ScopeSelf] = make(map[base.Permission]bool)
+	res[base.ScopeParent] = make(map[base.Permission]bool)
 	if len(r) == 0 {
 		return res
 	}
@@ -48,7 +48,7 @@ func (m *Manager) GetPermissionMap(r ...Role) map[base.UserScope]map[string]bool
 	)
 	assert.Nil(err)
 	for i := range rr {
-		res[rr[i].Scope][rr[i].Permission] = true
+		res[rr[i].Scope][base.Permission(rr[i].Permission)] = true
 	}
 	return res
 }

@@ -83,6 +83,7 @@ func ({{ .GroupRec }} *{{ .StructName }}) Routes(r *echo.Echo, mountPoint string
 		{{end}}
 	}
 	{{ if $route.Resource }}
+	base.RegisterPermission("{{$route.Resource}}", "{{$route.Resource}}")
 	m{{ $key }} = append(m{{ $key }}, authz.AuthorizeGenerator("{{$route.Resource}}",base.UserScope("{{$route.Scope}}"))){{ end }}
 	{{ if $route.RouteFuncMiddleware }}
 	m{{ $key }} = append(m{{ $key }}, {{ $.GroupRec }}.{{ $route.RouteFuncMiddleware|strip_type }}()...){{ end }}
