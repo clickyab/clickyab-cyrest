@@ -52,19 +52,19 @@ const (
 //		list = yes
 // }
 type User struct {
-	ID          int64                              `db:"id" json:"id" sort:"true" title:"ID" map:"users.id"`
-	Email       string                             `db:"email" json:"email" search:"true" title:"Email"`
-	Password    string                             `db:"password" json:"-"`
-	OldPassword common.NullString                  `db:"old_password" json:"-"`
-	AccessToken string                             `db:"access_token" json:"-"`
-	Type        UserType                           `db:"user_type" json:"user_type" filter:"true" title:"User type"`
-	DBParentID  common.NullInt64                   `db:"parent_id" json:"-"`
-	Avatar      common.NullString                  `db:"avatar" json:"avatar" visible:"false"`
-	Status      UserStatus                         `db:"status" json:"status" filter:"true" title:"User status"`
-	CreatedAt   time.Time                          `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
-	UpdatedAt   time.Time                          `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at"`
-	resources   map[base.UserScope]map[string]bool `db:"-"`
-	roles       []Role                             `db:"-"`
+	ID          int64                                       `db:"id" json:"id" sort:"true" title:"ID" map:"users.id"`
+	Email       string                                      `db:"email" json:"email" search:"true" title:"Email"`
+	Password    string                                      `db:"password" json:"-"`
+	OldPassword common.NullString                           `db:"old_password" json:"-"`
+	AccessToken string                                      `db:"access_token" json:"-"`
+	Type        UserType                                    `db:"user_type" json:"user_type" filter:"true" title:"User type"`
+	DBParentID  common.NullInt64                            `db:"parent_id" json:"-"`
+	Avatar      common.NullString                           `db:"avatar" json:"avatar" visible:"false"`
+	Status      UserStatus                                  `db:"status" json:"status" filter:"true" title:"User status"`
+	CreatedAt   time.Time                                   `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
+	UpdatedAt   time.Time                                   `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at"`
+	resources   map[base.UserScope]map[base.Permission]bool `db:"-"`
+	roles       []Role                                      `db:"-"`
 	//LastLogin   common.NullTime `db:"last_login" json:"last_login"`
 
 	refreshToken bool `db:"-"`
@@ -120,7 +120,7 @@ func (u *User) Initialize() {
 }
 
 // GetPermission for this user
-func (u *User) GetPermission() map[base.UserScope]map[string]bool {
+func (u *User) GetPermission() map[base.UserScope]map[base.Permission]bool {
 	if u.resources == nil {
 		r := u.GetRoles()
 		u.resources = NewAaaManager().GetPermissionMap(r...)
@@ -142,7 +142,8 @@ func (u *User) GetRoles() []Role {
 // if requesting for lower scope and user has upper scope, the the maximum scope
 // is returned, since the user with scope global, can do the scope self too
 // this is different when the check is done with ids included
-func (u *User) HasPerm(scope base.UserScope, perm string) (base.UserScope, bool) {
+func (u *User) HasPerm(scope base.UserScope, perm base.Permission) (base.UserScope, bool) {
+	base.PermissionRegistered(perm)
 	if !scope.IsValid() {
 		return base.ScopeSelf, false
 	}
@@ -175,7 +176,8 @@ func (u *User) HasPerm(scope base.UserScope, perm string) (base.UserScope, bool)
 
 // HasPermOn check if user has permission on an object based on its owner id and its
 // parent id
-func (u *User) HasPermOn(perm string, ownerID, parentID int64, scopes ...base.UserScope) (base.UserScope, bool) {
+func (u *User) HasPermOn(perm base.Permission, ownerID, parentID int64, scopes ...base.UserScope) (base.UserScope, bool) {
+	base.PermissionRegistered(perm)
 	res := u.GetPermission()
 	var (
 		self, parent, global bool
