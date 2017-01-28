@@ -60,13 +60,13 @@ type Ad struct {
 	ID              int64             `db:"id" json:"id" sort:"true" title:"ID"`
 	UserID          int64             `json:"user_id" db:"user_id" title:"UserID"`
 	PlanID          common.NullInt64  `json:"plan_id" db:"plan_id" title:"PlanID"`
-	Position        common.NullInt64  `json:"position" db:"position" title:"Position"`
+	Position        common.NullInt64  `json:"position" db:"position" visible:"false" title:"Position"`
 	Name            string            `json:"name" db:"name" title:"Name"`
 	Description     common.NullString `json:"description" db:"description" title:"Description"`
 	Src             common.NullString `json:"src" db:"src" title:"Src"`
-	CliMessageID    common.NullString `json:"cli_message_id" db:"cli_message_id" title:"CliMessageID"`
-	BotChatID       common.NullInt64  `json:"bot_chat_id" db:"bot_chat_id" title:"BotChatID"`
-	BotMessageID    common.NullInt64  `json:"bot_message_id" db:"bot_message_id" title:"BotMessageID"`
+	CliMessageID    common.NullString `json:"cli_message_id" db:"cli_message_id" visible:"false" title:"CliMessageID"`
+	BotChatID       common.NullInt64  `json:"bot_chat_id" db:"bot_chat_id" visible:"false" title:"BotChatID"`
+	BotMessageID    common.NullInt64  `json:"bot_message_id" db:"bot_message_id" visible:"false" title:"BotMessageID"`
 	AdAdminStatus   AdAdminStatus     `json:"admin_status" db:"admin_status" filter:"true" title:"AdminStatus"`
 	AdArchiveStatus AdArchiveStatus   `json:"archive_status" db:"archive_status" filter:"true" title:"ArchiveStatus"`
 	AdPayStatus     AdPayStatus       `json:"pay_status" db:"pay_status" filter:"true" title:"PayStatus"`
@@ -162,7 +162,7 @@ func (m *Manager) LoadNextAd(last int64) (*Ad, error) {
 //UserAdDataTable is the ad full data in data table, after join with other field
 // @DataTable {
 //		url = /user-ad
-//		entity = ad
+//		entity = userAd
 //		view = user_ad_list:parent
 //		controller = modules/telegram/ad/adControllers
 //		fill = FillUserAdDataTableArray
