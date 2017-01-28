@@ -1,7 +1,6 @@
 package user
 
 import (
-	"fmt"
 	"modules/misc/base"
 	"modules/misc/middlewares"
 	"modules/misc/trans"
@@ -67,7 +66,6 @@ func (u *Controller) createRole(ctx echo.Context) error {
 //		400 = base.ErrorResponseSimple
 // }
 func (u *Controller) deleteRole(ctx echo.Context) (err error) {
-	fmt.Println("here")
 	//var role *aaa.Role
 	var m = aaa.NewAaaManager()
 	ID, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
@@ -83,4 +81,26 @@ func (u *Controller) deleteRole(ctx echo.Context) (err error) {
 		ctx,
 		role,
 	)
+}
+
+// getRole getRole by id
+// @Route {
+// 		url = /role/:id
+// 		resource = get_role:global
+//		method = get
+//		:id = true, int, id of role to be deleted
+//		200 = aaa.Role
+//		400 = base.ErrorResponseSimple
+// }
+func (u *Controller) getRole(ctx echo.Context) (err error) {
+	var m = aaa.NewAaaManager()
+	ID, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	role, err := m.FindRoleByID(ID)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	return u.OKResponse(ctx, role)
 }
