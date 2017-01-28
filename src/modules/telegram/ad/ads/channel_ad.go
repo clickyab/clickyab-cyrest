@@ -149,7 +149,7 @@ func (m *Manager) ChooseAd(channelID int64) ([]SelectAd, error) {
 //ReportAdDataTable is the ad full data in data table, after join with other field
 // @DataTable {
 //		url = /report
-//		entity = ad
+//		entity = adReport
 //		view = report_ad:self
 //		controller = modules/telegram/ad/adControllers
 //		fill = FillAdReportDataTableArray
@@ -264,7 +264,7 @@ func (m *Manager) FillAdReportDataTableArray(
 //ReportChannelDataTable is the ad full data in data table, after join with other field
 // @DataTable {
 //		url = /report
-//		entity = channel
+//		entity = channelReport
 //		view = report_channel:self
 //		controller = modules/telegram/ad/chanControllers
 //		fill = FillChannelReportDataTableArray
