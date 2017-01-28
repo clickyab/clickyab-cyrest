@@ -42,7 +42,7 @@ func createMessage(bot *tgbotapi.BotAPI, chatID int64, ad *ads.Ad) tgbotapi.Mess
 
 }
 
-// RenderMessage render message
+//RenderMessage  is a sender that send message depend type of message forward or create
 func RenderMessage(bot *tgbotapi.BotAPI, chatID int64, ad *ads.Ad) tgbotapi.Message {
 	if ad.CliMessageID.Valid {
 		return forwardCli(bot, chatID, ad)

@@ -7,7 +7,9 @@ import (
 	"common/rabbit"
 	"common/utils"
 	"common/version"
+
 	"modules/telegram/ad/bot/worker"
+	"modules/telegram/ad/worker"
 	"modules/telegram/common/tgbot"
 )
 
@@ -26,6 +28,12 @@ func main() {
 		)
 		assert.Nil(err)
 
+		err = rabbit.RunWorker(
+			&worker.AdDelivery{},
+			worker.AdDeliveryAction,
+			10,
+		)
+		assert.Nil(err)
 	}()
 	utils.WaitExitSignal()
 
