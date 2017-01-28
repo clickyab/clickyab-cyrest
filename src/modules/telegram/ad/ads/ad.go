@@ -161,7 +161,7 @@ func (m *Manager) LoadNextAd(last int64) (*Ad, error) {
 
 //UserAdDataTable is the ad full data in data table, after join with other field
 // @DataTable {
-//		url = /user-ad/:id
+//		url = /user-ad
 //		entity = ad
 //		view = user_ad_list:parent
 //		controller = modules/telegram/ad/adControllers
@@ -187,10 +187,29 @@ func (m *Manager) FillUserAdDataTableArray(
 	var params []interface{}
 	var res UserAdDataTableArray
 	var where []string
-	var userID int64 ////
 
-	countQuery := fmt.Sprintf("SELECT COUNT(ads.id) FROM %s LEFT JOIN %s ON %s.id=%s.user_id where UserID=", AdTableFull, aaa.UserTableFull, aaa.UserTableFull, AdTableFull, userID)
-	query := fmt.Sprintf("SELECT ads.*,users.email FROM %s LEFT JOIN %s ON %s.id=%s.user_id where UserID=", AdTableFull, aaa.UserTableFull, aaa.UserTableFull, AdTableFull, userID)
+	currentUserID := u.GetID()
+	highestScope := u.GetCurrentScope()
+
+	countQuery := fmt.Sprintf("SELECT COUNT(ads.id) FROM %s LEFT JOIN %s ON %s.id=%s.user_id where (%s.id=%d OR %s.parent_id=%d ) ",
+		AdTableFull,
+		aaa.UserTableFull,
+		aaa.UserTableFull,
+		AdTableFull,
+		aaa.UserTableFull,
+		currentUserID,
+		aaa.UserTableFull,
+		currentUserID)
+
+	query := fmt.Sprintf("SELECT ads.*,users.email FROM %s LEFT JOIN %s ON %s.id=%s.user_id where (%s.id=%d OR %s.parent_id=%d ) ",
+		AdTableFull,
+		aaa.UserTableFull,
+		aaa.UserTableFull,
+		AdTableFull,
+		aaa.UserTableFull,
+		currentUserID,
+		aaa.UserTableFull,
+		currentUserID)
 	for field, value := range filters {
 		where = append(where, fmt.Sprintf("%s.%s=?", AdTableFull, field))
 		params = append(params, value)
@@ -200,9 +219,6 @@ func (m *Manager) FillUserAdDataTableArray(
 		where = append(where, fmt.Sprintf("%s LIKE ?", column))
 		params = append(params, "%"+val+"%")
 	}
-
-	currentUserID := u.GetID()
-	highestScope := u.GetCurrentScope()
 
 	if highestScope == base.ScopeSelf {
 		where = append(where, fmt.Sprintf("%s.user_id=?", AdTableFull))
