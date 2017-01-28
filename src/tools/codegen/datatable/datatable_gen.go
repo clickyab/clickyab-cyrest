@@ -65,7 +65,7 @@ type ColumnDef struct {
 
 var (
 	formater = regexp.MustCompile("Format([a-zA-Z]+)")
-	prefix   = regexp.MustCompile("_([a-zA-Z]+)")
+	prefix   = regexp.MustCompile("^_([a-zA-Z]+)")
 )
 
 const (
@@ -393,7 +393,7 @@ func (e dataTablePlugin) Finalize(c interface{}, p humanize.Package) error {
 	for i := range ctx {
 		res := make(map[string]*PermCode)
 		for key := range ctx[i].Ann.Items {
-			if prefix.MatchString(key) {
+			if prefix.MatchString(strings.Trim(key, " ")) {
 				var err error
 				res[key[1:]], err = NewPermCode(ctx[i].Ann.Items[key])
 				if err != nil {
