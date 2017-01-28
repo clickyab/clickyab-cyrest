@@ -113,6 +113,14 @@ func ({{ $m.Type|getvar }} {{ $m.Type }}) Filter(u base.PermInterface) {{ $m.Typ
 	res.Actions = strings.Join(action, ",")
 	return res
 }
+
+
+func init () {
+	{{ range $act, $perm := $m.Actions }}
+	base.RegisterPermission("{{ $perm.Perm }}", "{{ $perm.Perm }}");
+	{{ end }}
+}
+
 {{end}}
 `
 
