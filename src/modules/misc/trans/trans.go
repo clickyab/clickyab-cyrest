@@ -120,7 +120,7 @@ func E(translationID string, args ...interface{}) T9Error {
 
 // EE try to translate an already generated error
 func EE(e error) T9Error {
-	if e==nil{
+	if e == nil {
 		return T9Error{}
 	}
 	switch t9 := e.(type) {

@@ -6,7 +6,7 @@ import (
 	"gopkg.in/fzerorubigd/onion.v2"
 )
 
-// Fcfg is the file module settings
+// Bcfg is the file module settings
 var Bcfg Config
 
 // Config is the file module config
@@ -16,7 +16,7 @@ type Config struct {
 		MerchantOKStatus int32  `onion:"merchant_ok_status"`
 		CallbackURL      string `onion:"callback_url"`
 		ZarinURL         string `onion:"zarin_url"`
-		APiURL           string `onion:"api_url"`
+		APIURL           string `onion:"api_url"`
 		Mobile           string `onion:"mobile"`
 		Email            string `onion:"email"`
 		Description      string `onion:"description"`

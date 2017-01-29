@@ -9,7 +9,7 @@ CREATE TABLE billings
   reason VARCHAR(255),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
   updated_at TIMESTAMP DEFAULT '0000-00-00 00:00:00' NOT NULL,
-  CONSTRAINT billing._id_users_id_fk FOREIGN KEY (user_id) REFERENCES users(id)
+  CONSTRAINT billings._id_users_id_fk FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 -- +migrate Down

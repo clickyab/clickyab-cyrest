@@ -9,6 +9,7 @@ import (
 	_ "modules/telegram/ad"       // ad module
 	_ "modules/telegram/teleuser" // teleuser module
 	_ "modules/user"              // user module
+	_ "modules/billing" // billing module
 )
 
 func init() {
