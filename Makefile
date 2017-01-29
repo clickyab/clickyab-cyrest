@@ -203,6 +203,10 @@ codegen-file: tools-codegen
 	$(BIN)/codegen -p modules/file/controllers
 	$(BIN)/codegen -p modules/file/fila
 
+codegen-billing: tools-codegen
+	$(BIN)/codegen -p modules/billing/controllers
+	$(BIN)/codegen -p modules/billing/bil
+
 swagger-cleaner:
 	@rm -f $(WORK_DIR)/swagger/*.json
 	@rm -f $(WORK_DIR)/swagger/*.yaml
@@ -210,7 +214,7 @@ swagger-cleaner:
 swagger-client: tools-swagger
 	GOPATH=$(ROOT) cd $(ROOT)/src && $(BIN)/swagger generate client -f $(ROOT)/3rd/swagger/cyrest.yaml
 
-codegen: swagger-ui swagger-cleaner migration codegen-misc codegen-user codegen-category codegen-location codegen-ad codegen-teleuser codegen-file codegen-cyborg
+codegen: swagger-ui swagger-cleaner migration codegen-misc codegen-user codegen-category codegen-location codegen-ad codegen-teleuser codegen-file codegen-cyborg codegen-billing
 	@cp $(WORK_DIR)/swagger/out.yaml $(ROOT)/3rd/swagger/cyrest.yaml
 	@cp $(WORK_DIR)/swagger/out.json $(ROOT)/3rd/swagger/cyrest.json
 	@echo "Done"
