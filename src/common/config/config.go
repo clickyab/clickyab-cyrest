@@ -79,6 +79,13 @@ type AppConfig struct {
 		WebHookURL string
 		Active     bool
 	}
+	Mail struct {
+		Host     string `onion:"host"`
+		Port     int    `onion:"port"`
+		UserName string `onion:"user_name"`
+		Password string `onion:"password"`
+		From     string `onion:"from"`
+	}
 }
 
 func defaultLayer() onion.DefaultLayer {
@@ -149,6 +156,12 @@ func defaultLayer() onion.DefaultLayer {
 	assert.Nil(res.SetDefault("redmine.project_id", 3))
 	assert.Nil(res.SetDefault("redmine.new_issue_type_id", 1))
 	assert.Nil(res.SetDefault("redmine.active", false))
+
+	assert.Nil(res.SetDefault("mail.host", "localhost"))
+	assert.Nil(res.SetDefault("mail.port", 1025))
+	assert.Nil(res.SetDefault("mail.user_name", ""))
+	assert.Nil(res.SetDefault("mail.password", ""))
+	assert.Nil(res.SetDefault("mail.from", "hello@clickyab.com"))
 
 	return res
 }
