@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "modules/billing"  // billing module
 	_ "modules/category" // category module
 	"modules/category/cat"
 	_ "modules/file"              // file module

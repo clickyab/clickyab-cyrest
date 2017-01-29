@@ -16,6 +16,18 @@ import (
 	"common/rabbit"
 	"modules/telegram/cyborg/commands"
 
+	"fmt"
+
+	"modules/billing/config"
+
+	"modules/billing/bil"
+
+	"strings"
+
+	"common/payment"
+
+	"path"
+
 	echo "gopkg.in/labstack/echo.v3"
 )
 
@@ -350,7 +362,7 @@ func (u *Controller) edit(ctx echo.Context) error {
 
 //	getAd getAd for ad
 //	@Route	{
-//		url	=	/:id
+//		url	=	/get/:id
 //		method	= get
 //		resource = get_ad:self
 //		middleware = authz.Authenticate
@@ -375,4 +387,119 @@ func (u *Controller) getAd(ctx echo.Context) error {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
 	return u.OKResponse(ctx, currentAd)
+}
+
+//	charge charge user plan
+//	@Route	{
+//		url	=	/pay/:ad_id
+//		method	= get
+//		resource = pay_ad:self
+//		middleware = authz.Authenticate
+//		200 = ads.Ad
+//		400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) charge(ctx echo.Context) error {
+	//find ad
+	currentUser := authz.MustGetUser(ctx)
+	id, err := strconv.ParseInt(ctx.Param("ad_id"), 10, 0)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	adManager := ads.NewAdsManager()
+	bilManager := bil.NewBilManager()
+	currentAd, err := adManager.FindAdByID(id)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	//set callback url
+	callbackURL := fmt.Sprintf("%s%s", ctx.Scheme()+"://", path.Join(ctx.Request().Host, bcfg.Bcfg.Gate.CallbackURL, fmt.Sprintf("%d", currentAd.ID)))
+	//verify plan
+	if currentAd.AdAdminStatus != ads.AdAdminStatusAccepted {
+		return u.NotFoundResponse(ctx, nil)
+	}
+
+	//find plan
+	plan, err := adManager.FindPlanByID(currentAd.PlanID.Int64)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+
+	price := plan.Price
+	client := payment.NewPaymentGatewayImplementationServicePortType("", false, nil)
+	// Create a new payment request to Zarinpal
+	resp, err := client.Request(&payment.Request{
+		MerchantID:  bcfg.Bcfg.Gate.MerchantID,
+		Amount:      price,
+		Description: bcfg.Bcfg.Gate.Description,
+		Email:       bcfg.Bcfg.Gate.Email,
+		Mobile:      bcfg.Bcfg.Gate.Mobile,
+		CallbackURL: callbackURL,
+	})
+	if err != nil {
+		return u.BadResponse(ctx, nil)
+	}
+
+	if resp.Status == bcfg.Bcfg.Gate.MerchantOkStatus {
+		payment := &bil.Payment{
+			UserID:    currentUser.ID,
+			Amount:    price,
+			Status:    bil.PayStatusPending,
+			Authority: common.MakeNullString(resp.Authority),
+		}
+		assert.Nil(bilManager.CreatePayment(payment))
+		return u.OKResponse(ctx, fmt.Sprintf("%s%s", bcfg.Bcfg.Gate.ZarinURL, resp.Authority))
+	}
+	return u.BadResponse(ctx, nil)
+}
+
+//	charge charge user plan
+//	@Route	{
+//		url	=	/verify/:id
+//		method	= get
+//		200 = ads.Ad
+//		400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) verify(ctx echo.Context) error {
+	adManager := ads.NewAdsManager()
+	frontURL := fmt.Sprintf("%s%s", ctx.Scheme()+"://", path.Join(ctx.Request().Host, bcfg.Bcfg.Gate.FrontCallbackURL))
+	frontOk := fmt.Sprintf("%s%s", frontURL, "?success=yes")
+	frontNOk := fmt.Sprintf("%s%s", frontURL, "?success=no")
+	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
+	if err != nil {
+		return ctx.Redirect(http.StatusMovedPermanently, frontNOk)
+	}
+	currentAd, err := adManager.FindAdByID(id)
+	if err != nil {
+		return ctx.Redirect(http.StatusMovedPermanently, frontNOk)
+	}
+	plan, err := adManager.FindPlanByID(currentAd.PlanID.Int64)
+	if err != nil {
+		return ctx.Redirect(http.StatusMovedPermanently, frontNOk)
+	}
+	if strings.ToLower(ctx.FormValue("Status")) != "ok" {
+		return ctx.Redirect(http.StatusMovedPermanently, frontNOk)
+	}
+	client := payment.NewPaymentGatewayImplementationServicePortType("", false, nil)
+	// Create a new payment request to Zarinpal
+	resp, err := client.Verification(&payment.Verification{
+		MerchantID: bcfg.Bcfg.Gate.MerchantID,
+		Amount:     plan.Price,
+		Authority:  ctx.FormValue("Authority"),
+	})
+	// Check if response is error free
+	if err != nil {
+		return ctx.Redirect(http.StatusMovedPermanently, frontNOk)
+	}
+	if resp.Status == bcfg.Bcfg.Gate.MerchantOkStatus {
+		_, err = bil.NewBilManager().RegisterBilling(ctx.FormValue("Authority"), resp.RefID, plan.Price, resp.Status)
+		if err != nil {
+			return ctx.Redirect(http.StatusMovedPermanently, frontNOk)
+		}
+		//update ad pay status
+		currentAd.AdPayStatus = ads.AdPayStatusYes
+		assert.Nil(adManager.UpdateAd(currentAd))
+		return ctx.Redirect(http.StatusMovedPermanently, frontOk)
+	}
+	return ctx.Redirect(http.StatusMovedPermanently, frontNOk)
+
 }
