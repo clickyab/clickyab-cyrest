@@ -286,3 +286,8 @@ func (ns NullString) UnmarshalJSON(b []byte) error {
 func MakeNullString(s string) NullString {
 	return NullString{Valid: s != "", String: s}
 }
+
+// MakeNullTime create a new null time
+func MakeNullTime(t time.Time) NullTime {
+	return NullTime{Valid: !t.IsZero(), Time: t}
+}

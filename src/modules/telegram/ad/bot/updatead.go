@@ -2,7 +2,6 @@ package bot
 
 import (
 	"common/assert"
-	"common/initializer"
 	"common/models/common"
 	"fmt"
 	"modules/telegram/ad/ads"
@@ -13,11 +12,6 @@ import (
 
 	"gopkg.in/telegram-bot-api.v4"
 )
-
-type bot struct {
-}
-
-const htmlMode = "HTML"
 
 func (bb *bot) updateAD(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 	result := strings.Replace(m.Text, "/updatead-", "", 1)
@@ -78,15 +72,4 @@ func (bb *bot) wantAD(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 	assert.Nil(err)
 	return
 
-}
-
-func (bb *bot) Initialize() {
-
-	tgbot.RegisterMessageHandler("/updatead", bb.updateAD)
-	tgbot.RegisterMessageHandler("/ad", bb.wantAD)
-	tgbot.RegisterMessageHandler("/confirm", bb.confirm)
-}
-
-func init() {
-	initializer.Register(&bot{})
 }
