@@ -42,7 +42,7 @@ type RoleDataTable struct {
 }
 
 // RegisterRole is try to register role
-func (m *Manager) RegisterRole(name string, description string, perm map[base.UserScope][]string) (role *Role, err error) {
+func (m *Manager) RegisterRole(name string, description string, perm map[base.UserScope][]base.Permission) (role *Role, err error) {
 	role = &Role{
 		Name:        name,
 		Description: common.NullString{String: description, Valid: true},
@@ -63,6 +63,10 @@ func (m *Manager) RegisterRole(name string, description string, perm map[base.Us
 		}
 	}()
 	err = m.CreateRole(role)
+	if err != nil {
+		role = nil
+		return
+	}
 	err = m.RegisterRolePermission(role.ID, perm)
 	if err != nil {
 		role = nil
@@ -161,4 +165,53 @@ func (m *Manager) DeleteRole(ID int64) (r *Role, err error) {
 	//delete role
 	_, err = m.DeleteRoleByID(ID)
 	return
+}
+
+// UpdateRoleWithPerm try to save a new Role in database
+func (m *Manager) UpdateRoleWithPerm(ID int64, name string, description string, perm map[base.UserScope][]base.Permission) (r *Role, err error) {
+	now := time.Now()
+	r = &Role{
+		ID:          ID,
+		Name:        name,
+		Description: common.NullString{String: description, Valid: true},
+		UpdatedAt:   now,
+	}
+	err = m.Begin()
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if err != nil {
+			assert.Nil(m.Rollback())
+		} else {
+			err = m.Commit()
+		}
+
+		if err != nil {
+			r = nil
+		}
+	}()
+
+	if err != nil {
+		r = nil
+		return
+	}
+
+	err = m.UpdateRole(r)
+	if err != nil {
+		err = errors.New("cant update role")
+	}
+
+	//delete role_permission
+	err = m.DeleteRolePermissionByRoleID(ID)
+	if err != nil {
+		err = errors.New("cant delete role permission")
+	}
+
+	err = m.RegisterRolePermission(ID, perm)
+	if err != nil {
+		err = errors.New("cant register role permission")
+	}
+	return
+
 }
