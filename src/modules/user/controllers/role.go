@@ -13,9 +13,14 @@ import (
 // @Validate {
 // }
 type rolePayLoad struct {
-	Name        string                      `json:"name" validate:"gt=3" error:"name must be valid"`
-	Description string                      `json:"description" validate:"gt=3" error:"description must be valid"`
-	Perm        map[base.UserScope][]string `json:"perm"`
+	Name        string                               `json:"name" validate:"gt=3" error:"name must be valid"`
+	Description string                               `json:"description" validate:"gt=3" error:"description must be valid"`
+	Perm        map[base.UserScope][]base.Permission `json:"perm"`
+}
+
+type roleResponse struct {
+	Role aaa.Role                                    `json:"role"`
+	Perm map[base.UserScope]map[base.Permission]bool `json:"perm"`
 }
 
 // Validate custom validation for user scope
@@ -53,7 +58,6 @@ func (u *Controller) createRole(ctx echo.Context) error {
 		ctx,
 		role,
 	)
-	return nil
 }
 
 // deleteRole delete specified role in system
@@ -102,5 +106,39 @@ func (u *Controller) getRole(ctx echo.Context) (err error) {
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
 	}
-	return u.OKResponse(ctx, role)
+	perms := m.GetPermissionMap(*role)
+	return u.OKResponse(ctx, roleResponse{
+		Role: *role,
+		Perm: perms,
+	})
+}
+
+// updateRole register user in system
+// @Route {
+// 		url = /role/update/:id
+// 		resource = update_role:global
+// 		:id = true, int, id of role to be updated
+//		method = put
+//      	payload = rolePayLoad
+//		200 = aaa.Role
+//		400 = base.ErrorResponseSimple
+// }
+func (u *Controller) updateRole(ctx echo.Context) error {
+	ID, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
+	if err != nil {
+		return u.BadResponse(ctx, trans.E("can not update role"))
+	}
+	pl := u.MustGetPayload(ctx).(*rolePayLoad)
+	m := aaa.NewAaaManager()
+
+	//update role in db
+	role, err := m.UpdateRoleWithPerm(ID, pl.Name, pl.Description, pl.Perm)
+	if err != nil {
+		return u.BadResponse(ctx, trans.E("can not update role"))
+	}
+
+	return u.OKResponse(
+		ctx,
+		role,
+	)
 }

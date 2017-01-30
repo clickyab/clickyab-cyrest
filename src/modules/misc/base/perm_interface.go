@@ -2,7 +2,10 @@ package base
 
 import (
 	"common/assert"
+	"errors"
 	"sync"
+
+	"database/sql/driver"
 
 	"github.com/Sirupsen/logrus"
 )
@@ -106,6 +109,19 @@ func PermissionRegistered(perm Permission) {
 
 }
 
+// PermissionCheckRegistered check if the permission is registered in system or not
+// and just log it
+func PermissionCheckRegistered(perm Permission) bool {
+	lock.RLock()
+	defer lock.RUnlock()
+
+	if _, ok := registeredPerms[perm]; !ok {
+		return false
+	}
+	return true
+
+}
+
 // GetAllPermission return the permission list in system
 func GetAllPermission() map[Permission]string {
 	lock.RLock()
@@ -129,6 +145,39 @@ func NewPermInterfaceComplete(inner PermInterface, id int64, perm Permission, sc
 	}
 
 	return pc
+}
+
+// IsValid try to validate enum value on ths type
+func (e Permission) IsValid() bool {
+	return PermissionCheckRegistered(e)
+}
+
+// Scan convert the json array ino string slice
+func (e *Permission) Scan(src interface{}) error {
+	var b []byte
+	switch src.(type) {
+	case []byte:
+		b = src.([]byte)
+	case string:
+		b = []byte(src.(string))
+	case nil:
+		b = make([]byte, 0)
+	default:
+		return errors.New("unsupported type")
+	}
+	if !Permission(b).IsValid() {
+		return errors.New("invaid value")
+	}
+	*e = Permission(b)
+	return nil
+}
+
+// Value try to get the string slice representation in database
+func (e Permission) Value() (driver.Value, error) {
+	if !e.IsValid() {
+		return nil, errors.New("invaid status")
+	}
+	return string(e), nil
 }
 
 func init() {
