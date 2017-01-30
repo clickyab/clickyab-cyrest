@@ -11,6 +11,7 @@ services:
       - "3306:3306"
     volumes:
       - "/home/cy/mariadb:/var/lib/mysql"
+    command: --character-set-server=utf8 --collation-server=utf8_general_ci
     environment:
       - MYSQL_ROOT_PASSWORD=bita123
       - MYSQL_DATABASE=cyrest
