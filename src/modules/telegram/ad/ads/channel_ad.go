@@ -108,6 +108,23 @@ func (m *Manager) FindChannelAdByAdIDActive(a int64) ([]ChannelAd, error) {
 	return res, nil
 }
 
+// FindChannelAdActiveByChannelID return the ChannelAd base on its channel_id,active
+func (m *Manager) FindChannelAdActiveByChannelID(channelID int64, status ActiveStatus) ([]ChannelAd, error) {
+	res := []ChannelAd{}
+	_, err := m.GetDbMap().Select(
+		&res,
+		fmt.Sprintf("SELECT * FROM %s WHERE channel_id=? AND active='?'", ChannelAdTableFull),
+		channelID,
+		status,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
 // ChooseAd return the ads
 func (m *Manager) ChooseAd(channelID int64) ([]SelectAd, error) {
 	res := []SelectAd{}

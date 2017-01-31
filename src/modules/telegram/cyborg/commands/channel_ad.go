@@ -5,7 +5,9 @@ type ExistChannelAd struct {
 	// channel ID
 	ChannelID int64
 	// ad ID
-	AdID int64
+	AdID []int64
+	// chat ID
+	ChatID int64
 }
 
 // GetTopic return this message topic

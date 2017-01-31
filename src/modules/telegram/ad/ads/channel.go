@@ -85,6 +85,23 @@ func (m *Manager) FindChannelsByChatID(chatID int64) ([]Channel, error) {
 	return res, nil
 }
 
+// FindChannelByUserIDChannelID return the Channel base on its user_id
+func (m *Manager) FindChannelByUserIDChannelID(userID int64, channelID int64) (*Channel, error) {
+	var res Channel
+	err := m.GetDbMap().SelectOne(
+		&res,
+		fmt.Sprintf("SELECT * FROM %s WHERE user_id = ? AND id = ?", ChannelTableFull),
+		userID,
+		channelID,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 // FindChannelsByChatIDName return the Channel base on its chatId and name
 func (m *Manager) FindChannelsByChatIDName(chatID int64, name string) (*Channel, error) {
 	var res Channel
