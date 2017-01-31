@@ -79,6 +79,7 @@ type AppConfig struct {
 		WebHookURL string
 		Active     bool
 	}
+
 	Mail struct {
 		Host     string `onion:"host"`
 		Port     int    `onion:"port"`
@@ -86,6 +87,11 @@ type AppConfig struct {
 		Password string `onion:"password"`
 		From     string `onion:"from"`
 	}
+
+	Proxy struct {
+		Port	string
+		URL	string
+	      }
 }
 
 func defaultLayer() onion.DefaultLayer {
@@ -98,6 +104,7 @@ func defaultLayer() onion.DefaultLayer {
 	assert.Nil(res.SetDefault("profile", "cpu"))
 	assert.Nil(res.SetDefault("max_cpu_available", runtime.NumCPU()))
 	assert.Nil(res.SetDefault("proto", "http"))
+	assert.Nil(res.SetDefault("proxy_port", ":8080"))
 	assert.Nil(res.SetDefault("port", ":80"))
 
 	path, err := expand.Path("$PWD/../statics/")
@@ -162,6 +169,9 @@ func defaultLayer() onion.DefaultLayer {
 	assert.Nil(res.SetDefault("mail.user_name", ""))
 	assert.Nil(res.SetDefault("mail.password", ""))
 	assert.Nil(res.SetDefault("mail.from", "hello@clickyab.com"))
+
+	assert.Nil(res.SetDefault("proxy.port", "8000"))
+	assert.Nil(res.SetDefault("proxy.url", "https://google.com"))
 
 	return res
 }
