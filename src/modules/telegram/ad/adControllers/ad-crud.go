@@ -61,6 +61,12 @@ type adDescriptionPayLoad struct {
 	Body string `json:"body" validate:"required" error:"body is required"`
 }
 
+// @Validate {
+// }
+type adPlanPayLoad struct {
+	ID int64 `json:"plan_id" validate:"required" error:"plan is required"`
+}
+
 // Validate custom validation for user scope
 func (lp *adAdminStatusPayload) ValidateExtra(ctx echo.Context) error {
 	if !lp.AdAdminStatus.IsValid() {
@@ -386,6 +392,47 @@ func (u *Controller) getAd(ctx echo.Context) error {
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
+	return u.OKResponse(ctx, currentAd)
+}
+
+//	assignPlan assignPlan for ad
+//	@Route	{
+//		url	=	/plan/:id
+//		method	= put
+//		payload	= adPlanPayLoad
+//		resource = assign_plan:self
+//		middleware = authz.Authenticate
+//		200 = ads.Ad
+//		400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) assignPlan(ctx echo.Context) error {
+	m := ads.NewAdsManager()
+	pl := u.MustGetPayload(ctx).(*adPlanPayLoad)
+	//find plan
+	plan, err := m.FindPlanByID(pl.ID)
+	if err != nil || plan.Active != ads.ActiveStatusYes {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	currentAd, err := m.FindAdByID(id)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	currentUser := authz.MustGetUser(ctx)
+	owner, err := aaa.NewAaaManager().FindUserByID(currentAd.UserID)
+	assert.Nil(err)
+	_, b := currentUser.HasPermOn("assign_plan", owner.ID, owner.DBParentID.Int64)
+	if !b {
+		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
+	}
+	//check if he/she can assign plan (flow)
+	if currentAd.AdPayStatus != ads.AdPayStatusNo {
+		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
+	}
+	currentAd.PlanID = common.NullInt64{Valid: true, Int64: plan.ID}
 	return u.OKResponse(ctx, currentAd)
 }
 
