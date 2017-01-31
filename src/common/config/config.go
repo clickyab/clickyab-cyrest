@@ -89,9 +89,9 @@ type AppConfig struct {
 	}
 
 	Proxy struct {
-		Port	string
-		URL	string
-	      }
+		Port string
+		URL  string
+	}
 }
 
 func defaultLayer() onion.DefaultLayer {

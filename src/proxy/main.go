@@ -1,8 +1,8 @@
 package main
 
 import (
-	"net/http"
 	"io/ioutil"
+	"net/http"
 
 	"common/assert"
 	"common/config"
@@ -12,14 +12,13 @@ import (
 
 type Handler struct{}
 
-func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request){
+func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	incData, err := ioutil.ReadAll(r.Body)
 	assert.Nil(err)
 	defer r.Body.Close()
 
-	req, err := http.NewRequest(r.Method, config.Config.Proxy.URL + r.RequestURI, r.Body)
+	req, err := http.NewRequest(r.Method, config.Config.Proxy.URL+r.RequestURI, r.Body)
 	assert.Nil(err)
-
 
 	var resp *http.Response
 	resp, err = sendReq(req)
@@ -30,19 +29,18 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request){
 	assert.Nil(err)
 
 	logrus.WithFields(logrus.Fields{
-		"request": string(incData),
+		"request":  string(incData),
 		"response": string(respData),
 	}).Info(r.URL)
 
 }
 
-func sendReq(req *http.Request) (*http.Response, error){
+func sendReq(req *http.Request) (*http.Response, error) {
 	Client := &http.Client{}
 	return Client.Do(req)
 
 }
 
-
-func main(){
-	assert.Nil(http.ListenAndServe(":" + config.Config.Proxy.Port, &Handler{}))
+func main() {
+	assert.Nil(http.ListenAndServe(":"+config.Config.Proxy.Port, &Handler{}))
 }
