@@ -23,7 +23,7 @@ export DB_HOST?=127.0.0.1
 export RUSER?=$(APPNAME)
 export RPASS?=$(DEFAULT_PASS)
 export WORK_DIR=$(ROOT)/tmp
-export LINTER=$(BIN)/gometalinter -e ".*.gen.go" --cyclo-over=17 --line-length=200 --deadline=100s --disable-all --enable=structcheck --enable=aligncheck --enable=deadcode --enable=gocyclo --enable=ineffassign --enable=golint --enable=goimports --enable=errcheck --enable=varcheck --enable=interfacer --enable=gosimple --enable=staticcheck --enable=unused --enable=misspell --enable=lll
+export LINTER=$(BIN)/gometalinter -e ".*.gen.go" --cyclo-over=17 --line-length=200 --deadline=200s --disable-all --enable=structcheck --enable=aligncheck --enable=deadcode --enable=gocyclo --enable=ineffassign --enable=golint --enable=goimports --enable=errcheck --enable=varcheck --enable=interfacer --enable=gosimple --enable=staticcheck --enable=unused --enable=misspell --enable=lll
 export CYREST_FRONT_PATH=$(ROOT)/front/public
 
 
@@ -203,6 +203,10 @@ codegen-file: tools-codegen
 	$(BIN)/codegen -p modules/file/controllers
 	$(BIN)/codegen -p modules/file/fila
 
+codegen-billing: tools-codegen
+	$(BIN)/codegen -p modules/billing/controllers
+	$(BIN)/codegen -p modules/billing/bil
+
 swagger-cleaner:
 	@rm -f $(WORK_DIR)/swagger/*.json
 	@rm -f $(WORK_DIR)/swagger/*.yaml
@@ -210,7 +214,7 @@ swagger-cleaner:
 swagger-client: tools-swagger
 	GOPATH=$(ROOT) cd $(ROOT)/src && $(BIN)/swagger generate client -f $(ROOT)/3rd/swagger/cyrest.yaml
 
-codegen: swagger-ui swagger-cleaner migration codegen-misc codegen-user codegen-category codegen-location codegen-ad codegen-teleuser codegen-file codegen-cyborg
+codegen: swagger-ui swagger-cleaner migration codegen-misc codegen-user codegen-category codegen-location codegen-ad codegen-teleuser codegen-file codegen-cyborg codegen-billing
 	@cp $(WORK_DIR)/swagger/out.yaml $(ROOT)/3rd/swagger/cyrest.yaml
 	@cp $(WORK_DIR)/swagger/out.json $(ROOT)/3rd/swagger/cyrest.json
 	@echo "Done"
