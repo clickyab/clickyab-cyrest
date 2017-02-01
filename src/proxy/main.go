@@ -42,5 +42,8 @@ func sendReq(req *http.Request) (*http.Response, error) {
 }
 
 func main() {
-	assert.Nil(http.ListenAndServe(":"+config.Config.Proxy.Port, &Handler{}))
+	config.Initialize()
+	config.InitApplication()
+
+	assert.Nil(http.ListenAndServe(config.Config.Proxy.Port, &Handler{}))
 }
