@@ -32,12 +32,12 @@ func (bb *bot) confirm(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 	u, err := tlu.NewTluManager().GetUser(m.Chat.ID)
 	if err != nil {
 		// No action
-		doMessage(bot, m.Chat.ID, "<b>Not authorized</b>")
+		doMessage(bot, m.Chat.ID, "<b>Not authorized</b> #1001")
 		return
 	}
 	if _, ok := u.HasPerm(base.ScopeGlobal, "confirm_ad"); !ok {
 		// No action
-		doMessage(bot, m.Chat.ID, "<b>Not authorized</b>")
+		doMessage(bot, m.Chat.ID, "<b>Not authorized</b> #1002")
 		return
 	}
 	var (
