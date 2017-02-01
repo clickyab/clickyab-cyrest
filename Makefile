@@ -271,7 +271,7 @@ build-js: $(ROOT)/bin/swagger-codegen-cli-2.2.1.jar
 	JAVA_OPTS="$(JAVA_OPTS) -Xmx1024M -DloggerPath=conf/log4j.properties"
 	java -DappName=PetstoreClient $(JAVA_OPTS) -jar $(ROOT)/bin/swagger-codegen-cli-2.2.1.jar $$@ generate -t $(ROOT)/front/contrib/swagger-template -i $(ROOT)/3rd/swagger/cyrest.yaml -l javascript -o $(ROOT)/front/tmp/swagger/webpack-output
 	cp -a $(ROOT)/front/tmp/swagger/webpack-output/src/. $(ROOT)/front/src/app/swagger/
-	cd $(ROOT)/front && npm run build
+	cd $(ROOT)/front && npm install && npm run build
 
 setcap: $(BIN)/server needroot
 	setcap cap_net_bind_service=+ep $(BIN)/server
