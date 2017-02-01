@@ -20,6 +20,8 @@ import (
 
 	"modules/telegram/ad/ads"
 
+	"fmt"
+
 	echo "gopkg.in/labstack/echo.v3"
 )
 
@@ -312,7 +314,7 @@ func (u *Controller) getLast(ctx echo.Context) error {
 		return u.BadResponse(ctx, trans.E("count out of range"))
 	}
 	name := ctx.Param("name")
-	hash := utils.Sha1(name)
+	hash := utils.Sha1(fmt.Sprintf("%s%d", name, count))
 	//check if the key exists in redis
 	b, err := aredis.GetHashKey(hash, "STATUS", true, 2*time.Hour)
 	if b == "" || err != nil { //key not exists
