@@ -166,7 +166,7 @@ func (u *User) HasPerm(scope base.UserScope, perm base.Permission) (base.UserSco
 		}
 		fallthrough
 	case base.ScopeGlobal:
-		if res[scope][perm] {
+		if res[scope][perm] || res[scope][base.PermissionGod] {
 			rScope = scope
 			rHas = true
 		}
