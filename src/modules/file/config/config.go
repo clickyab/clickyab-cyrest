@@ -38,7 +38,7 @@ func (c *configLoader) Initialize(o *onion.Onion) []onion.Layer {
 	_ = def.SetDefault("size.max_download", 104857600)
 	_ = def.SetDefault("file.valid_extension", []string{".jpg", ".jpeg", ".mp4", ".png", ".pdf"})
 	_ = def.SetDefault("file.server_path", "statics.clickgram.com")
-	_ = def.SetDefault("file.upload_path", "http://static.rubik.com/")
+	_ = def.SetDefault("file.upload_path", "http://rubik.clickyab.ae/statics")
 	_ = def.SetDefault("file.temp_directory_path", filepath.Join(os.TempDir(), "upload"))
 	return []onion.Layer{def}
 }
