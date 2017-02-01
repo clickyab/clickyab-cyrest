@@ -39,7 +39,7 @@ type (
 // @Model {
 //		table = telegram_users
 //		primary = true, id
-//		find_by = id,user_id
+//		find_by = id,user_id,bot_chat_id
 //		list = yes
 // }
 type TeleUser struct {

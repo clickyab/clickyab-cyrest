@@ -256,7 +256,7 @@ func (mw *MultiWorker) existChannelAdFor(h []tgo.History, cliMessageID common.Nu
 
 func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error) {
 	m := ads.NewAdsManager()
-	chad, err := m.FindChannelIDAdByAdID(in.ChannelID, in.AdID)
+	chad, err := m.FindChannelIDAdByAdID(in.ChannelID, in.AdID[0])
 	assert.Nil(err)
 	if chad.Active == "no" || !chad.Active.IsValid() {
 		return false, nil
