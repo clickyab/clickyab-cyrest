@@ -9,6 +9,7 @@ MYSQL_DB=${MY_DB:-cyrest}
 # TODO : env re-write must be done here
 export CYREST_SWAGGER_ROOT=/app/swagger/
 export CYREST_FRONT_PATH=/app/public
+export CYREST_STATIC_ROOT=/app/statics
 export CYREST_SITE=rubik.clickyab.ae
 export CYREST_PROTO=http
 export CYREST_REDIS_ADDRESS=redis:6379

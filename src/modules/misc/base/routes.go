@@ -77,6 +77,7 @@ func Initialize(mountPoint string) *echo.Echo {
 
 			engine.Static("/swagger", config.Config.SwaggerRoot)
 		}
+		engine.Static("/statics", config.Config.StaticRoot)
 
 		engine.Logger = NewLogger()
 		echo.NotFoundHandler = notFoundHandler
