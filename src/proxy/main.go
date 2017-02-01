@@ -7,8 +7,8 @@ import (
 	"common/assert"
 	"common/config"
 
-	"github.com/Sirupsen/logrus"
 	"common/initializer"
+	"github.com/Sirupsen/logrus"
 )
 
 type Handler struct{}
