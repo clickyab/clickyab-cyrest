@@ -22,7 +22,7 @@ type bot struct {
 func (bb *bot) verify(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 	//sample code  /verify-1:12123
 	if !strings.Contains(m.Text, "-") && !strings.Contains(m.Text, ":") {
-		msg := tgbotapi.NewMessage(m.Chat.ID, "your code is not <b>valid</b>")
+		msg := tgbotapi.NewMessage(m.Chat.ID, "your command is <b>not valid</b>")
 		msg.ParseMode = htmlMode
 		_, err := bot.Send(msg)
 		assert.Nil(err)
@@ -31,7 +31,7 @@ func (bb *bot) verify(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 	result := strings.Replace(m.Text, "/verify-", "", 1)
 	str, err := aredis.GetKey(result, false, time.Hour)
 	if str == "" || err != nil {
-		msg := tgbotapi.NewMessage(m.Chat.ID, "your code is not <b>valid</b>")
+		msg := tgbotapi.NewMessage(m.Chat.ID, "your command is <b>not valid</b>")
 		msg.ParseMode = htmlMode
 		_, err := bot.Send(msg)
 		assert.Nil(err)
