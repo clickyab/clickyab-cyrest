@@ -43,7 +43,7 @@ func (c *Config) Initialize(o *onion.Onion) []onion.Layer {
 	assert.Nil(d.SetDefault("telegram.verify", "70018667"))
 
 	assert.Nil(d.SetDefault("telegram.channel_id", ""))
-	assert.Nil(d.SetDefault("telegram.api_key", "169197433:AAEHSXjrCldhvC6vzdAbHdRDHcMsqaWySEg"))
+	assert.Nil(d.SetDefault("telegram.api_key", "251566867:AAFVo595uWT4P7RMSB0sFeph8QNDgDF3t9s"))
 	assert.Nil(d.SetDefault("telegram.bot_id", "$0100000068c34a10ed72226be64e8d4d"))
 	assert.Nil(d.SetDefault("telegram.cli_host", "localhost"))
 	assert.Nil(d.SetDefault("telegram.cli_port", 9999))

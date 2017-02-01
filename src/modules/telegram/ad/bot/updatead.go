@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"gopkg.in/telegram-bot-api.v4"
+	"github.com/Sirupsen/logrus"
 )
 
 type bot struct {
@@ -43,6 +44,7 @@ func (bb *bot) wantAD(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 	chnManger := ads.NewAdsManager()
 	if strings.Contains(m.Text, "_") {
 		res := strings.Split(m.Text, "_")
+		logrus.Warn(res)
 		if len(res) != 2 {
 			return
 		}
