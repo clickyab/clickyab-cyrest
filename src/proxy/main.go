@@ -8,6 +8,7 @@ import (
 	"common/config"
 
 	"github.com/Sirupsen/logrus"
+	"common/initializer"
 )
 
 type Handler struct{}
@@ -42,5 +43,10 @@ func sendReq(req *http.Request) (*http.Response, error) {
 }
 
 func main() {
-	assert.Nil(http.ListenAndServe(":"+config.Config.Proxy.Port, &Handler{}))
+	config.Initialize()
+	config.InitApplication()
+
+	defer initializer.Initialize().Finalize()
+
+	assert.Nil(http.ListenAndServe(config.Config.Proxy.Port, &Handler{}))
 }

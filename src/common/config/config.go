@@ -168,7 +168,7 @@ func defaultLayer() onion.DefaultLayer {
 	assert.Nil(res.SetDefault("mail.password", ""))
 	assert.Nil(res.SetDefault("mail.from", "hello@clickyab.com"))
 
-	assert.Nil(res.SetDefault("proxy.port", "8000"))
+	assert.Nil(res.SetDefault("proxy.port", ":8000"))
 	assert.Nil(res.SetDefault("proxy.url", "https://google.com"))
 
 	return res
