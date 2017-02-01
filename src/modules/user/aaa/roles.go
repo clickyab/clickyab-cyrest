@@ -2,6 +2,7 @@ package aaa
 
 import (
 	"common/assert"
+	"common/config"
 	"common/models/common"
 	"errors"
 	"fmt"
@@ -137,6 +138,9 @@ func (m *Manager) DeleteRoleByID(roleID int64) (*Role, error) {
 // DeleteRole in transaction try delete role
 func (m *Manager) DeleteRole(ID int64) (r *Role, err error) {
 	r, err = m.FindRoleByID(ID)
+	if r.Name == config.Config.Role.Default {
+		return r, fmt.Errorf("you cannot remove role <<%s>>", config.Config.Role.Default)
+	}
 	err = m.Begin()
 	if err != nil {
 		return nil, err

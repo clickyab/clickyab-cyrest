@@ -86,6 +86,9 @@ type AppConfig struct {
 		Password string `onion:"password"`
 		From     string `onion:"from"`
 	}
+	Role struct {
+		Default string `onion:"default"`
+	}
 }
 
 func defaultLayer() onion.DefaultLayer {
@@ -162,6 +165,7 @@ func defaultLayer() onion.DefaultLayer {
 	assert.Nil(res.SetDefault("mail.user_name", ""))
 	assert.Nil(res.SetDefault("mail.password", ""))
 	assert.Nil(res.SetDefault("mail.from", "hello@clickyab.com"))
+	assert.Nil(res.SetDefault("role.default", "user"))
 
 	return res
 }
