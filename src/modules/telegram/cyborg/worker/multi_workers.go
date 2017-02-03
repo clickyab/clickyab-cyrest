@@ -136,7 +136,7 @@ func (mw *MultiWorker) identifyAD(in *commands.IdentifyAD) (bool, error) {
 
 func (mw *MultiWorker) selectAd(in *commands.SelectAd) (bool, error) {
 	b := ads.NewAdsManager()
-	chad, err := b.FindChannelAdByAdIDActive(in.ChannelID)
+	chad, err := b.FindChannelAdActiveByChannelID(in.ChannelID, ads.ActiveStatusYes)
 	assert.Nil(err)
 	if len(chad) > 0 {
 		return false, nil
