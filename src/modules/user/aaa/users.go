@@ -12,6 +12,8 @@ import (
 	"strings"
 	"time"
 
+	"common/config"
+
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/gorp.v1"
 )
@@ -357,6 +359,17 @@ func (m *Manager) RegisterUser(email, password string) (u *User, err error) {
 		}
 	}()
 	err = m.CreateUser(u)
+	if err != nil {
+		u = nil
+		return
+	}
+	role, err := m.FindRoleByName(config.Config.Role.Default)
+	if err != nil {
+		u = nil
+		return
+	}
+	ur := &UserRole{RoleID: role.ID, UserID: u.ID}
+	err = m.CreateUserRole(ur)
 	if err != nil {
 		u = nil
 		return
