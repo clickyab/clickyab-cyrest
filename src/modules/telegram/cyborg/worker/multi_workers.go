@@ -8,16 +8,15 @@ import (
 	"errors"
 	"fmt"
 	"modules/telegram/ad/ads"
+	bot2 "modules/telegram/ad/bot/worker"
 	"modules/telegram/common/tgo"
 	"modules/telegram/cyborg/bot"
 	"net"
 	"regexp"
 	"sort"
-	"strconv"
 	"sync"
 	"time"
 
-	bot2 "modules/telegram/ad/bot/worker"
 	"modules/telegram/cyborg/commands"
 
 	"common/redis"
@@ -438,66 +437,6 @@ func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error)
 	return false, nil
 }
 
-//updateMessage get channel id and read each post on it then if not save on db,
-//save it
-func (mw *MultiWorker) updateMessage(in *commands.UpdateMessage) (bool, error) {
-	defer rabbit.MustPublishAfter(in, 2*time.Minute)
-	knownManger := bot.NewBotManager()
-	c, err := knownManger.FindKnownChannelByName(in.CLiChannelName)
-	if err != nil {
-		//known channel not found
-		ch, err := mw.discoverChannel(in.CLiChannelName)
-
-		if err != nil {
-			// Oh crap. can not resolve this :/
-			return false, err
-		}
-		c, err = bot.NewBotManager().CreateChannelByRawData(ch)
-		if err != nil {
-			return false, err
-		}
-	}
-	caManager := ads.NewAdsManager()
-
-	history, err := mw.getLastMessages(c.CliTelegramID, in.Count, in.Offset)
-	assert.Nil(err)
-
-	if len(history) == 0 {
-		return true, nil
-	}
-	for i, h := range history {
-		codes := chnAdPattern.FindStringSubmatch(h.Text)
-		if len(codes) == 0 {
-			continue
-		}
-		adID, err := strconv.ParseInt(codes[1], 10, 0)
-		if err != nil {
-			//logrus.Warn(err)
-			continue
-		}
-		channelID, err := strconv.ParseInt(codes[2], 10, 0)
-		if err != nil {
-			//logrus.Warn(err)
-			continue
-		}
-
-		chn, err := caManager.FindChannelIDAdByAdID(adID, channelID)
-		if err != nil {
-			//logrus.Warn(err)
-			continue
-		}
-		if chn.CliMessageID.Valid && chn.CliMessageID.String == h.ID {
-			break
-
-		}
-		chn.CliMessageID = common.MakeNullString(history[i-1].ID)
-
-		assert.Nil(caManager.UpdateChannelAd(chn))
-
-	}
-	return false, err
-}
-
 // NewMultiWorker create a multi worker that listen on all commands
 func NewMultiWorker(ip net.IP, port int) (*MultiWorker, error) {
 	t, err := tgo.NewTelegramCli(ip, port)
@@ -516,6 +455,6 @@ func NewMultiWorker(ip net.IP, port int) (*MultiWorker, error) {
 	go rabbit.RunWorker(&commands.IdentifyAD{}, res.identifyAD, 1)
 	go rabbit.RunWorker(&commands.ExistChannelAd{}, res.existChannelAd, 1)
 	go rabbit.RunWorker(&commands.SelectAd{}, res.selectAd, 1)
-	go rabbit.RunWorker(&commands.UpdateMessage{}, res.updateMessage, 1)
+	//go rabbit.RunWorker(&commands.UpdateMessage{}, res.UpdateMessage, 1)
 	return res, nil
 }

@@ -9,4 +9,3 @@ ALTER TABLE ads
 -- SQL section 'Down' is executed when this migration is rolled back
 ALTER TABLE ads
   DROP COLUMN `view`;
-
