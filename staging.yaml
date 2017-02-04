@@ -9,9 +9,18 @@
         dest: /home/cy/cyrest
         force: yes
 
+    - shell: git checkout master && git pull
+      args:
+        chdir: /home/cy/cyrest/front
+
     - name: clean all data
       make:
         target: clean
+        chdir: /home/cy/cyrest
+
+    - name: get dependencies
+      make:
+        target: conditional-restore
         chdir: /home/cy/cyrest
 
     - name: generate codes
