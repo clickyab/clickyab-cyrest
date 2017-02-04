@@ -162,6 +162,46 @@ func (m *Manager) LoadNextAd(last int64) (*Ad, error) {
 	return &res, err
 }
 
+//ActiveAd selected ad
+type ActiveAd struct {
+	Ad     Ad
+	Viewed int64 `db:"viewed" json:"viewed"`
+}
+
+// SelectIndividualActiveAd return the next ad in the system
+func (m *Manager) SelectIndividualActiveAd() ([]ActiveAd, error) {
+	q := fmt.Sprintf("SELECT %[1]s.*,SUM(%[2]s.view) as viewed FROM %[2]s "+
+		" LEFT JOIN %[1]s on %[1]s.id = %[2]s.ad_id "+
+		" WHERE %[1]s.cli_message_id = NULL "+
+		" AND %[1]s.admin_status = ? "+
+		" AND %[1]s.active_status = ? "+
+		" AND %[1]s.pay_status = ? "+
+		" GROUP BY %[1]s.id",
+		AdTableFull,
+		ChannelAdTableFull,
+	)
+	res := []ActiveAd{}
+	_, err := m.GetDbMap().Select(&res, q, AdAdminStatusAccepted, AdActiveStatusYes, AdPayStatusYes)
+
+	return res, err
+}
+
+// SelectAdsPlan return the next ad in the system
+func (m *Manager) SelectAdsPlan() ([]ActiveAd, error) {
+	q := fmt.Sprintf("SELECT %[1]s.*,%[2]s.view as viewed FROM %[2]s "+
+		" LEFT JOIN %[1]s on %[1]s.id = %[2]s.plan_id "+
+		" WHERE %[1]s.admin_status = ? "+
+		" AND %[1]s.active_status = ? "+
+		" AND %[1]s.pay_status = ? ",
+		AdTableFull,
+		PlanTableFull,
+	)
+	res := []ActiveAd{}
+	_, err := m.GetDbMap().Select(&res, q, AdAdminStatusAccepted, AdActiveStatusYes, AdPayStatusYes)
+
+	return res, err
+}
+
 //UserAdDataTable is the ad full data in data table, after join with other field
 // @DataTable {
 //		url = /user-ad
