@@ -545,6 +545,13 @@ func (u *Controller) verify(ctx echo.Context) error {
 		//update ad pay status
 		currentAd.AdPayStatus = ads.AdPayStatusYes
 		assert.Nil(adManager.UpdateAd(currentAd))
+
+		defer func() {
+			rabbit.MustPublish(commands.IdentifyAD{
+				AdID: id,
+			})
+		}()
+
 		return ctx.Redirect(http.StatusMovedPermanently, frontOk)
 	}
 	return ctx.Redirect(http.StatusMovedPermanently, frontNOk)
