@@ -6,3 +6,7 @@ pkg/
 .vagrant/
 .git_index
 /tmp
+/vendor
+/src
+/node_modules
+.vscode
