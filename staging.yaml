@@ -50,7 +50,7 @@
     - name: build front end
       make:
         target: build-js
-        chdir: /home/develop/cyrest
+        chdir: /home/cy/cyrest
 
 # This is the staging build. it will build the app (using golang docker image) and run it with docker-compose
 - name: staging build
