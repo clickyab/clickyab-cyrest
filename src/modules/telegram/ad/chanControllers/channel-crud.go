@@ -19,6 +19,7 @@ import (
 	"common/models/common"
 
 	"modules/telegram/ad/ads"
+	"modules/telegram/config"
 
 	"fmt"
 
@@ -287,6 +288,16 @@ func (u *Controller) statusChannel(ctx echo.Context) error {
 	cha.ID = id
 	cha.AdminStatus = pl.Status
 	assert.Nil(m.UpdateChannel(cha))
+
+	if pl.Status == ads.AdminStatusAccepted {
+		defer func() {
+			rabbit.MustPublish(commands.GetChanCommand{
+				ChannelID: id,
+				Count:     int(tcfg.Cfg.Telegram.LimitCountWarning),
+			})
+		}()
+	}
+
 	return u.OKResponse(ctx, cha)
 
 }
