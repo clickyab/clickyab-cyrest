@@ -198,24 +198,29 @@ func (t *telegram) History(user string, limit, offset int) ([]History, error) {
 func (t *telegram) MessageHistory(user string, limit, offset int) ([]History, error) {
 	var data []History
 	var res []History
-	cmd := fmt.Sprintf("history %s %d %d", user, limit, offset)
-	x, err := t.exec(cmd)
-	//fmt.Print(string(x))
-	if err != nil {
-		return nil, err
-	}
-	fmt.Println(string(x))
-	err = json.Unmarshal(x, &data)
-	for i := range data {
-		if data[i].Event == Message {
-			res = append(res, data[i])
+	set := limit
+	for len(res) < limit {
+		cmd := fmt.Sprintf("history %s %d %d", user, limit, offset)
+		x, err := t.exec(cmd)
+
+		if err != nil {
+			return nil, err
 		}
+		fmt.Println(string(x))
+		err = json.Unmarshal(x, &data)
+		if err != nil {
+			return nil, err
+		}
+
+		for i := range data {
+			if data[i].Event == Message {
+				res = append(res, data[i])
+			}
+		}
+		offset += limit
 	}
-	if err != nil {
-		return nil, err
-	}
-	//fmt.Println(data)
-	return res, nil
+
+	return res[:set + 1], nil
 
 }
 
