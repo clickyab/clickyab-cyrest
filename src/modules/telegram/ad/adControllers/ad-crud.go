@@ -433,6 +433,7 @@ func (u *Controller) assignPlan(ctx echo.Context) error {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
 	currentAd.PlanID = common.NullInt64{Valid: true, Int64: plan.ID}
+	assert.Nil(m.UpdateAd(currentAd))
 	return u.OKResponse(ctx, currentAd)
 }
 
