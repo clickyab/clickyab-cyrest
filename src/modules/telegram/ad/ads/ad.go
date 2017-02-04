@@ -67,6 +67,7 @@ type Ad struct {
 	CliMessageID    common.NullString `json:"cli_message_id" db:"cli_message_id" visible:"false" title:"CliMessageID"`
 	BotChatID       common.NullInt64  `json:"bot_chat_id" db:"bot_chat_id" visible:"false" title:"BotChatID"`
 	BotMessageID    common.NullInt64  `json:"bot_message_id" db:"bot_message_id" visible:"false" title:"BotMessageID"`
+	View            common.NullInt64  `json:"view" db:"view" visible:"true" title:"View"`
 	AdAdminStatus   AdAdminStatus     `json:"admin_status" db:"admin_status" filter:"true" title:"AdminStatus"`
 	AdArchiveStatus AdArchiveStatus   `json:"archive_status" db:"archive_status" filter:"true" title:"ArchiveStatus"`
 	AdPayStatus     AdPayStatus       `json:"pay_status" db:"pay_status" filter:"true" title:"PayStatus"`
