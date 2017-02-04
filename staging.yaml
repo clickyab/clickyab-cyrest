@@ -92,7 +92,7 @@
         rsync_opts: "--exclude=.git --exclude=*.sh --exclude=gb* --exclude=go-bindata --exclude=fswatch --exclude=codegen"
         checksum: yes
         times: no
-        delegate_to: vagrant
+      delegate_to: vagrant
 
     - name: copy swagger files
       synchronize:
@@ -101,7 +101,7 @@
         delete: yes
         checksum: yes
         times: no
-        delegate_to: vagrant
+      delegate_to: vagrant
 
     - name: copy frontend files
       synchronize:
@@ -110,7 +110,7 @@
         delete: yes
         checksum: yes
         times: no
-        delegate_to: vagrant
+      delegate_to: vagrant
 
     - name: copy compose file to server
       synchronize:
