@@ -35,7 +35,6 @@ const (
 // @Model {
 //		table = channel_ad
 //		primary = false, channel_id,ad_id
-//		find_by = channel_id, ad_id
 // }
 type ChannelAd struct {
 	ChannelID    int64             `db:"channel_id" json:"channel_id"`
@@ -97,7 +96,7 @@ func (m *Manager) FindChannelAdActiveByChannelID(channelID int64, status ActiveS
 	res := []ChannelAd{}
 	_, err := m.GetDbMap().Select(
 		&res,
-		fmt.Sprintf("SELECT * FROM %s WHERE channel_id=? AND active='?'", ChannelAdTableFull),
+		fmt.Sprintf("SELECT * FROM %s WHERE channel_id=? AND active='?' AND end IS NULL", ChannelAdTableFull),
 		channelID,
 		status,
 	)
@@ -107,6 +106,63 @@ func (m *Manager) FindChannelAdActiveByChannelID(channelID int64, status ActiveS
 	}
 
 	return res, nil
+}
+
+// ChannelAdD ChannelAdD
+type ChannelAdD struct {
+	ChannelID    int64             `db:"channel_id" json:"channel_id"`
+	AdID         int64             `db:"ad_id" json:"ad_id"`
+	View         int64             `db:"view" json:"view"`
+	CliMessageID common.NullString `db:"cli_message_id" json:"cli_message_id"`
+	CliMessageAd common.NullString `db:"cli_message_ad" json:"cli_message_ad"`
+	PlanView     int64             `db:"plan_view" json:"plan_view"`
+	AdPosition   common.NullInt64  `json:"ad_position" db:"ad_position"`
+	BotChatID    int64             `db:"bot_chat_id" json:"bot_chat_id"`
+	BotMessageID int               `db:"bot_message_id" json:"bot_message_id"`
+	Active       ActiveStatus      `db:"active" json:"active"`
+	Start        common.NullTime   `db:"start" json:"start"`
+	End          common.NullTime   `db:"end" json:"end"`
+	Warning      int64             `db:"warning" json:"warning"`
+	PossibleView int64             `db:"possible_view" json:"possible_view"`
+	CreatedAt    time.Time         `db:"created_at" json:"created_at" sort:"true"`
+	UpdatedAt    time.Time         `db:"updated_at" json:"updated_at" sort:"true"`
+}
+
+// FindChannelAdByChannelIDActive return the ChannelAd base on its channel_id
+func (m *Manager) FindChannelAdByChannelIDActive(a int64) ([]ChannelAdD, error) {
+	res := []ChannelAdD{}
+	_, err := m.GetDbMap().Select(
+		&res,
+		fmt.Sprintf("SELECT %s.*,%s.cli_telegram_id AS cli_message_ad,"+
+			"%s.position AS ad_position,"+
+			"%s.view AS plan_view"+
+			" FROM %s INNER JOIN %s ON %s.id=%s.ad_id INNER JOIN %s ON %s.id=%s.plan_id WHERE channel_id=? AND active='yes' AND end IS NULL",
+			ChannelAdTableFull,
+			AdTableFull,
+			AdTableFull,
+			PlanTableFull,
+			ChannelAdTableFull,
+			AdTableFull,
+			AdTableFull,
+			ChannelAdTableFull,
+			PlanTableFull,
+			PlanTableFull,
+			AdTableFull,
+		),
+		a,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
+// UpdateChannelAds update channel ads
+func (m *Manager) UpdateChannelAds(ca []ChannelAd) error {
+	_, err := m.GetDbMap().Update(ca)
+	return err
 }
 
 // ChooseAd return the ads

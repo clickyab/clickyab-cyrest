@@ -35,3 +35,8 @@ func (m *Manager) FindChannelIDAdIDDetail(c int64, a int64) (*ChannelAdDetail, e
 	}
 	return &res, nil
 }
+
+// CreateChannelAdDetails create ad channel details
+func (m *Manager) CreateChannelAdDetails(cad []ChannelAdDetail) error {
+	return m.GetDbMap().Insert(cad)
+}

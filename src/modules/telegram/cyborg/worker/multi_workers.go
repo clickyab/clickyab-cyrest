@@ -4,21 +4,25 @@ import (
 	"common/assert"
 	"common/models/common"
 	"common/rabbit"
-	"common/redis"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"modules/telegram/ad/ads"
 	"modules/telegram/common/tgo"
-	"modules/telegram/config"
 	"modules/telegram/cyborg/bot"
-	"modules/telegram/cyborg/commands"
 	"net"
 	"regexp"
 	"sort"
 	"strconv"
 	"sync"
 	"time"
+
+	bot2 "modules/telegram/ad/bot/worker"
+	"modules/telegram/cyborg/commands"
+
+	"common/redis"
+
+	"modules/telegram/config"
 
 	"github.com/Sirupsen/logrus"
 )
@@ -31,6 +35,20 @@ type MultiWorker struct {
 
 //chnAdPattern is a pattern for message
 var chnAdPattern = regexp.MustCompile(`^([0-9]+)/([0-9]+)$`)
+
+type channelDetailStat struct {
+	frwrd bool
+	cliID common.NullString
+	adID  int64
+}
+
+type channelViewStat struct {
+	adID    int64
+	pos     int64
+	view    int64
+	warning int64
+	frwrd   bool
+}
 
 // Ping command verify if the client is alive
 func (mw *MultiWorker) Ping() error {
@@ -139,10 +157,10 @@ func (mw *MultiWorker) selectAd(in *commands.SelectAd) (bool, error) {
 		return false, nil
 	}
 	chooseAds, err := b.ChooseAd(in.ChannelID)
-	logrus.Info("chooseAds", chooseAds)
 	assert.Nil(err)
 	if len(chooseAds) == 0 {
 		return false, nil
+		//todo send empty ad
 	}
 	for k := range chooseAds {
 		chooseAds[k].AffectiveView = chooseAds[k].View - chooseAds[k].PossibleView
@@ -205,7 +223,7 @@ func (mw *MultiWorker) getChanStat(in *commands.GetChanCommand) (bool, error) {
 	return false, nil
 
 }
-func (mw *MultiWorker) transaction(m *ads.Manager, chad *ads.ChannelAd, channelAdDetail *ads.ChannelAdDetail) (bool, error) {
+func (mw *MultiWorker) transaction(m *ads.Manager, chad []ads.ChannelAd, channelAdDetail []ads.ChannelAdDetail, avg int64) (bool, error) {
 	err := m.Begin()
 	if err != nil {
 		return true, err
@@ -221,59 +239,119 @@ func (mw *MultiWorker) transaction(m *ads.Manager, chad *ads.ChannelAd, channelA
 			chad = nil
 		}
 	}()
-	err = m.UpdateChannelAd(chad)
+	err = m.CreateChannelAdDetails(channelAdDetail)
 	if err != nil {
 		return true, err
 	}
-	err = m.CreateChannelAdDetail(channelAdDetail)
+	err = m.UpdateChannelAds(chad)
+
+	//update ads table field view for promotion ad
+	for ch := range chad {
+		if chad[ch].CliMessageID.Valid {
+			//get ad
+			ad, err := m.FindAdByID(chad[ch].AdID)
+			if err != nil {
+				return true, err
+			}
+			ad.View = common.NullInt64{Valid: avg != 0, Int64: avg}
+			assert.Nil(m.UpdateAd(ad))
+		}
+	}
+
 	if err != nil {
 		return true, err
 	}
 	return false, err
 }
 
-func (mw *MultiWorker) existChannelAdFor(h []tgo.History, cliMessageID common.NullString, len int) (int64, int64, int64) {
-	var pos int64
-	var view int64
-	var warning int64
-	warning = 1
+func (mw *MultiWorker) existChannelAdFor(h []tgo.History, adConfs []channelDetailStat) (map[int64]channelViewStat, int64) {
+	var finalResult = make(map[int64]channelViewStat)
+	var sumNotpromotionView int64
+	var countNotPromotion int64
+	historyLen := len(h)
 	for k := range h {
 		if h[k].Event == "message" && h[k].Service == false {
 			if h[k].FwdFrom != nil {
-				if h[k].ID == cliMessageID.String {
-					warning = 0
-					view = int64(h[k].Views)
-					pos = int64(len - k)
+				for i := range adConfs {
+					if adConfs[i].frwrd && h[k].ID == adConfs[i].cliID.String { //the ad is forward type
+						finalResult[adConfs[i].adID] = channelViewStat{
+							view:    int64(h[k].Views),
+							warning: 0,
+							pos:     int64(historyLen - k),
+							frwrd:   true,
+							adID:    adConfs[i].adID,
+						}
+					} else if !adConfs[i].frwrd && h[k].ID == adConfs[i].cliID.String { //the ad is  not forward type
+						finalResult[adConfs[i].adID] = channelViewStat{
+							view:    int64(h[k].Views),
+							warning: 0,
+							pos:     int64(historyLen - k),
+							frwrd:   false,
+							adID:    adConfs[i].adID,
+						}
+						sumNotpromotionView += int64(h[k].Views)
+						countNotPromotion++
+					} else { //don't find ad in the history
+						finalResult[adConfs[i].adID] = channelViewStat{
+							view:    0,
+							warning: 1,
+							frwrd:   adConfs[i].frwrd,
+							adID:    adConfs[i].adID,
+							pos:     0,
+						}
+					}
 				}
 			}
 		}
 	}
-	return pos, view, warning
+	if countNotPromotion == 0 {
+		return finalResult, 0
+	}
+	return finalResult, (sumNotpromotionView) / (countNotPromotion)
 }
 
 func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error) {
+	var adsConf []channelDetailStat
 	m := ads.NewAdsManager()
-	chad, err := m.FindChannelIDAdByAdID(in.ChannelID, in.AdID[0])
+
+	chads, err := m.FindChannelAdByChannelIDActive(in.ChannelID)
 	assert.Nil(err)
-	if chad.Active == "no" || !chad.Active.IsValid() {
+	for i := range chads {
+		adsConf = append(adsConf, channelDetailStat{
+			cliID: chads[i].CliMessageID,
+			frwrd: chads[i].CliMessageAd.Valid,
+			adID:  chads[i].AdID,
+		})
+	}
+
+	//check for promotion to be alone or not
+	var promotionCount int
+	var notPromotionCount int
+	for adConf := range adsConf {
+		if adsConf[adConf].frwrd {
+			promotionCount++
+		}
+		notPromotionCount++
+	}
+
+	if notPromotionCount == 0 {
+
+		for adConf := range adsConf {
+			//send stop (warn message)
+			bot2.SendWarnAction(&bot2.SendWarn{
+				AdID:      adsConf[adConf].adID,
+				ChannelID: in.ChannelID,
+				Msg:       "please remove the following ad",
+				ChatID:    in.ChatID,
+			})
+
+		}
 		return false, nil
 	}
-	if chad.CliMessageID.Valid {
-		rabbit.PublishAfter(&commands.ExistChannelAd{
-			ChannelID: in.ChannelID,
-			AdID:      in.AdID,
-		}, tcfg.Cfg.Telegram.TimeReQueUe)
-	}
-	if !chad.End.Valid {
-		return false, nil
-	}
+
 	channel, err := m.FindChannelByID(in.ChannelID)
 	assert.Nil(err)
 	c, err := bot.NewBotManager().FindKnownChannelByName(channel.Name)
-	assert.Nil(err)
-	a := ads.NewAdsManager()
-	ad, err := a.FindAdByID(chad.AdID)
-	assert.Nil(err)
 	if err != nil {
 		ch, err := mw.discoverChannel(channel.Name)
 		assert.Nil(err)
@@ -282,48 +360,76 @@ func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error)
 	}
 	h, err := mw.getLastMessages(c.CliTelegramID, tcfg.Cfg.Telegram.LastPostChannel, 0)
 	assert.Nil(err)
-	chde, err := m.FindChanDetailByChannelID(chad.ChannelID)
-	assert.Nil(err)
-	//var len int64
-	len := len(h)
-	depos := tcfg.Cfg.Telegram.PositionAdDefault
-	if ad.Position.Valid {
-		depos = ad.Position.Int64
-	}
-	/*var pos int64
-	var view int64
-	var warning int64
-	warning = 1*/
-	var possible int64
-	pos, view, warning := mw.existChannelAdFor(h, chad.CliMessageID, len)
+	/*channelDetails, err := m.FindChanDetailByChannelID(channel.ID)
+	assert.Nil(err)*/
+	channelAdStat, avg := mw.existChannelAdFor(h, adsConf)
 
-	possible = int64(chde.TotalView / chde.Num)
-	channelAdDetail := &ads.ChannelAdDetail{}
-	chad.View = view
-	chad.PossibleView = possible
-	if pos < depos {
-		warning = 1
-	}
-	chad.Warning = chad.Warning + warning
-	if chad.Warning >= tcfg.Cfg.Telegram.LimitCountWarning {
-		//todo send message to user
-		chad.End = common.NullTime{Valid: true, Time: time.Now()}
+	var ChannelAdDetailArr []ads.ChannelAdDetail
+	for j := range chads {
+		var currentView int64
+		depos := tcfg.Cfg.Telegram.PositionAdDefault
+		if chads[j].AdPosition.Valid {
+			depos = chads[j].AdPosition.Int64
+		}
+		if channelAdStat[chads[j].AdID].pos < depos {
+			channelAdStat[chads[j].AdID] = channelViewStat{
+				warning: 1,
+				adID:    chads[j].AdID,
+				frwrd:   channelAdStat[chads[j].AdID].frwrd,
+				pos:     channelAdStat[chads[j].AdID].pos,
+				view:    channelAdStat[chads[j].AdID].view,
+			}
+		}
+		if channelAdStat[chads[j].AdID].frwrd == true {
+			currentView = avg
+		} else {
+			currentView = channelAdStat[chads[j].AdID].view
+		}
+		ChannelAdDetailArr = append(ChannelAdDetailArr, ads.ChannelAdDetail{
+			AdID:      chads[j].AdID,
+			ChannelID: chads[j].ChannelID,
+			View:      currentView,
+			Position:  common.NullInt64{Valid: channelAdStat[chads[j].AdID].pos != 0, Int64: channelAdStat[chads[j].AdID].pos},
+			Warning:   channelAdStat[chads[j].AdID].warning,
+		})
 	}
 
-	channelAdDetail.AdID = chad.AdID
-	channelAdDetail.AdID = chad.ChannelID
-	channelAdDetail.Warning = warning
-	channelAdDetail.Position = common.NullInt64{Valid: pos != 0, Int64: pos}
-	channelAdDetail.View = view
+	var ChannelAdArr []ads.ChannelAd
+
+	for chad := range chads {
+		var currentView int64
+		if channelAdStat[chads[chad].AdID].frwrd == true {
+			currentView = avg
+		} else {
+			currentView = channelAdStat[chads[chad].AdID].view
+		}
+		ChannelAdArr = append(ChannelAdArr, ads.ChannelAd{
+			Warning: chads[chad].Warning + channelAdStat[chads[chad].AdID].warning,
+			View:    currentView,
+		})
+		if chads[chad].Warning >= tcfg.Cfg.Telegram.LimitCountWarning {
+			//send stop (warn message)
+			bot2.SendWarnAction(&bot2.SendWarn{
+				AdID:      chads[chad].AdID,
+				ChannelID: in.ChannelID,
+				Msg:       "please reshot the following ad",
+				ChatID:    in.ChatID,
+			})
+			ChannelAdArr = append(ChannelAdArr, ads.ChannelAd{
+				End: common.NullTime{Valid: true, Time: time.Now()},
+			})
+		}
+	}
+
 	//transaction
-	res, err := mw.transaction(m, chad, channelAdDetail)
+	res, err := mw.transaction(m, ChannelAdArr, ChannelAdDetailArr, avg)
 	if res == true {
 		return true, err
 	}
 
 	rabbit.PublishAfter(&commands.ExistChannelAd{
 		ChannelID: in.ChannelID,
-		AdID:      in.AdID,
+		ChatID:    in.ChatID,
 	}, tcfg.Cfg.Telegram.TimeReQueUe)
 
 	return false, nil
