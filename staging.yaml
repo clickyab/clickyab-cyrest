@@ -3,6 +3,10 @@
   hosts: vagrant
 
   tasks:
+    - shell: git submodule update
+      args:
+        chdir: /home/cy/cyrest
+
     - name: clone the code
       git:
         repo: git@github.com:clickyab/clickyab-cyrest.git
