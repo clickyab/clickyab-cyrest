@@ -72,6 +72,6 @@
       args:
         chdir: /home/cy/compose/
 
-    - shell: /home/cy/.local/bin/docker-compose restart app
+    - shell: /home/cy/.local/bin/docker-compose restart app got cyborg
       args:
         chdir: /home/cy/compose/

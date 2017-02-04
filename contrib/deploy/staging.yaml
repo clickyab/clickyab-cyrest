@@ -38,14 +38,14 @@
   hosts: staging
 
   tasks:
-    - name: install certain python modules for docker
-      pip:
-        name: "{{ item.name }}"
-        version: "{{ item.version }}"
-        state: present
-      with_items:
-      - { name: docker, version: 2.0.0 }
-      - { name: docker-py, version: 1.10.6 }
+#    - name: install certain python modules for docker
+#      pip:
+#        name: "{{ item.name }}"
+#        version: "{{ item.version }}"
+#        state: present
+#      with_items:
+#      - { name: docker, version: 2.0.0 }
+#      - { name: docker-py, version: 1.10.6 }
 
     - name: make sure docker compose installed and ready
       pip:
@@ -107,6 +107,6 @@
       args:
         chdir: /home/cy/compose/
 
-    - shell: /home/cy/.local/bin/docker-compose restart app
+    - shell: /home/cy/.local/bin/docker-compose restart app cyborg got
       args:
         chdir: /home/cy/compose/

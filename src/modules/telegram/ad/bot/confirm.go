@@ -24,7 +24,8 @@ var (
 func doMessage(bot *tgbotapi.BotAPI, chatID int64, m string) {
 	msg := tgbotapi.NewMessage(chatID, m)
 	msg.ParseMode = "HTML"
-	_, _ = bot.Send(msg)
+	_, err := bot.Send(msg)
+	assert.Nil(err)
 	return
 }
 
@@ -72,7 +73,7 @@ func (bb *bot) confirm(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 	} else {
 		ad, err := mm.LoadNextAd(param)
 		if err != nil {
-			doMessage(bot, m.Chat.ID, "<b>No ad available at this time<b>")
+			doMessage(bot, m.Chat.ID, "<b>No ad available at this time</b>")
 			return
 		}
 
@@ -83,4 +84,8 @@ func (bb *bot) confirm(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 	}
 	doMessage(bot, m.Chat.ID, resp)
 	doMessage(bot, m.Chat.ID, "<i>OK</i>")
+}
+
+func init() {
+	base.RegisterPermission("confirm_ad", "confirm_ad")
 }
