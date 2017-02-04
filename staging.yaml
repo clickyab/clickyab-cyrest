@@ -86,28 +86,31 @@
 
     - name: copy go binary files to web servers
       synchronize:
-        src: "{{ playbook_dir }}/../../bin/"
+        src: "/home/cy/cyrest/bin/"
         dest: "/home/cy/cyrest/bin/"
         delete: yes
         rsync_opts: "--exclude=.git --exclude=*.sh --exclude=gb* --exclude=go-bindata --exclude=fswatch --exclude=codegen"
         checksum: yes
         times: no
+        delegate_to: vagrant
 
     - name: copy swagger files
       synchronize:
-        src: "{{ playbook_dir }}/../../3rd/swagger/"
+        src: "/home/cy/cyrest/3rd/swagger/"
         dest: "/home/cy/cyrest/swagger/"
         delete: yes
         checksum: yes
         times: no
+        delegate_to: vagrant
 
     - name: copy frontend files
       synchronize:
-        src: "{{ playbook_dir }}/../../front/public/"
+        src: "/home/cy/cyrest/front/public/"
         dest: "/home/cy/cyrest/public/"
         delete: yes
         checksum: yes
         times: no
+        delegate_to: vagrant
 
     - name: copy compose file to server
       synchronize:
