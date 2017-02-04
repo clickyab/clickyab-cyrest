@@ -2,6 +2,7 @@ package worker
 
 import (
 	"common/assert"
+	"common/models/common"
 	"common/rabbit"
 	"common/redis"
 	"encoding/json"
@@ -13,15 +14,11 @@ import (
 	"modules/telegram/cyborg/bot"
 	"modules/telegram/cyborg/commands"
 	"net"
+	"regexp"
+	"sort"
+	"strconv"
 	"sync"
 	"time"
-
-	"common/models/common"
-
-	"sort"
-
-	"regexp"
-	"strconv"
 
 	"github.com/Sirupsen/logrus"
 )
@@ -32,8 +29,8 @@ type MultiWorker struct {
 	lock   *sync.Mutex
 }
 
-//ChnAdPattern is a pattern for message
-var ChnAdPattern = regexp.MustCompile(`^([0-9]+)/([0-9]+)$`)
+//chnAdPattern is a pattern for message
+var chnAdPattern = regexp.MustCompile(`^([0-9]+)/([0-9]+)$`)
 
 // Ping command verify if the client is alive
 func (mw *MultiWorker) Ping() error {
@@ -360,7 +357,7 @@ func (mw *MultiWorker) updateMessage(in *commands.UpdateMessage) (bool, error) {
 		return true, nil
 	}
 	for i, h := range history {
-		codes := ChnAdPattern.FindStringSubmatch(h.Text)
+		codes := chnAdPattern.FindStringSubmatch(h.Text)
 		if len(codes) == 0 {
 			continue
 		}
