@@ -74,7 +74,6 @@ func (bb *bot) doneORReject(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 		defer func() {
 			rabbit.MustPublish(
 				commands.ExistChannelAd{
-					AdID:      adS,
 					ChannelID: channel.ID,
 					ChatID:    m.Chat.ID,
 				},
