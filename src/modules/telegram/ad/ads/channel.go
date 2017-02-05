@@ -140,8 +140,10 @@ func (m *Manager) FindChannelsByChatIDName(chatID int64, name string) (*Channel,
 //		view = channel_list:self
 //		controller = modules/telegram/ad/chanControllers
 //		fill = FillChannelDataTableArray
-//		_edit = channel_edit:self
-//		_change = channel_manage:global
+//		_edit = edit_channel:self
+//		_admin_status = status_channel:parent
+//		_archive_status = archive_channel:self
+//		_active = active_channel:global
 // }
 type ChannelDataTable struct {
 	Channel

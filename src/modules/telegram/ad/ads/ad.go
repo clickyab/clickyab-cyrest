@@ -84,7 +84,9 @@ type Ad struct {
 //		controller = modules/telegram/ad/adControllers
 //		fill = FillAdDataTableArray
 //		_edit = ad_edit:self
-//		_change = ad_manage:global
+//		_archive_status = change_archive_ad:self
+//		_active_status = change_active_ad:global
+//		_admin_status = change_admin_ad:parent
 // }
 type AdDataTable struct {
 	Ad
