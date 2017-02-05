@@ -155,14 +155,16 @@ func (u *Controller) editChannel(ctx echo.Context) error {
 
 //	active
 //	@Route	{
-//	url	=	/active/:id
+//	url	=	/list/active_status/:id
 //	method	= put
-//	resource = active_channel:self
+//	payload	= activePayload
+//	resource = active_channel:global
 //	middleware = authz.Authenticate
 //	200 = ads.Channel
 //	400 = base.ErrorResponseSimple
 //	}
 func (u *Controller) active(ctx echo.Context) error {
+	pl := u.MustGetPayload(ctx).(*activePayload)
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
@@ -179,7 +181,7 @@ func (u *Controller) active(ctx echo.Context) error {
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
-	if channel.Active == ads.ActiveStatusNo {
+	if pl.ActiveStatus == ads.ActiveStatusYes && channel.Active == ads.ActiveStatusNo {
 		channel.Active = ads.ActiveStatusYes
 	} else {
 		channel.Active = ads.ActiveStatusNo
@@ -190,14 +192,16 @@ func (u *Controller) active(ctx echo.Context) error {
 
 //	changeArchive toggle archiving channel
 //	@Route	{
-//	url	=	/change-archive/:id
+//	url	=	/list/archive_status/:id
 //	method	= put
+//	payload	= archivePayload
 //	resource = archive_channel:self
 //	middleware = authz.Authenticate
 //	200 = ads.Channel
 //	400 = base.ErrorResponseSimple
 //	}
 func (u *Controller) changeArchive(ctx echo.Context) error {
+	pl := u.MustGetPayload(ctx).(*archivePayload)
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
@@ -214,7 +218,7 @@ func (u *Controller) changeArchive(ctx echo.Context) error {
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
-	if channel.ArchiveStatus == ads.ArchiveStatusNo {
+	if pl.ArchiveStatus == ads.ArchiveStatusYes && channel.ArchiveStatus == ads.ArchiveStatusNo {
 		channel.ArchiveStatus = ads.ArchiveStatusYes
 	} else {
 		channel.ArchiveStatus = ads.ArchiveStatusNo
@@ -227,6 +231,18 @@ func (u *Controller) changeArchive(ctx echo.Context) error {
 // }
 type statusPayload struct {
 	Status ads.AdminStatus `json:"status" validate:"required"`
+}
+
+// @Validate {
+// }
+type activePayload struct {
+	ActiveStatus ads.ActiveStatus `json:"active_status" validate:"required"`
+}
+
+// @Validate {
+// }
+type archivePayload struct {
+	ArchiveStatus ads.ArchiveStatus `json:"archive_status" validate:"required"`
 }
 
 // MsgInfo is msg info
@@ -252,9 +268,29 @@ func (lp *statusPayload) ValidateExtra(ctx echo.Context) error {
 	return nil
 }
 
+// Validate custom validation for user scope
+func (lp *archivePayload) ValidateExtra(ctx echo.Context) error {
+	if !lp.ArchiveStatus.IsValid() {
+		return middlewares.GroupError{
+			"status": trans.E("is invalid"),
+		}
+	}
+	return nil
+}
+
+// Validate custom validation for user scope
+func (lp *activePayload) ValidateExtra(ctx echo.Context) error {
+	if !lp.ActiveStatus.IsValid() {
+		return middlewares.GroupError{
+			"status": trans.E("is invalid"),
+		}
+	}
+	return nil
+}
+
 //	statusChannel the route for get status channel
 //	@Route	{
-//	url	=	/status/:id
+//	url	=	/list/admin_status/:id
 //	method	= put
 //	payload	= statusPayload
 //	resource = status_channel:parent

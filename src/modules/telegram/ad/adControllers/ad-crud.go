@@ -67,6 +67,38 @@ type adPlanPayLoad struct {
 	ID int64 `json:"plan_id" validate:"required" error:"plan is required"`
 }
 
+// @Validate {
+// }
+type adArchiveStatusPayload struct {
+	AdArchiveStatus ads.AdArchiveStatus `json:"archive_status" validate:"required" error:"status is required"`
+}
+
+// @Validate {
+// }
+type adActiveStatusPayload struct {
+	AdActiveStatus ads.AdActiveStatus `json:"active_status" validate:"required" error:"status is required"`
+}
+
+// Validate custom validation for user scope
+func (lp *adActiveStatusPayload) ValidateExtra(ctx echo.Context) error {
+	if !lp.AdActiveStatus.IsValid() {
+		return middlewares.GroupError{
+			"status": trans.E("status is invalid"),
+		}
+	}
+	return nil
+}
+
+// Validate custom validation for user scope
+func (lp *adArchiveStatusPayload) ValidateExtra(ctx echo.Context) error {
+	if !lp.AdArchiveStatus.IsValid() {
+		return middlewares.GroupError{
+			"status": trans.E("status is invalid"),
+		}
+	}
+	return nil
+}
+
 // Validate custom validation for user scope
 func (lp *adAdminStatusPayload) ValidateExtra(ctx echo.Context) error {
 	if !lp.AdAdminStatus.IsValid() {
@@ -105,7 +137,7 @@ func (u *Controller) create(ctx echo.Context) error {
 
 //	changeAdminStatus change admin status for ad
 //	@Route	{
-//		url	=	/change-admin/:id
+//		url	=	/list/admin_status/:id
 //		method	= put
 //		payload	= adAdminStatusPayload
 //		resource = change_admin_ad:parent
@@ -140,14 +172,16 @@ func (u *Controller) changeAdminStatus(ctx echo.Context) error {
 
 //	changeArchiveStatus change archive status for ad
 //	@Route	{
-//		url = /change-archive/:id
+//		url = /list/archive_status/:id
 //		method = put
 //		resource = change_archive_ad:self
+//		payload	= adArchiveStatusPayload
 //		middleware = authz.Authenticate
 //		200 = ads.Ad
 //		400 = base.ErrorResponseSimple
 //	}
 func (u *Controller) changeArchiveStatus(ctx echo.Context) error {
+	pl := u.MustGetPayload(ctx).(*adArchiveStatusPayload)
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
@@ -164,9 +198,9 @@ func (u *Controller) changeArchiveStatus(ctx echo.Context) error {
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
-	if currentAd.AdArchiveStatus == ads.AdArchiveStatusYes {
+	if pl.AdArchiveStatus == ads.AdArchiveStatusNo && currentAd.AdArchiveStatus == ads.AdArchiveStatusYes {
 		currentAd.AdArchiveStatus = ads.AdArchiveStatusNo
-	} else {
+	} else if pl.AdArchiveStatus == ads.AdArchiveStatusYes && currentAd.AdArchiveStatus == ads.AdArchiveStatusNo {
 		currentAd.AdArchiveStatus = ads.AdArchiveStatusYes
 	}
 	assert.Nil(m.UpdateAd(currentAd))
@@ -291,14 +325,16 @@ func (u *Controller) promoteAd(ctx echo.Context) error {
 
 //	changeActiveStatus change active status for ad
 //	@Route	{
-//		url = /change-active/:id
+//		url = /list/active_status/:id
 //		method = put
+//		payload	= adActiveStatusPayload
 //		resource = change_active_ad:self
 //		middleware = authz.Authenticate
 //		200 = ads.Ad
 //		400 = base.ErrorResponseSimple
 //	}
 func (u *Controller) changeActiveStatus(ctx echo.Context) error {
+	pl := u.MustGetPayload(ctx).(*adActiveStatusPayload)
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
@@ -316,13 +352,13 @@ func (u *Controller) changeActiveStatus(ctx echo.Context) error {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
 	//check everything is good TODO: check pay status later
-	if currentAd.AdAdminStatus == "accepted" && currentAd.AdArchiveStatus == "no" && currentAd.Name != "" && currentAd.AdActiveStatus == ads.AdActiveStatusNo {
+	if currentAd.AdAdminStatus == "accepted" && currentAd.Name != "" && pl.AdActiveStatus == ads.AdActiveStatusYes && currentAd.AdActiveStatus == ads.AdActiveStatusNo {
 		currentAd.AdActiveStatus = ads.AdActiveStatusYes
 		//check to add job
 		if currentAd.CliMessageID.Valid {
 			rabbit.MustPublish(commands.IdentifyAD{AdID: currentAd.ID})
 		}
-	} else {
+	} else if pl.AdActiveStatus == ads.AdActiveStatusNo && currentAd.AdActiveStatus == ads.AdActiveStatusYes {
 		currentAd.AdActiveStatus = ads.AdActiveStatusNo
 	}
 	assert.Nil(m.UpdateAd(currentAd))
@@ -461,11 +497,6 @@ func (u *Controller) charge(ctx echo.Context) error {
 	}
 	//set callback url
 	callbackURL := fmt.Sprintf("%s%s", ctx.Scheme()+"://", path.Join(ctx.Request().Host, bcfg.Bcfg.Gate.CallbackURL, fmt.Sprintf("%d", currentAd.ID)))
-	//verify plan
-	if currentAd.AdAdminStatus != ads.AdAdminStatusAccepted {
-		return u.NotFoundResponse(ctx, nil)
-	}
-
 	//find plan
 	plan, err := adManager.FindPlanByID(currentAd.PlanID.Int64)
 	if err != nil {
@@ -510,7 +541,7 @@ func (u *Controller) charge(ctx echo.Context) error {
 func (u *Controller) verify(ctx echo.Context) error {
 	adManager := ads.NewAdsManager()
 	frontURL := fmt.Sprintf("%s%s", ctx.Scheme()+"://", path.Join(ctx.Request().Host, bcfg.Bcfg.Gate.FrontCallbackURL))
-	frontOk := fmt.Sprintf("%s%s", frontURL, "?success=yes")
+	frontOk := fmt.Sprintf("%s%s", frontURL, "?success=yes&ref=")
 	frontNOk := fmt.Sprintf("%s%s", frontURL, "?success=no")
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
 	if err != nil {
@@ -546,7 +577,7 @@ func (u *Controller) verify(ctx echo.Context) error {
 		//update ad pay status
 		currentAd.AdPayStatus = ads.AdPayStatusYes
 		assert.Nil(adManager.UpdateAd(currentAd))
-		return ctx.Redirect(http.StatusMovedPermanently, frontOk)
+		return ctx.Redirect(http.StatusMovedPermanently, fmt.Sprintf("%s%d", frontOk, resp.RefID))
 	}
 	return ctx.Redirect(http.StatusMovedPermanently, frontNOk)
 
