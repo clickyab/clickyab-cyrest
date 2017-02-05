@@ -3,11 +3,14 @@ package ads
 import (
 	"common/assert"
 	"common/models/common"
+	"errors"
 	"fmt"
 	"modules/misc/base"
 	"modules/user/aaa"
 	"strings"
 
+	"common/utils"
+	"database/sql/driver"
 	"time"
 )
 
@@ -25,6 +28,9 @@ const (
 
 	AdActiveStatusYes AdActiveStatus = "yes"
 	AdActiveStatusNo  AdActiveStatus = "no"
+
+	AdTypeIndividual AdType = "individual"
+	AdTypePromotion  AdType = "promotion"
 )
 
 type (
@@ -47,6 +53,8 @@ type (
 	// @Enum{
 	// }
 	AdActiveStatus string
+	// AdType type ads
+	AdType string
 )
 
 // Ad model
@@ -280,6 +288,140 @@ func (m *Manager) FillUserAdDataTableArray(
 	countQuery += strings.Join(where, " AND ")
 	limit := c
 	offset := (p - 1) * c
+	if sort != "" {
+		query += fmt.Sprintf(" ORDER BY %s %s ", sort, order)
+	}
+	query += fmt.Sprintf(" LIMIT %d OFFSET %d ", limit, offset)
+	count, err := m.GetDbMap().SelectInt(countQuery, params...)
+	assert.Nil(err)
+
+	_, err = m.GetDbMap().Select(&res, query, params...)
+	assert.Nil(err)
+	return res, count
+}
+
+//ReportAdDataTable is the ad full data in data table, after join with other field
+// @DataTable {
+//		url = /dashboard
+//		entity = adReport
+//		view = report_ad:self
+//		controller = modules/telegram/ad/adControllers
+//		fill = FillAdReportDataTableArray
+// }
+type ReportAdDataTable struct {
+	Name     string           `json:"name" db:"name" title:"Name"`
+	Type     AdType           `json:"type" db:"type" title:"Type"`
+	Start    common.NullTime  `db:"start" json:"start"`
+	End      common.NullTime  `db:"end" json:"end" sort:"true" title:"End"`
+	PlanView int64            `db:"plan_view" json:"plan_view" sort:"true" title:"PlanView"`
+	View     common.NullInt64 `json:"view" db:"view" visible:"true" title:"View"`
+	ParentID int64            `db:"-" json:"parent_id" visible:"false"`
+	OwnerID  int64            `db:"-" json:"owner_id" visible:"false"`
+	Actions  string           `db:"-" json:"_actions" visible:"false"`
+}
+
+// IsValid try to validate enum value on ths type
+func (e AdType) IsValid() bool {
+	return utils.StringInArray(
+		string(e),
+		string(AdTypeIndividual),
+		string(AdTypePromotion),
+	)
+}
+
+// Scan convert the json array ino string slice
+func (e *AdType) Scan(src interface{}) error {
+	var b []byte
+	switch src.(type) {
+	case []byte:
+		b = src.([]byte)
+	case string:
+		b = []byte(src.(string))
+	case nil:
+		b = make([]byte, 0)
+	default:
+		return errors.New("unsupported type")
+	}
+	if string(b) == "0" {
+		*e = AdTypeIndividual
+		return nil
+	}
+	if string(b) == "1" {
+		*e = AdTypePromotion
+		return nil
+	}
+
+	return fmt.Errorf("the resualt false %s", string(b))
+}
+
+// Value try to get the string slice representation in database
+func (e AdType) Value() (driver.Value, error) {
+	if !e.IsValid() {
+		return nil, errors.New("invaid status")
+	}
+	return string(e), nil
+}
+
+// FillAdReportDataTableArray is the function to handle
+func (m *Manager) FillAdReportDataTableArray(
+	u base.PermInterfaceComplete,
+	filters map[string]string,
+	search map[string]string,
+	sort, order string, p, c int) (ReportAdDataTableArray, int64) {
+	var params []interface{}
+	var res ReportAdDataTableArray
+	var where []string
+
+	countQuery := fmt.Sprintf("SELECT COUNT(%[2]s.id) FROM %[2]s "+
+		"LEFT JOIN %[1]s ON %[2]s.id=%[1]s.ad_id "+
+		"LEFT JOIN %[3]s ON %[3]s.id=%[2]s.user_id "+
+		"LEFT JOIN %[4]s ON %[4]s.id=%[2]s.plan_id "+
+		"GROUP BY %[2]s.id",
+		ChannelAdTableFull,
+		AdTableFull,
+		aaa.UserTableFull,
+		PlanTableFull,
+	)
+	query := fmt.Sprintf("SELECT %[1]s.name as name, %[1]s.cli_message_id IS NULL AS type, %[2]s.start as start, %[2]s.end as end, %[2]s.view as view, %[4]s.view as plan_view FROM %[1]s "+
+		"LEFT JOIN %[2]s ON %[1]s.id=%[2]s.ad_id "+
+		"LEFT JOIN %[3]s ON %[3]s.id=%[1]s.user_id "+
+		"LEFT JOIN %[4]s ON %[4]s.id=%[1]s.plan_id ",
+		AdTableFull,
+		ChannelAdTableFull,
+		aaa.UserTableFull,
+		PlanTableFull,
+	)
+	for field, value := range filters {
+		where = append(where, fmt.Sprintf("%s.%s=?", AdTableFull, field))
+		params = append(params, value)
+	}
+
+	for column, val := range search {
+		where = append(where, fmt.Sprintf("%s LIKE ?", column))
+		params = append(params, "%"+val+"%")
+	}
+
+	currentUserID := u.GetID()
+	highestScope := u.GetCurrentScope()
+
+	if highestScope == base.ScopeSelf {
+		where = append(where, fmt.Sprintf("%s.user_id=?", AdTableFull))
+		params = append(params, currentUserID)
+	} else if highestScope == base.ScopeParent {
+		where = append(where, fmt.Sprintf("%s.parent_id=?", aaa.UserTableFull))
+		params = append(params, currentUserID)
+	}
+
+	//check for perm
+	if len(where) > 0 {
+		query += " WHERE "
+		countQuery += " WHERE "
+	}
+	query += strings.Join(where, " AND ")
+	countQuery += strings.Join(where, " AND ")
+	limit := c
+	offset := (p - 1) * c
+	query += fmt.Sprintf(" GROUP BY %s.id ", AdTableFull)
 	if sort != "" {
 		query += fmt.Sprintf(" ORDER BY %s %s ", sort, order)
 	}
