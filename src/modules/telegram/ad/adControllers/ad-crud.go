@@ -541,7 +541,7 @@ func (u *Controller) charge(ctx echo.Context) error {
 func (u *Controller) verify(ctx echo.Context) error {
 	adManager := ads.NewAdsManager()
 	frontURL := fmt.Sprintf("%s%s", ctx.Scheme()+"://", path.Join(ctx.Request().Host, bcfg.Bcfg.Gate.FrontCallbackURL))
-	frontOk := fmt.Sprintf("%s%s", frontURL, "?success=yes&ref=")
+	frontOk := fmt.Sprintf("%s%s", frontURL, "?success=yes&payment=")
 	frontNOk := fmt.Sprintf("%s%s", frontURL, "?success=no")
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
 	if err != nil {
@@ -570,14 +570,14 @@ func (u *Controller) verify(ctx echo.Context) error {
 		return ctx.Redirect(http.StatusMovedPermanently, frontNOk)
 	}
 	if resp.Status == bcfg.Bcfg.Gate.MerchantOkStatus {
-		_, err = bil.NewBilManager().RegisterBilling(ctx.FormValue("Authority"), resp.RefID, plan.Price, resp.Status)
+		billing, err := bil.NewBilManager().RegisterBilling(ctx.FormValue("Authority"), resp.RefID, plan.Price, resp.Status)
 		if err != nil {
 			return ctx.Redirect(http.StatusMovedPermanently, frontNOk)
 		}
 		//update ad pay status
 		currentAd.AdPayStatus = ads.AdPayStatusYes
 		assert.Nil(adManager.UpdateAd(currentAd))
-		return ctx.Redirect(http.StatusMovedPermanently, fmt.Sprintf("%s%d", frontOk, resp.RefID))
+		return ctx.Redirect(http.StatusMovedPermanently, fmt.Sprintf("%s%d", frontOk, billing.PaymentID.Int64))
 	}
 	return ctx.Redirect(http.StatusMovedPermanently, frontNOk)
 
