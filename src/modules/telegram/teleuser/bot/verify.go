@@ -49,10 +49,17 @@ func (bb *bot) verify(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 			Remove:    tlu.RemoveStatusNo,
 			Resolve:   tlu.ResolveStatusYes,
 		}
-		assert.Nil(n.CreateTeleUser(tl))
-		msg.ParseMode = htmlMode
-		_, err := bot.Send(msg)
-		assert.Nil(err)
+		err := n.CreateTeleUser(tl)
+		if err != nil {
+			msg1 := tgbotapi.NewMessage(m.Chat.ID, "your account <b>cant</b> be accepted")
+			msg1.ParseMode = htmlMode
+			_, err = bot.Send(msg1)
+			assert.Nil(err)
+		} else {
+			msg.ParseMode = htmlMode
+			_, err = bot.Send(msg)
+			assert.Nil(err)
+		}
 	}
 }
 

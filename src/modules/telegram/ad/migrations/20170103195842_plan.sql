@@ -8,6 +8,7 @@ CREATE TABLE plans
     name VARCHAR(60) NOT NULL,
     description  TEXT,
     view INT,
+    position INT NOT NULL,
     type ENUM('promotion','individual') NOT NULL,
     active ENUM('yes', 'no') NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,

@@ -22,6 +22,10 @@ import (
 
 	"fmt"
 
+	"modules/telegram/config"
+
+	"errors"
+
 	echo "gopkg.in/labstack/echo.v3"
 )
 
@@ -76,7 +80,10 @@ func (u *Controller) createChannel(ctx echo.Context) error {
 		Active:        ads.ActiveStatusNo,
 		UserID:        currentUser.ID,
 	}
-	assert.Nil(m.CreateChannel(ch))
+	err = m.CreateChannel(ch)
+	if err != nil {
+		return u.NotFoundResponse(ctx, errors.New("cant register channel"))
+	}
 	return u.OKResponse(ctx, ch)
 
 }
@@ -319,7 +326,13 @@ func (u *Controller) statusChannel(ctx echo.Context) error {
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
-
+	if pl.Status == ads.AdminStatusAccepted {
+		//call worker get channel details
+		rabbit.MustPublish(&commands.GetChanCommand{
+			ChannelID: cha.ID,
+			Count:     tcfg.Cfg.Telegram.LastPostChannel,
+		})
+	}
 	cha.ID = id
 	cha.AdminStatus = pl.Status
 	assert.Nil(m.UpdateChannel(cha))
@@ -331,7 +344,7 @@ func (u *Controller) statusChannel(ctx echo.Context) error {
 //	@Route	{
 //	url	=	/last/:name/:count
 //	method	= get
-//	resource = get_last_channel:parent
+//	resource = get_last_channel:self
 //	middleware = authz.Authenticate
 //	200 = GetLastResponse
 //	400 = base.ErrorResponseSimple

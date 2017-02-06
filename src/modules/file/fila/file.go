@@ -462,10 +462,7 @@ func CheckUpload(link string, uID int64) (string, error) {
 		return "", errors.New("url not valid")
 	}
 	host := urlObj.Host
-	if err != nil {
-		return "", errors.New("url not valid")
-	}
-	if host == fcfg.Fcfg.File.UploadPath {
+	if host == fcfg.Fcfg.File.SameUploadPath {
 		return urlObj.Path, nil
 	}
 	return UploadFromURL(link, uID)
