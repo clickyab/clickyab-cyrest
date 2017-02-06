@@ -60,7 +60,7 @@ $(BIN)/gb:
 
 
 server:
-	$(BUILD) server
+	$(BUILD) cmd/server
 
 run-server: server
 	sudo setcap cap_net_bind_service=+ep $(BIN)/server
@@ -70,7 +70,7 @@ watch-server: codegen
 	make watch WATCH=server
 
 cyborg: $(BIN)/gb
-	$(BUILD) cyborg
+	$(BUILD) cmd/cyborg
 
 run-cyborg: cyborg
 	$(BIN)/cyborg
@@ -79,7 +79,7 @@ watch-cyborg:
 	make watch WATCH=cyborg
 
 got: $(BIN)/gb
-	$(BUILD) got
+	$(BUILD) cmd/got
 
 run-got: got
 	$(BIN)/got
@@ -88,7 +88,7 @@ watch-got:
 	make watch WATCH=got
 
 test: $(BIN)/gb
-	$(BUILD) test
+	$(BUILD) cmd/test
 
 run-test: test
 	$(BIN)/test
@@ -236,7 +236,7 @@ lint-modules: $(BIN)/gometalinter
 	$(LINTER) $(ROOT)/src/modules/...
 
 lint-mains: $(BIN)/gometalinter
-	$(LINTER) $(ROOT)/src/server/...
+	$(LINTER) $(ROOT)/src/cmd/...
 
 lint: lint-common lint-modules lint-mains
 	@echo "Done"
@@ -303,4 +303,3 @@ staging-front:
 
 staging-back:
 	make ansible HOSTS=$(ROOT)/contrib/deploy/staging-hosts.ini YAML=$(ROOT)/contrib/deploy/back-staging.yaml
-

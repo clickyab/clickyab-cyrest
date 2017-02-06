@@ -1,18 +1,16 @@
 package main
 
 import (
+	"common/assert"
 	"log"
 
 	"github.com/kr/pretty"
-
 	"gopkg.in/telegram-bot-api.v4"
 )
 
 func main() {
 	bot, err := tgbotapi.NewBotAPI("310314178:AAHVjYxnceAKdo_2cf5XLts0EqJZ7ptz0Wk")
-	if err != nil {
-		log.Panic(err)
-	}
+	assert.Nil(err)
 
 	bot.Debug = true
 
@@ -22,6 +20,7 @@ func main() {
 	u.Timeout = 60
 
 	updates, err := bot.GetUpdatesChan(u)
+	assert.Nil(err)
 
 	for update := range updates {
 		if update.Message == nil {

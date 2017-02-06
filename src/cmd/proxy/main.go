@@ -1,19 +1,19 @@
 package main
 
 import (
+	"common/assert"
+	"common/config"
 	"io/ioutil"
 	"net/http"
 
-	"common/assert"
-	"common/config"
-
 	"common/initializer"
+
 	"github.com/Sirupsen/logrus"
 )
 
-type Handler struct{}
+type handler struct{}
 
-func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	incData, err := ioutil.ReadAll(r.Body)
 	assert.Nil(err)
 	defer r.Body.Close()
@@ -48,5 +48,5 @@ func main() {
 
 	defer initializer.Initialize().Finalize()
 
-	assert.Nil(http.ListenAndServe(config.Config.Proxy.Port, &Handler{}))
+	assert.Nil(http.ListenAndServe(config.Config.Proxy.Port, &handler{}))
 }
