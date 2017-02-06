@@ -11,6 +11,7 @@ CREATE TABLE channels
     admin_status ENUM('pending', 'rejected','accepted'),
     archive_status ENUM('yes','no'),
     active ENUM('yes', 'no'),
+    UNIQUE KEY `chan_name_user_id` (`name`, `user_id`),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT '0000-00-00 00:00:00' NOT NULL,
     CONSTRAINT channels_id_users_id_fk FOREIGN KEY (user_id) REFERENCES users(id)

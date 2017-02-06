@@ -114,7 +114,6 @@ func PermissionRegistered(perm Permission) {
 func PermissionCheckRegistered(perm Permission) bool {
 	lock.RLock()
 	defer lock.RUnlock()
-
 	if _, ok := registeredPerms[perm]; !ok {
 		return false
 	}
@@ -149,7 +148,7 @@ func NewPermInterfaceComplete(inner PermInterface, id int64, perm Permission, sc
 
 // IsValid try to validate enum value on ths type
 func (e Permission) IsValid() bool {
-	return PermissionCheckRegistered(e)
+	return true
 }
 
 // Scan convert the json array ino string slice

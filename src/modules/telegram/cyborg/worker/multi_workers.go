@@ -212,7 +212,7 @@ func (mw *MultiWorker) getChanStat(in *commands.GetChanCommand) (bool, error) {
 		UserCount:  c.UserCount,
 		TelegramID: c.CliTelegramID,
 		AdminCount: c.RawData.AdminsCount,
-		Num:        totalCount,
+		PostCount:  totalCount,
 		TotalView:  sumView,
 		ChannelID:  channel.ID,
 	}

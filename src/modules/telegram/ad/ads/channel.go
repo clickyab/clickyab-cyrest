@@ -72,11 +72,12 @@ func (m *Manager) ChannelCreate(link, name string, status AdminStatus, archive A
 // FindChannelsByChatID return the Channel base on its user_id
 func (m *Manager) FindChannelsByChatID(chatID int64) ([]Channel, error) {
 	var res []Channel
-	query := "SELECT channels.* FROM channels INNER JOIN telegram_users ON telegram_users.user_id=channels.user_id WHERE telegram_users.bot_chat_id=?"
+	query := "SELECT channels.* FROM channels INNER JOIN telegram_users ON telegram_users.user_id=channels.user_id WHERE telegram_users.bot_chat_id=? AND channels.admin_status=?"
 	_, err := m.GetDbMap().Select(
 		&res,
 		query,
 		chatID,
+		AdminStatusAccepted,
 	)
 	if err != nil {
 		return nil, err
