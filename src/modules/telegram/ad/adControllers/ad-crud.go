@@ -286,6 +286,9 @@ func (u *Controller) uploadBanner(ctx echo.Context) error {
 	currentAd.Src = common.MakeNullString(file)
 	currentAd.CliMessageID = common.MakeNullString("")
 	assert.Nil(m.UpdateAd(currentAd))
+	if currentAd.Src.Valid {
+		currentAd.Src = common.MakeNullString(filepath.Join(fcfg.Fcfg.File.UploadUIPath, currentAd.Src.String))
+	}
 	return u.OKResponse(ctx, currentAd)
 }
 
