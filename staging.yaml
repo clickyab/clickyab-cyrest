@@ -114,12 +114,14 @@
 
     - name: copy compose file to server
       synchronize:
-        src: "{{ playbook_dir }}/"
+        src: "/home/cy/cyrest/contrib/deploy/"
         dest: "/home/cy/compose/"
         rsync_opts: "--exclude=.git --exclude=*.retry --exclude=staging*"
         delete: yes
         checksum: yes
         times: no
+      delegate_to: 192.168.88.8
+
 
     - shell: /home/cy/.local/bin/docker-compose build
       args:
