@@ -181,7 +181,6 @@ func (t *telegram) History(user string, limit, offset int) ([]History, error) {
 	var data []History
 	cmd := fmt.Sprintf("history %s %d %d", user, limit, offset)
 	x, err := t.exec(cmd)
-	//fmt.Print(string(x))
 	if err != nil {
 		return nil, err
 	}
@@ -190,7 +189,6 @@ func (t *telegram) History(user string, limit, offset int) ([]History, error) {
 	if err != nil {
 		return nil, err
 	}
-	//fmt.Println(data)
 	return data, nil
 
 }
