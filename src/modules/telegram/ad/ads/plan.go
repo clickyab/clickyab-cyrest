@@ -21,6 +21,7 @@ type Plan struct {
 	Description string       `json:"description" db:"description" search:"true" title:"description"`
 	Price       int64        `db:"price" json:"price" title:"Price"`
 	View        int64        `db:"view" json:"view" title:"View"`
+	Position    int64        `db:"position" json:"position" title:"Position"`
 	Type        PlanType     `json:"type" db:"type" filter:"true" title:"Type"`
 	Active      ActiveStatus `json:"active" db:"active" filter:"true" title:"Active"`
 	CreatedAt   time.Time    `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
@@ -35,6 +36,40 @@ func (m *Manager) GetAllActivePlans() ([]Plan, error) {
 		&res,
 		query,
 		ActiveStatusYes,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
+// GetAllIndividualActivePlans return all the individual active plans
+func (m *Manager) GetAllIndividualActivePlans() ([]Plan, error) {
+	var res []Plan
+	query := fmt.Sprintf("SELECT * FROM %s WHERE active=? AND type=?", PlanTableFull)
+	_, err := m.GetDbMap().Select(
+		&res,
+		query,
+		ActiveStatusYes,
+		PlanTypeIndividual,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
+// GetAllPromotionActivePlans return all the promotion active plans
+func (m *Manager) GetAllPromotionActivePlans() ([]Plan, error) {
+	var res []Plan
+	query := fmt.Sprintf("SELECT * FROM %s WHERE active=? AND type=?", PlanTableFull)
+	_, err := m.GetDbMap().Select(
+		&res,
+		query,
+		ActiveStatusYes,
+		PlanTypePromotion,
 	)
 	if err != nil {
 		return nil, err

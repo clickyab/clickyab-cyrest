@@ -28,6 +28,9 @@ import (
 
 	"path"
 
+	"modules/file/config"
+	"path/filepath"
+
 	echo "gopkg.in/labstack/echo.v3"
 )
 
@@ -428,6 +431,9 @@ func (u *Controller) getAd(ctx echo.Context) error {
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
+	if currentAd.Src.Valid {
+		currentAd.Src = common.MakeNullString(filepath.Join(fcfg.Fcfg.File.UploadUIPath, currentAd.Src.String))
+	}
 	return u.OKResponse(ctx, currentAd)
 }
 
@@ -578,6 +584,12 @@ func (u *Controller) verify(ctx echo.Context) error {
 		currentAd.AdPayStatus = ads.AdPayStatusYes
 		assert.Nil(adManager.UpdateAd(currentAd))
 		return ctx.Redirect(http.StatusMovedPermanently, fmt.Sprintf("%s%d", frontOk, billing.PaymentID.Int64))
+		//call worker
+		defer func() {
+			rabbit.MustPublish(&commands.IdentifyAD{
+				AdID: currentAd.ID,
+			})
+		}()
 	}
 	return ctx.Redirect(http.StatusMovedPermanently, frontNOk)
 

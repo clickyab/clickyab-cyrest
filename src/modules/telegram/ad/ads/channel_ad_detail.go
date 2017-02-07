@@ -9,10 +9,11 @@ import (
 // ChannelAdDetail is the list of ad in channel for cyborg
 // @Model {
 //		table = channel_ad_detail
-//		primary = false, channel_id,ad_id
+//		primary = true, id
 //		find_by = channel_id, ad_id
 // }
 type ChannelAdDetail struct {
+	ID        int64            `db:"id" json:"id"`
 	ChannelID int64            `db:"channel_id" json:"channel_id"`
 	AdID      int64            `db:"ad_id" json:"ad_id"`
 	View      int64            `db:"view" json:"view"`

@@ -159,6 +159,29 @@ func (m *Manager) FindChannelAdByChannelIDActive(a int64) ([]ChannelAdD, error) 
 	return res, nil
 }
 
+// ChannelAdChan struct channel ad
+type ChannelAdChan struct {
+	ChannelAd ChannelAd
+	Channel   Channel
+}
+
+// FindChannelAdActiveByAdID return the adID base on its ad_id,ActiveStatus
+func (m *Manager) FindChannelAdActiveByAdID(adID int64, status ActiveStatus) ([]ChannelAdChan, error) {
+	res := []ChannelAdChan{}
+	_, err := m.GetDbMap().Select(
+		&res,
+		fmt.Sprintf("SELECT * FROM %s WHERE ad_id=? AND active=?", ChannelAdTableFull),
+		adID,
+		status,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
 // UpdateChannelAds update channel ads
 func (m *Manager) UpdateChannelAds(ca []ChannelAd) error {
 	_, err := m.GetDbMap().Update(ca)

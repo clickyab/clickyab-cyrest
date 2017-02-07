@@ -36,6 +36,12 @@ type (
 	ArchiveStatus string
 )
 
+// DailyView struct for dashboard
+type DailyView struct {
+	Date time.Time `db:"date" json:"date" sort:"true"`
+	View int64     `db:"view" json:"view"`
+}
+
 // Channel model
 // @Model {
 //		table = channels
@@ -72,11 +78,12 @@ func (m *Manager) ChannelCreate(link, name string, status AdminStatus, archive A
 // FindChannelsByChatID return the Channel base on its user_id
 func (m *Manager) FindChannelsByChatID(chatID int64) ([]Channel, error) {
 	var res []Channel
-	query := "SELECT channels.* FROM channels INNER JOIN telegram_users ON telegram_users.user_id=channels.user_id WHERE telegram_users.bot_chat_id=?"
+	query := "SELECT channels.* FROM channels INNER JOIN telegram_users ON telegram_users.user_id=channels.user_id WHERE telegram_users.bot_chat_id=? AND channels.admin_status=?"
 	_, err := m.GetDbMap().Select(
 		&res,
 		query,
 		chatID,
+		AdminStatusAccepted,
 	)
 	if err != nil {
 		return nil, err
@@ -100,6 +107,36 @@ func (m *Manager) FindChannelByUserIDChannelID(userID int64, channelID int64) (*
 	}
 
 	return &res, nil
+}
+
+// FindChannelsByUserID return the Channels owned by a user
+func (m *Manager) FindChannelsByUserID(userID int64) ([]Channel, error) {
+	channels := []Channel{}
+	_, err := m.GetDbMap().Select(
+		&channels,
+		fmt.Sprintf("SELECT * FROM %s WHERE user_id= ? ", ChannelTableFull),
+		userID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return channels, nil
+}
+
+// GetChanDailyViewByID returns DaylyView per channel
+func (m *Manager) GetChanDailyViewByID(chanID int64) ([]DailyView, error) {
+	var res []DailyView
+	now := time.Now().String()[:10]
+	aWeekB4 := time.Now().AddDate(0, 0, -7).String()[:10]
+	rawQ := `SELECT DATE(created_at) as date, sum(view) as view from %s
+			WHERE channel_id=?
+			AND DATE(created_at) BETWEEN '%s' AND '%s'
+			AND HOUR(created_at) = 23
+			AND minute(created_at) BETWEEN 54 AND 59
+			GROUP BY DATE(created_at)`
+	q := fmt.Sprintf(rawQ, ChannelAdDetailTableFull, aWeekB4, now)
+	_, err := m.GetDbMap().Select(&res, q, chanID)
+	return res, err
 }
 
 // FindChannelsByChatIDName return the Channel base on its chatId and name

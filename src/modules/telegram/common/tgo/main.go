@@ -181,7 +181,6 @@ func (t *telegram) History(user string, limit, offset int) ([]History, error) {
 	var data []History
 	cmd := fmt.Sprintf("history %s %d %d", user, limit, offset)
 	x, err := t.exec(cmd)
-	//fmt.Print(string(x))
 	if err != nil {
 		return nil, err
 	}
@@ -190,7 +189,6 @@ func (t *telegram) History(user string, limit, offset int) ([]History, error) {
 	if err != nil {
 		return nil, err
 	}
-	//fmt.Println(data)
 	return data, nil
 
 }
@@ -198,30 +196,26 @@ func (t *telegram) History(user string, limit, offset int) ([]History, error) {
 func (t *telegram) MessageHistory(user string, limit, offset int) ([]History, error) {
 	var data []History
 	var res []History
-	set := limit
-	for len(res) < limit {
-		cmd := fmt.Sprintf("history %s %d %d", user, limit, offset)
-		x, err := t.exec(cmd)
 
-		if err != nil {
-			return nil, err
-		}
-		fmt.Println(string(x))
-		err = json.Unmarshal(x, &data)
-		if err != nil {
-			return nil, err
-		}
+	cmd := fmt.Sprintf("history %s %d %d", user, limit, offset)
+	x, err := t.exec(cmd)
 
-		for i := range data {
-			if data[i].Event == Message {
-				res = append(res, data[i])
-			}
-		}
-		offset += limit
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println(string(x))
+	err = json.Unmarshal(x, &data)
+	if err != nil {
+		return nil, err
 	}
 
-	return res[:set + 1], nil
+	for i := range data {
+		if data[i].Event == Message {
+			res = append(res, data[i])
+		}
+	}
 
+	return res, nil
 }
 
 func (t *telegram) UserInfo(user string) (*UserInfo, error) {
