@@ -4,6 +4,7 @@ import (
 	"common/assert"
 	"common/models/common"
 	"common/rabbit"
+	"common/utils"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -31,6 +32,10 @@ type MultiWorker struct {
 	client tgo.TelegramCli
 	lock   *sync.Mutex
 }
+
+var (
+	once = &sync.Once{}
+)
 
 type channelDetailStat struct {
 	frwrd bool
@@ -461,5 +466,24 @@ func NewMultiWorker(ip net.IP, port int) (*MultiWorker, error) {
 	go rabbit.RunWorker(&commands.ExistChannelAd{}, res.existChannelAd, 1)
 	go rabbit.RunWorker(&commands.SelectAd{}, res.selectAd, 1)
 	//go rabbit.RunWorker(&commands.UpdateMessage{}, res.UpdateMessage, 1)
+
+	once.Do(func() {
+
+		utils.SafeGO(func() {
+			for {
+				<-time.After(5 * time.Minute)
+				assert.Nil(res.cronReview())
+			}
+		}, true)
+
+		utils.SafeGO(func() {
+			for {
+				<-time.After(1 * time.Minute)
+				assert.Nil(res.updateMessage())
+			}
+		}, true)
+
+	})
+
 	return res, nil
 }
