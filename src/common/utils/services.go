@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"runtime/debug"
 
 	"common/version"
 
@@ -145,5 +146,39 @@ func SlackDoMessage(err interface{}, icon string, attachments ...SlackAttachment
 	if resp.StatusCode != http.StatusOK {
 		logrus.WithField("response", resp).Warn("sending payload to slack failed")
 		return
+	}
+}
+
+// SafeGO is a function to safely run a go routine
+func SafeGO(f func(), continues bool) {
+	s := make(chan struct{})
+	for {
+		go func() {
+			defer func() {
+				if continues {
+					s <- struct{}{}
+				}
+			}()
+			defer func() {
+				if err := recover(); err != nil {
+					stack := debug.Stack()
+
+					data := fmt.Sprintf("Request : \nStack : \n %s", stack)
+					logrus.WithField("error", err).Warn(err, data)
+					if config.Config.Redmine.Active {
+						go RedmineDoError(err, []byte(data))
+					}
+
+					if config.Config.Slack.Active {
+						go SlackDoMessage(err, ":shit:", SlackAttachment{Text: data, Color: "#AA3939"})
+					}
+				}
+			}()
+			f()
+		}()
+		if !continues {
+			break
+		}
+		<-s
 	}
 }

@@ -18,7 +18,7 @@ var chnAdPattern = regexp.MustCompile(`^([0-9]+)/([0-9]+)$`)
 
 //UpdateMessage get channel id and read each post on it then if not save on db,
 //save it
-func (mw *MultiWorker) UpdateMessage() (bool, error) {
+func (mw *MultiWorker) updateMessage() error {
 	knownManger := bot.NewBotManager()
 	c, err := knownManger.FindKnownChannelByName(tcfg.Cfg.Telegram.ChannelName)
 	if err != nil {
@@ -27,11 +27,11 @@ func (mw *MultiWorker) UpdateMessage() (bool, error) {
 
 		if err != nil {
 			// Oh crap. can not resolve this :/
-			return false, err
+			return err
 		}
 		c, err = bot.NewBotManager().CreateChannelByRawData(ch)
 		if err != nil {
-			return false, err
+			return err
 		}
 	}
 	caManager := ads.NewAdsManager()
@@ -40,7 +40,7 @@ func (mw *MultiWorker) UpdateMessage() (bool, error) {
 	assert.Nil(err)
 
 	if len(history) == 0 {
-		return true, nil
+		return nil
 	}
 	for i, h := range history {
 		codes := chnAdPattern.FindStringSubmatch(h.Text)
@@ -72,16 +72,16 @@ func (mw *MultiWorker) UpdateMessage() (bool, error) {
 		assert.Nil(caManager.UpdateChannelAd(chn))
 
 	}
-	return false, err
+	return err
 }
 
 // CronReview cron review for finished ads
-func (mw *MultiWorker) CronReview() (bool, error) {
+func (mw *MultiWorker) cronReview() error {
 	m := ads.NewAdsManager()
 	activeIndividualAds, err := m.SelectIndividualActiveAd()
 	assert.Nil(err)
 	if len(activeIndividualAds) <= 0 {
-		return false, nil
+		return nil
 	}
 
 	for k := range activeIndividualAds {
@@ -113,6 +113,6 @@ func (mw *MultiWorker) CronReview() (bool, error) {
 		}
 	}
 
-	return false, nil
+	return nil
 
 }
