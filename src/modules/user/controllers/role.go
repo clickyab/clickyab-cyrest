@@ -159,3 +159,25 @@ func (u *Controller) allRoles(ctx echo.Context) (err error) {
 	}
 	return u.OKResponse(ctx, roles)
 }
+
+// getUserRole getUserRole by user_id
+// @Route {
+// 		url = /role/user/:id
+// 		resource = get_user_role:parent
+//		method = get
+//		:id = true, int, id of user
+//		200 = aaa.Role
+//		400 = base.ErrorResponseSimple
+// }
+func (u *Controller) getUserRole(ctx echo.Context) (err error) {
+	m := aaa.NewAaaManager()
+	ID, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
+	if err != nil {
+		return u.BadResponse(ctx, trans.E("id not valid"))
+	}
+	user, err := m.FindUserByID(ID)
+	if err != nil {
+		return u.BadResponse(ctx, trans.E("cant get user"))
+	}
+	return u.OKResponse(ctx, user.GetRoles())
+}
