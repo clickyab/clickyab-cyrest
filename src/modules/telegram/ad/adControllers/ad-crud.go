@@ -436,6 +436,7 @@ func (u *Controller) getAd(ctx echo.Context) error {
 	}
 	if currentAd.Src.Valid {
 		currentAd.Src = common.MakeNullString(filepath.Join(fcfg.Fcfg.File.UploadUIPath, currentAd.Src.String))
+		currentAd.Mime = common.MakeNullString(filepath.Ext(currentAd.Src.String))
 	}
 	return u.OKResponse(ctx, currentAd)
 }
