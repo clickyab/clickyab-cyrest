@@ -173,7 +173,7 @@ func (m *Manager) LoadNextAd(last int64) (*Ad, error) {
 
 //ActiveAd selected ad
 type ActiveAd struct {
-	Ad     Ad
+	Ad
 	Viewed int64 `db:"viewed" json:"viewed"`
 }
 
