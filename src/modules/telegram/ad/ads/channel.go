@@ -275,3 +275,94 @@ func (m *Manager) ChangeActive(ID int64, userID int64, name string, link string,
 	assert.Nil(m.UpdateChannel(ch))
 	return ch
 }
+
+//ReportActiveAdDataTable is the ad full data in data table, after join with other field
+// @DataTable {
+//		url = /dashboard/active_ad
+//		entity = activeAd
+//		view = active_ad:self
+//		controller = modules/telegram/ad/chanControllers
+//		fill = FillActiveAdReportDataTableArray
+// }
+type ReportActiveAdDataTable struct {
+	Type        AdType          `json:"type" db:"type" title:"Type"`
+	AdName      string          `json:"ad_name" db:"ad_name" title:"Ad Name"`
+	ChannelName string          `json:"channel_name" db:"channel_name" title:"Channel Name"`
+	Active      ActiveStatus    `db:"active" json:"active" title:"Active" filter:"true"`
+	Start       common.NullTime `db:"start" json:"start" title:"Start" sort:"true"`
+	End         common.NullTime `db:"end" json:"end" title:"End" sort:"true"`
+	View        int64           `json:"view" db:"view" visible:"true" title:"View" sort:"true"`
+	ParentID    int64           `db:"-" json:"parent_id" visible:"false"`
+	OwnerID     int64           `db:"-" json:"owner_id" visible:"false"`
+	Actions     string          `db:"-" json:"_actions" visible:"false"`
+}
+
+// FillActiveAdReportDataTableArray is the function to handle
+func (m *Manager) FillActiveAdReportDataTableArray(
+	u base.PermInterfaceComplete,
+	filters map[string]string,
+	search map[string]string,
+	sort, order string, p, c int) (ReportActiveAdDataTableArray, int64) {
+	var params []interface{}
+	var res ReportActiveAdDataTableArray
+	var where []string
+
+	countQuery := fmt.Sprintf("SELECT count(%[1]s.ad_id)  FROM %[1]s "+
+		"LEFT JOIN %[2]s ON %[1]s.channel_id = %[2]s.id "+
+		"LEFT JOIN  %[3]s ON %[1]s.ad_id = %[3]s.id "+
+		"GROUP BY %[1]s.channel_id",
+		ChannelAdTableFull,
+		ChannelTableFull,
+		AdTableFull,
+	)
+	query := fmt.Sprintf("SELECT %[3]s.cli_message_id is NULL as type,"+
+		"%[3]s.name as ad_name, %[2]s.name as channel_name,%[1]s.active as active,"+
+		"%[1]s.start as start,%[1]s.end as end,%[1]s.view as view  FROM %[1]s "+
+		"LEFT JOIN %[2]s ON %[1]s.channel_id = %[2]s.id "+
+		"LEFT JOIN  %[3]s ON %[1]s.ad_id = %[3]s.id ",
+		ChannelAdTableFull,
+		ChannelTableFull,
+		AdTableFull,
+	)
+	for field, value := range filters {
+		where = append(where, fmt.Sprintf("%s.%s=?", AdTableFull, field))
+		params = append(params, value)
+	}
+
+	for column, val := range search {
+		where = append(where, fmt.Sprintf("%s LIKE ?", column))
+		params = append(params, "%"+val+"%")
+	}
+
+	currentUserID := u.GetID()
+	highestScope := u.GetCurrentScope()
+
+	if highestScope == base.ScopeSelf {
+		where = append(where, fmt.Sprintf(" %s.user_id=? ", AdTableFull))
+		params = append(params, currentUserID)
+	} else if highestScope == base.ScopeParent {
+		where = append(where, fmt.Sprintf(" %s.parent_id=? ", aaa.UserTableFull))
+		params = append(params, currentUserID)
+	}
+
+	//check for perm
+	if len(where) > 0 {
+		query += " WHERE "
+		countQuery += " WHERE "
+	}
+	query += strings.Join(where, " AND ")
+	countQuery += strings.Join(where, " AND ")
+	limit := c
+	offset := (p - 1) * c
+	query += fmt.Sprintf(" GROUP BY %s.channel_id ", ChannelAdTableFull)
+	if sort != "" {
+		query += fmt.Sprintf(" ORDER BY %s %s ", sort, order)
+	}
+	query += fmt.Sprintf(" LIMIT %d OFFSET %d ", limit, offset)
+	count, err := m.GetDbMap().SelectInt(countQuery, params...)
+	assert.Nil(err)
+
+	_, err = m.GetDbMap().Select(&res, query, params...)
+	assert.Nil(err)
+	return res, count
+}
