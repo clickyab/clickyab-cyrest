@@ -7,6 +7,8 @@ import (
 
 	"fmt"
 
+	"common/assert"
+
 	"gopkg.in/telegram-bot-api.v4"
 )
 
@@ -42,7 +44,8 @@ func SendWarnAction(in *SendWarn) (bool, error) {
 	}
 	baseMSg := fmt.Sprintf("Dear Admin of the <b>%s</b> channel:\n", channel.Name)
 	x := tgbotapi.NewMessage(in.ChatID, fmt.Sprintf("%s%s", baseMSg, in.Msg))
-	tgbot.Send(x)
+	_, err = tgbot.Send(x)
+	assert.Nil(err)
 	if in.AdID != 0 { //forward the ad
 		channelAd, err := m.FindChannelIDAdByAdID(in.ChannelID, in.AdID)
 		if err != nil {

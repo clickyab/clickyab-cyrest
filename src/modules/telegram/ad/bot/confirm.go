@@ -55,7 +55,7 @@ func (bb *bot) confirm(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 	if command == "accept" {
 		ad, err := mm.FindAdByID(param)
 		if err != nil || ad.AdActiveStatus != ads.AdActiveStatusYes || ad.AdAdminStatus != ads.AdAdminStatusPending || ad.AdPayStatus != ads.AdPayStatusYes {
-			doMessage(bot, m.Chat.ID, "<b>Invalid ad<b>")
+			doMessage(bot, m.Chat.ID, "<b>Invalid ad</b>")
 			return
 		}
 		ad.AdAdminStatus = ads.AdAdminStatusAccepted
@@ -64,7 +64,7 @@ func (bb *bot) confirm(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 	} else if command == "reject" {
 		ad, err := mm.FindAdByID(param)
 		if err != nil || ad.AdActiveStatus != ads.AdActiveStatusYes || ad.AdAdminStatus != ads.AdAdminStatusPending || ad.AdPayStatus != ads.AdPayStatusYes {
-			doMessage(bot, m.Chat.ID, "<b>Invalid ad<b>")
+			doMessage(bot, m.Chat.ID, "<b>Invalid ad</b>")
 			return
 		}
 		ad.AdAdminStatus = ads.AdAdminStatusRejected
