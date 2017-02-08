@@ -9,10 +9,10 @@ import (
 	"fmt"
 	"modules/telegram/ad/ads"
 	bot2 "modules/telegram/ad/bot/worker"
+	bot3 "modules/telegram/ad/worker"
 	"modules/telegram/common/tgo"
 	"modules/telegram/cyborg/bot"
 	"net"
-	"regexp"
 	"sort"
 	"sync"
 	"time"
@@ -31,9 +31,6 @@ type MultiWorker struct {
 	client tgo.TelegramCli
 	lock   *sync.Mutex
 }
-
-//chnAdPattern is a pattern for message
-var chnAdPattern = regexp.MustCompile(`^([0-9]+)/([0-9]+)$`)
 
 type channelDetailStat struct {
 	frwrd bool
@@ -169,6 +166,11 @@ func (mw *MultiWorker) selectAd(in *commands.SelectAd) (bool, error) {
 	}
 	sort.Sort(ads.ByAffectiveView(chooseAds))
 	//todo send ad to user
+	rabbit.MustPublish(&bot3.AdDelivery{
+		AdsID:     []int64{chooseAds[0].ID},
+		ChannelID: in.ChannelID,
+		ChatID:    in.ChatID,
+	})
 	return false, nil
 
 }

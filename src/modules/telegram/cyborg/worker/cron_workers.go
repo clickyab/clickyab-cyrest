@@ -6,20 +6,24 @@ import (
 	"fmt"
 	"modules/telegram/ad/ads"
 	bot2 "modules/telegram/ad/bot/worker"
+	"modules/telegram/config"
 	"modules/telegram/cyborg/bot"
-	"modules/telegram/cyborg/commands"
+	"regexp"
 	"strconv"
 	"time"
 )
 
+//chnAdPattern is a pattern for message
+var chnAdPattern = regexp.MustCompile(`^([0-9]+)/([0-9]+)$`)
+
 //UpdateMessage get channel id and read each post on it then if not save on db,
 //save it
-func (mw *MultiWorker) UpdateMessage(in *commands.UpdateMessage) (bool, error) {
+func (mw *MultiWorker) UpdateMessage() (bool, error) {
 	knownManger := bot.NewBotManager()
-	c, err := knownManger.FindKnownChannelByName(in.CLiChannelName)
+	c, err := knownManger.FindKnownChannelByName(tcfg.Cfg.Telegram.ChannelName)
 	if err != nil {
 		//known channel not found
-		ch, err := mw.discoverChannel(in.CLiChannelName)
+		ch, err := mw.discoverChannel(tcfg.Cfg.Telegram.ChannelName)
 
 		if err != nil {
 			// Oh crap. can not resolve this :/
@@ -32,7 +36,7 @@ func (mw *MultiWorker) UpdateMessage(in *commands.UpdateMessage) (bool, error) {
 	}
 	caManager := ads.NewAdsManager()
 
-	history, err := mw.getLastMessages(c.CliTelegramID, in.Count, in.Offset)
+	history, err := mw.getLastMessages(c.CliTelegramID, tcfg.Cfg.Telegram.MsgCount, tcfg.Cfg.Telegram.MsgOffset)
 	assert.Nil(err)
 
 	if len(history) == 0 {
@@ -72,7 +76,7 @@ func (mw *MultiWorker) UpdateMessage(in *commands.UpdateMessage) (bool, error) {
 }
 
 // CronReview cron review for finished ads
-func (mw *MultiWorker) CronReview(in *commands.UpdateMessage) (bool, error) {
+func (mw *MultiWorker) CronReview() (bool, error) {
 	m := ads.NewAdsManager()
 	activeIndividualAds, err := m.SelectIndividualActiveAd()
 	assert.Nil(err)

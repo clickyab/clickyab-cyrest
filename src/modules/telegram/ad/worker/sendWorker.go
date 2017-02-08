@@ -15,9 +15,9 @@ import (
 
 //AdDelivery is type of ad delivery
 type AdDelivery struct {
-	chatID    int64
-	adsID     []int64
-	channelID int64
+	ChatID    int64
+	AdsID     []int64
+	ChannelID int64
 }
 
 // GetTopic return this message topic
@@ -33,14 +33,14 @@ func (AdDelivery) GetQueue() string {
 //AdDeliveryAction is a function that send ad and channel data and metadata
 func AdDeliveryAction(in *AdDelivery) (bool, error) {
 
-	for adID := range in.adsID {
+	for adID := range in.AdsID {
 		adManager := ads.NewAdsManager()
-		ad, err := adManager.FindAdByID(in.adsID[adID])
+		ad, err := adManager.FindAdByID(in.AdsID[adID])
 
 		if err != nil {
 			continue
 		}
-		res := bot.RenderMessage(tgbot.GetBot(), in.chatID, ad)
+		res := bot.RenderMessage(tgbot.GetBot(), in.ChatID, ad)
 		if !ad.CliMessageID.Valid {
 			fwd := tgbotapi.NewForward(tcfg.Cfg.Telegram.ChannelID, res.Chat.ID, res.MessageID)
 			_, err := tgbot.Send(fwd)
@@ -48,7 +48,7 @@ func AdDeliveryAction(in *AdDelivery) (bool, error) {
 				continue
 			}
 
-			msgTxt := fmt.Sprintf("%d/%d", ad.ID, in.channelID)
+			msgTxt := fmt.Sprintf("%d/%d", ad.ID, in.ChannelID)
 			msg := tgbotapi.NewMessage(tcfg.Cfg.Telegram.ChannelID, msgTxt)
 			_, err = tgbot.Send(msg)
 			if err != nil {
@@ -56,7 +56,7 @@ func AdDeliveryAction(in *AdDelivery) (bool, error) {
 			}
 		}
 		var cha ads.ChannelAd
-		cha.ChannelID = in.channelID
+		cha.ChannelID = in.ChannelID
 		cha.CliMessageID = ad.CliMessageID
 		cha.AdID = ad.ID
 		cha.BotChatID = res.Chat.ID
