@@ -142,3 +142,20 @@ func (u *Controller) updateRole(ctx echo.Context) error {
 		role,
 	)
 }
+
+// allRoles allRoles
+// @Route {
+// 		url = /allroles
+// 		resource = get_all_roles:parent
+//		method = get
+//		200 = aaa.Role
+//		400 = base.ErrorResponseSimple
+// }
+func (u *Controller) allRoles(ctx echo.Context) (err error) {
+	m := aaa.NewAaaManager()
+	roles, err := m.GetAllRole()
+	if err != nil {
+		return u.BadResponse(ctx, trans.E("error while getting roles"))
+	}
+	return u.OKResponse(ctx, roles)
+}

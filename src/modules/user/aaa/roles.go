@@ -219,3 +219,16 @@ func (m *Manager) UpdateRoleWithPerm(ID int64, name string, description string, 
 	return
 
 }
+
+// GetAllRole return all registered roles in system
+func (m *Manager) GetAllRole() ([]Role, error) {
+	var res []Role
+	query := fmt.Sprintf("SELECT * FROM %s", RoleTableFull)
+	_, err := m.GetDbMap().Select(
+		&res,
+		query,
+	)
+
+	return res, err
+
+}
