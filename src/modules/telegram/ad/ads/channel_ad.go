@@ -55,10 +55,11 @@ type ChannelAd struct {
 //SelectAd choose ad
 type SelectAd struct {
 	Ad
-	View          int64 `db:"view" json:"view"`
-	Viewed        int64 `db:"viewed" json:"viewed"`
-	PossibleView  int64 `db:"possible_view" json:"possible_view"`
-	AffectiveView int64 `json:"affective_view"`
+	Type          AdType `json:"type" db:"type" title:"Type"`
+	View          int64  `db:"view" json:"view"`
+	Viewed        int64  `db:"viewed" json:"viewed"`
+	PossibleView  int64  `db:"possible_view" json:"possible_view"`
+	AffectiveView int64  `json:"affective_view"`
 }
 
 //ByAffectiveView sort by AffectiveView
@@ -189,11 +190,12 @@ func (m *Manager) ChooseAd(channelID int64) ([]SelectAd, error) {
 	res := []SelectAd{}
 	_, err := m.GetDbMap().Select(
 		&res,
-		fmt.Sprintf("SELECT %[1]s.*,sum(%[2]s.possible_view) as possible_view,sum(%[2]s.view) as viewed ,%[3]s.view as view "+
+		fmt.Sprintf("SELECT %[1]s.*,sum(%[2]s.possible_view) as possible_view,"+
+			"sum(%[2]s.view) as viewed ,%[3]s.view as view, %[1]s.cli_message_id IS NULL as type "+
 			"FROM %[1]s "+
 			"LEFT JOIN %[3]s ON %[3]s.id = %[1]s.plan_id "+
-			"INNER JOIN %[2]s on %[2]s.ad_id = %[1]s.id "+
-			"WHERE %[2]s.channel_id != ? "+
+			"LEFT JOIN %[2]s on %[2]s.ad_id = %[1]s.id "+
+			"WHERE  ( %[2]s.channel_id != ? OR %[2]s.channel_id IS NULL ) "+
 			"GROUP BY %[2]s.ad_id ",
 			AdTableFull,
 			ChannelAdTableFull,
