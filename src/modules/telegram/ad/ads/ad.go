@@ -70,7 +70,7 @@ type Ad struct {
 	PlanID          common.NullInt64  `json:"plan_id" db:"plan_id" title:"PlanID"`
 	Position        common.NullInt64  `json:"position" db:"position" visible:"false" title:"Position"`
 	Name            string            `json:"name" db:"name" title:"Name"`
-	Description     common.NullString `json:"description" db:"description" title:"Description"`
+	Description     common.NullString `json:"description" db:"description" visible:"false" title:"Description"`
 	Src             common.NullString `json:"src" db:"src" title:"Src"`
 	Mime            common.NullString `json:"mime,ommitempty" db:"-" visible:"false" title:"Mime"`
 	CliMessageID    common.NullString `json:"cli_message_id" db:"cli_message_id" visible:"false" title:"CliMessageID"`
