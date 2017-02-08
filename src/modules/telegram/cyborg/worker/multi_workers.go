@@ -161,8 +161,13 @@ func (mw *MultiWorker) selectAd(in *commands.SelectAd) (bool, error) {
 	chooseAds, err := b.ChooseAd(in.ChannelID)
 	assert.Nil(err)
 	if len(chooseAds) == 0 {
+		rabbit.MustPublish(&bot2.SendWarn{
+			AdID:      0,
+			ChannelID: in.ChannelID,
+			Msg:       "already have active ad",
+			ChatID:    in.ChatID,
+		})
 		return false, nil
-		//todo send empty ad
 	}
 	for k := range chooseAds {
 		chooseAds[k].AffectiveView = chooseAds[k].View - chooseAds[k].PossibleView
@@ -340,11 +345,10 @@ func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error)
 
 		for adConf := range adsConf {
 			//send stop (warn message)
-			bot2.SendWarnAction(&bot2.SendWarn{
+			rabbit.MustPublish(&bot2.SendWarn{
 				AdID:      adsConf[adConf].adID,
 				ChannelID: in.ChannelID,
 				Msg:       "please remove the following ad",
-				ChatID:    in.ChatID,
 			})
 
 		}
@@ -411,11 +415,10 @@ func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error)
 		})
 		if chads[chad].Warning >= tcfg.Cfg.Telegram.LimitCountWarning {
 			//send stop (warn message)
-			bot2.SendWarnAction(&bot2.SendWarn{
+			rabbit.MustPublish(&bot2.SendWarn{
 				AdID:      chads[chad].AdID,
 				ChannelID: in.ChannelID,
 				Msg:       "please reshot the following ad",
-				ChatID:    in.ChatID,
 			})
 			ChannelAdArr = append(ChannelAdArr, ads.ChannelAd{
 				End: common.NullTime{Valid: true, Time: time.Now()},

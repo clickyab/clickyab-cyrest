@@ -10,6 +10,9 @@ import (
 	"strings"
 	"time"
 
+	"common/rabbit"
+	"modules/telegram/cyborg/commands"
+
 	"gopkg.in/telegram-bot-api.v4"
 )
 
@@ -50,6 +53,10 @@ func (bb *bot) wantAD(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 			return
 		}
 		//everything ok publish a job TODO:
+		rabbit.MustPublish(&commands.SelectAd{
+			ChannelID: channel.ID,
+			ChatID:    m.Chat.ID,
+		})
 		fmt.Println(channel.Name)
 		return
 	}
