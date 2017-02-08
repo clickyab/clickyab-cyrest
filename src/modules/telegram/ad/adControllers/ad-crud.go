@@ -29,7 +29,6 @@ import (
 	"path"
 
 	"modules/file/config"
-	"path/filepath"
 
 	echo "gopkg.in/labstack/echo.v3"
 )
@@ -287,7 +286,13 @@ func (u *Controller) uploadBanner(ctx echo.Context) error {
 	currentAd.CliMessageID = common.MakeNullString("")
 	assert.Nil(m.UpdateAd(currentAd))
 	if currentAd.Src.Valid {
-		currentAd.Src = common.MakeNullString(filepath.Join(fcfg.Fcfg.File.UploadUIPath, currentAd.Src.String))
+		g, err := url.Parse(fcfg.Fcfg.File.UploadPath)
+		if err != nil {
+			return u.NotFoundResponse(ctx, nil)
+		}
+		g.Path = path.Join(g.Path, currentAd.Src.String)
+		s := g.String()
+		currentAd.Src = common.MakeNullString(s)
 	}
 	return u.OKResponse(ctx, currentAd)
 }
@@ -435,8 +440,13 @@ func (u *Controller) getAd(ctx echo.Context) error {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
 	if currentAd.Src.Valid {
-		currentAd.Src = common.MakeNullString(filepath.Join(fcfg.Fcfg.File.UploadUIPath, currentAd.Src.String))
-		currentAd.Mime = common.MakeNullString(filepath.Ext(currentAd.Src.String))
+		g, err := url.Parse(fcfg.Fcfg.File.UploadPath)
+		if err != nil {
+			return u.NotFoundResponse(ctx, nil)
+		}
+		g.Path = path.Join(g.Path, currentAd.Src.String)
+		s := g.String()
+		currentAd.Src = common.MakeNullString(s)
 	}
 	return u.OKResponse(ctx, currentAd)
 }

@@ -452,7 +452,7 @@ func UploadFromURL(link string, uID int64) (string, error) {
 		UserID:   uID,
 	}
 	assert.Nil(NewFilaManager().CreateFile(newFile))
-	return fpath, nil
+	return "/" + fpath, nil
 }
 
 // CheckUpload is the check upload func
@@ -463,7 +463,7 @@ func CheckUpload(link string, uID int64) (string, error) {
 	}
 	host := urlObj.Host
 	if host == fcfg.Fcfg.File.SameUploadPath {
-		return urlObj.Path, nil
+		return strings.Replace(urlObj.Path, fcfg.Fcfg.File.UploadURLReplace, "", 1), nil
 	}
 	return UploadFromURL(link, uID)
 }

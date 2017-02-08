@@ -25,6 +25,7 @@ type Config struct {
 		UploadPath        string   `onion:"upload_path"`
 		UploadUIPath      string   `onion:"upload_ui_path"`
 		SameUploadPath    string   `onion:"same_upload_path"`
+		UploadURLReplace  string   `onion:"upload_url_replace"`
 	} `onion:"file"`
 }
 
@@ -43,6 +44,7 @@ func (c *configLoader) Initialize(o *onion.Onion) []onion.Layer {
 	_ = def.SetDefault("file.upload_path", "http://rubik.clickyab.ae/statics/")
 	_ = def.SetDefault("file.upload_ui_path", "http://rubik.clickyab.ae/")
 	_ = def.SetDefault("file.same_upload_path", "rubik.clickyab.ae")
+	_ = def.SetDefault("file.upload_url_replace", "statics/")
 	_ = def.SetDefault("file.temp_directory_path", filepath.Join(os.TempDir(), "upload"))
 	return []onion.Layer{def}
 }
