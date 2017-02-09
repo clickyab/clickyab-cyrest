@@ -9,9 +9,14 @@ import (
 )
 
 var (
-	translations map[string]bool
+	translations = make(map[string]map[string]string)
 	lock         = &sync.RWMutex{}
 	_            = new(baseTranslated) // Make the stupid unused stop the warning
+)
+
+const (
+	// DefaultLang is the default application language
+	DefaultLang = "en_US"
 )
 
 type baseTranslated interface {
@@ -19,6 +24,8 @@ type baseTranslated interface {
 	GetText() string
 	// Params is the parameters
 	GetParams() []interface{}
+	// Translate is the actual translation
+	Translate(string) string
 }
 
 // Translated is the interface to handle the translation
@@ -56,6 +63,21 @@ func (t9 t9Base) GetParams() []interface{} {
 	return t9.Params
 }
 
+func (t9 t9Base) Translate(lang string) string {
+	lock.RLock()
+	t, ok := translations[lang]
+	if !ok {
+		lock.RUnlock()
+		lock.Lock()
+		translations[lang] = t9n.NewT9nManager().LoadAllInMap(lang)
+		t = translations[lang]
+		lock.Unlock()
+		lock.RLock()
+	}
+	tmp := t[t9.Text]
+	return fmt.Sprintf(tmp, t9.Params...)
+}
+
 func (t9 T9String) String() string {
 	return fmt.Sprintf(t9.GetText(), t9.GetParams()...)
 }
@@ -79,16 +101,16 @@ func T(translationID string, args ...interface{}) (res T9String) {
 	}()
 	lock.RLock()
 
-	if translations == nil {
+	if translations[DefaultLang] == nil {
 		lock.RUnlock()
 		lock.Lock()
 		m := t9n.NewT9nManager()
-		translations = m.LoadAllInMap(true)
+		translations[DefaultLang] = m.LoadAllInMap(DefaultLang)
 		lock.Unlock()
 		lock.RLock()
 	}
 
-	_, ok := translations[translationID]
+	_, ok := translations[DefaultLang][translationID]
 	lock.RUnlock()
 	if !ok {
 		var err error
@@ -97,7 +119,7 @@ func T(translationID string, args ...interface{}) (res T9String) {
 		err = m.AddMissing(translationID)
 		if err == nil {
 			logrus.Debugf("[ADD TRANSLATION] %s", translationID)
-			translations[translationID] = true
+			translations[DefaultLang][translationID] = translationID
 		}
 		lock.Unlock()
 	}

@@ -1,48 +1,70 @@
 package t9n
 
 import (
+	"common/assert"
 	"database/sql"
+	"fmt"
 	"sync"
-	"time"
 )
 
-// Translation model
+// Strings model
+// @Model {
+//		table = strings
+//		primary = true, id
+//		list = yes
+// }
+type Strings struct {
+	ID   int64  `db:"id" json:"id"`
+	Text string `db:"text" json:"text"`
+}
+
+// Translations model
 // @Model {
 //		table = translations
 //		primary = true, id
 //		list = yes
 // }
-type Translation struct {
-	ID        int64          `db:"id" json:"id"`
-	String    string         `db:"string" json:"string"`
-	Single    sql.NullString `db:"single" json:"single"`
-	Plural    sql.NullString `db:"plural" json:"plural"`
-	CreatedAt time.Time      `db:"created_at" json:"created_at"`
-	UpdatedAt time.Time      `db:"updated_at" json:"updated_at"`
+type Translations struct {
+	ID         int64  `db:"id" json:"id"`
+	StringID   int64  `db:"string_id" json:"string_id"`
+	Lang       string `db:"lang" json:"lang"`
+	Translated string `db:"translated" json:"translated"`
+}
+
+type mixed struct {
+	Text       string         `db:"text"`
+	Translated sql.NullString `db:"translated"`
 }
 
 var (
 	lock    = sync.Mutex{}
-	allData map[string]bool
+	allData = make(map[string]map[string]string)
 )
 
 // LoadAllInMap try to load all translation from database into memory
-func (m *Manager) LoadAllInMap(force bool) map[string]bool {
+func (m *Manager) LoadAllInMap(lang string) map[string]string {
 	lock.Lock()
 	defer lock.Unlock()
 
-	if allData != nil && !force {
-		return allData
-	}
+	query := fmt.Sprintf(
+		"SELECT s.text, t.translated FROM %s AS s LEFT JOIN %s AS t ON t.string_id = s.id AND t.lang=?",
+		StringsTableFull,
+		TranslationsTableFull,
+	)
+	var tmp []mixed
+	_, err := m.GetDbMap().Select(&tmp, query, lang)
+	assert.Nil(err)
 
-	tmp := m.ListTranslations()
-
-	allData := make(map[string]bool)
+	res := make(map[string]string)
 	for i := range tmp {
-		allData[tmp[i].String] = true
+		if tmp[i].Translated.Valid {
+			res[tmp[i].Text] = tmp[i].Translated.String
+		} else {
+			res[tmp[i].Text] = tmp[i].Text
+		}
 	}
-
-	return allData
+	allData[lang] = res
+	return res
 }
 
 // AddMissing Add missing translation
@@ -50,14 +72,19 @@ func (m *Manager) AddMissing(txt string) error {
 	lock.Lock()
 	defer lock.Unlock()
 
-	tmp := Translation{
-		String: txt,
+	tmp := Strings{
+		Text: txt,
 	}
 
-	err := m.CreateTranslation(&tmp)
+	err := m.CreateStrings(&tmp)
 	if err != nil {
 		return err
 	}
+	for i := range allData {
+		if allData[i] != nil {
+			allData[i][txt] = txt
+		}
 
+	}
 	return nil
 }
