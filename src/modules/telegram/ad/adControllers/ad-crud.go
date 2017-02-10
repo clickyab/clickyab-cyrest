@@ -30,6 +30,8 @@ import (
 
 	"modules/file/config"
 
+	"path/filepath"
+
 	echo "gopkg.in/labstack/echo.v3"
 )
 
@@ -447,6 +449,7 @@ func (u *Controller) getAd(ctx echo.Context) error {
 		g.Path = path.Join(g.Path, currentAd.Src.String)
 		s := g.String()
 		currentAd.Src = common.MakeNullString(s)
+		currentAd.Mime = common.MakeNullString(filepath.Ext(currentAd.Src.String))
 	}
 	return u.OKResponse(ctx, currentAd)
 }

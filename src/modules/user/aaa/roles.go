@@ -172,14 +172,7 @@ func (m *Manager) DeleteRole(ID int64) (r *Role, err error) {
 }
 
 // UpdateRoleWithPerm try to save a new Role in database
-func (m *Manager) UpdateRoleWithPerm(ID int64, name string, description string, perm map[base.UserScope][]base.Permission) (r *Role, err error) {
-	now := time.Now()
-	r = &Role{
-		ID:          ID,
-		Name:        name,
-		Description: common.NullString{String: description, Valid: true},
-		UpdatedAt:   now,
-	}
+func (m *Manager) UpdateRoleWithPerm(ID int64, name, description string, perm map[base.UserScope][]base.Permission) (r *Role, err error) {
 	err = m.Begin()
 	if err != nil {
 		return nil, err
@@ -200,6 +193,13 @@ func (m *Manager) UpdateRoleWithPerm(ID int64, name string, description string, 
 		r = nil
 		return
 	}
+
+	role, err := m.FindRoleByID(ID)
+	if err != nil {
+		return
+	}
+	role.Name = name
+	role.Description = common.MakeNullString(description)
 
 	err = m.UpdateRole(r)
 	if err != nil {
