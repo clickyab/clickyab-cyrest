@@ -9,19 +9,27 @@ import (
 	"modules/user/middlewares"
 	"net/http"
 	"strconv"
+
+	"common/models/common"
 	"time"
 
-	"github.com/Sirupsen/logrus"
 	"gopkg.in/labstack/echo.v3"
 )
 
-type weeklyReport struct {
-	ChannelName string           `json:"name"`
-	Detail      map[string]int64 `json:"detail"`
+// WeeklyReport show
+type WeeklyReport struct {
+	ChannelName string   `json:"name"`
+	Report      []Report `json:"report"`
+}
+
+// Report shows view if its ended
+type Report struct {
+	View int64           `json:"view"`
+	End  common.NullTime `json:"end"`
 }
 
 type weeklyReportArr struct {
-	Weeklyreport []weeklyReport `json:"report"`
+	Weeklyreport []WeeklyReport `json:"chandetail"`
 }
 
 //	dashboard shows views per channel
@@ -49,18 +57,21 @@ func (u *Controller) dashboard(ctx echo.Context) error {
 	}
 
 	for i := range channels {
-		reports, err := m.GetChanDailyViewByID(channels[i].ID)
+		temp, err := m.GetChanViewByID(channels[i].ID)
 		assert.Nil(err)
 
-		temp := weeklyReport{
-			ChannelName: channels[i].Name,
-			Detail:      map[string]int64{},
+		wk := WeeklyReport{}
+		wk.ChannelName = channels[i].Name
+		for k := range temp {
+			rep := Report{}
+			rep.View = temp[k].View
+			if time.Now().Before(temp[k].End) {
+				rep.End = common.NullTime{Time: temp[k].End}
+				rep.End.Valid = true
+			}
+			wk.Report = append(wk.Report, rep)
 		}
-		for j := range reports {
-			temp.Detail[reports[j].Date.Format(time.RFC3339)] = reports[j].View
-		}
-		res.Weeklyreport = append(res.Weeklyreport, temp)
-		logrus.Warn(res)
+		res.Weeklyreport = append(res.Weeklyreport, wk)
 	}
 
 	return u.OKResponse(ctx, res)

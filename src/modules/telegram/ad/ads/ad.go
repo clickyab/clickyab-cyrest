@@ -434,3 +434,43 @@ func (m *Manager) FillAdReportDataTableArray(
 	assert.Nil(err)
 	return res, count
 }
+
+type adDBReport struct {
+	Name string
+	View int64
+	End  time.Time
+}
+
+// AdReport shows the report for ad
+type AdReport struct {
+	Name  string          `json:"name"`
+	View  int64           `json:"view"`
+	End   common.NullTime `json:"end"`
+	Price int             `json:"price"`
+}
+
+// GetAdReport returns ads weekly report
+func (m *Manager) GetAdReport(adID int64) ([]AdReport, error) {
+	res := []AdReport{}
+
+	q := `SELECT %[1]s.name, %[1]s.view, end from %[2]s LEFT JOIN %[1]s on %[2]s.ad_id = %[1]s.id where ad_id=?`
+	q = fmt.Sprintf(q, AdTableFull, ChannelAdTableFull)
+
+	var temp []adDBReport
+	_, err := m.GetDbMap().Select(&temp, q, adID)
+	if err != nil {
+		return nil, err
+	}
+
+	for k := range temp {
+		rep := AdReport{}
+		rep.Name = temp[k].Name
+		rep.View = temp[k].View
+		if time.Now().After(temp[k].End) {
+			rep.End = common.NullTime{Time: temp[k].End}
+			rep.End.Valid = true
+		}
+		res = append(res, rep)
+	}
+	return res, nil
+}
