@@ -38,8 +38,8 @@ type (
 
 // DailyView struct for dashboard
 type DailyView struct {
-	Date time.Time `db:"date" json:"date" sort:"true"`
-	View int64     `db:"view" json:"view"`
+	View int64 `db:"view" json:"view"`
+	End  time.Time
 }
 
 // Channel model
@@ -123,20 +123,19 @@ func (m *Manager) FindChannelsByUserID(userID int64) ([]Channel, error) {
 	return channels, nil
 }
 
-// GetChanDailyViewByID returns DaylyView per channel
-func (m *Manager) GetChanDailyViewByID(chanID int64) ([]DailyView, error) {
+// GetChanViewByID returns Channels View by day
+func (m *Manager) GetChanViewByID(chanID int64) ([]DailyView, error) {
+	q := `SELECT sum(view) AS view, end FROM channel_ad
+		where channel_id=?
+		GROUP BY now() > end`
+
 	var res []DailyView
-	now := time.Now().String()[:10]
-	aWeekB4 := time.Now().AddDate(0, 0, -7).String()[:10]
-	rawQ := `SELECT DATE(created_at) as date, sum(view) as view from %s
-			WHERE channel_id=?
-			AND DATE(created_at) BETWEEN '%s' AND '%s'
-			AND HOUR(created_at) = 23
-			AND minute(created_at) BETWEEN 54 AND 59
-			GROUP BY DATE(created_at)`
-	q := fmt.Sprintf(rawQ, ChannelAdDetailTableFull, aWeekB4, now)
 	_, err := m.GetDbMap().Select(&res, q, chanID)
-	return res, err
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }
 
 // FindChannelsByChatIDName return the Channel base on its chatId and name
@@ -231,6 +230,86 @@ func (m *Manager) FillChannelDataTableArray(u base.PermInterfaceComplete, filter
 	if sort != "" {
 		query += fmt.Sprintf(" ORDER BY %s %s ", sort, order)
 	}
+	query += fmt.Sprintf(" LIMIT %d OFFSET %d ", limit, offset)
+	fmt.Println(countQuery)
+	count, err := m.GetDbMap().SelectInt(countQuery, params...)
+	assert.Nil(err)
+
+	_, err = m.GetDbMap().Select(&res, query, params...)
+	assert.Nil(err)
+	return res, count
+}
+
+//ChannelDetailDataTable is the role full data in data table, after join with other field
+// @DataTable {
+//		url = /detail
+//		entity = channel
+//		view = channel_list:self
+//		controller = modules/telegram/ad/chanControllers
+//		fill = FillChannelDetailDataTableArray
+//		_edit = edit_channel:self
+//		_admin_status = status_channel:parent
+//		_archive_status = archive_channel:self
+//		_active = active_channel:global
+// }
+type ChannelDetailDataTable struct {
+	ChanID   int64           `json:"name" search:"true" db:"name" visible:"false" title:"Name"`
+	View     int64           `db:"view" json:"view"`
+	AdName   string          `db:"warning" json:"warning" search:"true"`
+	Active   ActiveStatus    `db:"active" json:"active" filter:"true"`
+	Start    common.NullTime `db:"start" json:"start"`
+	End      common.NullTime `db:"end" json:"end"`
+	Warning  int64           `db:"warning" json:"warning"`
+	ParentID int64           `db:"-" json:"parent_id" visible:"false"`
+	OwnerID  int64           `db:"-" json:"owner_id" visible:"false"`
+	Actions  string          `db:"-" json:"_actions" visible:"false"`
+}
+
+// FillChannelDetailDataTableArray is the function to handle
+func (m *Manager) FillChannelDetailDataTableArray(u base.PermInterfaceComplete,
+	filters map[string]string,
+	search map[string]string,
+	sort,
+	order string,
+	p, c int) (ChannelDetailDataTableArray, int64) {
+	var params []interface{}
+	var res ChannelDetailDataTableArray
+	var where []string
+
+	countQuery := fmt.Sprintf("SELECT COUNT(channel_ad.id) FROM %[1]s LEFT JOIN %[2]s ON %[1]s.ad_id=%[2]s.id", ChannelAdTableFull, AdTableFull)
+	query := fmt.Sprintf("SELECT ads.name, channel_ad.view, active, start, end FROM %[1]s LEFT JOIN %[2]s ON %[1]s.id=%[2]s.ad_id", ChannelAdTableFull, AdTableFull)
+
+	for field, value := range filters {
+		where = append(where, fmt.Sprintf(ChannelTableFull+".%s=%s", field, "?"))
+		params = append(params, value)
+	}
+
+	for column, val := range search {
+		where = append(where, fmt.Sprintf("%s LIKE ?", column))
+		params = append(params, fmt.Sprintf("%s"+val+"%s", "%", "%"))
+	}
+
+	currentUserID := u.GetID()
+	highestScope := u.GetCurrentScope()
+
+	if highestScope == base.ScopeSelf {
+		where = append(where, fmt.Sprintf("%s.user_id=?", ChannelTableFull))
+		params = append(params, currentUserID)
+	} else if highestScope == base.ScopeParent {
+		where = append(where, "users.parent_id=?")
+		params = append(params, currentUserID)
+	}
+
+	//check for perm
+	if len(where) > 0 {
+		query += " WHERE "
+		countQuery += " WHERE "
+	}
+	query += strings.Join(where, " AND ")
+	countQuery += strings.Join(where, " AND ")
+	limit := c
+	offset := (p - 1) * c
+
 	query += fmt.Sprintf(" LIMIT %d OFFSET %d ", limit, offset)
 	fmt.Println(countQuery)
 	count, err := m.GetDbMap().SelectInt(countQuery, params...)
