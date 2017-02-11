@@ -181,7 +181,7 @@ type ActiveAd struct {
 func (m *Manager) SelectIndividualActiveAd() ([]ActiveAd, error) {
 	q := fmt.Sprintf("SELECT %[1]s.*,SUM(%[2]s.view) as viewed FROM %[2]s "+
 		" LEFT JOIN %[1]s on %[1]s.id = %[2]s.ad_id "+
-		" WHERE %[1]s.cli_message_id = NULL "+
+		" WHERE %[1]s.cli_message_id IS NULL "+
 		" AND %[1]s.admin_status = ? "+
 		" AND %[1]s.active_status = ? "+
 		" AND %[1]s.pay_status = ? "+
@@ -198,7 +198,7 @@ func (m *Manager) SelectIndividualActiveAd() ([]ActiveAd, error) {
 // SelectAdsPlan return the next ad in the system
 func (m *Manager) SelectAdsPlan() ([]ActiveAd, error) {
 	q := fmt.Sprintf("SELECT %[1]s.*,%[2]s.view as viewed FROM %[2]s "+
-		" LEFT JOIN %[1]s on %[1]s.id = %[2]s.plan_id "+
+		" LEFT JOIN %[1]s on %[1]s.plan_id = %[2]s.id "+
 		" WHERE %[1]s.admin_status = ? "+
 		" AND %[1]s.active_status = ? "+
 		" AND %[1]s.pay_status = ? ",
@@ -340,8 +340,10 @@ func (e *AdType) Scan(src interface{}) error {
 		b = []byte(src.(string))
 	case nil:
 		b = make([]byte, 0)
+	case int64:
+		b = []byte(fmt.Sprint(src.(int64)))
 	default:
-		return errors.New("unsupported type")
+		return fmt.Errorf("unsupported type %T", src)
 	}
 	if string(b) == "0" {
 		*e = AdTypeIndividual
