@@ -11,6 +11,8 @@ import (
 	"regexp"
 	"strconv"
 	"time"
+
+	"github.com/Sirupsen/logrus"
 )
 
 //chnAdPattern is a pattern for message
@@ -19,6 +21,7 @@ var chnAdPattern = regexp.MustCompile(`^([0-9]+)/([0-9]+)$`)
 //UpdateMessage get channel id and read each post on it then if not save on db,
 //save it
 func (mw *MultiWorker) updateMessage() error {
+	logrus.Warn("update message")
 	knownManger := bot.NewBotManager()
 	c, err := knownManger.FindKnownChannelByName(tcfg.Cfg.Telegram.ChannelName)
 	if err != nil {
@@ -43,27 +46,30 @@ func (mw *MultiWorker) updateMessage() error {
 		return nil
 	}
 	for i, h := range history {
+		fmt.Println(h.Text)
 		codes := chnAdPattern.FindStringSubmatch(h.Text)
 		if len(codes) == 0 {
+			fmt.Println("not")
 			continue
 		}
-		adID, err := strconv.ParseInt(codes[1], 10, 0)
+		channelID, err := strconv.ParseInt(codes[1], 10, 0)
 		if err != nil {
-			//logrus.Warn(err)
+			logrus.Warn(err)
 			continue
 		}
-		channelID, err := strconv.ParseInt(codes[2], 10, 0)
+		adID, err := strconv.ParseInt(codes[2], 10, 0)
 		if err != nil {
-			//logrus.Warn(err)
+			logrus.Warn(err)
 			continue
 		}
 
 		chn, err := caManager.FindChannelIDAdByAdID(adID, channelID)
 		if err != nil {
-			//logrus.Warn(err)
+			logrus.Warn(err)
 			continue
 		}
-		if chn.CliMessageID.Valid && chn.CliMessageID.String == h.ID {
+		if chn.CliMessageID.Valid && chn.CliMessageID.String == history[i-1].ID {
+			logrus.Warn("break")
 			break
 
 		}
@@ -77,6 +83,7 @@ func (mw *MultiWorker) updateMessage() error {
 
 // CronReview cron review for finished ads
 func (mw *MultiWorker) cronReview() error {
+	logrus.Debug("SSS")
 	m := ads.NewAdsManager()
 	activeIndividualAds, err := m.SelectIndividualActiveAd()
 	assert.Nil(err)

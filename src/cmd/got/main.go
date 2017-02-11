@@ -16,7 +16,6 @@ import (
 func main() {
 	config.Initialize()
 	config.InitApplication()
-
 	defer initializer.Initialize().Finalize()
 	version.LogVersion().Infof("Application started")
 	go func() {
@@ -27,8 +26,10 @@ func main() {
 			&bot.SendWarn{}, bot.SendWarnAction, 10,
 		)
 		assert.Nil(err)
+	}()
+	go func() {
 
-		err = rabbit.RunWorker(
+		err := rabbit.RunWorker(
 			&worker.AdDelivery{},
 			worker.AdDeliveryAction,
 			10,

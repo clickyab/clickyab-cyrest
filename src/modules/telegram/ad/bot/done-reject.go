@@ -18,6 +18,7 @@ import (
 
 	"modules/user/aaa"
 
+	"github.com/Sirupsen/logrus"
 	"gopkg.in/telegram-bot-api.v4"
 )
 
@@ -25,13 +26,14 @@ func (bb *bot) doneORReject(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 
 	b := ads.NewAdsManager()
 	doneSlice := doneRejectReg.FindStringSubmatch(m.Text)
-	if len(doneSlice) != 2 {
-		send(bot, m.Chat.ID, "your command is <b>not valid</b>")
+	logrus.Warn(doneSlice, len(doneSlice))
+	if len(doneSlice) != 3 {
+		send(bot, m.Chat.ID, "your command is <b>not valid1</b>")
 		return
 	}
-	channelID, err := strconv.ParseInt(doneSlice[1], 10, 0)
+	channelID, err := strconv.ParseInt(doneSlice[2], 10, 0)
 	if err != nil {
-		send(bot, m.Chat.ID, "your command is <b>not valid</b>")
+		send(bot, m.Chat.ID, "your command is <b>not valid2</b>")
 		return
 	}
 	tele := tlu.NewTluManager()
@@ -53,7 +55,7 @@ func (bb *bot) doneORReject(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 		return
 	}
 
-	if doneSlice[0] == "done" {
+	if doneSlice[1] == "done" {
 		channelAd, err := b.FindChannelAdActiveByChannelID(channel.ID, ads.ActiveStatusNo)
 		if err != nil {
 			send(bot, m.Chat.ID, "your command is <b>not valid</b>")
@@ -72,12 +74,12 @@ func (bb *bot) doneORReject(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 		}
 
 		defer func() {
+			logrus.Warn("done")
 			rabbit.MustPublish(
 				commands.ExistChannelAd{
 					ChannelID: channel.ID,
 					ChatID:    m.Chat.ID,
-				},
-			)
+				})
 		}()
 
 		send(bot, m.Chat.ID, fmt.Sprintf("ads active in <b>%s</b> channle", channel.Name))
