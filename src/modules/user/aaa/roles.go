@@ -201,7 +201,7 @@ func (m *Manager) UpdateRoleWithPerm(ID int64, name, description string, perm ma
 	role.Name = name
 	role.Description = common.MakeNullString(description)
 
-	err = m.UpdateRole(r)
+	err = m.UpdateRole(role)
 	if err != nil {
 		err = errors.New("cant update role")
 	}
