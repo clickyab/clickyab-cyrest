@@ -67,6 +67,9 @@ type TelegramCli interface {
 
 	// Close the connection
 	Close() error
+
+	// GetMessage return the message from public channel
+	GetMessage(string) (*History, error)
 }
 
 type telegram struct {
@@ -377,6 +380,20 @@ func (t *telegram) ChannelInvite(channelID, user string) (*SuccessResp, error) {
 func (t *telegram) GetSelf() (*UserInfo, error) {
 	var data UserInfo
 	cmd := "get_self"
+	x, err := t.exec(cmd)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(x, &data)
+	if err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+func (t *telegram) GetMessage(msgID string) (*History, error) {
+	var data History
+	cmd := fmt.Sprintf("get_message %s", msgID)
 	x, err := t.exec(cmd)
 	if err != nil {
 		return nil, err

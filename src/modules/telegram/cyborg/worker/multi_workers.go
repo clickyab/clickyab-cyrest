@@ -8,8 +8,8 @@ import (
 	"errors"
 	"fmt"
 	"modules/telegram/ad/ads"
-	bot2 "modules/telegram/ad/bot/worker"
 	bot3 "modules/telegram/ad/worker"
+	bot2 "modules/telegram/bot/worker"
 	"modules/telegram/common/tgo"
 	"modules/telegram/cyborg/bot"
 	"net"
@@ -23,8 +23,8 @@ import (
 
 	"modules/telegram/config"
 
+	"common/config"
 	"common/utils"
-
 	"modules/misc/trans"
 
 	"github.com/Sirupsen/logrus"
@@ -80,6 +80,13 @@ func (mw *MultiWorker) discoverChannel(c string) (*tgo.ChannelInfo, error) {
 		return nil, errors.New("invalid channel type")
 	}
 	return mw.client.ChannelInfo(ch.ID)
+}
+
+func (mw *MultiWorker) discoverMessage(msgID string) (*tgo.History, error) {
+	mw.lock.Lock()
+	defer mw.lock.Unlock()
+
+	return mw.client.GetMessage(msgID)
 }
 
 func (mw *MultiWorker) getLastMessages(telegramID string, count int, offset int) ([]tgo.History, error) {
@@ -498,6 +505,76 @@ func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error)
 	return false, nil
 }
 
+func (mw *MultiWorker) discoverAd(in *commands.DiscoverAd) (bool, error) {
+	adsManager := ads.NewAdsManager()
+	chads, err := adsManager.FindChannelAdByChannelIDActive(in.Channel)
+	assert.Nil(err)
+
+	// first try to resolve the channel
+	m := bot.NewBotManager()
+	channel, err := adsManager.FindChannelByID(in.Channel)
+	assert.Nil(err)
+	c, err := m.FindKnownChannelByName(channel.Name)
+	if err != nil {
+		ch, err := mw.discoverChannel(channel.Name)
+		assert.Nil(err)
+		c, err = bot.NewBotManager().CreateChannelByRawData(ch)
+		assert.Nil(err)
+	}
+	h, err := mw.getLastMessages(c.CliTelegramID, 10, 0)
+	assert.Nil(err)
+	// then discover the messages
+	found := 0
+bigLoop:
+	for i := range chads {
+		var msg *tgo.History
+		if chads[i].CliMessageAd.Valid {
+			msg, err = mw.discoverMessage(chads[i].CliMessageAd.String)
+			assert.Nil(err)
+		}
+		for j := range h {
+			// Promotion or individual?
+			if msg != nil {
+				// promotion
+				if comparePromotion(*msg, h[j]) {
+					adsManager.SetCLIMessageID(chads[i].ChannelID, chads[i].AdID, h[j].ID)
+					found++
+					continue bigLoop
+				}
+			} else {
+				if compareIndividual(chads[i], h[j]) {
+					adsManager.SetCLIMessageID(chads[i].ChannelID, chads[i].AdID, h[j].ID)
+					found++
+					continue bigLoop
+				}
+			}
+		}
+	}
+
+	// I think we are gonna die, or the user is stupid. replace us, or him/her
+	if found != len(chads) {
+
+		data, _ := json.MarshalIndent(struct {
+			History []tgo.History
+			Chads   []ads.ChannelAdD
+		}{
+			History: h,
+			Chads:   chads,
+		}, "\t", "\t")
+		logrus.Warn(data)
+		if config.Config.Slack.Active {
+			go utils.SlackDoMessage(
+				"[BUG/USER] can not find messages in channel, nothing special but please check if the user is stupid or we are?",
+				":thinking_face:",
+				utils.SlackAttachment{Text: string(data), Color: "#AA3939"},
+			)
+		}
+	}
+
+	return false, nil
+
+}
+
 // NewMultiWorker create a multi worker that listen on all commands
 func NewMultiWorker(ip net.IP, port int) (*MultiWorker, error) {
 	t, err := tgo.NewTelegramCli(ip, port)
@@ -516,6 +593,7 @@ func NewMultiWorker(ip net.IP, port int) (*MultiWorker, error) {
 	go rabbit.RunWorker(&commands.IdentifyAD{}, res.identifyAD, 1)
 	go rabbit.RunWorker(&commands.ExistChannelAd{}, res.existChannelAd, 1)
 	go rabbit.RunWorker(&commands.SelectAd{}, res.selectAd, 1)
+	go rabbit.RunWorker(&commands.DiscoverAd{}, res.discoverAd, 1)
 	//go rabbit.RunWorker(&commands.UpdateMessage{}, res.UpdateMessage, 1)
 
 	once.Do(func() {

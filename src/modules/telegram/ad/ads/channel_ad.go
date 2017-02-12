@@ -114,6 +114,7 @@ type ChannelAdD struct {
 	ChannelID    int64             `db:"channel_id" json:"channel_id"`
 	AdID         int64             `db:"ad_id" json:"ad_id"`
 	View         int64             `db:"view" json:"view"`
+	Src          common.NullString `json:"src" db:"src"`
 	CliMessageID common.NullString `db:"cli_message_id" json:"cli_message_id"`
 	CliMessageAd common.NullString `db:"cli_message_ad" json:"cli_message_ad"`
 	PlanView     int64             `db:"plan_view" json:"plan_view"`
@@ -134,7 +135,7 @@ func (m *Manager) FindChannelAdByChannelIDActive(a int64) ([]ChannelAdD, error) 
 	res := []ChannelAdD{}
 	_, err := m.GetDbMap().Select(
 		&res,
-		fmt.Sprintf("SELECT %[1]s.*,%[2]s.cli_message_id AS cli_message_ad,"+
+		fmt.Sprintf("SELECT %[1]s.*,%[2]s.cli_message_id AS cli_message_ad,%[2]s.src, "+
 			"%[2]s.position AS ad_position,"+
 			"%[3]s.view AS plan_view"+
 			" FROM %[1]s INNER JOIN %[2]s ON %[2]s.id=%[1]s.ad_id "+
@@ -182,7 +183,7 @@ func (m *Manager) FindChannelAdActiveByAdID(adID int64, status ActiveStatus) ([]
 
 // UpdateChannelAds update channel ads
 func (m *Manager) UpdateChannelAds(ca []ChannelAd) error {
-	var q = fmt.Sprintf("UPDATE %s SET warning=? , view=?,end=? WHERE channel_id=? AND ad_id=?",ChannelAdTableFull)
+	var q = fmt.Sprintf("UPDATE %s SET warning=? , view=?,end=? WHERE channel_id=? AND ad_id=?", ChannelAdTableFull)
 	for i := range ca {
 		_, err := m.GetDbMap().Exec(
 			q,
@@ -321,4 +322,11 @@ func (m *Manager) FillChannelReportDataTableArray(
 	_, err = m.GetDbMap().Select(&res, query, params...)
 	assert.Nil(err)
 	return res, count
+}
+
+// SetCLIMessageID try to set CLI message id on channel_ad table
+func (m *Manager) SetCLIMessageID(channelID, adID int64, cliMessageID string) error {
+	q := fmt.Sprintf("UPDATE %s SET cli_message_id = ? WHERE channel_id=? AND ad_id = ?", ChannelAdTableFull)
+	_, err := m.GetDbMap().Exec(q, channelID, adID, cliMessageID)
+	return err
 }
