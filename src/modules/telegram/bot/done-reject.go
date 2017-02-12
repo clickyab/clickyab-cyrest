@@ -1,22 +1,17 @@
 package bot
 
 import (
-	"strconv"
-
+	"common/models/common"
+	"common/rabbit"
+	"fmt"
 	"modules/telegram/ad/ads"
-
+	"modules/telegram/cyborg/commands"
+	"modules/telegram/teleuser/tlu"
+	"modules/user/aaa"
+	"strconv"
 	"time"
 
-	"fmt"
-
-	"common/rabbit"
-	"modules/telegram/cyborg/commands"
-
-	"common/models/common"
-
-	"modules/telegram/teleuser/tlu"
-
-	"modules/user/aaa"
+	"modules/telegram/config"
 
 	"github.com/Sirupsen/logrus"
 	"gopkg.in/telegram-bot-api.v4"
@@ -76,10 +71,17 @@ func (bb *bot) doneORReject(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 		defer func() {
 			logrus.Warn("done")
 			rabbit.MustPublish(
+				commands.DiscoverAd{
+					Channel: channelID,
+				},
+			)
+			rabbit.MustPublishAfter(
 				commands.ExistChannelAd{
 					ChannelID: channel.ID,
 					ChatID:    m.Chat.ID,
-				})
+				},
+				tcfg.Cfg.Telegram.TimeReQueUe,
+			)
 		}()
 
 		send(bot, m.Chat.ID, fmt.Sprintf("ads active in <b>%s</b> channle", channel.Name))

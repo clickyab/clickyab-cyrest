@@ -3,11 +3,11 @@ package worker
 import (
 	"common/assert"
 	"modules/telegram/ad/ads"
-	"modules/telegram/ad/bot"
+	"modules/telegram/bot"
 	"modules/telegram/common/tgbot"
 
 	"fmt"
-	bot2 "modules/telegram/ad/bot/worker"
+	bot2 "modules/telegram/bot/worker"
 	"modules/telegram/config"
 
 	"common/rabbit"

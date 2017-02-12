@@ -24,6 +24,7 @@ type Config struct {
 	Telegram struct {
 		APIKey      string `onion:"api_key"`
 		BotID       string `onion:"bot_id"`
+		BotName     string `onion:"bot_name"`
 		ChannelID   int64  `onion:"channel_id"`
 		ChannelName string `onion:"channel_name"`
 		MsgCount    int    `onion:"message_count"`
@@ -52,6 +53,7 @@ func (c *Config) Initialize(o *onion.Onion) []onion.Layer {
 	assert.Nil(d.SetDefault("telegram.message_offset", "0"))
 	assert.Nil(d.SetDefault("telegram.api_key", "292112659:AAE_Q-jlF8d_nxMBQ5Bu09834eThuOqs5xY"))
 	assert.Nil(d.SetDefault("telegram.bot_id", "$010000001349691192027bb30ddbd5c2"))
+	assert.Nil(d.SetDefault("telegram.bot_name", "mft54bot"))
 	assert.Nil(d.SetDefault("telegram.cli_host", "localhost"))
 	assert.Nil(d.SetDefault("telegram.cli_port", 9999))
 	assert.Nil(d.SetDefault("telegram.last_post_channel", 20))

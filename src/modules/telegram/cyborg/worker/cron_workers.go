@@ -5,7 +5,7 @@ import (
 	"common/models/common"
 	"fmt"
 	"modules/telegram/ad/ads"
-	bot2 "modules/telegram/ad/bot/worker"
+	bot2 "modules/telegram/bot/worker"
 	"modules/telegram/config"
 	"modules/telegram/cyborg/bot"
 	"regexp"

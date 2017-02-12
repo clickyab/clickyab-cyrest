@@ -8,8 +8,8 @@ import (
 	"common/utils"
 	"common/version"
 
-	"modules/telegram/ad/bot/worker"
 	"modules/telegram/ad/worker"
+	bot "modules/telegram/bot/worker"
 	"modules/telegram/common/tgbot"
 )
 
