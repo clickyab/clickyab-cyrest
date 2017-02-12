@@ -4,7 +4,6 @@ import (
 	"common/assert"
 	"common/models/common"
 	"common/rabbit"
-	"common/utils"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -23,6 +22,10 @@ import (
 	"common/redis"
 
 	"modules/telegram/config"
+
+	"common/utils"
+
+	"modules/misc/trans"
 
 	"github.com/Sirupsen/logrus"
 )
@@ -166,18 +169,52 @@ func (mw *MultiWorker) selectAd(in *commands.SelectAd) (bool, error) {
 		rabbit.MustPublish(&bot2.SendWarn{
 			AdID:      0,
 			ChannelID: in.ChannelID,
-			Msg:       "already have active ad",
+			Msg:       trans.T("no ads for you").String(),
 			ChatID:    in.ChatID,
 		})
 		return false, nil
 	}
 	for k := range chooseAds {
-		chooseAds[k].AffectiveView = chooseAds[k].View - chooseAds[k].PossibleView
+		chooseAds[k].AffectiveView = chooseAds[k].PlanView - chooseAds[k].PossibleView.Int64
 	}
 	sort.Sort(ads.ByAffectiveView(chooseAds))
+	logrus.Infof("%+v", chooseAds)
+	var (
+		promoted int64
+		normal   int64
+	)
+
+	for i := range chooseAds {
+		if promoted == 0 && chooseAds[i].CliMessageID.Valid {
+			promoted = chooseAds[i].ID
+		}
+		if normal == 0 && !chooseAds[i].CliMessageID.Valid {
+			normal = chooseAds[i].ID
+		}
+
+		if promoted != 0 && normal != 0 {
+			break
+		}
+	}
+
+	if normal == 0 {
+		rabbit.MustPublish(&bot2.SendWarn{
+			AdID:      0,
+			ChannelID: in.ChannelID,
+			Msg:       "you have an active ad",
+		})
+		return false, nil
+	}
+
+	adList := []int64{}
+	if promoted != 0 {
+		adList = append(adList, promoted)
+	}
+	adList = append(adList, normal)
+	logrus.Info(adList)
 	//todo send ad to user
 	rabbit.MustPublish(&bot3.AdDelivery{
-		AdsID:     []int64{chooseAds[0].ID},
+		AdsID:     adList,
 		ChannelID: in.ChannelID,
 		ChatID:    in.ChatID,
 	})
@@ -237,7 +274,7 @@ func (mw *MultiWorker) getChanStat(in *commands.GetChanCommand) (bool, error) {
 	return false, nil
 
 }
-func (mw *MultiWorker) transaction(m *ads.Manager, chad []ads.ChannelAd, channelAdDetail []ads.ChannelAdDetail, avg int64) (bool, error) {
+func (mw *MultiWorker) transaction(m *ads.Manager, chad []ads.ChannelAd, channelAdDetail []*ads.ChannelAdDetail, avg int64) (bool, error) {
 	err := m.Begin()
 	if err != nil {
 		return true, err
@@ -254,11 +291,12 @@ func (mw *MultiWorker) transaction(m *ads.Manager, chad []ads.ChannelAd, channel
 		}
 	}()
 	err = m.CreateChannelAdDetails(channelAdDetail)
+	assert.Nil(err)
 	if err != nil {
 		return true, err
 	}
 	err = m.UpdateChannelAds(chad)
-
+	assert.Nil(err)
 	//update ads table field view for promotion ad
 	for ch := range chad {
 		if chad[ch].CliMessageID.Valid {
@@ -267,6 +305,7 @@ func (mw *MultiWorker) transaction(m *ads.Manager, chad []ads.ChannelAd, channel
 			if err != nil {
 				return true, err
 			}
+			//ad.View = common.NullInt64{Valid: avg != 0, Int64: avg}
 			ad.View = common.NullInt64{Valid: avg != 0, Int64: avg}
 			assert.Nil(m.UpdateAd(ad))
 		}
@@ -325,6 +364,7 @@ func (mw *MultiWorker) existChannelAdFor(h []tgo.History, adConfs []channelDetai
 }
 
 func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error) {
+	logrus.Warn("existChannelAdFor")
 	var adsConf []channelDetailStat
 	m := ads.NewAdsManager()
 
@@ -336,6 +376,14 @@ func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error)
 			frwrd: chads[i].CliMessageAd.Valid,
 			adID:  chads[i].AdID,
 		})
+		assert.True(chads[i].CliMessageID.Valid, "cli not filled")
+		if !chads[i].CliMessageID.Valid {
+			rabbit.PublishAfter(&commands.ExistChannelAd{
+				ChannelID: in.ChannelID,
+				ChatID:    in.ChatID,
+			}, tcfg.Cfg.Telegram.TimeReQueUe)
+			return false, nil
+		}
 	}
 
 	//check for promotion to be alone or not
@@ -362,6 +410,11 @@ func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error)
 		return false, nil
 	}
 
+	defer rabbit.PublishAfter(&commands.ExistChannelAd{
+		ChannelID: in.ChannelID,
+		ChatID:    in.ChatID,
+	}, tcfg.Cfg.Telegram.TimeReQueUe)
+
 	channel, err := m.FindChannelByID(in.ChannelID)
 	assert.Nil(err)
 	c, err := bot.NewBotManager().FindKnownChannelByName(channel.Name)
@@ -377,7 +430,7 @@ func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error)
 	assert.Nil(err)*/
 	channelAdStat, avg := mw.existChannelAdFor(h, adsConf)
 
-	var ChannelAdDetailArr []ads.ChannelAdDetail
+	var ChannelAdDetailArr []*ads.ChannelAdDetail
 	for j := range chads {
 		var currentView int64
 		depos := tcfg.Cfg.Telegram.PositionAdDefault
@@ -398,7 +451,7 @@ func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error)
 		} else {
 			currentView = channelAdStat[chads[j].AdID].view
 		}
-		ChannelAdDetailArr = append(ChannelAdDetailArr, ads.ChannelAdDetail{
+		ChannelAdDetailArr = append(ChannelAdDetailArr, &ads.ChannelAdDetail{
 			AdID:      chads[j].AdID,
 			ChannelID: chads[j].ChannelID,
 			View:      currentView,
@@ -417,8 +470,11 @@ func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error)
 			currentView = channelAdStat[chads[chad].AdID].view
 		}
 		ChannelAdArr = append(ChannelAdArr, ads.ChannelAd{
-			Warning: chads[chad].Warning + channelAdStat[chads[chad].AdID].warning,
-			View:    currentView,
+
+			Warning:   chads[chad].Warning + channelAdStat[chads[chad].AdID].warning,
+			View:      currentView,
+			AdID:      chads[chad].AdID,
+			ChannelID: chads[chad].ChannelID,
 		})
 		if chads[chad].Warning >= tcfg.Cfg.Telegram.LimitCountWarning {
 			//send stop (warn message)
@@ -438,11 +494,6 @@ func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error)
 	if res == true {
 		return true, err
 	}
-
-	rabbit.PublishAfter(&commands.ExistChannelAd{
-		ChannelID: in.ChannelID,
-		ChatID:    in.ChatID,
-	}, tcfg.Cfg.Telegram.TimeReQueUe)
 
 	return false, nil
 }
@@ -469,17 +520,17 @@ func NewMultiWorker(ip net.IP, port int) (*MultiWorker, error) {
 
 	once.Do(func() {
 
-		utils.SafeGO(func() {
+		go utils.SafeGO(func() {
 			for {
-				<-time.After(5 * time.Minute)
 				assert.Nil(res.cronReview())
+				<-time.After(1 * time.Minute)
 			}
 		}, true)
 
-		utils.SafeGO(func() {
+		go utils.SafeGO(func() {
 			for {
-				<-time.After(1 * time.Minute)
 				assert.Nil(res.updateMessage())
+				<-time.After(1 * time.Minute)
 			}
 		}, true)
 

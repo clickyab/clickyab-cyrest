@@ -42,6 +42,7 @@ func Start() error {
 // Send a message using the global handler
 func Send(c tgbotapi.Chattable) (tgbotapi.Message, error) {
 	assert.NotNil(handler, "[BUG] call this to early")
+	time.Sleep(tcfg.Cfg.Telegram.SendDelay)
 	return handler.Send(c)
 }
 
