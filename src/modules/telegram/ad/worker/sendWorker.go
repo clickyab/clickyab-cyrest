@@ -12,6 +12,9 @@ import (
 
 	"common/rabbit"
 
+	"modules/misc/trans"
+	"time"
+
 	"gopkg.in/telegram-bot-api.v4"
 )
 
@@ -47,10 +50,11 @@ func AdDeliveryAction(in *AdDelivery) (bool, error) {
 			ChannelID: in.ChannelID,
 			AdID:      0,
 			ChatID:    in.ChatID,
-			Msg:       "please forward the following ad to your channel",
+			Msg:       trans.T("please forward the following ad to your channel and dont send other messages until i confirmed your actions\n👇👇👇👇👇👇👇👇👇👇").String(),
 		})
+		time.Sleep(tcfg.Cfg.Telegram.SendDelay)
 		res := bot.RenderMessage(tgbot.GetBot(), in.ChatID, ad)
-		msgx := fmt.Sprintf("please forward these as to your channel and press done otherwise press reject\n/done_%[1]d\n/reject_%[1]d\n", in.ChannelID)
+		msgx := fmt.Sprintf("after forward the ad/ads press done otherwise press reject\n/done_%[1]d\n/reject_%[1]d\n🖕🖕🖕🖕🖕🖕🖕🖕🖕🖕🖕", in.ChannelID)
 		userMsg := tgbotapi.NewMessage(in.ChatID, msgx)
 		userMsg.ParseMode = "HTML"
 		_, err = tgbot.Send(userMsg)
@@ -73,7 +77,7 @@ func AdDeliveryAction(in *AdDelivery) (bool, error) {
 		}
 		var cha ads.ChannelAd
 		cha.ChannelID = in.ChannelID
-		cha.CliMessageID = ad.CliMessageID
+		//cha.CliMessageID = ad.CliMessageID
 		cha.AdID = ad.ID
 		cha.BotChatID = res.Chat.ID
 		cha.BotMessageID = res.MessageID

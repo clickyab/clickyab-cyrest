@@ -7,13 +7,10 @@ import (
 	"modules/telegram/ad/ads"
 	bot2 "modules/telegram/bot/worker"
 	"time"
-
-	"github.com/Sirupsen/logrus"
 )
 
 // CronReview cron review for finished ads
 func (mw *MultiWorker) cronReview() error {
-	logrus.Debug("SSS")
 	m := ads.NewAdsManager()
 	activeIndividualAds, err := m.SelectIndividualActiveAd()
 	assert.Nil(err)

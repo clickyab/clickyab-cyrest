@@ -327,6 +327,37 @@ func (m *Manager) FillChannelReportDataTableArray(
 // SetCLIMessageID try to set CLI message id on channel_ad table
 func (m *Manager) SetCLIMessageID(channelID, adID int64, cliMessageID string) error {
 	q := fmt.Sprintf("UPDATE %s SET cli_message_id = ? WHERE channel_id=? AND ad_id = ?", ChannelAdTableFull)
-	_, err := m.GetDbMap().Exec(q, channelID, adID, cliMessageID)
+	_, err := m.GetDbMap().Exec(q, cliMessageID, channelID, adID)
+	return err
+}
+
+// UpdateOnDuplicateChanDetail try to save a new ChanDetail or update in database
+func (m *Manager) UpdateOnDuplicateChanDetail(cd *ChanDetail) error {
+	now := time.Now()
+	cd.CreatedAt = now
+	cd.UpdatedAt = now
+	_, err := m.GetDbMap().Exec(fmt.Sprintf("INSERT INTO %s "+
+		"(id,name, channel_id, title, info, cli_telegram_id, user_count, admin_count, post_count, total_view,created_at,updated_at)"+
+		" VALUES (NULL,?,?,?,?,?,?,?,?,?,?,?)"+
+		" ON DUPLICATE KEY UPDATE "+
+		"title=VALUES(title)"+
+		",info=VALUES(info)"+
+		",user_count=VALUES(user_count)"+
+		",admin_count=VALUES(admin_count)"+
+		",post_count=VALUES(post_count)"+
+		",total_view=VALUES(total_view)"+
+		",updated_at=VALUES(updated_at)", ChanDetailTableFull),
+		cd.Name,
+		cd.ChannelID,
+		cd.Title,
+		cd.Info,
+		cd.TelegramID,
+		cd.UserCount,
+		cd.AdminCount,
+		cd.PostCount,
+		cd.TotalView,
+		cd.CreatedAt,
+		cd.UpdatedAt,
+	)
 	return err
 }
