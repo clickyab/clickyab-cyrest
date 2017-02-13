@@ -4,6 +4,7 @@ import (
 	"common/assert"
 	"common/config"
 	"common/models/common"
+	"common/utils"
 	"errors"
 	"fmt"
 	"modules/misc/base"
@@ -231,4 +232,24 @@ func (m *Manager) GetAllRole() ([]Role, error) {
 
 	return res, err
 
+}
+
+// FindRoleByIDs return the Role base on its id
+func (m *Manager) FindRoleByIDs(IDs []int64) ([]Role, error) {
+	var res []Role
+	var t []interface{}
+	for i := range IDs {
+		t = append(t, IDs[i])
+	}
+	_, err := m.GetDbMap().Select(
+		&res,
+		fmt.Sprintf("SELECT * FROM %s WHERE id IN(%s)", RoleTableFull, utils.DBImplode(IDs)),
+		t...,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }

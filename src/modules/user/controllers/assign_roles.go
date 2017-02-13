@@ -1,7 +1,6 @@
 package user
 
 import (
-	"common/assert"
 	"modules/user/aaa"
 
 	"gopkg.in/labstack/echo.v3"
@@ -30,18 +29,14 @@ func (u *Controller) assignRoles2User(ctx echo.Context) error {
 	pl := u.MustGetPayload(ctx).(*assignRolesPayload)
 	m := aaa.NewAaaManager()
 	//var usr *aaa.User
-	usr, err := m.FindUserByID(pl.UserID)
+	_, err := m.FindUserByID(pl.UserID)
 	if err != nil {
 		return u.BadResponse(ctx, errors.New("user not found"))
 	}
 
-	for _, v := range pl.RoleIDs {
-		role, err := m.FindRoleByID(v)
-		if err != nil {
-			return u.BadResponse(ctx, errors.New("role not found"))
-		}
-		ur := &aaa.UserRole{RoleID: role.ID, UserID: usr.ID}
-		assert.Nil(m.CreateUserRole(ur))
+	_, err = m.RegisterUserRole(pl.UserID, pl.RoleIDs)
+	if err != nil {
+		return u.BadResponse(ctx, errors.New("error in assigning"))
 	}
 
 	return u.OKResponse(ctx, nil)
