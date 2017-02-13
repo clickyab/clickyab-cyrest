@@ -609,6 +609,25 @@ func (u *Controller) verify(ctx echo.Context) error {
 		}()
 	}
 	return ctx.Redirect(http.StatusMovedPermanently, frontNOk)
+}
+
+//	pieChartAdvertiser show per campaign view
+//	@Route	{
+//		url	=	/dashboard/pie-chart
+//		method	= get
+//		resource = pie_chart_advertiser:self
+//		middleware = authz.Authenticate
+//		200 = ads.PieChart
+//		400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) pieChartAdvertiser(ctx echo.Context) error {
+	currentUser := authz.MustGetUser(ctx)
+	m := ads.NewAdsManager()
+	pieChart, err := m.PieChartAdvertiser(currentUser.ID)
+	if err != nil {
+		return u.BadResponse(ctx, nil)
+	}
+	return u.OKResponse(ctx, pieChart)
 
 }
 
