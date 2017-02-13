@@ -4,6 +4,7 @@ package commands
 type DiscoverAd struct {
 	// ChannelID is the channel id to use
 	Channel int64
+	ChatID  int64
 }
 
 // GetTopic return this message topic

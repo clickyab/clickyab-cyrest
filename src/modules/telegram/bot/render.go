@@ -8,6 +8,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	"modules/telegram/config"
+	"time"
+
 	"gopkg.in/telegram-bot-api.v4"
 )
 
@@ -15,6 +18,7 @@ func forwardCli(bot *tgbotapi.BotAPI, chatID int64, ad *ads.Ad) tgbotapi.Message
 	assert.True(ad.BotChatID.Valid, "[BUG] not yet checked by the bot")
 	assert.True(ad.BotMessageID.Valid, "[BUG] not yet checked by the bot")
 	msg := tgbotapi.NewForward(chatID, ad.BotChatID.Int64, int(ad.BotMessageID.Int64))
+	time.Sleep(tcfg.Cfg.Telegram.SendDelay)
 	x, err := bot.Send(msg)
 	assert.Nil(err)
 	return x
@@ -35,7 +39,7 @@ func createMessage(bot *tgbotapi.BotAPI, chatID int64, ad *ads.Ad) tgbotapi.Mess
 	}
 
 	assert.NotNil(chat, "[BUG] Unhandled ext ")
-
+	time.Sleep(tcfg.Cfg.Telegram.SendDelay)
 	x, err := bot.Send(chat)
 	assert.Nil(err)
 	return x

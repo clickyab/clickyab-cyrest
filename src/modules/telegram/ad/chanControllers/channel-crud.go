@@ -77,7 +77,7 @@ func (u *Controller) createChannel(ctx echo.Context) error {
 		ArchiveStatus: ads.ArchiveStatusNo,
 		AdminStatus:   ads.AdminStatusPending,
 		Link:          common.MakeNullString(pl.Link),
-		Active:        ads.ActiveStatusNo,
+		Active:        ads.ActiveStatusYes,
 		UserID:        currentUser.ID,
 	}
 	err = m.CreateChannel(ch)

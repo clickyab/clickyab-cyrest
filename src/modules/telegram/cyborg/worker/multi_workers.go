@@ -274,7 +274,7 @@ func (mw *MultiWorker) getChanStat(in *commands.GetChanCommand) (bool, error) {
 		TotalView:  sumView,
 		ChannelID:  channel.ID,
 	}
-	err = ads.NewAdsManager().CreateChanDetail(cd)
+	err = ads.NewAdsManager().UpdateOnDuplicateChanDetail(cd)
 	assert.Nil(err)
 	rabbit.PublishAfter(in, 24*time.Hour)
 	//ch, err := mw.discoverChannel(in.Channel)
@@ -527,13 +527,20 @@ func (mw *MultiWorker) discoverAd(in *commands.DiscoverAd) (bool, error) {
 	found := 0
 bigLoop:
 	for i := range chads {
+		if chads[i].CliMessageID.Valid {
+			found++
+			continue
+		}
 		var msg *tgo.History
 		if chads[i].CliMessageAd.Valid {
 			msg, err = mw.discoverMessage(chads[i].CliMessageAd.String)
 			assert.Nil(err)
 		}
-		for j := range h {
+		for j := len(h) - 1; j >= 0; j-- {
 			// Promotion or individual?
+			if h[j].FwdFrom == nil {
+				continue
+			}
 			if msg != nil {
 				// promotion
 				if comparePromotion(*msg, h[j]) {
@@ -569,8 +576,22 @@ bigLoop:
 				utils.SlackAttachment{Text: string(data), Color: "#AA3939"},
 			)
 		}
+	} else {
+		rabbit.MustPublishAfter(
+			commands.ExistChannelAd{
+				ChannelID: channel.ID,
+				ChatID:    in.ChatID,
+			},
+			tcfg.Cfg.Telegram.TimeReQueUe,
+		)
+		//send ok message
+		rabbit.MustPublish(&bot2.SendWarn{
+			AdID:      0,
+			ChannelID: in.Channel,
+			Msg:       trans.T("your add has been successfully activated\nthanks for your cooperation").String(),
+			ChatID:    in.ChatID,
+		})
 	}
-
 	return false, nil
 
 }

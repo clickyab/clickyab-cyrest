@@ -11,8 +11,6 @@ import (
 	"strconv"
 	"time"
 
-	"modules/telegram/config"
-
 	"github.com/Sirupsen/logrus"
 	"gopkg.in/telegram-bot-api.v4"
 )
@@ -69,22 +67,14 @@ func (bb *bot) doneORReject(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 		}
 
 		defer func() {
-			logrus.Warn("done")
 			rabbit.MustPublish(
 				commands.DiscoverAd{
 					Channel: channelID,
+					ChatID:  m.Chat.ID,
 				},
 			)
-			rabbit.MustPublishAfter(
-				commands.ExistChannelAd{
-					ChannelID: channel.ID,
-					ChatID:    m.Chat.ID,
-				},
-				tcfg.Cfg.Telegram.TimeReQueUe,
-			)
-		}()
 
-		send(bot, m.Chat.ID, fmt.Sprintf("ads active in <b>%s</b> channle", channel.Name))
+		}()
 		return
 	}
 	//reject command
