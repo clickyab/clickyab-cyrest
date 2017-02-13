@@ -6,80 +6,10 @@ import (
 	"fmt"
 	"modules/telegram/ad/ads"
 	bot2 "modules/telegram/bot/worker"
-	"modules/telegram/config"
-	"modules/telegram/cyborg/bot"
-	"regexp"
-	"strconv"
 	"time"
 
 	"github.com/Sirupsen/logrus"
 )
-
-//chnAdPattern is a pattern for message
-var chnAdPattern = regexp.MustCompile(`^([0-9]+)/([0-9]+)$`)
-
-//UpdateMessage get channel id and read each post on it then if not save on db,
-//save it
-func (mw *MultiWorker) updateMessage() error {
-	logrus.Warn("update message")
-	knownManger := bot.NewBotManager()
-	c, err := knownManger.FindKnownChannelByName(tcfg.Cfg.Telegram.ChannelName)
-	if err != nil {
-		//known channel not found
-		ch, err := mw.discoverChannel(tcfg.Cfg.Telegram.ChannelName)
-
-		if err != nil {
-			// Oh crap. can not resolve this :/
-			return err
-		}
-		c, err = bot.NewBotManager().CreateChannelByRawData(ch)
-		if err != nil {
-			return err
-		}
-	}
-	caManager := ads.NewAdsManager()
-
-	history, err := mw.getLastMessages(c.CliTelegramID, tcfg.Cfg.Telegram.MsgCount, tcfg.Cfg.Telegram.MsgOffset)
-	assert.Nil(err)
-
-	if len(history) == 0 {
-		return nil
-	}
-	for i, h := range history {
-		fmt.Println(h.Text)
-		codes := chnAdPattern.FindStringSubmatch(h.Text)
-		if len(codes) == 0 {
-			fmt.Println("not")
-			continue
-		}
-		channelID, err := strconv.ParseInt(codes[1], 10, 0)
-		if err != nil {
-			logrus.Warn(err)
-			continue
-		}
-		adID, err := strconv.ParseInt(codes[2], 10, 0)
-		if err != nil {
-			logrus.Warn(err)
-			continue
-		}
-
-		chn, err := caManager.FindChannelIDAdByAdID(adID, channelID)
-		if err != nil {
-			logrus.Warn(err)
-			continue
-		}
-		if chn.CliMessageID.Valid && chn.CliMessageID.String == history[i-1].ID {
-			logrus.Warn("break")
-			break
-
-		}
-		chn.CliMessageID = common.MakeNullString(history[i-1].ID)
-
-		assert.Nil(caManager.UpdateChannelAd(chn))
-
-	}
-	return err
-}
 
 // CronReview cron review for finished ads
 func (mw *MultiWorker) cronReview() error {

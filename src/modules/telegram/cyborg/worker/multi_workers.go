@@ -594,7 +594,6 @@ func NewMultiWorker(ip net.IP, port int) (*MultiWorker, error) {
 	go rabbit.RunWorker(&commands.ExistChannelAd{}, res.existChannelAd, 1)
 	go rabbit.RunWorker(&commands.SelectAd{}, res.selectAd, 1)
 	go rabbit.RunWorker(&commands.DiscoverAd{}, res.discoverAd, 1)
-	//go rabbit.RunWorker(&commands.UpdateMessage{}, res.UpdateMessage, 1)
 
 	once.Do(func() {
 
@@ -604,14 +603,6 @@ func NewMultiWorker(ip net.IP, port int) (*MultiWorker, error) {
 				<-time.After(1 * time.Minute)
 			}
 		}, true)
-
-		go utils.SafeGO(func() {
-			for {
-				assert.Nil(res.updateMessage())
-				<-time.After(1 * time.Minute)
-			}
-		}, true)
-
 	})
 
 	return res, nil
