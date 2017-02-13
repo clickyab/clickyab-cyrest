@@ -69,3 +69,8 @@ func Int64InArray(q int64, arr ...int64) bool {
 func ValidateEmail(email string) bool {
 	return emailMath.MatchString(email)
 }
+
+// DBImplode implode ids
+func DBImplode(IDs []int64) string {
+	return strings.Trim(strings.Repeat("?,", len(IDs)), ",")
+}
