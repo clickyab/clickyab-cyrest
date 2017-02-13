@@ -17,6 +17,10 @@ var (
 const (
 	// DefaultLang is the default application language
 	DefaultLang = "en_US"
+	// PersianLang PersianLang
+	PersianLang = "fa_IR"
+	// EnglishLang EnglishLang
+	EnglishLang = "en_US"
 )
 
 type baseTranslated interface {

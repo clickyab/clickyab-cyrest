@@ -88,3 +88,18 @@ func (m *Manager) AddMissing(txt string) error {
 	}
 	return nil
 }
+
+// CreateOnDuplicateUpdateTranslations try to save a new Translations in database
+func (m *Manager) CreateOnDuplicateUpdateTranslations(t *Translations) error {
+	q := fmt.Sprintf(
+		"INSERT INTO %s (string_id,lang,translated) VALUES (?,?,?) ON DUPLICATE KEY UPDATE translated=VALUES(translated)",
+		TranslationsTableFull,
+	)
+	_, err := m.GetDbMap().Exec(
+		q,
+		t.StringID,
+		t.Lang,
+		t.Translated,
+	)
+	return err
+}
