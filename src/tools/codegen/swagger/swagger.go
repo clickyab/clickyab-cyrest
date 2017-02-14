@@ -41,6 +41,7 @@ var (
 		"common/models/common.NullString": {"type": "string"},
 		"modules/balance/acc.Money":       {"type": "integer"},
 		"modules/user/aaa.UserStatus":     {"type": "string"},
+		"common/models/common.MB4String":  {"type": "string"},
 	}
 )
 
