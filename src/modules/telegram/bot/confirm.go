@@ -33,12 +33,12 @@ func (bb *bot) confirm(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 	u, err := tlu.NewTluManager().GetUser(m.Chat.ID)
 	if err != nil {
 		// No action
-		doMessage(bot, m.Chat.ID, trans.T("<b>Not authorized</b> #1001").Translate())
+		doMessage(bot, m.Chat.ID, trans.T("<b>Not authorized</b> #1001").Translate(trans.Persian))
 		return
 	}
 	if _, ok := u.HasPerm(base.ScopeGlobal, "confirm_ad"); !ok {
 		// No action
-		doMessage(bot, m.Chat.ID, trans.T("<b>Not authorized</b> #1002").Translate())
+		doMessage(bot, m.Chat.ID, trans.T("<b>Not authorized</b> #1002").Translate(trans.Persian))
 		return
 	}
 	var (
@@ -55,35 +55,35 @@ func (bb *bot) confirm(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 	if command == "accept" {
 		ad, err := mm.FindAdByID(param)
 		if err != nil || ad.AdActiveStatus != ads.AdActiveStatusYes || ad.AdAdminStatus != ads.AdAdminStatusPending || ad.AdPayStatus != ads.AdPayStatusYes {
-			doMessage(bot, m.Chat.ID, trans.T("<b>Invalid ad</b>").Translate())
+			doMessage(bot, m.Chat.ID, trans.T("<b>Invalid ad</b>").Translate(trans.Persian))
 			return
 		}
 		ad.AdAdminStatus = ads.AdAdminStatusAccepted
 		assert.Nil(mm.UpdateAd(ad))
-		resp = trans.T("Ad %s is accepted", ad.Name).Translate()
+		resp = trans.T("Ad %s is accepted", ad.Name).Translate(trans.Persian)
 	} else if command == "reject" {
 		ad, err := mm.FindAdByID(param)
 		if err != nil || ad.AdActiveStatus != ads.AdActiveStatusYes || ad.AdAdminStatus != ads.AdAdminStatusPending || ad.AdPayStatus != ads.AdPayStatusYes {
-			doMessage(bot, m.Chat.ID, trans.T("<b>Invalid ad</b>").Translate())
+			doMessage(bot, m.Chat.ID, trans.T("<b>Invalid ad</b>").Translate(trans.Persian))
 			return
 		}
 		ad.AdAdminStatus = ads.AdAdminStatusRejected
 		assert.Nil(mm.UpdateAd(ad))
-		resp = trans.T("Ad %s is rejected", ad.Name).Translate()
+		resp = trans.T("Ad %s is rejected", ad.Name).Translate(trans.Persian)
 	} else {
 		ad, err := mm.LoadNextAd(param)
 		if err != nil {
-			doMessage(bot, m.Chat.ID, trans.T("<b>No ad available at this time</b>").Translate())
+			doMessage(bot, m.Chat.ID, trans.T("<b>No ad available at this time</b>").Translate(trans.Persian))
 			return
 		}
 
 		RenderMessage(bot, m.Chat.ID, ad)
-		doMessage(bot, m.Chat.ID, trans.T("Accept /confirm_%s_%d", "accept", ad.ID).Translate())
-		doMessage(bot, m.Chat.ID, trans.T("Reject /confirm_%s_%d", "reject", ad.ID).Translate())
-		doMessage(bot, m.Chat.ID, trans.T("Next /confirm_%s_%d", "next", ad.ID).Translate())
+		doMessage(bot, m.Chat.ID, trans.T("Accept /confirm_%s_%d", "accept", ad.ID).Translate(trans.Persian))
+		doMessage(bot, m.Chat.ID, trans.T("Reject /confirm_%s_%d", "reject", ad.ID).Translate(trans.Persian))
+		doMessage(bot, m.Chat.ID, trans.T("Next /confirm_%s_%d", "next", ad.ID).Translate(trans.Persian))
 	}
 	doMessage(bot, m.Chat.ID, resp)
-	doMessage(bot, m.Chat.ID, trans.T("<i>OK</i>").Translate())
+	doMessage(bot, m.Chat.ID, trans.T("<i>OK</i>").Translate(trans.Persian))
 }
 
 func init() {

@@ -122,31 +122,31 @@ func ChunkFlowData(r echo.Context) (NgFlowData, error) {
 	ngfd := NgFlowData{}
 	ngfd.ChunkNumber, err = strconv.Atoi(r.FormValue("flowChunkNumber"))
 	if err != nil {
-		return ngfd, trans.E("Bad ChunkNumber").Error()
+		return ngfd, trans.E("Bad ChunkNumber")
 	}
 	ngfd.TotalChunks, err = strconv.Atoi(r.FormValue("flowTotalChunks"))
 	if err != nil {
-		return ngfd, trans.E("Bad TotalChunks").Error()
+		return ngfd, trans.E("Bad TotalChunks")
 	}
 	ngfd.ChunkSize, err = strconv.Atoi(r.FormValue("flowChunkSize"))
 	if err != nil {
-		return ngfd, trans.E("Bad ChunkSize").Error()
+		return ngfd, trans.E("Bad ChunkSize")
 	}
 	ngfd.TotalSize, err = strconv.Atoi(r.FormValue("flowTotalSize"))
 	if err != nil {
-		return ngfd, trans.E("Bad TotalSize").Error()
+		return ngfd, trans.E("Bad TotalSize")
 	}
 	ngfd.Identifier = r.FormValue("flowIdentifier")
 	if ngfd.Identifier == "" {
-		return ngfd, trans.E("Bad Identifier").Error()
+		return ngfd, trans.E("Bad Identifier")
 	}
 	ngfd.Filename = r.FormValue("flowFilename")
 	if ngfd.Filename == "" {
-		return ngfd, trans.E("Bad Filename").Error()
+		return ngfd, trans.E("Bad Filename")
 	}
 	ngfd.RelativePath = r.FormValue("flowRelativePath")
 	if ngfd.RelativePath == "" {
-		return ngfd, trans.E("Bad RelativePath").Error()
+		return ngfd, trans.E("Bad RelativePath")
 	}
 	return ngfd, nil
 }
@@ -162,7 +162,7 @@ func ChunkUpload(tempDir string, ngfd NgFlowData, r echo.Context) (string, error
 	fileDir, chunkFile := buildPathChunks(tempDir, ngfd)
 	err = storeChunk(fileDir, chunkFile, ngfd, r)
 	if err != nil {
-		return "", trans.E("Unable to store chunk Error:\n%S", err.Error()).Error()
+		return "", trans.E("Unable to store chunk Error:\n%s", err.Error())
 	}
 	if allChunksUploaded(tempDir, ngfd) {
 		file, err := combineChunks(fileDir, ngfd)
@@ -296,19 +296,19 @@ func allChunksUploaded(tempDir string, ngfd NgFlowData) bool {
 func storeChunk(tempDir string, tempFile string, ngfd NgFlowData, r echo.Context) error {
 	err := os.MkdirAll(tempDir, DefaultDirPermissions)
 	if err != nil {
-		return trans.E("Bad directory").Error()
+		return trans.E("Bad directory")
 	}
 	file, _, err := r.Request().FormFile("file")
 	if err != nil {
-		return trans.E("Can't access file field").Error()
+		return trans.E("Can't access file field")
 	}
 	data, err := ioutil.ReadAll(file)
 	if err != nil {
-		return trans.E("Can't read file").Error()
+		return trans.E("Can't read file")
 	}
 	err = ioutil.WriteFile(tempFile, data, DefaultDirPermissions)
 	if err != nil {
-		return trans.E("Can't write file").Error()
+		return trans.E("Can't write file")
 	}
 	return nil
 }
@@ -405,7 +405,7 @@ func UploadFromURL(link string, uID int64) (string, error) {
 	} else if utils.StringInArray(extension, ValidDocumentExtension...) {
 		typ = FileTypeDocument
 	} else {
-		return "", trans.E("error file type").Error()
+		return "", trans.E("error file type")
 	}
 
 	//check file type
@@ -417,30 +417,30 @@ func UploadFromURL(link string, uID int64) (string, error) {
 	defer out.Close()
 	if err != nil {
 		os.Remove(filePath)
-		return "", trans.E("error while uploading file").Error()
+		return "", trans.E("error while uploading file")
 	}
 	resp, err := http.Get(link)
 	if err != nil {
 		os.Remove(filePath)
-		return "", trans.E("error while uploading file").Error()
+		return "", trans.E("error while uploading file")
 	}
 	if err != nil {
 		os.Remove(filePath)
-		return "", trans.E("error while uploading file").Error()
+		return "", trans.E("error while uploading file")
 	}
 	defer resp.Body.Close()
 	if err != nil {
 		os.Remove(filePath)
-		return "", trans.E("error while uploading file").Error()
+		return "", trans.E("error while uploading file")
 	}
 	downSize, err := io.Copy(out, resp.Body)
 	if err != nil {
 		os.Remove(filePath)
-		return "", trans.E("error while uploading file").Error()
+		return "", trans.E("error while uploading file")
 	}
 	if downSize > fcfg.Fcfg.Size.MaxDownload {
 		os.Remove(filePath)
-		return "", trans.E("size not valid").Error()
+		return "", trans.E("size not valid")
 	}
 	fpath := filepath.Join(year, month, newFileName)
 
@@ -460,7 +460,7 @@ func UploadFromURL(link string, uID int64) (string, error) {
 func CheckUpload(link string, uID int64) (string, error) {
 	urlObj, err := url.Parse(link)
 	if err != nil {
-		return "", trans.E("url not valid").Error()
+		return "", trans.E("url not valid")
 	}
 	host := urlObj.Host
 	if host == fcfg.Fcfg.File.SameUploadPath {

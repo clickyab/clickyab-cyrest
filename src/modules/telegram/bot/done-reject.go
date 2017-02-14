@@ -24,37 +24,37 @@ func (bb *bot) doneORReject(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 	doneSlice := doneRejectReg.FindStringSubmatch(m.Text)
 	logrus.Warn(doneSlice, len(doneSlice))
 	if len(doneSlice) != 3 {
-		send(bot, m.Chat.ID, trans.T("your command is <b>not valid1</b>").Translate())
+		send(bot, m.Chat.ID, trans.T("your command is <b>not valid1</b>").Translate(trans.Persian))
 		return
 	}
 	channelID, err := strconv.ParseInt(doneSlice[2], 10, 0)
 	if err != nil {
-		send(bot, m.Chat.ID, trans.T("your command is <b>not valid1</b>").Translate())
+		send(bot, m.Chat.ID, trans.T("your command is <b>not valid1</b>").Translate(trans.Persian))
 		return
 	}
 	tele := tlu.NewTluManager()
 	telegramUser, err := tele.FindTeleUserByBotChatID(m.Chat.ID)
 	if err != nil {
-		send(bot, m.Chat.ID, trans.T("your telegram user is not in our system \n please register!").Translate())
+		send(bot, m.Chat.ID, trans.T("your telegram user is not in our system \n please register!").Translate(trans.Persian))
 		return
 	}
 	usr := aaa.NewAaaManager()
 	user, err := usr.FindUserByID(telegramUser.UserID)
 	if err != nil {
-		send(bot, m.Chat.ID, trans.T("your telegram user is not in our system \n please register!").Translate())
+		send(bot, m.Chat.ID, trans.T("your telegram user is not in our system \n please register!").Translate(trans.Persian))
 		return
 	}
 
 	channel, err := b.FindChannelByUserIDChannelID(user.ID, channelID)
 	if err != nil {
-		send(bot, m.Chat.ID, trans.T("you are not owner this channel").Translate())
+		send(bot, m.Chat.ID, trans.T("you are not owner this channel").Translate(trans.Persian))
 		return
 	}
 
 	if doneSlice[1] == "done" {
 		channelAd, err := b.FindChannelAdActiveByChannelID(channel.ID, ads.ActiveStatusNo)
 		if err != nil {
-			send(bot, m.Chat.ID, trans.T("your command is <b>not valid</b>").Translate())
+			send(bot, m.Chat.ID, trans.T("your command is <b>not valid</b>").Translate(trans.Persian))
 			return
 		}
 		var adS []int64
@@ -64,7 +64,7 @@ func (bb *bot) doneORReject(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 			channelAd[chAd].Start = common.MakeNullTime(time.Now())
 			err = b.UpdateChannelAd(&channelAd[chAd])
 			if err != nil {
-				send(bot, m.Chat.ID, trans.T("your command is <b>not valid</b>").Translate())
+				send(bot, m.Chat.ID, trans.T("your command is <b>not valid</b>").Translate(trans.Persian))
 				return
 			}
 		}
@@ -85,13 +85,13 @@ func (bb *bot) doneORReject(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 			)
 		}()
 
-		send(bot, m.Chat.ID, trans.T("ads active in <b>%s</b> channle", channel.Name).Translate())
+		send(bot, m.Chat.ID, trans.T("ads active in <b>%s</b> channle", channel.Name).Translate(trans.Persian))
 		return
 	}
 	//reject command
 	channelAd, err := b.FindChannelAdActiveByChannelID(channel.ID, ads.ActiveStatusYes)
 	if err != nil {
-		send(bot, m.Chat.ID, trans.T("your command is <b>not valid</b>").Translate())
+		send(bot, m.Chat.ID, trans.T("your command is <b>not valid</b>").Translate(trans.Persian))
 		return
 	}
 	for chAd := range channelAd {
@@ -99,11 +99,11 @@ func (bb *bot) doneORReject(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 		channelAd[chAd].End = common.MakeNullTime(time.Now())
 		err = b.UpdateChannelAd(&channelAd[chAd])
 		if err != nil {
-			send(bot, m.Chat.ID, trans.T("your command is <b>not valid</b>").Translate())
+			send(bot, m.Chat.ID, trans.T("your command is <b>not valid</b>").Translate(trans.Persian))
 			return
 		}
 	}
-	send(bot, m.Chat.ID, trans.T("ads reject in <b>%s</b> channle", channel.Name).Translate())
+	send(bot, m.Chat.ID, trans.T("ads reject in <b>%s</b> channle", channel.Name).Translate(trans.Persian))
 	return
 
 }
