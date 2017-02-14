@@ -243,7 +243,7 @@ func (m *Manager) FillChannelDataTableArray(u base.PermInterfaceComplete, filter
 //ChannelDetailDataTable is the role full data in data table, after join with other field
 // @DataTable {
 //		url = /detail
-//		entity = channel
+//		entity = channelDetail
 //		view = channel_list:self
 //		controller = modules/telegram/ad/chanControllers
 //		fill = FillChannelDetailDataTableArray

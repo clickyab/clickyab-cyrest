@@ -61,7 +61,7 @@ type adAdminStatusPayload struct {
 // @Validate {
 // }
 type adDescriptionPayLoad struct {
-	Body string `json:"body" validate:"required" error:"body is required"`
+	Body common.MB4String `json:"body" validate:"required" error:"body is required"`
 }
 
 // @Validate {
@@ -238,7 +238,7 @@ func (u *Controller) addDescription(ctx echo.Context) error {
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
-	currentAd.Description = common.MakeNullString(pl.Body)
+	currentAd.Description = pl.Body
 	currentAd.CliMessageID = common.MakeNullString("")
 	assert.Nil(m.UpdateAd(currentAd))
 	return u.OKResponse(ctx, currentAd)
@@ -331,7 +331,7 @@ func (u *Controller) promoteAd(ctx echo.Context) error {
 	currentAd.Src = common.MakeNullString("")
 	currentAd.BotChatID = common.NullInt64{}
 	currentAd.BotMessageID = common.NullInt64{}
-	currentAd.Description = common.MakeNullString("")
+	currentAd.Description = nil
 	assert.Nil(m.UpdateAd(currentAd))
 	return u.OKResponse(ctx, currentAd)
 }

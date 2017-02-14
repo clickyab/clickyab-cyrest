@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"database/sql"
 	"database/sql/driver"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -42,6 +43,9 @@ type NullString struct {
 	Valid  bool
 	String string
 }
+
+// MB4String is the emoji ready string
+type MB4String []byte
 
 // GenericJSONField is used to handle generic json data in postgres
 type GenericJSONField map[string]interface{}
@@ -211,6 +215,47 @@ func (gjf *GenericJSONField) Scan(src interface{}) error {
 // Value try to get the string slice representation in database
 func (gjf GenericJSONField) Value() (driver.Value, error) {
 	return json.Marshal(gjf)
+}
+
+// Scan convert the json array ino string slice
+func (gjf *MB4String) Scan(src interface{}) error {
+	var b []byte
+	var err error
+	switch src.(type) {
+	case []byte:
+		b = src.([]byte)
+	case string:
+		b = []byte(src.(string))
+	case nil:
+		*gjf = make([]byte, 0)
+		return nil
+	default:
+		return errors.New("unsupported type")
+	}
+	*gjf, err = base64.StdEncoding.DecodeString(string(b))
+	return err
+}
+
+// Value try to get the string slice representation in database
+func (gjf MB4String) Value() (driver.Value, error) {
+	tmp := base64.StdEncoding.EncodeToString([]byte(gjf))
+	return []byte(tmp), nil
+}
+
+// MarshalJSON try to marshaling to json
+func (gjf MB4String) MarshalJSON() ([]byte, error) {
+	return json.Marshal([]byte(gjf))
+}
+
+// UnmarshalJSON try to unmarshal dae from input
+func (gjf *MB4String) UnmarshalJSON(b []byte) error {
+	tmp := []byte{}
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+	*gjf = tmp
+	return nil
 }
 
 // Scan convert the json array ino string slice
