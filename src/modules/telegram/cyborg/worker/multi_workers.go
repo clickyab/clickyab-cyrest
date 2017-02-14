@@ -176,7 +176,7 @@ func (mw *MultiWorker) selectAd(in *commands.SelectAd) (bool, error) {
 		rabbit.MustPublish(&bot2.SendWarn{
 			AdID:      0,
 			ChannelID: in.ChannelID,
-			Msg:       trans.T("no ads for you").String(),
+			Msg:       trans.T("no ads for you").Translate(),
 			ChatID:    in.ChatID,
 		})
 		return false, nil

@@ -14,6 +14,7 @@ import (
 	"modules/telegram/cyborg/commands"
 
 	"gopkg.in/telegram-bot-api.v4"
+	"modules/misc/trans"
 )
 
 func (bb *bot) updateAD(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
@@ -46,7 +47,7 @@ func (bb *bot) wantAD(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 		//find channel by chat ID and channel_name
 		channel, err := chnManger.FindChannelsByChatIDName(m.Chat.ID, res[1])
 		if err != nil {
-			msg := tgbotapi.NewMessage(m.Chat.ID, "channel not found for you")
+			msg := tgbotapi.NewMessage(m.Chat.ID, trans.T("channel not found for you").Translate())
 			msg.ParseMode = htmlMode
 			_, err := bot.Send(msg)
 			assert.Nil(err)
@@ -63,13 +64,13 @@ func (bb *bot) wantAD(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 	channels, err := chnManger.FindChannelsByChatID(m.Chat.ID)
 	assert.Nil(err)
 	if len(channels) == 0 {
-		msg := tgbotapi.NewMessage(m.Chat.ID, "no channels for you")
+		msg := tgbotapi.NewMessage(m.Chat.ID, trans.T("no channels for you").Translate())
 		msg.ParseMode = htmlMode
 		_, err := bot.Send(msg)
 		assert.Nil(err)
 		return
 	}
-	textMsg := "please choose one of the below channels\n"
+	textMsg := trans.T("please choose one of the below channels\n").Translate()
 	for i := range channels {
 		textMsg += fmt.Sprintf("/ad_%s\n", channels[i].Name)
 	}

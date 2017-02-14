@@ -2,7 +2,6 @@ package fila
 
 import (
 	"common/config"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -20,6 +19,8 @@ import (
 	"net/url"
 	"sort"
 	"strings"
+
+	"modules/misc/trans"
 
 	"gopkg.in/labstack/echo.v3"
 )
@@ -65,15 +66,15 @@ var (
 	// DefaultFilePermissions is the default permissions for directories created by gongflow
 	DefaultFilePermissions os.FileMode = 0600
 	// ErrNoTempDir is returned when the temp directory doesn't exist
-	ErrNoTempDir = errors.New("gongflow: the temporary directory doesn't exist")
+	ErrNoTempDir = trans.E("gongflow: the temporary directory doesn't exist")
 	// ErrCantCreateDir is returned wwhen the temporary directory doesn't exist
-	ErrCantCreateDir = errors.New("gongflow: can't create a directory under the temp directory")
+	ErrCantCreateDir = trans.E("gongflow: can't create a directory under the temp directory")
 	// ErrCantWriteFile is returned when it can't create a directory under the temp directory
-	ErrCantWriteFile = errors.New("gongflow: can't write to a file under the temp directory")
+	ErrCantWriteFile = trans.E("gongflow: can't write to a file under the temp directory")
 	// ErrCantReadFile is returned when it can't read a file under the temp directory (or got back bad data)
-	ErrCantReadFile = errors.New("gongflow: can't read a file under the temp directory (or got back bad data)")
+	ErrCantReadFile = trans.E("gongflow: can't read a file under the temp directory (or got back bad data)")
 	// ErrCantDelete is return when it can't delete a file/directory under the temp directory
-	ErrCantDelete                   = errors.New("gongflow: can't delete a file/directory under the temp directory")
+	ErrCantDelete                   = trans.E("gongflow: can't delete a file/directory under the temp directory")
 	alreadyCheckedDirectory         = false
 	lastCheckedDirectoryError error // = nil
 	// ValidImgExtension is the image valid ext
@@ -121,31 +122,31 @@ func ChunkFlowData(r echo.Context) (NgFlowData, error) {
 	ngfd := NgFlowData{}
 	ngfd.ChunkNumber, err = strconv.Atoi(r.FormValue("flowChunkNumber"))
 	if err != nil {
-		return ngfd, errors.New("Bad ChunkNumber")
+		return ngfd, trans.E("Bad ChunkNumber").Error()
 	}
 	ngfd.TotalChunks, err = strconv.Atoi(r.FormValue("flowTotalChunks"))
 	if err != nil {
-		return ngfd, errors.New("Bad TotalChunks")
+		return ngfd, trans.E("Bad TotalChunks").Error()
 	}
 	ngfd.ChunkSize, err = strconv.Atoi(r.FormValue("flowChunkSize"))
 	if err != nil {
-		return ngfd, errors.New("Bad ChunkSize")
+		return ngfd, trans.E("Bad ChunkSize").Error()
 	}
 	ngfd.TotalSize, err = strconv.Atoi(r.FormValue("flowTotalSize"))
 	if err != nil {
-		return ngfd, errors.New("Bad TotalSize")
+		return ngfd, trans.E("Bad TotalSize").Error()
 	}
 	ngfd.Identifier = r.FormValue("flowIdentifier")
 	if ngfd.Identifier == "" {
-		return ngfd, errors.New("Bad Identifier")
+		return ngfd, trans.E("Bad Identifier").Error()
 	}
 	ngfd.Filename = r.FormValue("flowFilename")
 	if ngfd.Filename == "" {
-		return ngfd, errors.New("Bad Filename")
+		return ngfd, trans.E("Bad Filename").Error()
 	}
 	ngfd.RelativePath = r.FormValue("flowRelativePath")
 	if ngfd.RelativePath == "" {
-		return ngfd, errors.New("Bad RelativePath")
+		return ngfd, trans.E("Bad RelativePath").Error()
 	}
 	return ngfd, nil
 }
@@ -161,7 +162,7 @@ func ChunkUpload(tempDir string, ngfd NgFlowData, r echo.Context) (string, error
 	fileDir, chunkFile := buildPathChunks(tempDir, ngfd)
 	err = storeChunk(fileDir, chunkFile, ngfd, r)
 	if err != nil {
-		return "", errors.New("Unable to store chunk" + err.Error())
+		return "", trans.E("Unable to store chunk Error:\n%S", err.Error()).Error()
 	}
 	if allChunksUploaded(tempDir, ngfd) {
 		file, err := combineChunks(fileDir, ngfd)
@@ -178,22 +179,22 @@ func ChunkUpload(tempDir string, ngfd NgFlowData, r echo.Context) (string, error
 func ChunkStatus(tempDir string, ngfd NgFlowData) (string, int) {
 	err := checkDirectory(tempDir)
 	if err != nil {
-		return "Directory is broken: " + err.Error(), http.StatusInternalServerError
+		return trans.T("Directory is broken: %s", err.Error()).String(), http.StatusInternalServerError
 	}
 	_, chunkFile := buildPathChunks(tempDir, ngfd)
 	ChunkNumberString := strconv.Itoa(ngfd.ChunkNumber)
 	dat, err := ioutil.ReadFile(chunkFile)
 	if err != nil {
 		// every thing except for 200, 201, 202, 404, 415. 500, 501
-		return "The chunk " + ngfd.Identifier + ":" + ChunkNumberString + " isn't started yet!", http.StatusNotAcceptable
+		return trans.T("The chunk %s: %s isn't started yet!", ngfd.Identifier, ChunkNumberString).String(), http.StatusNotAcceptable
 	}
 	// An exception for large last chunks, according to ng-flow the last chunk can be anywhere less
 	// than 2x the chunk size unless you haave forceChunkSize on... seems like idiocy to me, but alright.
 	if ngfd.ChunkNumber != ngfd.TotalChunks && ngfd.ChunkSize != len(dat) {
-		return "The chunk " + ngfd.Identifier + ":" + ChunkNumberString + " is the wrong size!", http.StatusInternalServerError
+		return trans.T("The chunk %s: %s is the wrong size!", ngfd.Identifier, ChunkNumberString).String(), http.StatusInternalServerError
 	}
 
-	return "The chunk " + ngfd.Identifier + ":" + ChunkNumberString + " looks great!", http.StatusOK
+	return trans.T("The chunk %s: %s looks great!", ngfd.Identifier, ChunkNumberString).String(), http.StatusOK
 }
 
 // ChunksCleanup is used to go through the tempDir and remove any chunks and directories older than
@@ -295,19 +296,19 @@ func allChunksUploaded(tempDir string, ngfd NgFlowData) bool {
 func storeChunk(tempDir string, tempFile string, ngfd NgFlowData, r echo.Context) error {
 	err := os.MkdirAll(tempDir, DefaultDirPermissions)
 	if err != nil {
-		return errors.New("Bad directory")
+		return trans.E("Bad directory").Error()
 	}
 	file, _, err := r.Request().FormFile("file")
 	if err != nil {
-		return errors.New("Can't access file field")
+		return trans.E("Can't access file field").Error()
 	}
 	data, err := ioutil.ReadAll(file)
 	if err != nil {
-		return errors.New("Can't read file")
+		return trans.E("Can't read file").Error()
 	}
 	err = ioutil.WriteFile(tempFile, data, DefaultDirPermissions)
 	if err != nil {
-		return errors.New("Can't write file")
+		return trans.E("Can't write file").Error()
 	}
 	return nil
 }
@@ -404,7 +405,7 @@ func UploadFromURL(link string, uID int64) (string, error) {
 	} else if utils.StringInArray(extension, ValidDocumentExtension...) {
 		typ = FileTypeDocument
 	} else {
-		return "", errors.New("error file type")
+		return "", trans.E("error file type").Error()
 	}
 
 	//check file type
@@ -416,30 +417,30 @@ func UploadFromURL(link string, uID int64) (string, error) {
 	defer out.Close()
 	if err != nil {
 		os.Remove(filePath)
-		return "", errors.New("error while uploading file")
+		return "", trans.E("error while uploading file").Error()
 	}
 	resp, err := http.Get(link)
 	if err != nil {
 		os.Remove(filePath)
-		return "", errors.New("error while uploading file")
+		return "", trans.E("error while uploading file").Error()
 	}
 	if err != nil {
 		os.Remove(filePath)
-		return "", errors.New("error while uploading file")
+		return "", trans.E("error while uploading file").Error()
 	}
 	defer resp.Body.Close()
 	if err != nil {
 		os.Remove(filePath)
-		return "", errors.New("error while uploading file")
+		return "", trans.E("error while uploading file").Error()
 	}
 	downSize, err := io.Copy(out, resp.Body)
 	if err != nil {
 		os.Remove(filePath)
-		return "", errors.New("error while uploading file")
+		return "", trans.E("error while uploading file").Error()
 	}
 	if downSize > fcfg.Fcfg.Size.MaxDownload {
 		os.Remove(filePath)
-		return "", errors.New("size not valid")
+		return "", trans.E("size not valid").Error()
 	}
 	fpath := filepath.Join(year, month, newFileName)
 
@@ -459,7 +460,7 @@ func UploadFromURL(link string, uID int64) (string, error) {
 func CheckUpload(link string, uID int64) (string, error) {
 	urlObj, err := url.Parse(link)
 	if err != nil {
-		return "", errors.New("url not valid")
+		return "", trans.E("url not valid").Error()
 	}
 	host := urlObj.Host
 	if host == fcfg.Fcfg.File.SameUploadPath {
