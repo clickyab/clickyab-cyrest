@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"common/models/common"
+
 	"github.com/Sirupsen/logrus"
 )
 
@@ -44,9 +46,9 @@ type Category struct {
 // }
 type CategoryDataTable struct {
 	Category
-	ParentID int64  `db:"-" json:"parent_id" visible:"false"`
-	OwnerID  int64  `db:"-" json:"owner_id" visible:"false"`
-	Actions  string `db:"-" json:"_actions" visible:"false"`
+	ParentID common.NullInt64 `db:"-" json:"parent_id" visible:"false"`
+	OwnerID  int64            `db:"-" json:"owner_id" visible:"false"`
+	Actions  string           `db:"-" json:"_actions" visible:"false"`
 }
 
 // Initialize the mcategory

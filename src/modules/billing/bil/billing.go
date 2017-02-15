@@ -92,10 +92,10 @@ func (m *Manager) RegisterBilling(authority string, refID int64, price int64, st
 // }
 type BillingDataTable struct {
 	Billing
-	Email    string `db:"email" json:"email" search:"true" title:"Email"`
-	ParentID int64  `db:"-" json:"parent_id" visible:"false"`
-	OwnerID  int64  `db:"-" json:"owner_id" visible:"false"`
-	Actions  string `db:"-" json:"_actions" visible:"false"`
+	Email    string           `db:"email" json:"email" search:"true" title:"Email"`
+	ParentID common.NullInt64 `db:"parent_id" json:"parent_id" visible:"false"`
+	OwnerID  int64            `db:"owner_id" json:"owner_id" visible:"false"`
+	Actions  string           `db:"-" json:"_actions" visible:"false"`
 }
 
 // FillBillingDataTableArray is the function to handle
@@ -113,7 +113,7 @@ func (m *Manager) FillBillingDataTableArray(
 		BillingTableFull,
 		aaa.UserTableFull,
 	)
-	query := fmt.Sprintf("SELECT %[1]s.*,%[2]s.email FROM %[1]s "+
+	query := fmt.Sprintf("SELECT %[1]s.*,%[2]s.email,%[2]s.id AS owner_id, %[2]s.parent_id as parent_id FROM %[1]s "+
 		"LEFT JOIN %[2]s ON %[2]s.id=%[1]s.user_id ",
 		BillingTableFull,
 		aaa.UserTableFull,

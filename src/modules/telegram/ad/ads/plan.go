@@ -2,6 +2,7 @@ package ads
 
 import (
 	"common/assert"
+	"common/models/common"
 	"fmt"
 	"modules/misc/base"
 	"strings"
@@ -90,9 +91,9 @@ func (m *Manager) GetAllPromotionActivePlans() ([]Plan, error) {
 // }
 type PlanDataTable struct {
 	Plan
-	ParentID int64  `db:"-" json:"parent_id" visible:"false"`
-	OwnerID  int64  `db:"-" json:"owner_id" visible:"false"`
-	Actions  string `db:"-" json:"_actions" visible:"false"`
+	ParentID common.NullInt64 `db:"-" json:"parent_id" visible:"false"`
+	OwnerID  int64            `db:"-" json:"owner_id" visible:"false"`
+	Actions  string           `db:"-" json:"_actions" visible:"false"`
 }
 
 // FillPlanDataTableArray is the function to handle
