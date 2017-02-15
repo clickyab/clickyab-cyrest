@@ -237,11 +237,11 @@ func (ms *MB4String) Scan(src interface{}) error {
 }
 
 // Value try to get the string slice representation in database
-func (ms *MB4String) Value() (driver.Value, error) {
-	if ms == nil {
+func (ms MB4String) Value() (driver.Value, error) {
+	if ms == nil || len(ms) == 0 {
 		return nil, nil
 	}
-	tmp := base64.StdEncoding.EncodeToString(*ms)
+	tmp := base64.StdEncoding.EncodeToString(ms)
 	return []byte(tmp), nil
 }
 

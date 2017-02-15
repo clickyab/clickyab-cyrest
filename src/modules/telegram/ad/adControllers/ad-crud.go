@@ -365,15 +365,10 @@ func (u *Controller) changeActiveStatus(ctx echo.Context) error {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
 	//check everything is good TODO: check pay status later
-	if currentAd.AdAdminStatus == "accepted" && currentAd.Name != "" && pl.AdActiveStatus == ads.AdActiveStatusYes && currentAd.AdActiveStatus == ads.AdActiveStatusNo {
-		currentAd.AdActiveStatus = ads.AdActiveStatusYes
-		//check to add job
-		if currentAd.CliMessageID.Valid {
-			rabbit.MustPublish(commands.IdentifyAD{AdID: currentAd.ID})
-		}
-	} else if pl.AdActiveStatus == ads.AdActiveStatusNo && currentAd.AdActiveStatus == ads.AdActiveStatusYes {
-		currentAd.AdActiveStatus = ads.AdActiveStatusNo
-	}
+	currentAd.AdActiveStatus = pl.AdActiveStatus
+	rabbit.MustPublish(&commands.IdentifyAD{
+		AdID: currentAd.ID,
+	})
 	assert.Nil(m.UpdateAd(currentAd))
 	return u.OKResponse(ctx, currentAd)
 }
@@ -532,7 +527,7 @@ func (u *Controller) charge(ctx echo.Context) error {
 	resp, err := client.Request(&payment.Request{
 		MerchantID:  bcfg.Bcfg.Gate.MerchantID,
 		Amount:      price,
-		Description: bcfg.Bcfg.Gate.Description,
+		Description: plan.Description,
 		Email:       bcfg.Bcfg.Gate.Email,
 		Mobile:      bcfg.Bcfg.Gate.Mobile,
 		CallbackURL: callbackURL,
