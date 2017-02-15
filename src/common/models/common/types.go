@@ -218,7 +218,7 @@ func (gjf GenericJSONField) Value() (driver.Value, error) {
 }
 
 // Scan convert the json array ino string slice
-func (gjf *MB4String) Scan(src interface{}) error {
+func (ms *MB4String) Scan(src interface{}) error {
 	var b []byte
 	var err error
 	switch src.(type) {
@@ -227,34 +227,37 @@ func (gjf *MB4String) Scan(src interface{}) error {
 	case string:
 		b = []byte(src.(string))
 	case nil:
-		*gjf = make([]byte, 0)
+		*ms = make([]byte, 0)
 		return nil
 	default:
 		return errors.New("unsupported type")
 	}
-	*gjf, err = base64.StdEncoding.DecodeString(string(b))
+	*ms, err = base64.StdEncoding.DecodeString(string(b))
 	return err
 }
 
 // Value try to get the string slice representation in database
-func (gjf MB4String) Value() (driver.Value, error) {
-	tmp := base64.StdEncoding.EncodeToString([]byte(gjf))
+func (ms *MB4String) Value() (driver.Value, error) {
+	if ms == nil {
+		return nil, nil
+	}
+	tmp := base64.StdEncoding.EncodeToString(*ms)
 	return []byte(tmp), nil
 }
 
 // MarshalJSON try to marshaling to json
-func (gjf MB4String) MarshalJSON() ([]byte, error) {
-	return json.Marshal([]byte(gjf))
+func (ms *MB4String) MarshalJSON() ([]byte, error) {
+	return json.Marshal([]byte(*ms))
 }
 
 // UnmarshalJSON try to unmarshal dae from input
-func (gjf *MB4String) UnmarshalJSON(b []byte) error {
+func (ms *MB4String) UnmarshalJSON(b []byte) error {
 	tmp := []byte{}
 	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
-	*gjf = tmp
+	*ms = tmp
 	return nil
 }
 
