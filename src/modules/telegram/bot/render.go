@@ -30,11 +30,11 @@ func createMessage(bot *tgbotapi.BotAPI, chatID int64, ad *ads.Ad) tgbotapi.Mess
 	var chat tgbotapi.Chattable
 	if ext == ".jpg" || ext == ".jpeg" || ext == ".png" || ext == ".gif" {
 		ph := tgbotapi.NewPhotoUpload(chatID, f)
-		ph.Caption = ad.Description.String
+		ph.Caption = string(ad.Description)
 		chat = ph
 	} else if ext == ".mov" || ext == ".mp4" {
 		vd := tgbotapi.NewVideoUpload(chatID, f)
-		vd.Caption = ad.Description.String
+		vd.Caption = string(ad.Description)
 		chat = vd
 	}
 

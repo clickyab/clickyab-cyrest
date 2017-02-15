@@ -61,7 +61,7 @@ type adAdminStatusPayload struct {
 // @Validate {
 // }
 type adDescriptionPayLoad struct {
-	Body string `json:"body" validate:"required" error:"body is required"`
+	Body common.MB4String `json:"body" validate:"required" error:"body is required"`
 }
 
 // @Validate {
@@ -238,7 +238,7 @@ func (u *Controller) addDescription(ctx echo.Context) error {
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
-	currentAd.Description = common.MakeNullString(pl.Body)
+	currentAd.Description = pl.Body
 	currentAd.CliMessageID = common.MakeNullString("")
 	assert.Nil(m.UpdateAd(currentAd))
 	return u.OKResponse(ctx, currentAd)
@@ -331,7 +331,7 @@ func (u *Controller) promoteAd(ctx echo.Context) error {
 	currentAd.Src = common.MakeNullString("")
 	currentAd.BotChatID = common.NullInt64{}
 	currentAd.BotMessageID = common.NullInt64{}
-	currentAd.Description = common.MakeNullString("")
+	currentAd.Description = nil
 	assert.Nil(m.UpdateAd(currentAd))
 	return u.OKResponse(ctx, currentAd)
 }
@@ -609,6 +609,25 @@ func (u *Controller) verify(ctx echo.Context) error {
 		}()
 	}
 	return ctx.Redirect(http.StatusMovedPermanently, frontNOk)
+}
+
+//	pieChartAdvertiser show per campaign view
+//	@Route	{
+//		url	=	/dashboard/pie-chart
+//		method	= get
+//		resource = pie_chart_advertiser:self
+//		middleware = authz.Authenticate
+//		200 = ads.PieChart
+//		400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) pieChartAdvertiser(ctx echo.Context) error {
+	currentUser := authz.MustGetUser(ctx)
+	m := ads.NewAdsManager()
+	pieChart, err := m.PieChartAdvertiser(currentUser.ID)
+	if err != nil {
+		return u.BadResponse(ctx, nil)
+	}
+	return u.OKResponse(ctx, pieChart)
 
 }
 

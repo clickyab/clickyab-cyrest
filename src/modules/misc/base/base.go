@@ -67,9 +67,9 @@ func (c Controller) OKResponse(ctx echo.Context, res interface{}) error {
 	if res == nil {
 		res = NormalResponse{}
 	}
-	ctx.JSON(http.StatusOK, res)
 
-	return nil
+	return ctx.JSON(http.StatusOK, res)
+
 }
 
 // MustGetPayload is for payload middleware
