@@ -9,13 +9,15 @@ import (
 
 	"common/assert"
 
+	"modules/misc/trans"
+
 	"gopkg.in/telegram-bot-api.v4"
 )
 
 // SendWarn is the command for
 type SendWarn struct {
 	// The msg
-	Msg string
+	Msg trans.T9String
 	// The channel ID
 	ChannelID int64
 	// AdID
@@ -42,8 +44,8 @@ func SendWarnAction(in *SendWarn) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	baseMSg := fmt.Sprintf("Dear Admin of the <b>%s</b> channel:\n", channel.Name)
-	x := tgbotapi.NewMessage(in.ChatID, fmt.Sprintf("%s%s", baseMSg, in.Msg))
+	baseMSg := trans.T("Dear Admin of the <b>%s</b> channel:\n", channel.Name).Translate(trans.Persian)
+	x := tgbotapi.NewMessage(in.ChatID, fmt.Sprintf("%s%s", baseMSg, in.Msg.Translate(trans.Persian)))
 	x.ParseMode = "HTML"
 	_, err = tgbot.Send(x)
 	assert.Nil(err)

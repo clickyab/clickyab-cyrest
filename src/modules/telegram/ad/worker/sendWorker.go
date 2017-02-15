@@ -50,7 +50,7 @@ func AdDeliveryAction(in *AdDelivery) (bool, error) {
 			ChannelID: in.ChannelID,
 			AdID:      0,
 			ChatID:    in.ChatID,
-			Msg:       trans.T("please forward the following ad to your channel and dont send other messages until i confirmed your actions\n👇👇👇👇👇👇👇👇👇👇").String(),
+			Msg:       trans.T("please forward the following ad to your channel and dont send other messages until i confirmed your actions\n👇👇👇👇👇👇👇👇👇👇"),
 		})
 		time.Sleep(tcfg.Cfg.Telegram.SendDelay)
 		res := bot.RenderMessage(tgbot.GetBot(), in.ChatID, ad)

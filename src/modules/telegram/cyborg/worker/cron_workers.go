@@ -3,7 +3,7 @@ package worker
 import (
 	"common/assert"
 	"common/models/common"
-	"fmt"
+	"modules/misc/trans"
 	"modules/telegram/ad/ads"
 	bot2 "modules/telegram/bot/worker"
 	"time"
@@ -35,7 +35,7 @@ func (mw *MultiWorker) cronReview() error {
 				channelAd[c].ChannelAd.Active = ads.ActiveStatusNo
 				channelAd[c].ChannelAd.End = common.MakeNullTime(time.Now())
 				assert.Nil(m.UpdateChannelAd(&channelAd[c].ChannelAd))
-				str := fmt.Sprintf("you have have <%d> in channel \n please remove ad from <%s> channel", channelAd[c].ChannelAd.View, channelAd[c].Channel.Name)
+				str := trans.T("you have have <%d> in channel \n please remove ad from <%s> channel", channelAd[c].ChannelAd.View, channelAd[c].Channel.Name)
 				bot2.SendWarnAction(&bot2.SendWarn{
 					AdID:      channelAd[c].ChannelAd.AdID,
 					ChannelID: channelAd[c].ChannelAd.ChannelID,

@@ -176,7 +176,7 @@ func (mw *MultiWorker) selectAd(in *commands.SelectAd) (bool, error) {
 		rabbit.MustPublish(&bot2.SendWarn{
 			AdID:      0,
 			ChannelID: in.ChannelID,
-			Msg:       trans.T("no ads for you").String(),
+			Msg:       trans.T("no ads for you"),
 			ChatID:    in.ChatID,
 		})
 		return false, nil
@@ -208,7 +208,7 @@ func (mw *MultiWorker) selectAd(in *commands.SelectAd) (bool, error) {
 		rabbit.MustPublish(&bot2.SendWarn{
 			AdID:      0,
 			ChannelID: in.ChannelID,
-			Msg:       "you have an active ad",
+			Msg:       trans.T("you have an active ad"),
 		})
 		return false, nil
 	}
@@ -410,7 +410,7 @@ func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error)
 			rabbit.MustPublish(&bot2.SendWarn{
 				AdID:      adsConf[adConf].adID,
 				ChannelID: in.ChannelID,
-				Msg:       "please remove the following ad",
+				Msg:       trans.T("please remove the following ad"),
 			})
 
 		}
@@ -488,7 +488,7 @@ func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error)
 			rabbit.MustPublish(&bot2.SendWarn{
 				AdID:      chads[chad].AdID,
 				ChannelID: in.ChannelID,
-				Msg:       "please reshot the following ad",
+				Msg:       trans.T("please reshot the following ad"),
 			})
 			ChannelAdArr = append(ChannelAdArr, ads.ChannelAd{
 				End: common.NullTime{Valid: true, Time: time.Now()},
@@ -588,7 +588,7 @@ bigLoop:
 		rabbit.MustPublish(&bot2.SendWarn{
 			AdID:      0,
 			ChannelID: in.Channel,
-			Msg:       trans.T("your add has been successfully activated\nthanks for your cooperation").String(),
+			Msg:       trans.T("your add has been successfully activated\nthanks for your cooperation"),
 			ChatID:    in.ChatID,
 		})
 	}
