@@ -70,7 +70,7 @@ type Ad struct {
 	PlanID          common.NullInt64  `json:"plan_id" db:"plan_id" title:"PlanID"`
 	Position        common.NullInt64  `json:"position" db:"position" visible:"false" title:"Position"`
 	Name            string            `json:"name" db:"name" title:"Name"`
-	Description     common.NullString `json:"description" db:"description" visible:"false" title:"Description"`
+	Description     common.MB4String  `json:"description" db:"description" visible:"false" title:"Description"`
 	Src             common.NullString `json:"src" db:"src" title:"Src"`
 	Extension       common.NullString `json:"extension,ommitempty" db:"-" visible:"false" title:"Extension"`
 	CliMessageID    common.NullString `json:"cli_message_id" db:"cli_message_id" visible:"false" title:"CliMessageID"`
@@ -474,5 +474,35 @@ func (m *Manager) GetAdReport(adID int64) ([]AdReport, error) {
 		}
 		res = append(res, rep)
 	}
+	return res, nil
+}
+
+// PieChart struct type
+type PieChart struct {
+	Name string           `json:"name" db:"name" title:"Name"`
+	View common.NullInt64 `json:"view" db:"view" visible:"true" title:"View"`
+}
+
+// PieChartAdvertiser return the ads
+func (m *Manager) PieChartAdvertiser(userID int64) ([]PieChart, error) {
+
+	res := []PieChart{}
+	_, err := m.GetDbMap().Select(
+		&res,
+		fmt.Sprintf("SELECT %[1]s.name,%[1]s.view "+
+			" FROM %[1]s "+
+			" LEFT JOIN %[2]s ON %[1]s.user_id = %[2]s.id "+
+			" WHERE ( %[2]s.id = ? OR %[2]s.parent_id = ? )",
+			AdTableFull,
+			aaa.UserTableFull,
+		),
+		userID,
+		userID,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
 	return res, nil
 }
