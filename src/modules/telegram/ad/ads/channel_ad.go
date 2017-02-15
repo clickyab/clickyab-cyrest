@@ -299,16 +299,16 @@ func (m *Manager) ChooseAd(channelID int64) ([]SelectAd, error) {
 // }
 type ReportChannelDataTable struct {
 	Channel
-	View         int64           `db:"view" json:"view" sort:"true" title:"View"`
-	Active       ActiveStatus    `db:"active" json:"active" title:"ActiveStatus" filter:"true"`
-	Start        common.NullTime `db:"start" json:"start" sort:"true" title:"Start"`
-	End          common.NullTime `db:"end" json:"end" sort:"true" title:"End"`
-	Warning      int64           `db:"warning" json:"warning" sort:"true" title:"Warning"`
-	PossibleView int64           `db:"possible_view" json:"possible_view" sort:"true" title:"PossibleView"`
-	Email        string          `db:"email" json:"email" search:"true" title:"Email"`
-	ParentID     int64           `db:"-" json:"parent_id" visible:"false"`
-	OwnerID      int64           `db:"-" json:"owner_id" visible:"false"`
-	Actions      string          `db:"-" json:"_actions" visible:"false"`
+	View         int64            `db:"view" json:"view" sort:"true" title:"View"`
+	Active       ActiveStatus     `db:"active" json:"active" title:"ActiveStatus" filter:"true"`
+	Start        common.NullTime  `db:"start" json:"start" sort:"true" title:"Start"`
+	End          common.NullTime  `db:"end" json:"end" sort:"true" title:"End"`
+	Warning      int64            `db:"warning" json:"warning" sort:"true" title:"Warning"`
+	PossibleView int64            `db:"possible_view" json:"possible_view" sort:"true" title:"PossibleView"`
+	Email        string           `db:"email" json:"email" search:"true" title:"Email"`
+	ParentID     common.NullInt64 `db:"parent_id" json:"parent_id" visible:"false"`
+	OwnerID      int64            `db:"owner_id" json:"owner_id" visible:"false"`
+	Actions      string           `db:"-" json:"_actions" visible:"false"`
 }
 
 // FillChannelReportDataTableArray is the function to handle
@@ -329,7 +329,7 @@ func (m *Manager) FillChannelReportDataTableArray(
 		ChannelTableFull,
 		aaa.UserTableFull,
 	)
-	query := fmt.Sprintf("SELECT %[1]s.*,%[2]s.view,%[2]s.warning,%[2]s.active,%[2]s.start,%[2]s.possible_view,%[2]s.end,%[3]s.email FROM %[2]s "+
+	query := fmt.Sprintf("SELECT %[1]s.*,%[2]s.view,%[2]s.warning,%[2]s.active,%[2]s.start,%[2]s.possible_view,%[2]s.end,%[3]s.email,%[3]s.id AS owner_id, %[3]s.parent_id as parent_id FROM %[2]s "+
 		"INNER JOIN %[1]s ON %[1]s.id=%[2]s.channel_id "+
 		"INNER JOIN %[3]s ON %[3]s.id=%[1]s.user_id ",
 		ChannelTableFull,

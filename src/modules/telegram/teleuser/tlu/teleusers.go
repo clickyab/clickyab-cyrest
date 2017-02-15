@@ -69,10 +69,10 @@ type Verifycode struct {
 // }
 type TeleuserDataTable struct {
 	TeleUser
-	Email    string `db:"email" json:"email" search:"true" title:"Email"`
-	ParentID int64  `db:"-" json:"parent_id" visible:"false"`
-	OwnerID  int64  `db:"-" json:"owner_id" visible:"false"`
-	Actions  string `db:"-" json:"_actions" visible:"false"`
+	Email    string           `db:"email" json:"email" search:"true" title:"Email"`
+	ParentID common.NullInt64 `db:"parent_id" json:"parent_id" visible:"false"`
+	OwnerID  int64            `db:"owner_id" json:"owner_id" visible:"false"`
+	Actions  string           `db:"-" json:"_actions" visible:"false"`
 }
 
 // FillTeleuserDataTableArray is the function to handle the user data table
@@ -81,8 +81,12 @@ func (m *Manager) FillTeleuserDataTableArray(u base.PermInterfaceComplete, filte
 	var res TeleuserDataTableArray
 	var where []string
 
-	countQuery := fmt.Sprintf("SELECT COUNT(telegram_users.id) FROM %s LEFT JOIN %s ON %s.id=%s.user_id", TeleUserTableFull, aaa.UserTableFull, aaa.UserTableFull, TeleUserTableFull)
-	query := fmt.Sprintf("SELECT telegram_users.*,users.email FROM %s LEFT JOIN %s ON %s.id=%s.user_id", TeleUserTableFull, aaa.UserTableFull, aaa.UserTableFull, TeleUserTableFull)
+	countQuery := fmt.Sprintf("SELECT COUNT(%[1]s.id) FROM %[1]s LEFT JOIN %[2]s ON %[2]s.id = %[1]s.user_id",
+		TeleUserTableFull,
+		aaa.UserTableFull)
+	query := fmt.Sprintf("SELECT %[1]s.*,%[2]s.email,%[2]s.id AS owner_id, %[2]s.parent_id as parent_id FROM %[1]s LEFT JOIN %[2]s ON %[2]s.id=%[1]s.user_id",
+		TeleUserTableFull,
+		aaa.UserTableFull)
 	for field, value := range filters {
 		where = append(where, fmt.Sprintf(TeleUserTableFull+".%s=%s", field, "?"))
 		params = append(params, value)
@@ -100,7 +104,7 @@ func (m *Manager) FillTeleuserDataTableArray(u base.PermInterfaceComplete, filte
 		where = append(where, fmt.Sprintf("%s.user_id=?", TeleUserTableFull))
 		params = append(params, currentUserID)
 	} else if highestScope == base.ScopeParent {
-		where = append(where, "users.parent_id=?")
+		where = append(where, "%s.parent_id=?", aaa.UserTableFull)
 		params = append(params, currentUserID)
 	}
 

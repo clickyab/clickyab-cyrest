@@ -141,15 +141,18 @@ func (m *Manager) GetChanViewByID(chanID int64) ([]DailyView, error) {
 // FindChannelsByChatIDName return the Channel base on its chatId and name
 func (m *Manager) FindChannelsByChatIDName(chatID int64, name string) (*Channel, error) {
 	var res Channel
-	query := "SELECT channels.* FROM channels" +
-		" INNER JOIN telegram_users ON telegram_users.user_id=channels.user_id" +
-		" WHERE telegram_users.bot_chat_id=?" +
-		" AND channels.name=?" +
-		" AND telegram_users.remove=?" +
-		" AND telegram_users.resolve=?" +
-		" AND channels.admin_status=?" +
-		" AND channels.archive_status=?" +
-		" AND channels.active=?"
+	query := fmt.Sprintf("SELECT %[1]s.* FROM %[1]s"+
+		" INNER JOIN %[2]s ON %[2]s.user_id=%[1]s.user_id"+
+		" WHERE %[2]s.bot_chat_id=?"+
+		" AND %[1]s.name=?"+
+		" AND %[2]s.remove=?"+
+		" AND %[2]s.resolve=?"+
+		" AND %[1]s.admin_status=?"+
+		" AND %[1]s.archive_status=?"+
+		" AND %[1]s.active=?",
+		ChannelTableFull,
+		tlu.TeleUserTableFull,
+	)
 	err := m.GetDbMap().SelectOne(
 		&res,
 		query,
@@ -183,10 +186,10 @@ func (m *Manager) FindChannelsByChatIDName(chatID int64, name string) (*Channel,
 // }
 type ChannelDataTable struct {
 	Channel
-	Email    string `db:"email" json:"email" search:"true" title:"Email"`
-	ParentID int64  `db:"-" json:"parent_id" visible:"false"`
-	OwnerID  int64  `db:"-" json:"owner_id" visible:"false"`
-	Actions  string `db:"-" json:"_actions" visible:"false"`
+	Email    string           `db:"email" json:"email" search:"true" title:"Email"`
+	ParentID common.NullInt64 `db:"parent_id" json:"parent_id" visible:"false"`
+	OwnerID  int64            `db:"owner_id" json:"owner_id" visible:"false"`
+	Actions  string           `db:"-" json:"_actions" visible:"false"`
 }
 
 // FillChannelDataTableArray is the function to handle
@@ -195,8 +198,12 @@ func (m *Manager) FillChannelDataTableArray(u base.PermInterfaceComplete, filter
 	var res ChannelDataTableArray
 	var where []string
 
-	countQuery := fmt.Sprintf("SELECT COUNT(channels.id) FROM %s LEFT JOIN %s ON %s.id=%s.user_id", ChannelTableFull, aaa.UserTableFull, aaa.UserTableFull, ChannelTableFull)
-	query := fmt.Sprintf("SELECT channels.*,users.email FROM %s LEFT JOIN %s ON %s.id=%s.user_id", ChannelTableFull, aaa.UserTableFull, aaa.UserTableFull, ChannelTableFull)
+	countQuery := fmt.Sprintf("SELECT COUNT(%[1]s.id) FROM %[1]s LEFT JOIN %[2]s ON %[2]s.id=%[1]s.user_id ",
+		ChannelTableFull,
+		aaa.UserTableFull)
+	query := fmt.Sprintf("SELECT %[1]s.*,%[2]s.email,%[2]s.id AS owner_id, %[2]s.parent_id as parent_id FROM %[1]s LEFT JOIN %[2]s ON %[2]s.id=%[1]s.user_id ",
+		ChannelTableFull,
+		aaa.UserTableFull)
 	for field, value := range filters {
 		where = append(where, fmt.Sprintf(ChannelTableFull+".%s=%s", field, "?"))
 		params = append(params, value)
@@ -214,7 +221,7 @@ func (m *Manager) FillChannelDataTableArray(u base.PermInterfaceComplete, filter
 		where = append(where, fmt.Sprintf("%s.user_id=?", ChannelTableFull))
 		params = append(params, currentUserID)
 	} else if highestScope == base.ScopeParent {
-		where = append(where, "users.parent_id=?")
+		where = append(where, "%s.parent_id=?", aaa.UserTableFull)
 		params = append(params, currentUserID)
 	}
 
@@ -253,16 +260,16 @@ func (m *Manager) FillChannelDataTableArray(u base.PermInterfaceComplete, filter
 //		_active = active_channel:global
 // }
 type ChannelDetailDataTable struct {
-	ChanID   int64           `json:"name" search:"true" db:"name" visible:"false" title:"Name"`
-	View     int64           `db:"view" json:"view"`
-	AdName   string          `db:"warning" json:"warning" search:"true"`
-	Active   ActiveStatus    `db:"active" json:"active" filter:"true"`
-	Start    common.NullTime `db:"start" json:"start"`
-	End      common.NullTime `db:"end" json:"end"`
-	Warning  int64           `db:"warning" json:"warning"`
-	ParentID int64           `db:"-" json:"parent_id" visible:"false"`
-	OwnerID  int64           `db:"-" json:"owner_id" visible:"false"`
-	Actions  string          `db:"-" json:"_actions" visible:"false"`
+	ChanID   int64            `json:"name" search:"true" db:"name" visible:"false" title:"Name"`
+	View     int64            `db:"view" json:"view"`
+	AdName   string           `db:"warning" json:"warning" search:"true"`
+	Active   ActiveStatus     `db:"active" json:"active" filter:"true"`
+	Start    common.NullTime  `db:"start" json:"start"`
+	End      common.NullTime  `db:"end" json:"end"`
+	Warning  int64            `db:"warning" json:"warning"`
+	ParentID common.NullInt64 `db:"parent_id" json:"parent_id" visible:"false"`
+	OwnerID  int64            `db:"owner_id" json:"owner_id" visible:"false"`
+	Actions  string           `db:"-" json:"_actions" visible:"false"`
 }
 
 // FillChannelDetailDataTableArray is the function to handle
@@ -276,8 +283,13 @@ func (m *Manager) FillChannelDetailDataTableArray(u base.PermInterfaceComplete,
 	var res ChannelDetailDataTableArray
 	var where []string
 
-	countQuery := fmt.Sprintf("SELECT COUNT(channel_ad.id) FROM %[1]s LEFT JOIN %[2]s ON %[1]s.ad_id=%[2]s.id", ChannelAdTableFull, AdTableFull)
-	query := fmt.Sprintf("SELECT ads.name, channel_ad.view, active, start, end FROM %[1]s LEFT JOIN %[2]s ON %[1]s.id=%[2]s.ad_id", ChannelAdTableFull, AdTableFull)
+	countQuery := fmt.Sprintf("SELECT COUNT(%[1]s.id) FROM %[1]s "+
+		"LEFT JOIN %[2]s ON %[1]s.ad_id=%[2]s.id "+
+		"LEFT JOIN %[3]s ON %[3]s.id=%[2]s.user_id", ChannelAdTableFull, AdTableFull, aaa.UserTableFull)
+	query := fmt.Sprintf("SELECT %[2]s.name, %[1]s.view, %[1]s.active,"+
+		" %[1]s.start, %[1]send ,%[3]s.id AS owner_id, %[3]s.parent_id as parent_id "+
+		"FROM %[1]s LEFT JOIN %[2]s ON %[1]s.id=%[2]s.ad_id "+
+		"LEFT JOIN %[3]s ON %[3]s.id=%[2]s.user_id", ChannelAdTableFull, AdTableFull, aaa.UserTableFull)
 
 	for field, value := range filters {
 		where = append(where, fmt.Sprintf(ChannelTableFull+".%s=%s", field, "?"))
@@ -296,7 +308,7 @@ func (m *Manager) FillChannelDetailDataTableArray(u base.PermInterfaceComplete,
 		where = append(where, fmt.Sprintf("%s.user_id=?", ChannelTableFull))
 		params = append(params, currentUserID)
 	} else if highestScope == base.ScopeParent {
-		where = append(where, "users.parent_id=?")
+		where = append(where, "%s.parent_id=?", aaa.UserTableFull)
 		params = append(params, currentUserID)
 	}
 
@@ -364,16 +376,16 @@ func (m *Manager) ChangeActive(ID int64, userID int64, name string, link string,
 //		fill = FillActiveAdReportDataTableArray
 // }
 type ReportActiveAdDataTable struct {
-	Type        AdType          `json:"type" db:"type" title:"Type"`
-	AdName      string          `json:"ad_name" db:"ad_name" title:"Ad Name"`
-	ChannelName string          `json:"channel_name" db:"channel_name" title:"Channel Name"`
-	Active      ActiveStatus    `db:"active" json:"active" title:"Active" filter:"true"`
-	Start       common.NullTime `db:"start" json:"start" title:"Start" sort:"true"`
-	End         common.NullTime `db:"end" json:"end" title:"End" sort:"true"`
-	View        int64           `json:"view" db:"view" visible:"true" title:"View" sort:"true"`
-	ParentID    int64           `db:"-" json:"parent_id" visible:"false"`
-	OwnerID     int64           `db:"-" json:"owner_id" visible:"false"`
-	Actions     string          `db:"-" json:"_actions" visible:"false"`
+	Type        AdType           `json:"type" db:"type" title:"Type"`
+	AdName      string           `json:"ad_name" db:"ad_name" title:"Ad Name"`
+	ChannelName string           `json:"channel_name" db:"channel_name" title:"Channel Name"`
+	Active      ActiveStatus     `db:"active" json:"active" title:"Active" filter:"true"`
+	Start       common.NullTime  `db:"start" json:"start" title:"Start" sort:"true"`
+	End         common.NullTime  `db:"end" json:"end" title:"End" sort:"true"`
+	View        int64            `json:"view" db:"view" visible:"true" title:"View" sort:"true"`
+	ParentID    common.NullInt64 `db:"parent_id" json:"parent_id" visible:"false"`
+	OwnerID     int64            `db:"owner_id" json:"owner_id" visible:"false"`
+	Actions     string           `db:"-" json:"_actions" visible:"false"`
 }
 
 // FillActiveAdReportDataTableArray is the function to handle
@@ -389,19 +401,25 @@ func (m *Manager) FillActiveAdReportDataTableArray(
 	countQuery := fmt.Sprintf("SELECT count(%[1]s.ad_id)  FROM %[1]s "+
 		"LEFT JOIN %[2]s ON %[1]s.channel_id = %[2]s.id "+
 		"LEFT JOIN  %[3]s ON %[1]s.ad_id = %[3]s.id "+
-		"GROUP BY %[1]s.channel_id",
+		"GROUP BY %[1]s.channel_id"+
+		"LEFT JOIN  %[4]s ON %[4]s.id = %[2]s.user_id ",
 		ChannelAdTableFull,
 		ChannelTableFull,
 		AdTableFull,
+		aaa.UserTableFull,
 	)
 	query := fmt.Sprintf("SELECT %[3]s.cli_message_id is NULL as type,"+
 		"%[3]s.name as ad_name, %[2]s.name as channel_name,%[1]s.active as active,"+
-		"%[1]s.start as start,%[1]s.end as end,%[1]s.view as view  FROM %[1]s "+
+		"%[1]s.start as start,%[1]s.end as end,%[1]s.view as view"+
+		", %[4]s.id AS owner_id,  %[4]s.parent_id as parent_id "+
+		"FROM %[1]s "+
 		"LEFT JOIN %[2]s ON %[1]s.channel_id = %[2]s.id "+
-		"LEFT JOIN  %[3]s ON %[1]s.ad_id = %[3]s.id ",
+		"LEFT JOIN  %[3]s ON %[1]s.ad_id = %[3]s.id "+
+		"LEFT JOIN  %[4]s ON %[4]s.id = %[2]s.user_id ",
 		ChannelAdTableFull,
 		ChannelTableFull,
 		AdTableFull,
+		aaa.UserTableFull,
 	)
 	for field, value := range filters {
 		where = append(where, fmt.Sprintf("%s.%s=?", AdTableFull, field))

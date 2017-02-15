@@ -99,14 +99,14 @@ func ({{ $m.Type|getvar }} {{ $m.Type }}) Filter(u base.PermInterface) {{ $m.Typ
 	{{ end }}
 	{{ range $clm := $m.Column }}
 	{{ if $clm.HasPerm }}
-	if _, ok := u.HasPermOn("{{ $clm.Perm.Perm }}", {{ $m.Type|getvar }}.OwnerID, {{ $m.Type|getvar }}.ParentID {{ $clm.Perm.Scope|scopeArg }}); ok {
+	if _, ok := u.HasPermOn("{{ $clm.Perm.Perm }}", {{ $m.Type|getvar }}.OwnerID, {{ $m.Type|getvar }}.ParentID.Int64 {{ $clm.Perm.Scope|scopeArg }}); ok {
 		res.{{ $clm.Name }} = {{ if $clm.Format }} {{ $m.Type|getvar }}.Format{{ $clm.Name}}()  {{ else }}{{ $m.Type|getvar }}.{{ $clm.Name}} {{ end }}
 	}
 	{{ end }}
 	{{ end }}
 	action := []string{}
 	{{ range $act, $perm := $m.Actions }}
-	if _, ok := u.HasPermOn("{{ $perm.Perm }}", {{ $m.Type|getvar }}.OwnerID, {{ $m.Type|getvar }}.ParentID {{ $perm.Scope|scopeArg }}); ok {
+	if _, ok := u.HasPermOn("{{ $perm.Perm }}", {{ $m.Type|getvar }}.OwnerID, {{ $m.Type|getvar }}.ParentID.Int64 {{ $perm.Scope|scopeArg }}); ok {
 		action = append(action, "{{ $act }}")
 	}
 	{{ end }}

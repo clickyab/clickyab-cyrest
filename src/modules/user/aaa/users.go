@@ -84,9 +84,9 @@ type User struct {
 // }
 type UserDataTable struct {
 	User
-	ParentID int64  `db:"parent_id_dt" json:"parent_id" visible:"false"`
-	OwnerID  int64  `db:"owner_id_dt" json:"owner_id" visible:"false"`
-	Actions  string `db:"-" json:"_actions" visible:"false"`
+	ParentID common.NullInt64 `db:"parent_id_dt" json:"parent_id" visible:"false"`
+	OwnerID  int64            `db:"owner_id_dt" json:"owner_id" visible:"false"`
+	Actions  string           `db:"-" json:"_actions" visible:"false"`
 }
 
 // CreateUserHook is the hook for create a user
@@ -230,8 +230,8 @@ func (m *Manager) FillUserDataTableArray(u base.PermInterfaceComplete, filters m
 	var res UserDataTableArray
 	var where []string
 
-	countQuery := "SELECT COUNT(id) FROM users"
-	query := "SELECT users.*,users.id AS owner_id_dt,CASE WHEN users.parent_id IS NOT NULL THEN users.parent_id ELSE 0 END as parent_id_dt FROM users"
+	countQuery := fmt.Sprintf("SELECT COUNT(id) FROM %s", UserTableFull)
+	query := fmt.Sprintf("SELECT %[1]s.*,%[1]s.id AS owner_id_dt, %[1]s.parent_id as parent_id_dt FROM %[1]s", UserTableFull)
 	for field, value := range filters {
 		where = append(where, fmt.Sprintf("%s=%s", field, "?"))
 		params = append(params, value)
@@ -246,10 +246,10 @@ func (m *Manager) FillUserDataTableArray(u base.PermInterfaceComplete, filters m
 	highestScope := u.GetCurrentScope()
 
 	if highestScope == base.ScopeSelf {
-		where = append(where, "users.id=?")
+		where = append(where, "%s.id=?", UserTableFull)
 		params = append(params, currentUserID)
 	} else if highestScope == base.ScopeParent {
-		where = append(where, "users.parent_id=?")
+		where = append(where, "%s.parent_id=?", UserTableFull)
 		params = append(params, currentUserID)
 	}
 

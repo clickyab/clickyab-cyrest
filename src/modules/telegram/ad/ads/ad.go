@@ -100,10 +100,10 @@ type Ad struct {
 // }
 type AdDataTable struct {
 	Ad
-	Email    string `db:"email" json:"email" search:"true" title:"Email"`
-	ParentID int64  `db:"parent_id" json:"parent_id" visible:"false"`
-	OwnerID  int64  `db:"owner_id" json:"owner_id" visible:"false"`
-	Actions  string `db:"-" json:"_actions" visible:"false"`
+	Email    string           `db:"email" json:"email" search:"true" title:"Email"`
+	ParentID common.NullInt64 `db:"parent_id" json:"parent_id" visible:"false"`
+	OwnerID  int64            `db:"owner_id" json:"owner_id" visible:"false"`
+	Actions  string           `db:"-" json:"_actions" visible:"false"`
 }
 
 // FillAdDataTableArray is the function to handle
@@ -116,11 +116,12 @@ func (m *Manager) FillAdDataTableArray(
 	var res AdDataTableArray
 	var where []string
 
-	countQuery := fmt.Sprintf("SELECT COUNT(ads.id) FROM %s LEFT JOIN %s ON %s.id=%s.user_id", AdTableFull, aaa.UserTableFull, aaa.UserTableFull, AdTableFull)
-	query := fmt.Sprintf(
-		"SELECT ads.*,users.email,%[1]s.id AS owner_id,CASE WHEN %[1]s.parent_id IS NOT NULL THEN %[1]s.parent_id ELSE 0 END as parent_id FROM %[2]s LEFT JOIN %[1]s ON %[1]s.id=%[2]s.user_id",
-		aaa.UserTableFull, AdTableFull,
-	)
+	countQuery := fmt.Sprintf("SELECT COUNT(%[1]s.id) FROM %[1]s LEFT JOIN %[2]s ON %[2]s.id=%[1]s.user_id",
+		AdTableFull,
+		aaa.UserTableFull)
+	query := fmt.Sprintf("SELECT %[1]s.*,%[2]s.email,%[2]s.id AS owner_id, %[2]s.parent_id as parent_id FROM %[1]s LEFT JOIN %[2]s ON %[2]s.id=%[1]s.user_id",
+		AdTableFull,
+		aaa.UserTableFull)
 	for field, value := range filters {
 		where = append(where, fmt.Sprintf("%s.%s=?", AdTableFull, field))
 		params = append(params, value)
@@ -138,7 +139,7 @@ func (m *Manager) FillAdDataTableArray(
 		where = append(where, fmt.Sprintf("%s.user_id=?", AdTableFull))
 		params = append(params, currentUserID)
 	} else if highestScope == base.ScopeParent {
-		where = append(where, "users.parent_id=?")
+		where = append(where, "%s.parent_id=?", aaa.UserTableFull)
 		params = append(params, currentUserID)
 	}
 
@@ -227,10 +228,10 @@ func (m *Manager) SelectAdsPlan() ([]ActiveAd, error) {
 // }
 type UserAdDataTable struct {
 	Ad
-	Email    string `db:"email" json:"email" search:"true" title:"Email"`
-	ParentID int64  `db:"-" json:"parent_id" visible:"false"`
-	OwnerID  int64  `db:"-" json:"owner_id" visible:"false"`
-	Actions  string `db:"-" json:"_actions" visible:"false"`
+	Email    string           `db:"email" json:"email" search:"true" title:"Email"`
+	ParentID common.NullInt64 `db:"parent_id" json:"parent_id" visible:"false"`
+	OwnerID  int64            `db:"owner_id" json:"owner_id" visible:"false"`
+	Actions  string           `db:"-" json:"_actions" visible:"false"`
 }
 
 // FillUserAdDataTableArray is the function to handle
@@ -247,25 +248,13 @@ func (m *Manager) FillUserAdDataTableArray(
 	currentUserID := u.GetID()
 	highestScope := u.GetCurrentScope()
 
-	countQuery := fmt.Sprintf("SELECT COUNT(ads.id) FROM %s LEFT JOIN %s ON %s.id=%s.user_id where (%s.id=%d OR %s.parent_id=%d ) ",
+	countQuery := fmt.Sprintf("SELECT COUNT(%[1]s.id) FROM %[1]s LEFT JOIN %[2]s ON %[2]s.id=%[1]s.user_id ",
 		AdTableFull,
-		aaa.UserTableFull,
-		aaa.UserTableFull,
-		AdTableFull,
-		aaa.UserTableFull,
-		currentUserID,
-		aaa.UserTableFull,
-		currentUserID)
+		aaa.UserTableFull)
 
-	query := fmt.Sprintf("SELECT ads.*,users.email FROM %s LEFT JOIN %s ON %s.id=%s.user_id where (%s.id=%d OR %s.parent_id=%d ) ",
+	query := fmt.Sprintf("SELECT %[1]s.*,%[2]s.email,%[2]s.id AS owner_id, %[2]s.parent_id as parent_id FROM %[1]s LEFT JOIN %[2]s ON %[2]s.id=%[1]s.user_id ",
 		AdTableFull,
-		aaa.UserTableFull,
-		aaa.UserTableFull,
-		AdTableFull,
-		aaa.UserTableFull,
-		currentUserID,
-		aaa.UserTableFull,
-		currentUserID)
+		aaa.UserTableFull)
 	for field, value := range filters {
 		where = append(where, fmt.Sprintf("%s.%s=?", AdTableFull, field))
 		params = append(params, value)
@@ -280,7 +269,7 @@ func (m *Manager) FillUserAdDataTableArray(
 		where = append(where, fmt.Sprintf("%s.user_id=?", AdTableFull))
 		params = append(params, currentUserID)
 	} else if highestScope == base.ScopeParent {
-		where = append(where, "users.parent_id=?")
+		where = append(where, "%s.parent_id=?", aaa.UserTableFull)
 		params = append(params, currentUserID)
 	}
 
@@ -320,8 +309,8 @@ type ReportAdDataTable struct {
 	End      common.NullTime  `db:"end" json:"end" sort:"true" title:"End"`
 	PlanView int64            `db:"plan_view" json:"plan_view" sort:"true" title:"PlanView"`
 	View     common.NullInt64 `json:"view" db:"view" visible:"true" title:"View"`
-	ParentID int64            `db:"-" json:"parent_id" visible:"false"`
-	OwnerID  int64            `db:"-" json:"owner_id" visible:"false"`
+	ParentID common.NullInt64 `db:"parent_id" json:"parent_id" visible:"false"`
+	OwnerID  int64            `db:"owner_id" json:"owner_id" visible:"false"`
 	Actions  string           `db:"-" json:"_actions" visible:"false"`
 }
 
@@ -389,7 +378,9 @@ func (m *Manager) FillAdReportDataTableArray(
 		aaa.UserTableFull,
 		PlanTableFull,
 	)
-	query := fmt.Sprintf("SELECT %[1]s.name as name, %[1]s.cli_message_id IS NULL AS type, %[2]s.start as start, %[2]s.end as end, %[2]s.view as view, %[4]s.view as plan_view FROM %[1]s "+
+	query := fmt.Sprintf("SELECT %[1]s.name as name, %[1]s.cli_message_id IS NULL AS type,"+
+		" %[2]s.start as start, %[2]s.end as end, %[2]s.view as view,"+
+		" %[4]s.view as plan_view ,%[3]s.id AS owner_id, %[3]s.parent_id as parent_id FROM %[1]s "+
 		"LEFT JOIN %[2]s ON %[1]s.id=%[2]s.ad_id "+
 		"LEFT JOIN %[3]s ON %[3]s.id=%[1]s.user_id "+
 		"LEFT JOIN %[4]s ON %[4]s.id=%[1]s.plan_id ",
