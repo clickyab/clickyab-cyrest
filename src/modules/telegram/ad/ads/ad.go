@@ -100,8 +100,8 @@ type Ad struct {
 type AdDataTable struct {
 	Ad
 	Email    string `db:"email" json:"email" search:"true" title:"Email"`
-	ParentID int64  `db:"-" json:"parent_id" visible:"false"`
-	OwnerID  int64  `db:"-" json:"owner_id" visible:"false"`
+	ParentID int64  `db:"parent_id" json:"parent_id" visible:"false"`
+	OwnerID  int64  `db:"owner_id" json:"owner_id" visible:"false"`
 	Actions  string `db:"-" json:"_actions" visible:"false"`
 }
 
@@ -116,7 +116,10 @@ func (m *Manager) FillAdDataTableArray(
 	var where []string
 
 	countQuery := fmt.Sprintf("SELECT COUNT(ads.id) FROM %s LEFT JOIN %s ON %s.id=%s.user_id", AdTableFull, aaa.UserTableFull, aaa.UserTableFull, AdTableFull)
-	query := fmt.Sprintf("SELECT ads.*,users.email FROM %s LEFT JOIN %s ON %s.id=%s.user_id", AdTableFull, aaa.UserTableFull, aaa.UserTableFull, AdTableFull)
+	query := fmt.Sprintf(
+		"SELECT ads.*,users.email,%[1]s.id AS owner_id,CASE WHEN %[1]s.parent_id IS NOT NULL THEN %[1]s.parent_id ELSE 0 END as parent_id FROM %[2]s LEFT JOIN %[1]s ON %[1]s.id=%[2]s.user_id",
+		aaa.UserTableFull, AdTableFull,
+	)
 	for field, value := range filters {
 		where = append(where, fmt.Sprintf("%s.%s=?", AdTableFull, field))
 		params = append(params, value)
