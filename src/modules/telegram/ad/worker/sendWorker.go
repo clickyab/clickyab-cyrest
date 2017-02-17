@@ -38,6 +38,13 @@ func (AdDelivery) GetQueue() string {
 //AdDeliveryAction is a function that send ad and channel data and metadata
 func AdDeliveryAction(in *AdDelivery) (bool, error) {
 
+	rabbit.MustPublish(bot2.SendWarn{
+		ChannelID: in.ChannelID,
+		AdID:      0,
+		ChatID:    in.ChatID,
+		Msg:       trans.T("please forward the following ad to your channel and dont send other messages until i confirmed your actions\n👇👇👇👇👇👇👇👇👇👇").String(),
+	})
+	time.Sleep(tcfg.Cfg.Telegram.SendDelay)
 	for adID := range in.AdsID {
 		adManager := ads.NewAdsManager()
 		ad, err := adManager.FindAdByID(in.AdsID[adID])
@@ -45,36 +52,7 @@ func AdDeliveryAction(in *AdDelivery) (bool, error) {
 		if err != nil {
 			continue
 		}
-
-		rabbit.MustPublish(bot2.SendWarn{
-			ChannelID: in.ChannelID,
-			AdID:      0,
-			ChatID:    in.ChatID,
-			Msg:       trans.T("please forward the following ad to your channel and dont send other messages until i confirmed your actions\n👇👇👇👇👇👇👇👇👇👇").String(),
-		})
-		time.Sleep(tcfg.Cfg.Telegram.SendDelay)
 		res := bot.RenderMessage(tgbot.GetBot(), in.ChatID, ad)
-		msgx := fmt.Sprintf("after forward the ad/ads press done otherwise press reject\n/done_%[1]d\n/reject_%[1]d\n🖕🖕🖕🖕🖕🖕🖕🖕🖕🖕🖕", in.ChannelID)
-		userMsg := tgbotapi.NewMessage(in.ChatID, msgx)
-		userMsg.ParseMode = "HTML"
-		_, err = tgbot.Send(userMsg)
-		if err != nil {
-			continue
-		}
-		if !ad.CliMessageID.Valid {
-			fwd := tgbotapi.NewForward(tcfg.Cfg.Telegram.ChannelID, res.Chat.ID, res.MessageID)
-			_, err := tgbot.Send(fwd)
-			if err != nil {
-				continue
-			}
-
-			msgTxt := fmt.Sprintf("%d/%d", ad.ID, in.ChannelID)
-			msg := tgbotapi.NewMessage(tcfg.Cfg.Telegram.ChannelID, msgTxt)
-			_, err = tgbot.Send(msg)
-			if err != nil {
-				continue
-			}
-		}
 		var cha ads.ChannelAd
 		cha.ChannelID = in.ChannelID
 		//cha.CliMessageID = ad.CliMessageID
@@ -87,6 +65,13 @@ func AdDeliveryAction(in *AdDelivery) (bool, error) {
 		err = ads.NewAdsManager().CreateChannelAd(&cha)
 		assert.Nil(err)
 
+	}
+	msgx := fmt.Sprintf("after forward the ad/ads press done otherwise press reject\n/done_%[1]d\n/reject_%[1]d\n🖕🖕🖕🖕🖕🖕🖕🖕🖕🖕🖕", in.ChannelID)
+	userMsg := tgbotapi.NewMessage(in.ChatID, msgx)
+	userMsg.ParseMode = "HTML"
+	_, err := tgbot.Send(userMsg)
+	if err != nil {
+		return false, nil
 	}
 	return false, nil
 }

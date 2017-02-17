@@ -82,13 +82,6 @@ func (mw *MultiWorker) discoverChannel(c string) (*tgo.ChannelInfo, error) {
 	return mw.client.ChannelInfo(ch.ID)
 }
 
-func (mw *MultiWorker) discoverMessage(msgID string) (*tgo.History, error) {
-	mw.lock.Lock()
-	defer mw.lock.Unlock()
-
-	return mw.client.GetMessage(msgID)
-}
-
 func (mw *MultiWorker) getLastMessages(telegramID string, count int, offset int) ([]tgo.History, error) {
 	mw.lock.Lock()
 	defer mw.lock.Unlock()
@@ -185,12 +178,10 @@ func (mw *MultiWorker) selectAd(in *commands.SelectAd) (bool, error) {
 		chooseAds[k].AffectiveView = chooseAds[k].PlanView - chooseAds[k].PossibleView.Int64
 	}
 	sort.Sort(ads.ByAffectiveView(chooseAds))
-	logrus.Infof("%+v", chooseAds)
 	var (
 		promoted int64
 		normal   int64
 	)
-
 	for i := range chooseAds {
 		if promoted == 0 && chooseAds[i].CliMessageID.Valid {
 			promoted = chooseAds[i].ID
@@ -208,7 +199,7 @@ func (mw *MultiWorker) selectAd(in *commands.SelectAd) (bool, error) {
 		rabbit.MustPublish(&bot2.SendWarn{
 			AdID:      0,
 			ChannelID: in.ChannelID,
-			Msg:       "you have an active ad",
+			Msg:       "no ads for you",
 		})
 		return false, nil
 	}
@@ -218,7 +209,7 @@ func (mw *MultiWorker) selectAd(in *commands.SelectAd) (bool, error) {
 		adList = append(adList, promoted)
 	}
 	adList = append(adList, normal)
-	logrus.Info(adList)
+	logrus.Warn(adList)
 	//todo send ad to user
 	rabbit.MustPublish(&bot3.AdDelivery{
 		AdsID:     adList,
@@ -507,7 +498,7 @@ func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error)
 
 func (mw *MultiWorker) discoverAd(in *commands.DiscoverAd) (bool, error) {
 	adsManager := ads.NewAdsManager()
-	chads, err := adsManager.FindChannelAdByChannelIDActive(in.Channel)
+	chads, err := adsManager.FindChannelAdByChannelID(in.Channel)
 	assert.Nil(err)
 
 	// first try to resolve the channel
@@ -525,16 +516,31 @@ func (mw *MultiWorker) discoverAd(in *commands.DiscoverAd) (bool, error) {
 	assert.Nil(err)
 	// then discover the messages
 	found := 0
+	var cha []*ads.ChannelAd
 bigLoop:
 	for i := range chads {
 		if chads[i].CliMessageID.Valid {
 			found++
 			continue
 		}
+		cha = append(cha, &ads.ChannelAd{
+			AdID:         chads[i].AdID,
+			ChannelID:    chads[i].ChannelID,
+			BotChatID:    chads[i].BotChatID,
+			BotMessageID: chads[i].BotMessageID,
+			CliMessageID: chads[i].CliMessageID,
+			CreatedAt:    chads[i].CreatedAt,
+			PossibleView: chads[i].PossibleView,
+			View:         chads[i].View,
+			Warning:      chads[i].Warning,
+			Start:        common.MakeNullTime(time.Now()),
+			Active:       ads.ActiveStatusYes,
+		})
 		var msg *tgo.History
 		if chads[i].CliMessageAd.Valid {
-			msg, err = mw.discoverMessage(chads[i].CliMessageAd.String)
-			assert.Nil(err)
+			msg = &tgo.History{}
+			assert.Nil(json.Unmarshal([]byte(chads[i].PromoteData.String), msg))
+
 		}
 		for j := len(h) - 1; j >= 0; j-- {
 			// Promotion or individual?
@@ -557,7 +563,6 @@ bigLoop:
 			}
 		}
 	}
-
 	// I think we are gonna die, or the user is stupid. replace us, or him/her
 	if found != len(chads) {
 
@@ -568,7 +573,6 @@ bigLoop:
 			History: h,
 			Chads:   chads,
 		}, "\t", "\t")
-		logrus.Warn(data)
 		if config.Config.Slack.Active {
 			go utils.SlackDoMessage(
 				"[BUG/USER] can not find messages in channel, nothing special but please check if the user is stupid or we are?",
@@ -576,7 +580,15 @@ bigLoop:
 				utils.SlackAttachment{Text: string(data), Color: "#AA3939"},
 			)
 		}
+		rabbit.MustPublish(&bot2.SendWarn{
+			AdID:      0,
+			ChannelID: in.Channel,
+			Msg:       trans.T("cant find your ad please make sure the ad is in your channel and press done").String(),
+			ChatID:    in.ChatID,
+		})
 	} else {
+		err = adsManager.UpdateActiveEndChannelAds(cha)
+		assert.Nil(err)
 		rabbit.MustPublishAfter(
 			commands.ExistChannelAd{
 				ChannelID: channel.ID,

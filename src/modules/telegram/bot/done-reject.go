@@ -1,7 +1,6 @@
 package bot
 
 import (
-	"common/models/common"
 	"common/rabbit"
 	"fmt"
 	"modules/telegram/ad/ads"
@@ -9,7 +8,6 @@ import (
 	"modules/telegram/teleuser/tlu"
 	"modules/user/aaa"
 	"strconv"
-	"time"
 
 	"github.com/Sirupsen/logrus"
 	"gopkg.in/telegram-bot-api.v4"
@@ -50,20 +48,9 @@ func (bb *bot) doneORReject(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 
 	if doneSlice[1] == "done" {
 		channelAd, err := b.FindChannelAdActiveByChannelID(channel.ID, ads.ActiveStatusNo)
-		if err != nil {
+		if err != nil || len(channelAd) == 0 {
 			send(bot, m.Chat.ID, "your command is <b>not valid</b>")
 			return
-		}
-		var adS []int64
-		for chAd := range channelAd {
-			adS = append(adS, channelAd[chAd].AdID)
-			channelAd[chAd].Active = ads.ActiveStatusYes
-			channelAd[chAd].Start = common.MakeNullTime(time.Now())
-			err = b.UpdateChannelAd(&channelAd[chAd])
-			if err != nil {
-				send(bot, m.Chat.ID, "your command is <b>not valid</b>")
-				return
-			}
 		}
 
 		defer func() {
@@ -78,21 +65,12 @@ func (bb *bot) doneORReject(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 		return
 	}
 	//reject command
-	channelAd, err := b.FindChannelAdActiveByChannelID(channel.ID, ads.ActiveStatusYes)
+	err = b.DeleteChannelAdByChannelID(channel.ID)
 	if err != nil {
 		send(bot, m.Chat.ID, "your command is <b>not valid</b>")
 		return
 	}
-	for chAd := range channelAd {
-		channelAd[chAd].Active = ads.ActiveStatusNo
-		channelAd[chAd].End = common.MakeNullTime(time.Now())
-		err = b.UpdateChannelAd(&channelAd[chAd])
-		if err != nil {
-			send(bot, m.Chat.ID, "your command is <b>not valid</b>")
-			return
-		}
-	}
-	send(bot, m.Chat.ID, fmt.Sprintf("ads reject in <b>%s</b> channle", channel.Name))
+	send(bot, m.Chat.ID, fmt.Sprintf("ads reject in <b>%s</b> channel", channel.Name))
 	return
 
 }
