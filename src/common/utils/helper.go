@@ -4,6 +4,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"unicode"
 )
 
 var (
@@ -73,4 +74,15 @@ func ValidateEmail(email string) bool {
 // DBImplode implode ids
 func DBImplode(IDs []int64) string {
 	return strings.Trim(strings.Repeat("?,", len(IDs)), ",")
+}
+
+// RemoveEmojis RemoveEmojis
+func RemoveEmojis(str string) string {
+	result := []rune{}
+	for _, i := range str {
+		if !unicode.IsMark(i) && !unicode.IsSymbol(i) {
+			result = append(result, i)
+		}
+	}
+	return string(result)
 }

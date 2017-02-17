@@ -31,6 +31,8 @@ import (
 
 	"modules/file/config"
 
+	"common/redis"
+
 	"gopkg.in/labstack/echo.v3"
 )
 
@@ -327,7 +329,13 @@ func (u *Controller) promoteAd(ctx echo.Context) error {
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
+	//get message from redis by cli ID
+	messageHistory, err := aredis.GetKey(pl.CliMessageID, false, 0)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
 	currentAd.CliMessageID = common.MakeNullString(pl.CliMessageID)
+	currentAd.PromoteData = common.MakeNullString(messageHistory)
 	currentAd.Src = common.MakeNullString("")
 	currentAd.BotChatID = common.NullInt64{}
 	currentAd.BotMessageID = common.NullInt64{}

@@ -11,6 +11,7 @@ CREATE TABLE ads
   description TEXT,
   src TEXT,
   position INT(11),
+  promote_data TEXT,
   admin_status ENUM('pending', 'rejected','accepted'),
   archive_status ENUM('yes', 'no'),
   pay_status ENUM('yes', 'no'),

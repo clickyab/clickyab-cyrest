@@ -74,6 +74,7 @@ type Ad struct {
 	Src             common.NullString `json:"src" db:"src" title:"Src"`
 	Extension       common.NullString `json:"extension,ommitempty" db:"-" visible:"false" title:"Extension"`
 	CliMessageID    common.NullString `json:"cli_message_id" db:"cli_message_id" visible:"false" title:"CliMessageID"`
+	PromoteData     common.NullString `json:"promote_data" db:"promote_data" visible:"false" title:"PromoteData"`
 	BotChatID       common.NullInt64  `json:"bot_chat_id" db:"bot_chat_id" visible:"false" title:"BotChatID"`
 	BotMessageID    common.NullInt64  `json:"bot_message_id" db:"bot_message_id" visible:"false" title:"BotMessageID"`
 	View            common.NullInt64  `json:"view" db:"view" visible:"true" title:"View"`

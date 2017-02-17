@@ -392,9 +392,23 @@ func (u *Controller) getLast(ctx echo.Context) error {
 		for i := range res {
 			if res[i].Media == nil {
 				finalRes = append(finalRes, MsgInfo{CliID: res[i].ID, Text: res[i].Text, Type: tgo.Message})
+				res[i].Text = utils.RemoveEmojis(res[i].Text)
+				b, err := json.Marshal(res[i])
+				assert.Nil(err)
+				err = aredis.StoreKey(res[i].ID, string(b), 1*time.Hour)
+				if err != nil {
+					return u.BadResponse(ctx, trans.E("failed job"))
+				}
 
 			} else if res[i].Media.Type == tgo.Photo {
+				res[i].Media.Caption = utils.RemoveEmojis(res[i].Text)
 				finalRes = append(finalRes, MsgInfo{CliID: res[i].ID, Text: res[i].Media.Caption, Type: res[i].Media.Type})
+				b, err := json.Marshal(res[i])
+				assert.Nil(err)
+				err = aredis.StoreKey(res[i].ID, string(b), 1*time.Hour)
+				if err != nil {
+					return u.BadResponse(ctx, trans.E("failed job"))
+				}
 			}
 		}
 		return u.OKResponse(ctx, GetLastResponse{

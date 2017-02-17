@@ -94,7 +94,7 @@ type History struct {
 		AdminsCount       int    `json:"admins_count"`
 		KickedCount       int    `json:"kicked_count"`
 		Username          string `json:"username"`
-	} `json:"fwd_from,omitempty"`
+	} `json:"fwd_from"`
 	FwdDate int    `json:"fwd_date,omitempty"`
 	Text    string `json:"text,omitempty"`
 }

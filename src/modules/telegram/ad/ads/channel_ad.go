@@ -109,6 +109,21 @@ func (m *Manager) FindChannelAdActiveByChannelID(channelID int64, status ActiveS
 	return res, nil
 }
 
+// DeleteChannelAdByChannelID delete the ChannelAd
+func (m *Manager) DeleteChannelAdByChannelID(channelID int64) error {
+	q := fmt.Sprintf("DELETE FROM %s WHERE channel_id=? AND start IS NULL AND end IS NULL", ChannelAdTableFull)
+	_, err := m.GetDbMap().Exec(
+		q,
+		channelID,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // ChannelAdD ChannelAdD
 type ChannelAdD struct {
 	ChannelID    int64             `db:"channel_id" json:"channel_id"`
@@ -117,6 +132,7 @@ type ChannelAdD struct {
 	Src          common.NullString `json:"src" db:"src"`
 	CliMessageID common.NullString `db:"cli_message_id" json:"cli_message_id"`
 	CliMessageAd common.NullString `db:"cli_message_ad" json:"cli_message_ad"`
+	PromoteData  common.NullString `db:"promote_data" json:"promote_data"`
 	PlanView     int64             `db:"plan_view" json:"plan_view"`
 	AdPosition   common.NullInt64  `json:"ad_position" db:"ad_position"`
 	BotChatID    int64             `db:"bot_chat_id" json:"bot_chat_id"`
@@ -135,7 +151,7 @@ func (m *Manager) FindChannelAdByChannelIDActive(a int64) ([]ChannelAdD, error) 
 	res := []ChannelAdD{}
 	_, err := m.GetDbMap().Select(
 		&res,
-		fmt.Sprintf("SELECT %[1]s.*,%[2]s.cli_message_id AS cli_message_ad,%[2]s.src, "+
+		fmt.Sprintf("SELECT %[1]s.*,%[2]s.cli_message_id AS cli_message_ad,%[2]s.promote_data,%[2]s.src, "+
 			"%[2]s.position AS ad_position,"+
 			"%[3]s.view AS plan_view"+
 			" FROM %[1]s INNER JOIN %[2]s ON %[2]s.id=%[1]s.ad_id "+
@@ -143,6 +159,34 @@ func (m *Manager) FindChannelAdByChannelIDActive(a int64) ([]ChannelAdD, error) 
 			" WHERE channel_id=? "+
 			" AND %[1]s.active='yes' "+
 			" AND %[2]s.active_status='yes' "+
+			" AND end IS NULL",
+			ChannelAdTableFull,
+			AdTableFull,
+			PlanTableFull,
+		),
+		a,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
+// FindChannelAdByChannelID return the ChannelAd base on its channel_id
+func (m *Manager) FindChannelAdByChannelID(a int64) ([]ChannelAdD, error) {
+	res := []ChannelAdD{}
+	_, err := m.GetDbMap().Select(
+		&res,
+		fmt.Sprintf("SELECT %[1]s.*,%[2]s.cli_message_id AS cli_message_ad,%[2]s.promote_data,%[2]s.src, "+
+			"%[2]s.position AS ad_position,"+
+			"%[3]s.view AS plan_view"+
+			" FROM %[1]s INNER JOIN %[2]s ON %[2]s.id=%[1]s.ad_id "+
+			" INNER JOIN %[3]s ON %[3]s.id=%[2]s.plan_id "+
+			" WHERE channel_id=? "+
+			" AND %[1]s.active='no' "+
+			" AND start IS NULL"+
 			" AND end IS NULL",
 			ChannelAdTableFull,
 			AdTableFull,
@@ -199,6 +243,17 @@ func (m *Manager) UpdateChannelAds(ca []ChannelAd) error {
 	return nil
 }
 
+// UpdateActiveEndChannelAds update channel ads
+func (m *Manager) UpdateActiveEndChannelAds(ca []*ChannelAd) error {
+	for i := range ca {
+		err := m.UpdateChannelAd(ca[i])
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // ChooseAd return the ads
 func (m *Manager) ChooseAd(channelID int64) ([]SelectAd, error) {
 	res := []SelectAd{}
@@ -214,7 +269,7 @@ func (m *Manager) ChooseAd(channelID int64) ([]SelectAd, error) {
 			" AND %[1]s.admin_status = ? "+
 			" AND %[1]s.active_status = ? "+
 			" AND %[1]s.pay_status = ? "+
-			"GROUP BY %[2]s.ad_id ",
+			"GROUP BY %[1]s.id ",
 			AdTableFull,
 			ChannelAdTableFull,
 			PlanTableFull,
