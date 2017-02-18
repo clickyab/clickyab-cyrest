@@ -30,6 +30,7 @@ func (bb *bot) Initialize() {
 	tgbot.RegisterMessageHandler("/confirm", bb.confirm)
 	tgbot.RegisterMessageHandler("/done", bb.doneORReject)
 	tgbot.RegisterMessageHandler("/reject", bb.doneORReject)
+	tgbot.RegisterMessageHandler("/reshot", bb.reshot)
 }
 
 func init() {
