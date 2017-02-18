@@ -501,3 +501,14 @@ func (m *Manager) PieChartAdvertiser(userID int64) ([]PieChart, error) {
 
 	return res, nil
 }
+
+// UpdateAdView update ad view
+func (m *Manager) UpdateAdView(ID, view int64) error {
+	q := fmt.Sprintf("UPDATE %s SET view = ? WHERE id = ?", AdTableFull)
+	_, err := m.GetDbMap().Exec(
+		q,
+		view,
+		ID,
+	)
+	return err
+}

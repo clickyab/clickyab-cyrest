@@ -83,6 +83,8 @@ func (c *Config) Loaded() {
 	}
 
 	c.o.GetStruct("", c)
+	c.Telegram.TimeReQueUe = c.o.GetDuration("telegram.time_requeue")
+	c.Telegram.SendDelay = c.o.GetDuration("telegram.send_delay")
 }
 
 // IsAdmin check if the current user is admin

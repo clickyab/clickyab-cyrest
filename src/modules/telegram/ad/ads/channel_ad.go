@@ -227,17 +227,18 @@ func (m *Manager) FindChannelAdActiveByAdID(adID int64, status ActiveStatus) ([]
 
 // UpdateChannelAds update channel ads
 func (m *Manager) UpdateChannelAds(ca []ChannelAd) error {
-	var q = fmt.Sprintf("UPDATE %s SET warning=? , view=?,end=? WHERE channel_id=? AND ad_id=?", ChannelAdTableFull)
+	var q = fmt.Sprintf("UPDATE %s SET warning=? , view=? WHERE channel_id=? AND ad_id=?", ChannelAdTableFull)
 	for i := range ca {
 		_, err := m.GetDbMap().Exec(
 			q,
 			ca[i].Warning,
 			ca[i].View,
-			ca[i].End,
 			ca[i].ChannelID,
 			ca[i].AdID,
 		)
-		return err
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
