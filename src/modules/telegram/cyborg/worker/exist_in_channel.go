@@ -12,6 +12,9 @@ import (
 	"modules/telegram/cyborg/commands"
 	"time"
 
+	"fmt"
+	"modules/misc/trans"
+
 	"github.com/Sirupsen/logrus"
 )
 
@@ -138,15 +141,13 @@ func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error)
 	channelAdStat, avg := mw.existChannelAdFor(h, adsConf)
 	var ChannelAdDetailArr []*ads.ChannelAdDetail
 	var ChannelAdArr []ads.ChannelAd
+	var reshot bool
+	logrus.Warnf("%+v", chads)
+	logrus.Warn(len(chads))
 	for j := range chads {
-		defaultPosition := tcfg.Cfg.Telegram.PositionAdDefault
-		if chads[j].AdPosition.Valid {
-			defaultPosition = chads[j].AdPosition.Int64
-		}
-		if t, ok := channelAdStat[chads[j].AdID]; ok && t.pos > defaultPosition {
-			t.warning = 1
-			channelAdStat[chads[j].AdID] = t
-		} else if !ok {
+		defaultPosition := chads[j].PlanPosition
+		if t, ok := channelAdStat[chads[j].AdID]; !ok || t.pos > defaultPosition {
+			logrus.Warn("inside ")
 			ChannelAdDetailArr = append(ChannelAdDetailArr, &ads.ChannelAdDetail{
 				AdID:      chads[j].AdID,
 				ChannelID: chads[j].ChannelID,
@@ -162,6 +163,7 @@ func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error)
 				AdID:      chads[j].AdID,
 				ChannelID: chads[j].ChannelID,
 			})
+			reshot = true
 
 			continue
 		}
@@ -189,16 +191,18 @@ func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error)
 			AdID:      chads[j].AdID,
 			ChannelID: chads[j].ChannelID,
 		})
-		if chads[j].Warning >= tcfg.Cfg.Telegram.LimitCountWarning {
-			//send stop (warn message)
-			rabbit.MustPublish(&bot2.SendWarn{
-				AdID:      chads[j].AdID,
-				ChannelID: in.ChannelID,
-				Msg:       "please reshot the ads",
-			})
-		}
 
 	}
+	if reshot {
+		//send stop (warn message)
+		rabbit.MustPublish(&bot2.SendWarn{
+			AdID:      0,
+			ChannelID: in.ChannelID,
+			Msg:       trans.T("please reshot all ads\n%s", fmt.Sprintf("/reshot_%d", in.ChannelID)).String(),
+			ChatID:    in.ChatID,
+		})
+	}
+	logrus.Warnf("%+v", ChannelAdArr)
 
 	//transaction
 	res, err := mw.transaction(m, ChannelAdArr, ChannelAdDetailArr, avg)

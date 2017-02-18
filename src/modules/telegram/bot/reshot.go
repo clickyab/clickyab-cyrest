@@ -43,7 +43,7 @@ func (bb *bot) reshot(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 		send(bot, m.Chat.ID, "you are not owner this channel")
 		return
 	}
-	channelAd, err := b.FindChannelAdActiveByChannelID(channel.ID, ads.ActiveStatusNo)
+	channelAd, err := b.FindChannelAdActiveByChannelID(channel.ID, ads.ActiveStatusYes)
 	if err != nil || len(channelAd) == 0 {
 		send(bot, m.Chat.ID, "your command is <b>not valid</b>")
 		return
@@ -53,6 +53,7 @@ func (bb *bot) reshot(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 		commands.DiscoverAd{
 			Channel: channelID,
 			ChatID:  m.Chat.ID,
+			Reshot:  true,
 		},
 	)
 }

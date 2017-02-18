@@ -2,7 +2,6 @@ package worker
 
 import (
 	"common/assert"
-	"common/models/common"
 	"common/rabbit"
 	"modules/misc/trans"
 	"modules/telegram/ad/ads"
@@ -101,20 +100,6 @@ func (mw *MultiWorker) transaction(m *ads.Manager, chad []ads.ChannelAd, channel
 	}
 	err = m.UpdateChannelAds(chad)
 	assert.Nil(err)
-	//update ads table field view for promotion ad
-	for ch := range chad {
-		if chad[ch].CliMessageID.Valid {
-			//get ad
-			ad, err := m.FindAdByID(chad[ch].AdID)
-			if err != nil {
-				return true, err
-			}
-			//ad.View = common.NullInt64{Valid: avg != 0, Int64: avg}
-			ad.View = common.NullInt64{Valid: avg != 0, Int64: avg}
-			assert.Nil(m.UpdateAd(ad))
-		}
-	}
-
 	if err != nil {
 		return true, err
 	}

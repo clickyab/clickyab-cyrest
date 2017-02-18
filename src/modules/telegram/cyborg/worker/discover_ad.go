@@ -15,12 +15,22 @@ import (
 	"modules/telegram/cyborg/bot"
 	"modules/telegram/cyborg/commands"
 	"time"
+
+	"github.com/Sirupsen/logrus"
 )
 
 func (mw *MultiWorker) discoverAd(in *commands.DiscoverAd) (bool, error) {
+	logrus.Warn("discover ad 1")
 	adsManager := ads.NewAdsManager()
-	chads, err := adsManager.FindChannelAdByChannelID(in.Channel)
-	assert.Nil(err)
+	var chads []ads.ChannelAdD
+	var err error
+	if in.Reshot {
+		chads, err = adsManager.FindReshotChannelAdByChannelID(in.Channel)
+		assert.Nil(err)
+	} else {
+		chads, err = adsManager.FindChannelAdByChannelID(in.Channel)
+		assert.Nil(err)
+	}
 
 	// first try to resolve the channel
 	m := bot.NewBotManager()
@@ -40,16 +50,17 @@ func (mw *MultiWorker) discoverAd(in *commands.DiscoverAd) (bool, error) {
 	var cha []*ads.ChannelAd
 bigLoop:
 	for i := range chads {
-		if chads[i].CliMessageID.Valid {
+		logrus.Warn("discover ad")
+		if chads[i].CliMessageID.Valid && !in.Reshot {
 			found++
 			continue
 		}
+		logrus.Warn("discover ad")
 		cha = append(cha, &ads.ChannelAd{
 			AdID:         chads[i].AdID,
 			ChannelID:    chads[i].ChannelID,
 			BotChatID:    chads[i].BotChatID,
 			BotMessageID: chads[i].BotMessageID,
-			CliMessageID: chads[i].CliMessageID,
 			CreatedAt:    chads[i].CreatedAt,
 			PossibleView: chads[i].PossibleView,
 			View:         chads[i].View,
@@ -71,13 +82,17 @@ bigLoop:
 			if msg != nil {
 				// promotion
 				if comparePromotion(*msg, h[j]) {
-					adsManager.SetCLIMessageID(chads[i].ChannelID, chads[i].AdID, h[j].ID)
+					err = adsManager.SetCLIMessageID(chads[i].ChannelID, chads[i].AdID, h[j].ID)
+					assert.Nil(err)
+					cha[i].CliMessageID = common.MakeNullString(h[j].ID)
 					found++
 					continue bigLoop
 				}
 			} else {
 				if compareIndividual(chads[i], h[j]) {
-					adsManager.SetCLIMessageID(chads[i].ChannelID, chads[i].AdID, h[j].ID)
+					err = adsManager.SetCLIMessageID(chads[i].ChannelID, chads[i].AdID, h[j].ID)
+					assert.Nil(err)
+					cha[i].CliMessageID = common.MakeNullString(h[j].ID)
 					found++
 					continue bigLoop
 				}
@@ -118,12 +133,22 @@ bigLoop:
 			tcfg.Cfg.Telegram.TimeReQueUe,
 		)
 		//send ok message
-		rabbit.MustPublish(&bot2.SendWarn{
-			AdID:      0,
-			ChannelID: in.Channel,
-			Msg:       trans.T("your add has been successfully activated\nthanks for your cooperation").String(),
-			ChatID:    in.ChatID,
-		})
+		if in.Reshot {
+			rabbit.MustPublish(&bot2.SendWarn{
+				AdID:      0,
+				ChannelID: in.Channel,
+				Msg:       trans.T("your reshot process begin\nthanks for your cooperation").String(),
+				ChatID:    in.ChatID,
+			})
+		} else {
+			rabbit.MustPublish(&bot2.SendWarn{
+				AdID:      0,
+				ChannelID: in.Channel,
+				Msg:       trans.T("your add has been successfully activated\nthanks for your cooperation").String(),
+				ChatID:    in.ChatID,
+			})
+		}
+
 	}
 	return false, nil
 
