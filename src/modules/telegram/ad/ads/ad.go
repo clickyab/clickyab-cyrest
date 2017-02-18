@@ -207,13 +207,13 @@ func (m *Manager) UpdateIndividualViewCount() {
 		SET ads.view = chad.dv
 		WHERE ads.cli_message_id IS NULL AND ads.active_status = ? AND ads.admin_status = ? AND ads.pay_status = ? `
 	q = fmt.Sprintf(q, AdTableFull, ChannelAdTableFull)
-	_, err := m.GetDbMap().Exec(q)
+	_, err := m.GetDbMap().Exec(q, ActiveStatusYes, AdminStatusAccepted, AdPayStatusYes)
 	assert.Nil(err)
 }
 
 // FinishedActiveAds return all finished ads
 func (m *Manager) FinishedActiveAds() []Ad {
-	q := `SELECT * FROM %s AS a LEFT JOIN %s AS p ON a.plan_id = p.id
+	q := `SELECT a.* FROM %s AS a LEFT JOIN %s AS p ON a.plan_id = p.id
 		WHERE p.view < a.view AND a.admin_status = ?
 		AND a.active_status = ? AND a.pay_status = ?`
 	q = fmt.Sprintf(q, AdTableFull, PlanTableFull)
@@ -224,10 +224,10 @@ func (m *Manager) FinishedActiveAds() []Ad {
 }
 
 // GetWarningLimited return all passed warnings
-func (m *Manager) GetWarningLimited(warnings int64) []ChannelAd {
-	q := fmt.Sprintf("SELECT * FROM %s WHERE warnings > ? AND active=? AND end IS NOT NULL", ChannelAdTableFull)
+func (m *Manager) GetWarningLimited(warning int64) []ChannelAd {
+	q := fmt.Sprintf("SELECT * FROM %s WHERE warning > ? AND active=? AND end IS NULL", ChannelAdTableFull)
 	var ch []ChannelAd
-	_, err := m.GetDbMap().Select(&ch, q, warnings, ActiveStatusYes)
+	_, err := m.GetDbMap().Select(&ch, q, warning, ActiveStatusYes)
 	assert.Nil(err)
 
 	return ch

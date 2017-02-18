@@ -25,16 +25,20 @@ func (mw *MultiWorker) cronReview() error {
 		assert.Nil(err)
 		for c := range channelAd {
 			//todo send message to admin channel
-			channelAd[c].ChannelAd.Active = ads.ActiveStatusNo
-			channelAd[c].ChannelAd.End = common.MakeNullTime(time.Now())
-			assert.Nil(m.UpdateChannelAd(&channelAd[c].ChannelAd))
-			str := trans.T("you have have <%d> in channel \n please remove ad from <%s> channel", channelAd[c].ChannelAd.View, channelAd[c].Channel.Name)
-			rabbit.MustPublish(&bot2.SendWarn{
-				AdID:      channelAd[c].ChannelAd.AdID,
-				ChannelID: channelAd[c].ChannelAd.ChannelID,
-				Msg:       str.String(),
-				ChatID:    channelAd[c].ChannelAd.BotChatID,
-			})
+			channelAds := m.FindActiveChannelAdByChannelID(channelAd[c].ChannelID)
+			for i := range channelAds {
+				channelAds[i].Active = ads.ActiveStatusNo
+				channelAds[i].End = common.MakeNullTime(time.Now())
+				err = m.UpdateChannelAd(&channelAds[i])
+				assert.Nil(err)
+				str := trans.T("you have %d view in channel \n please remove all ads from your channel", channelAds[i].View)
+				rabbit.MustPublish(&bot2.SendWarn{
+					AdID:      0,
+					ChannelID: channelAds[i].ChannelID,
+					Msg:       str.String(),
+					ChatID:    channelAds[i].BotChatID,
+				})
+			}
 		}
 	}
 
@@ -44,7 +48,7 @@ func (mw *MultiWorker) cronReview() error {
 		assert.Nil(m.UpdateChannelAd(&chad))
 		str := trans.T("Sorry, but since there is a lot of error, please remove the ads from your channel")
 		rabbit.MustPublish(&bot2.SendWarn{
-			AdID:      chad.AdID,
+			AdID:      0,
 			ChannelID: chad.ChannelID,
 			Msg:       str.String(),
 			ChatID:    chad.BotChatID,
