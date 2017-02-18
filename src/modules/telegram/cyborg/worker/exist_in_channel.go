@@ -18,13 +18,15 @@ import (
 func (mw *MultiWorker) existChannelAdFor(h []tgo.History, adConfs []channelDetailStat) (map[int64]channelViewStat, int64) {
 	var finalResult = make(map[int64]channelViewStat)
 	var sumNotpromotionView int64
-	var countNotPromotion int64
+	var countIndividual int64
+	var found int
 	historyLen := len(h)
-	for k := range h {
+bigloop:
+	for k := historyLen - 1; k >= 0; k-- {
 		if h[k].Event == "message" && h[k].Service == false {
 			if h[k].FwdFrom != nil {
 				for i := range adConfs {
-					if adConfs[i].frwrd && h[k].ID == adConfs[i].cliID.String { //the ad is forward type
+					if adConfs[i].frwrd && h[k].ID == adConfs[i].cliChannelAdID.String { //the ad is forward type
 						finalResult[adConfs[i].adID] = channelViewStat{
 							view:    int64(h[k].Views),
 							warning: 0,
@@ -32,7 +34,12 @@ func (mw *MultiWorker) existChannelAdFor(h []tgo.History, adConfs []channelDetai
 							frwrd:   true,
 							adID:    adConfs[i].adID,
 						}
-					} else if !adConfs[i].frwrd && h[k].ID == adConfs[i].cliID.String { //the ad is  not forward type
+						found++
+						if found == len(adConfs) {
+							break bigloop
+						}
+						break
+					} else if !adConfs[i].frwrd && h[k].ID == adConfs[i].cliChannelAdID.String { //the ad is  not forward type
 						finalResult[adConfs[i].adID] = channelViewStat{
 							view:    int64(h[k].Views),
 							warning: 0,
@@ -41,7 +48,12 @@ func (mw *MultiWorker) existChannelAdFor(h []tgo.History, adConfs []channelDetai
 							adID:    adConfs[i].adID,
 						}
 						sumNotpromotionView += int64(h[k].Views)
-						countNotPromotion++
+						countIndividual++
+						found++
+						if found == len(adConfs) {
+							break bigloop
+						}
+						break
 					} else { //don't find ad in the history
 						finalResult[adConfs[i].adID] = channelViewStat{
 							view:    0,
@@ -55,10 +67,10 @@ func (mw *MultiWorker) existChannelAdFor(h []tgo.History, adConfs []channelDetai
 			}
 		}
 	}
-	if countNotPromotion == 0 {
+	if countIndividual == 0 {
 		return finalResult, 0
 	}
-	return finalResult, (sumNotpromotionView) / (countNotPromotion)
+	return finalResult, (sumNotpromotionView) / (countIndividual)
 }
 
 func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error) {
@@ -67,34 +79,30 @@ func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error)
 	m := ads.NewAdsManager()
 
 	chads, err := m.FindChannelAdByChannelIDActive(in.ChannelID)
+	if len(chads) == 0 {
+		return false, nil
+	}
 	assert.Nil(err)
 	for i := range chads {
 		adsConf = append(adsConf, channelDetailStat{
-			cliID: chads[i].CliMessageID,
-			frwrd: chads[i].CliMessageAd.Valid,
-			adID:  chads[i].AdID,
+			cliChannelAdID: chads[i].CliMessageID,
+			frwrd:          chads[i].CliMessageAd.Valid,
+			adID:           chads[i].AdID,
 		})
 		assert.True(chads[i].CliMessageID.Valid, "cli not filled")
-		if !chads[i].CliMessageID.Valid {
-			rabbit.PublishAfter(&commands.ExistChannelAd{
-				ChannelID: in.ChannelID,
-				ChatID:    in.ChatID,
-			}, tcfg.Cfg.Telegram.TimeReQueUe)
-			return false, nil
-		}
 	}
 
 	//check for promotion to be alone or not
 	var promotionCount int
-	var notPromotionCount int
+	var individualCount int
 	for adConf := range adsConf {
 		if adsConf[adConf].frwrd {
 			promotionCount++
 		}
-		notPromotionCount++
+		individualCount++
 	}
 
-	if notPromotionCount == 0 {
+	if individualCount == 0 {
 
 		for adConf := range adsConf {
 			//send stop (warn message)
@@ -126,26 +134,43 @@ func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error)
 	assert.Nil(err)
 	/*channelDetails, err := m.FindChanDetailByChannelID(channel.ID)
 	assert.Nil(err)*/
-	channelAdStat, avg := mw.existChannelAdFor(h, adsConf)
 
+	channelAdStat, avg := mw.existChannelAdFor(h, adsConf)
 	var ChannelAdDetailArr []*ads.ChannelAdDetail
+	var ChannelAdArr []ads.ChannelAd
 	for j := range chads {
-		var currentView int64
-		depos := tcfg.Cfg.Telegram.PositionAdDefault
+		defaultPosition := tcfg.Cfg.Telegram.PositionAdDefault
 		if chads[j].AdPosition.Valid {
-			depos = chads[j].AdPosition.Int64
+			defaultPosition = chads[j].AdPosition.Int64
 		}
-		if channelAdStat[chads[j].AdID].pos < depos {
-			channelAdStat[chads[j].AdID] = channelViewStat{
-				warning: 1,
-				adID:    chads[j].AdID,
-				frwrd:   channelAdStat[chads[j].AdID].frwrd,
-				pos:     channelAdStat[chads[j].AdID].pos,
-				view:    channelAdStat[chads[j].AdID].view,
-			}
+		if t, ok := channelAdStat[chads[j].AdID]; ok && t.pos > defaultPosition {
+			t.warning = 1
+			channelAdStat[chads[j].AdID] = t
+		} else if !ok {
+			ChannelAdDetailArr = append(ChannelAdDetailArr, &ads.ChannelAdDetail{
+				AdID:      chads[j].AdID,
+				ChannelID: chads[j].ChannelID,
+				View:      0,
+				Position:  common.NullInt64{},
+				Warning:   1,
+				CreatedAt: time.Now(),
+			})
+			ChannelAdArr = append(ChannelAdArr, ads.ChannelAd{
+
+				Warning:   chads[j].Warning + 1,
+				View:      chads[j].View,
+				AdID:      chads[j].AdID,
+				ChannelID: chads[j].ChannelID,
+			})
+
+			continue
 		}
+		var currentView int64
 		if channelAdStat[chads[j].AdID].frwrd == true {
 			currentView = avg
+			//update ad
+			assert.Nil(m.UpdateAdView(chads[j].AdID, channelAdStat[chads[j].AdID].view))
+
 		} else {
 			currentView = channelAdStat[chads[j].AdID].view
 		}
@@ -155,36 +180,24 @@ func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error)
 			View:      currentView,
 			Position:  common.NullInt64{Valid: channelAdStat[chads[j].AdID].pos != 0, Int64: channelAdStat[chads[j].AdID].pos},
 			Warning:   channelAdStat[chads[j].AdID].warning,
+			CreatedAt: time.Now(),
 		})
-	}
-
-	var ChannelAdArr []ads.ChannelAd
-
-	for chad := range chads {
-		var currentView int64
-		if channelAdStat[chads[chad].AdID].frwrd == true {
-			currentView = avg
-		} else {
-			currentView = channelAdStat[chads[chad].AdID].view
-		}
 		ChannelAdArr = append(ChannelAdArr, ads.ChannelAd{
 
-			Warning:   chads[chad].Warning + channelAdStat[chads[chad].AdID].warning,
+			Warning:   chads[j].Warning + channelAdStat[chads[j].AdID].warning,
 			View:      currentView,
-			AdID:      chads[chad].AdID,
-			ChannelID: chads[chad].ChannelID,
+			AdID:      chads[j].AdID,
+			ChannelID: chads[j].ChannelID,
 		})
-		if chads[chad].Warning >= tcfg.Cfg.Telegram.LimitCountWarning {
+		if chads[j].Warning >= tcfg.Cfg.Telegram.LimitCountWarning {
 			//send stop (warn message)
 			rabbit.MustPublish(&bot2.SendWarn{
-				AdID:      chads[chad].AdID,
+				AdID:      chads[j].AdID,
 				ChannelID: in.ChannelID,
-				Msg:       "please reshot the following ad",
-			})
-			ChannelAdArr = append(ChannelAdArr, ads.ChannelAd{
-				End: common.NullTime{Valid: true, Time: time.Now()},
+				Msg:       "please reshot the ads",
 			})
 		}
+
 	}
 
 	//transaction

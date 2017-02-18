@@ -26,9 +26,9 @@ var (
 )
 
 type channelDetailStat struct {
-	frwrd bool
-	cliID common.NullString
-	adID  int64
+	frwrd          bool
+	cliChannelAdID common.NullString
+	adID           int64
 }
 
 type channelViewStat struct {
