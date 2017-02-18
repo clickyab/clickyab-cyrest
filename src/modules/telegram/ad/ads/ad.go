@@ -200,6 +200,39 @@ func (m *Manager) SelectIndividualActiveAd() ([]ActiveAd, error) {
 	return res, err
 }
 
+// UpdateIndividualViewCount try to fill the view of individuals base on its sub view
+func (m *Manager) UpdateIndividualViewCount() {
+	q := `UPDATE %s
+		LEFT JOIN (SELECT ad_id, SUM(view) AS dv FROM %s GROUP BY ad_id ) AS chad ON chad.ad_id = ads.id
+		SET ads.view = chad.dv
+		WHERE ads.cli_message_id IS NULL AND ads.active_status = ? AND ads.admin_status = ? AND ads.pay_status = ? `
+	q = fmt.Sprintf(q, AdTableFull, ChannelAdTableFull)
+	_, err := m.GetDbMap().Exec(q)
+	assert.Nil(err)
+}
+
+// FinishedActiveAds return all finished ads
+func (m *Manager) FinishedActiveAds() []Ad {
+	q := `SELECT * FROM %s AS a LEFT JOIN %s AS p ON a.plan_id = p.id
+		WHERE p.view < a.view AND a.admin_status = ?
+		AND a.active_status = ? AND a.pay_status = ?`
+	q = fmt.Sprintf(q, AdTableFull, PlanTableFull)
+	var res []Ad
+	_, err := m.GetDbMap().Select(&res, q, AdminStatusAccepted, ActiveStatusYes, AdPayStatusYes)
+	assert.Nil(err)
+	return res
+}
+
+// GetWarningLimited return all passed warnings
+func (m *Manager) GetWarningLimited(warnings int64) []ChannelAd {
+	q := fmt.Sprintf("SELECT * FROM %s WHERE warnings > ? AND active=? AND end IS NOT NULL", ChannelAdTableFull)
+	var ch []ChannelAd
+	_, err := m.GetDbMap().Select(&ch, q, warnings, ActiveStatusYes)
+	assert.Nil(err)
+
+	return ch
+}
+
 // SelectAdsPlan return the next ad in the system
 func (m *Manager) SelectAdsPlan() ([]ActiveAd, error) {
 	q := fmt.Sprintf("SELECT %[1]s.*,%[2]s.view as viewed FROM %[2]s "+
