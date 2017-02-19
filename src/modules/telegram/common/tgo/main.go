@@ -206,7 +206,6 @@ func (t *telegram) MessageHistory(user string, limit, offset int) ([]History, er
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(string(x))
 	err = json.Unmarshal(x, &data)
 	if err != nil {
 		return nil, err

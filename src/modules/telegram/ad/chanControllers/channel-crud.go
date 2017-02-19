@@ -389,7 +389,7 @@ func (u *Controller) getLast(ctx echo.Context) error {
 		if err != nil {
 			return u.BadResponse(ctx, trans.E("failed job"))
 		}
-		for i := range res {
+		for i := len(res) - 1; i >= 0; i-- {
 			if res[i].Media == nil {
 				finalRes = append(finalRes, MsgInfo{CliID: res[i].ID, Text: res[i].Text, Type: tgo.Message})
 				res[i].Text = utils.RemoveEmojis(res[i].Text)
