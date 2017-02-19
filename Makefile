@@ -256,6 +256,8 @@ rabbitmq-setup: needroot
 	rabbitmqctl add_user $(RUSER) $(RPASS) || rabbitmqctl change_password $(RUSER) $(RPASS)
 	rabbitmqctl set_user_tags $(RUSER) administrator
 	rabbitmqctl set_permissions -p / $(RUSER) ".*" ".*" ".*"
+	rabbitmqctl add_vhost tg || echo "tg is already there"
+	rabbitmqctl set_permissions -p tg $(RUSER) ".*" ".*" ".*"
 	wget -O /usr/bin/rabbitmqadmin http://127.0.0.1:15672/cli/rabbitmqadmin
 	chmod a+x /usr/bin/rabbitmqadmin
 	rabbitmqadmin declare queue name=dlx-queue
