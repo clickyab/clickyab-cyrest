@@ -29,7 +29,7 @@ func (mw *MultiWorker) getLast(in *commands.GetLastCommand) (bool, error) {
 	}
 	h, err := mw.getLastMessages(c.CliTelegramID, 99, 0)
 	if len(h) > in.Count {
-		h = h[:in.Count]
+		h = h[len(h)-in.Count:]
 	}
 	if err != nil {
 		assert.Nil(aredis.StoreHashKey(in.HashKey, "STATUS", "failed", time.Hour))
