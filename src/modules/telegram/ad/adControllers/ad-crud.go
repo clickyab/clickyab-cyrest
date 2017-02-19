@@ -372,11 +372,13 @@ func (u *Controller) changeActiveStatus(ctx echo.Context) error {
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
-	//check everything is good TODO: check pay status later
-	currentAd.AdActiveStatus = pl.AdActiveStatus
-	rabbit.MustPublish(&commands.IdentifyAD{
-		AdID: currentAd.ID,
-	})
+	//check everything is good
+	if currentAd.AdPayStatus == ads.AdPayStatusYes && currentAd.AdAdminStatus == ads.AdAdminStatusPending {
+		currentAd.AdActiveStatus = pl.AdActiveStatus
+		rabbit.MustPublish(&commands.IdentifyAD{
+			AdID: currentAd.ID,
+		})
+	}
 	assert.Nil(m.UpdateAd(currentAd))
 	return u.OKResponse(ctx, currentAd)
 }
