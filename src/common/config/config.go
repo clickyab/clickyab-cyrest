@@ -141,7 +141,7 @@ func defaultLayer() onion.DefaultLayer {
 
 	assert.Nil(res.SetDefault("amqp.publisher", 30))
 	assert.Nil(res.SetDefault("amqp.exchange", "cy"))
-	assert.Nil(res.SetDefault("amqp.dsn", "amqp://cyrest:bita123@127.0.0.1:5672/"))
+	assert.Nil(res.SetDefault("amqp.dsn", "amqp://cyrest:bita123@127.0.0.1:5672/tg"))
 	assert.Nil(res.SetDefault("amqp.confirmlen", 50))
 
 	assert.Nil(res.SetDefault("page.per_Page", 10))
