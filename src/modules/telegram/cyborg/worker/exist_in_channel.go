@@ -29,50 +29,44 @@ bigloop:
 		if h[k].Event == "message" && h[k].Service == false {
 			if h[k].FwdFrom != nil {
 				for i := range adConfs {
-					if adConfs[i].frwrd && h[k].ID == adConfs[i].cliChannelAdID.String { //the ad is forward type
+					if h[k].ID == adConfs[i].cliChannelAdID.String {
 						finalResult[adConfs[i].adID] = channelViewStat{
 							view:    int64(h[k].Views),
 							warning: 0,
 							pos:     int64(historyLen - k),
-							frwrd:   true,
-							adID:    adConfs[i].adID,
-						}
-						found++
-						if found == len(adConfs) {
-							break bigloop
-						}
-						break
-					} else if !adConfs[i].frwrd && h[k].ID == adConfs[i].cliChannelAdID.String { //the ad is  not forward type
-						finalResult[adConfs[i].adID] = channelViewStat{
-							view:    int64(h[k].Views),
-							warning: 0,
-							pos:     int64(historyLen - k),
-							frwrd:   false,
-							adID:    adConfs[i].adID,
-						}
-						sumNotpromotionView += int64(h[k].Views)
-						countIndividual++
-						found++
-						if found == len(adConfs) {
-							break bigloop
-						}
-						break
-					} else { //don't find ad in the history
-						finalResult[adConfs[i].adID] = channelViewStat{
-							view:    0,
-							warning: 1,
 							frwrd:   adConfs[i].frwrd,
 							adID:    adConfs[i].adID,
-							pos:     0,
 						}
+						found++
+					}
+					if !adConfs[i].frwrd { //the ad is  not forward type
+						sumNotpromotionView += int64(h[k].Views)
+						countIndividual++
+					}
+					if found == len(adConfs) {
+						break bigloop
 					}
 				}
 			}
 		}
 	}
+
+	for i := range adConfs {
+		if _, ok := finalResult[adConfs[i].adID]; ok {
+			finalResult[adConfs[i].adID] = channelViewStat{
+				view:    0,
+				warning: 1,
+				frwrd:   adConfs[i].frwrd,
+				adID:    adConfs[i].adID,
+				pos:     0,
+			}
+		}
+	}
+
 	if countIndividual == 0 {
 		return finalResult, 0
 	}
+	logrus.Debug("final result , sumNotpromotionView , countIndividual", finalResult, " ", sumNotpromotionView, " ", countIndividual)
 	return finalResult, (sumNotpromotionView) / (countIndividual)
 }
 
