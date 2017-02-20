@@ -14,8 +14,6 @@ import (
 
 	"fmt"
 	"modules/misc/trans"
-
-	"github.com/Sirupsen/logrus"
 )
 
 func (mw *MultiWorker) existChannelAdFor(h []tgo.History, adConfs []channelDetailStat) (map[int64]channelViewStat, int64) {
@@ -66,12 +64,10 @@ bigloop:
 	if countIndividual == 0 {
 		return finalResult, 0
 	}
-	logrus.Debug("final result , sumNotpromotionView , countIndividual", finalResult, " ", sumNotpromotionView, " ", countIndividual)
 	return finalResult, (sumNotpromotionView) / (countIndividual)
 }
 
 func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error) {
-	logrus.Warn("existChannelAdFor")
 	var adsConf []channelDetailStat
 	m := ads.NewAdsManager()
 
@@ -136,12 +132,9 @@ func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error)
 	var ChannelAdDetailArr []*ads.ChannelAdDetail
 	var ChannelAdArr []ads.ChannelAd
 	var reshot bool
-	logrus.Warnf("%+v", chads)
-	logrus.Warn(len(chads))
 	for j := range chads {
 		defaultPosition := chads[j].PlanPosition
 		if t, ok := channelAdStat[chads[j].AdID]; !ok || t.pos > defaultPosition {
-			logrus.Warn("inside ")
 			ChannelAdDetailArr = append(ChannelAdDetailArr, &ads.ChannelAdDetail{
 				AdID:      chads[j].AdID,
 				ChannelID: chads[j].ChannelID,
@@ -196,7 +189,6 @@ func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error)
 			ChatID:    in.ChatID,
 		})
 	}
-	logrus.Warnf("%+v", ChannelAdArr)
 
 	//transaction
 	res, err := mw.transaction(m, ChannelAdArr, ChannelAdDetailArr, avg)

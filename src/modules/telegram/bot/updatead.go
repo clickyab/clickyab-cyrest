@@ -22,7 +22,6 @@ func (bb *bot) updateAD(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 	if err == nil {
 		tgbot.RegisterUserHandler(m.Chat.ID, func(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 			defer tgbot.UnRegisterUserHandler(m.Chat.ID)
-
 			n := ads.NewAdsManager()
 			currentAd, err := n.FindAdByID(id)
 			assert.Nil(err)
@@ -58,7 +57,6 @@ func (bb *bot) wantAD(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 			ChannelID: channel.ID,
 			ChatID:    m.Chat.ID,
 		})
-		fmt.Println(channel.Name)
 		return
 	}
 	channels, err := chnManger.FindChannelsByChatID(m.Chat.ID)

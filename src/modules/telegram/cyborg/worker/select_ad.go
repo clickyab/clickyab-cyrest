@@ -57,6 +57,7 @@ func (mw *MultiWorker) selectAd(in *commands.SelectAd) (bool, error) {
 			AdID:      0,
 			ChannelID: in.ChannelID,
 			Msg:       "no ads for you",
+			ChatID:    in.ChatID,
 		})
 		return false, nil
 	}

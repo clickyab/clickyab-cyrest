@@ -400,8 +400,8 @@ func (u *Controller) getLast(ctx echo.Context) error {
 					return u.BadResponse(ctx, trans.E("failed job"))
 				}
 
-			} else if res[i].Media.Type == tgo.Photo {
-				res[i].Media.Caption = utils.RemoveEmojis(res[i].Text)
+			} else {
+				res[i].Media.Caption = utils.RemoveEmojis(res[i].Media.Caption)
 				finalRes = append(finalRes, MsgInfo{CliID: res[i].ID, Text: res[i].Media.Caption, Type: res[i].Media.Type})
 				b, err := json.Marshal(res[i])
 				assert.Nil(err)
