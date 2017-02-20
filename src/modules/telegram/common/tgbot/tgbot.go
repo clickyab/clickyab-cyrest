@@ -130,6 +130,7 @@ bigLoop:
 				}()
 				h(bot, update.Message)
 			}()
+			tb.lock.RUnlock()
 			continue bigLoop
 		}
 		// currently we only support messages
