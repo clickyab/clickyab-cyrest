@@ -10,3 +10,9 @@ pkg/
 /src
 /node_modules
 .vscode
+.retry
+Would skip repository contrib/tg
+Would skip repository front/
+release.retry
+front
+contrib

@@ -1,93 +1,80 @@
 ---
 - name: build the code
   hosts: vagrant
+  vars:
+    mode: "{{ lookup('env','MODE') }}"
 
   tasks:
     - shell: git submodule update
       args:
-        chdir: /home/cy/cyrest
+        chdir: "/home/cy/cyrest-{{ mode }}"
 
     - name: clone the code
       git:
         repo: git@github.com:clickyab/clickyab-cyrest.git
-        dest: /home/cy/cyrest
+        dest: "/home/cy/cyrest-{{ mode }}"
         force: yes
 
     - shell: git checkout master && git pull
       args:
-        chdir: /home/cy/cyrest/front
+        chdir: "/home/cy/cyrest-{{ mode }}/front"
 
     - name: clean all data
       make:
         target: clean
-        chdir: /home/cy/cyrest
+        chdir: "/home/cy/cyrest-{{ mode }}"
 
     - name: get dependencies
       make:
         target: conditional-restore
-        chdir: /home/cy/cyrest
+        chdir: "/home/cy/cyrest-{{ mode }}"
 
     - name: generate codes
       make:
         target: codegen
-        chdir: /home/cy/cyrest
+        chdir: "/home/cy/cyrest-{{ mode }}"
 
     - name: generate codes
       make:
         target: codegen
-        chdir: /home/cy/cyrest
+        chdir: "/home/cy/cyrest-{{ mode }}"
 
     - name: create migration
       make:
         target: migration
-        chdir: /home/cy/cyrest
+        chdir: "/home/cy/cyrest-{{ mode }}"
 
     - name: build binaries
       make:
         target: all
-        chdir: /home/cy/cyrest
+        chdir: "/home/cy/cyrest-{{ mode }}"
 
     - name: build front end
       make:
         target: build-js
-        chdir: /home/cy/cyrest
+        chdir: "/home/cy/cyrest-{{ mode }}"
 
 # This is the staging build. it will build the app (using golang docker image) and run it with docker-compose
 - name: staging build
   hosts: staging
+  vars:
+    mode: "{{ lookup('env','MODE') }}"
 
   tasks:
-#    - name: install certain python modules for docker
-#      pip:
-#        name: "{{ item.name }}"
-#        version: "{{ item.version }}"
-#        state: present
-#      with_items:
-#      - { name: docker, version: 2.0.0 }
-#      - { name: docker-py, version: 1.10.6 }
-
     - name: make sure docker compose installed and ready
       pip:
         name: docker-compose
 
-    # - name: pull redis image
-    #   docker_image:
-    #     name: registry.clickyab.ae/clickyab/redis
-
-    # - name: pull mariadb image
-    #   docker_image:
-    #     name: registry.clickyab.ae/clickyab/mariadb
-
     - name: Creates directory
       file:
-        path: /home/cy/cyrest
+        path: "/home/cy/cyrest-{{ mode }}"
         state: directory
 
 
     - name: copy go binary files to web servers
       synchronize:
-        src: "/home/cy/cyrest/bin/"
-        dest: "/home/cy/cyrest/bin/"
+        src: "/home/cy/cyrest-{{ mode }}/bin/"
+        dest: "/home/cy/cyrest-{{ mode }}/bin/"
         delete: yes
         rsync_opts: "--exclude=.git --exclude=*.sh --exclude=gb* --exclude=go-bindata --exclude=fswatch --exclude=codegen"
         checksum: yes
@@ -96,8 +83,8 @@
 
     - name: copy swagger files
       synchronize:
-        src: "/home/cy/cyrest/3rd/swagger/"
-        dest: "/home/cy/cyrest/swagger/"
+        src: "/home/cy/cyrest-{{ mode }}/3rd/swagger/"
+        dest: "/home/cy/cyrest-{{ mode }}/swagger/"
         delete: yes
         checksum: yes
         times: no
@@ -105,8 +92,8 @@
 
     - name: copy frontend files
       synchronize:
-        src: "/home/cy/cyrest/front/public/"
-        dest: "/home/cy/cyrest/public/"
+        src: "/home/cy/cyrest-{{ mode }}/front/public/"
+        dest: "/home/cy/cyrest-{{ mode }}/public/"
         delete: yes
         checksum: yes
         times: no
@@ -114,23 +101,25 @@
 
     - name: copy compose file to server
       synchronize:
-        src: "/home/cy/cyrest/contrib/deploy/"
-        dest: "/home/cy/compose/"
+        src: "{{ playbook_dir}}/"
+        dest: "/home/cy/compose-{{ mode }}/"
         rsync_opts: "--exclude=.git --exclude=*.retry --exclude=staging*"
         delete: yes
         checksum: yes
         times: no
       delegate_to: 192.168.88.8
 
+    - name: rename the correct compse
+      command: mv "/home/cy/compose-{{ mode }}/docker-compose-{{ mode }}.yaml" "/home/cy/compose-{{ mode }}/docker-compose.yaml"
 
     - shell: /home/cy/.local/bin/docker-compose build
       args:
-        chdir: /home/cy/compose/
+        chdir: "/home/cy/compose-{{ mode }}/"
 
     - shell: /home/cy/.local/bin/docker-compose up -d
       args:
-        chdir: /home/cy/compose/
+        chdir: "/home/cy/compose-{{ mode }}/"
 
     - shell: /home/cy/.local/bin/docker-compose restart app cyborg got
       args:
-        chdir: /home/cy/compose/
+        chdir: "/home/cy/compose-{{ mode }}/"

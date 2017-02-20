@@ -1,0 +1,100 @@
+version: '2'
+services:
+  tgcli:
+    build: ./tgcli
+    volumes:
+      - "/home/cy/.telegram-cli:/home/telegramd/.telegram-cli"
+    command: tg
+    networks:
+      - rubik
+
+  app:
+    build: ./image
+    ports:
+      - "80:80"
+    volumes:
+      - "/home/cy/cyrest:/app"
+    command: /app/bin/server
+    environment:
+      - CYREST_DEVEL_MODE
+      - MYSQL_USER
+      - MYSQL_PASSWORD
+      - MYSQL_DB
+      - MYSQL_HOST
+      - MYSQL_PORT
+      - AMQP_USER
+      - AMQP_PASS
+      - AMQP_HOST
+      - AMQP_PORT
+      - AMQP_VHOST
+      - REDIS_PASS
+      - REDIS_PORT
+      - REDIS_HOST
+      - CYREST_SITE
+      - CYREST_PROTO
+      - CYREST_TELEGRAM_API_KEY
+      - CYREST_TELEGRAM_BOT_ID
+      - CYREST_TELEGRAM_BOT_NAME
+    networks:
+      - rubik
+  got:
+    build: ./image
+    volumes:
+      - "/home/cy/cyrest:/app"
+    command: /app/bin/got
+    environment:
+      - CYREST_DEVEL_MODE
+      - MYSQL_USER
+      - MYSQL_PASSWORD
+      - MYSQL_DB
+      - MYSQL_HOST
+      - MYSQL_PORT
+      - AMQP_USER
+      - AMQP_PASS
+      - AMQP_HOST
+      - AMQP_PORT
+      - AMQP_VHOST
+      - REDIS_PASS
+      - REDIS_PORT
+      - REDIS_HOST
+      - CYREST_SITE
+      - CYREST_PROTO
+      - CYREST_TELEGRAM_API_KEY
+      - CYREST_TELEGRAM_BOT_ID
+      - CYREST_TELEGRAM_BOT_NAME
+    networks:
+      - rubik
+  cyborg:
+    build: ./image
+    volumes:
+      - "/home/cy/cyrest:/app"
+    command: /app/bin/cyborg
+    environment:
+      - CYREST_DEVEL_MODE
+      - MYSQL_USER
+      - MYSQL_PASSWORD
+      - MYSQL_DB
+      - MYSQL_HOST
+      - MYSQL_PORT
+      - AMQP_USER
+      - AMQP_PASS
+      - AMQP_HOST
+      - AMQP_PORT
+      - AMQP_VHOST
+      - REDIS_PASS
+      - REDIS_PORT
+      - REDIS_HOST
+      - CYREST_SITE
+      - CYREST_PROTO
+      - CYREST_TELEGRAM_API_KEY
+      - CYREST_TELEGRAM_BOT_ID
+      - CYREST_TELEGRAM_BOT_NAME
+    links:
+      - tgcli
+    networks:
+      - rubik
+
+networks:
+  rubik:
+    # Use a custom driver
+    driver: bridge
