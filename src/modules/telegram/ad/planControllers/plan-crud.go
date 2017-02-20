@@ -58,6 +58,7 @@ func (u *Controller) allIndividualPlan(ctx echo.Context) error {
 //	url	=	/appropriate
 //	method	= get
 //	resource = get_plan:self
+//	payload	= planPayload
 //	middleware = authz.Authenticate
 //	200 = plans
 //	400 = base.ErrorResponseSimple
