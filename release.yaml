@@ -5,15 +5,15 @@
     mode: "{{ lookup('env','MODE') }}"
 
   tasks:
-    - shell: git submodule update
-      args:
-        chdir: "/home/cy/cyrest-{{ mode }}"
-
     - name: clone the code
       git:
         repo: git@github.com:clickyab/clickyab-cyrest.git
         dest: "/home/cy/cyrest-{{ mode }}"
         force: yes
+
+    - shell: git submodule update
+      args:
+        chdir: "/home/cy/cyrest-{{ mode }}"
 
     - shell: git checkout master && git pull
       args:
@@ -112,14 +112,14 @@
     - name: rename the correct compse
       command: mv "/home/cy/compose-{{ mode }}/docker-compose-{{ mode }}.yaml" "/home/cy/compose-{{ mode }}/docker-compose.yaml"
 
-    - shell: /home/cy/.local/bin/docker-compose build
+    - shell: docker-compose build
       args:
         chdir: "/home/cy/compose-{{ mode }}/"
 
-    - shell: /home/cy/.local/bin/docker-compose up -d
+    - shell: docker-compose up -d
       args:
         chdir: "/home/cy/compose-{{ mode }}/"
 
-    - shell: /home/cy/.local/bin/docker-compose restart app cyborg got
+    - shell: docker-compose restart app cyborg got
       args:
         chdir: "/home/cy/compose-{{ mode }}/"

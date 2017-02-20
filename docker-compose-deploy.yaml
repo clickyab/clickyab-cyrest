@@ -11,7 +11,7 @@ services:
   app:
     build: ./image
     ports:
-      - "80:80"
+      - "${EXTERNAL_IP}:80:80"
     volumes:
       - "/home/cy/cyrest:/app"
     command: /app/bin/server
