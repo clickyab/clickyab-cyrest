@@ -65,10 +65,10 @@
 #      with_items:
 #      - { name: docker, version: 2.0.0 }
 #      - { name: docker-py, version: 1.10.6 }
-
-    - name: make sure docker compose installed and ready
-      pip:
-        name: docker-compose
+#
+#    - name: make sure docker compose installed and ready
+#      pip:
+#        name: docker-compose
 
     # - name: pull redis image
     #   docker_image:
