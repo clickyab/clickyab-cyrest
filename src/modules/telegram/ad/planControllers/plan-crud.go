@@ -15,12 +15,6 @@ import (
 	"gopkg.in/labstack/echo.v3"
 )
 
-// @Validate {
-// }
-type planPayload struct {
-	AdID int64 `json:"ad_id" validate:"required" error:"ad id is required"`
-}
-
 //	allPlan get all plans
 //	@Route	{
 //	url	=	/
@@ -55,19 +49,21 @@ func (u *Controller) allIndividualPlan(ctx echo.Context) error {
 
 //	getAllAppropriatePlan get all appropriate plans
 //	@Route	{
-//	url	=	/appropriate
+//	url	=	/appropriate/:id
 //	method	= get
 //	resource = get_plan:self
-//	payload	= planPayload
 //	middleware = authz.Authenticate
 //	200 = plans
 //	400 = base.ErrorResponseSimple
 //	}
 func (u *Controller) getAllAppropriatePlan(ctx echo.Context) error {
+	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
 	var plans []ads.Plan
-	pl := u.MustGetPayload(ctx).(*planPayload)
 	m := ads.NewAdsManager()
-	currentAd, err := m.FindAdByID(pl.AdID)
+	currentAd, err := m.FindAdByID(id)
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
 	}
