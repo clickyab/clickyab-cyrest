@@ -13,15 +13,12 @@ import (
 	"common/rabbit"
 	"modules/telegram/cyborg/commands"
 
-	"github.com/Sirupsen/logrus"
 	"gopkg.in/telegram-bot-api.v4"
 )
 
 func (bb *bot) updateAD(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
-	logrus.Debug("update ad got ...")
 	result := strings.Replace(m.Text, "/updatead-", "", 1)
 	id, err := strconv.ParseInt(result, 0, 10)
-	logrus.Debug("update ad got ... ", id, " ", err)
 	if err == nil {
 		tgbot.RegisterUserHandler(m.Chat.ID, func(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 			defer tgbot.UnRegisterUserHandler(m.Chat.ID)
@@ -31,7 +28,6 @@ func (bb *bot) updateAD(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 			assert.Nil(err)
 			currentAd.BotChatID = common.NullInt64{Valid: true, Int64: m.Chat.ID}
 			currentAd.BotMessageID = common.NullInt64{Valid: true, Int64: int64(m.MessageID)}
-			logrus.Debug("update ad got ... ", m.Chat.ID, " ", m.MessageID)
 
 			assert.Nil(n.UpdateAd(currentAd))
 

@@ -12,6 +12,8 @@ import (
 	"sync"
 	"time"
 
+	"modules/telegram/config"
+
 	"github.com/Sirupsen/logrus"
 )
 
@@ -105,6 +107,13 @@ func NewMultiWorker(ip net.IP, port int) (*MultiWorker, error) {
 	if err := res.Ping(); err != nil {
 		return nil, err
 	}
+	botName := tcfg.Cfg.Telegram.BotName
+	info, err := t.ResolveUsername(botName)
+	assert.Nil(err)
+	tcfg.Cfg.Telegram.BotID = info.ID
+	_, err = t.Msg(info.ID, "/start")
+	assert.Nil(err)
+
 	go rabbit.RunWorker(&commands.GetLastCommand{}, res.getLast, 1)
 	go rabbit.RunWorker(&commands.GetChanCommand{}, res.getChanStat, 1)
 	go rabbit.RunWorker(&commands.IdentifyAD{}, res.identifyAD, 1)
