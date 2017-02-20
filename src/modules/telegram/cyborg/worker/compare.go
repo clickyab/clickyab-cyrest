@@ -27,7 +27,7 @@ func comparePromotion(src tgo.History, dst tgo.History) bool {
 			}
 		}
 	}
-	if src.Media != nil {
+	if src.Media != nil && dst.Media != nil {
 		return src.Media.Caption == utils.RemoveEmojis(dst.Media.Caption)
 	}
 	return src.Text == utils.RemoveEmojis(dst.Text)

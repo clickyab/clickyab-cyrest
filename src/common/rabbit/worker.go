@@ -12,6 +12,8 @@ import (
 
 	"sync/atomic"
 
+	"runtime/debug"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/streadway/amqp"
 )
@@ -156,7 +158,8 @@ bigLoop:
 				defer func() {
 					if e := recover(); e != nil {
 						//Panic??
-						logrus.Warn(e)
+						logrus.Error(e)
+						debug.PrintStack()
 						_ = job.Reject(false)
 					}
 				}()

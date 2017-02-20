@@ -82,7 +82,7 @@ type History struct {
 	Media   *struct {
 		Type    string `json:"type"`
 		Caption string `json:"caption"`
-	} `json:"media,omitempty"`
+	} `json:"media"`
 	FwdFrom *struct {
 		ID                string `json:"id"`
 		PeerType          string `json:"peer_type"`
