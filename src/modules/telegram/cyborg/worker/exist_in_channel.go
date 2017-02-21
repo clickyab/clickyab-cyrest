@@ -14,11 +14,13 @@ import (
 
 	"fmt"
 	"modules/misc/trans"
+
+	"github.com/Sirupsen/logrus"
 )
 
 func (mw *MultiWorker) existChannelAdFor(h []tgo.History, adConfs []channelDetailStat) (map[int64]channelViewStat, int64) {
 	var finalResult = make(map[int64]channelViewStat)
-	var sumNotpromotionView int64
+	var sumIndividualView int64
 	var countIndividual int64
 	var found int
 	historyLen := len(h)
@@ -36,10 +38,10 @@ bigloop:
 							adID:    adConfs[i].adID,
 						}
 						found++
-					}
-					if !adConfs[i].frwrd { //the ad is  not forward type
-						sumNotpromotionView += int64(h[k].Views)
-						countIndividual++
+						if !adConfs[i].frwrd { //the ad is  not forward type
+							sumIndividualView += int64(h[k].Views)
+							countIndividual++
+						}
 					}
 					if found == len(adConfs) {
 						break bigloop
@@ -50,7 +52,8 @@ bigloop:
 	}
 
 	for i := range adConfs {
-		if _, ok := finalResult[adConfs[i].adID]; ok {
+		if _, ok := finalResult[adConfs[i].adID]; !ok {
+			logrus.Infof("%+v", finalResult[adConfs[i].adID])
 			finalResult[adConfs[i].adID] = channelViewStat{
 				view:    0,
 				warning: 1,
@@ -64,7 +67,8 @@ bigloop:
 	if countIndividual == 0 {
 		return finalResult, 0
 	}
-	return finalResult, (sumNotpromotionView) / (countIndividual)
+	logrus.Warnf("%+v", finalResult, sumIndividualView, countIndividual)
+	return finalResult, (sumIndividualView) / (countIndividual)
 }
 
 func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error) {
@@ -139,7 +143,7 @@ func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error)
 				AdID:      chads[j].AdID,
 				ChannelID: chads[j].ChannelID,
 				View:      0,
-				Position:  common.NullInt64{},
+				Position:  common.NullInt64{Valid: t.pos != 0, Int64: t.pos},
 				Warning:   1,
 				CreatedAt: time.Now(),
 			})
