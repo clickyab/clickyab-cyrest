@@ -26,6 +26,8 @@ import (
 
 	"errors"
 
+	"modules/misc/base"
+
 	echo "gopkg.in/labstack/echo.v3"
 )
 
@@ -86,6 +88,26 @@ func (u *Controller) createChannel(ctx echo.Context) error {
 	}
 	return u.OKResponse(ctx, ch)
 
+}
+
+//	channelStat shows channels status
+//	@Route	{
+//		url	=	/chanstat
+//		method	= get
+//		resource = get_ad_chart:self
+//		middleware = authz.Authenticate
+//		200 = ads.ChanStat
+//		400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) channelStat(ctx echo.Context) error {
+
+	currentUser := authz.MustGetUser(ctx)
+	scope, ok := currentUser.HasPerm(base.ScopeGlobal, "get_ad_chart")
+	if !ok {
+		u.BadResponse(ctx, errors.New(trans.T("not authorized").String()))
+	}
+	result := ads.NewAdsManager().GetChanStat(currentUser.ID, scope)
+	return u.OKResponse(ctx, result)
 }
 
 //	getChannel

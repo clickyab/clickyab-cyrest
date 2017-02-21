@@ -61,6 +61,12 @@ type Channel struct {
 	UpdatedAt     time.Time         `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at"`
 }
 
+// ChanStat returns channels and their status by provider
+type ChanStat struct {
+	Name string      `json:"name" db:"name"`
+	Stat AdminStatus `json:"status" db:"status"`
+}
+
 // ChannelCreate a new channel
 func (m *Manager) ChannelCreate(link, name string, status AdminStatus, archive ArchiveStatus, active ActiveStatus, userID int64) *Channel {
 
@@ -462,4 +468,26 @@ func (m *Manager) FillActiveAdReportDataTableArray(
 	_, err = m.GetDbMap().Select(&res, query, params...)
 	assert.Nil(err)
 	return res, count
+}
+
+// GetChanStat returns channels and admin statuss'
+func (m *Manager) GetChanStat(userID int64, scope base.UserScope) (result []ChanStat) {
+	q := fmt.Sprintf("SELECT name, admin_status AS status from %[1]s "+
+		"LEFT JOIN %[2]s ON %[1]s.user_id = %[2]s.id",
+		ChannelTableFull,
+		aaa.UserTableFull)
+
+	where := ""
+	if scope == base.ScopeSelf {
+		where = fmt.Sprintf("WHERE user_id=%s", userID)
+	} else if scope == base.ScopeParent {
+		where = fmt.Sprintf("WHERE user_id=%[1]s OR parent_id=%[1]s", userID)
+	}
+
+	q += where
+
+	_, err := m.GetDbMap().Select(&result, q, userID)
+	assert.Nil(err)
+
+	return
 }
