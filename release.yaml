@@ -80,7 +80,7 @@
     CYREST_TELEGRAM_API_KEY: "{{ lookup('env','CYREST_TELEGRAM_API_KEY') }}"
     CYREST_TELEGRAM_BOT_ID: "{{ lookup('env','CYREST_TELEGRAM_BOT_ID') }}"
     CYREST_TELEGRAM_BOT_NAME: "{{ lookup('env','CYREST_TELEGRAM_BOT_NAME') }}"
-    VIRTUAL_HOST: "{{ lookup('env','VIRTUAL_HOST') }}"
+    VIRTUAL_HOST: "{{ lookup('env','CYREST_SITE') }}"
 
   tasks:
     - name: make sure docker compose installed and ready

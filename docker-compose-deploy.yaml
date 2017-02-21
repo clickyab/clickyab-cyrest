@@ -33,7 +33,7 @@ services:
       - CYREST_TELEGRAM_API_KEY
       - CYREST_TELEGRAM_BOT_ID
       - CYREST_TELEGRAM_BOT_NAME
-      - VIRTUAL_HOST
+      - VIRTUAL_HOST=${CYREST_SITE}
     networks:
       - rubik
   got:
