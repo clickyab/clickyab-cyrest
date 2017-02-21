@@ -59,6 +59,7 @@
   hosts: staging
   vars:
     mode: "{{ lookup('env','MODE') }}"
+    external_ip: "{{ lookup('env','EXTERNAL_IP') }}"
 
   tasks:
     - name: make sure docker compose installed and ready
@@ -67,14 +68,14 @@
 
     - name: Creates directory
       file:
-        path: "/home/cy/cyrest-{{ mode }}"
+        path: "/home/cy/cyrest"
         state: directory
 
 
     - name: copy go binary files to web servers
       synchronize:
         src: "/home/cy/cyrest-{{ mode }}/bin/"
-        dest: "/home/cy/cyrest-{{ mode }}/bin/"
+        dest: "/home/cy/cyrest/bin/"
         delete: yes
         rsync_opts: "--exclude=.git --exclude=*.sh --exclude=gb* --exclude=go-bindata --exclude=fswatch --exclude=codegen"
         checksum: yes
@@ -84,7 +85,7 @@
     - name: copy swagger files
       synchronize:
         src: "/home/cy/cyrest-{{ mode }}/3rd/swagger/"
-        dest: "/home/cy/cyrest-{{ mode }}/swagger/"
+        dest: "/home/cy/cyrest/swagger/"
         delete: yes
         checksum: yes
         times: no
@@ -93,7 +94,7 @@
     - name: copy frontend files
       synchronize:
         src: "/home/cy/cyrest-{{ mode }}/front/public/"
-        dest: "/home/cy/cyrest-{{ mode }}/public/"
+        dest: "/home/cy/cyrest/public/"
         delete: yes
         checksum: yes
         times: no
@@ -119,6 +120,8 @@
     - shell: docker-compose up -d
       args:
         chdir: "/home/cy/compose-{{ mode }}/"
+      environment:
+        - EXTERNAL_IP={{ external_ip }}
 
     - shell: docker-compose restart app cyborg got
       args:

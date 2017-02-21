@@ -10,8 +10,6 @@ services:
 
   app:
     build: ./image
-    ports:
-      - "${EXTERNAL_IP}:80:80"
     volumes:
       - "/home/cy/cyrest:/app"
     command: /app/bin/server
@@ -35,6 +33,7 @@ services:
       - CYREST_TELEGRAM_API_KEY
       - CYREST_TELEGRAM_BOT_ID
       - CYREST_TELEGRAM_BOT_NAME
+      - VIRTUAL_HOST
     networks:
       - rubik
   got:
