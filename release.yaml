@@ -59,7 +59,28 @@
   hosts: staging
   vars:
     mode: "{{ lookup('env','MODE') }}"
-    external_ip: "{{ lookup('env','EXTERNAL_IP') }}"
+
+  environment:
+    CYREST_DEVEL_MODE: "{{ lookup('env','CYREST_DEVEL_MODE') }}"
+    MYSQL_USER: "{{ lookup('env','MYSQL_USER') }}"
+    MYSQL_PASSWORD: "{{ lookup('env','MYSQL_PASSWORD') }}"
+    MYSQL_DB: "{{ lookup('env','MYSQL_DB') }}"
+    MYSQL_HOST: "{{ lookup('env','MYSQL_HOST') }}"
+    MYSQL_PORT: "{{ lookup('env','MYSQL_PORT') }}"
+    AMQP_USER: "{{ lookup('env','AMQP_USER') }}"
+    AMQP_PASS: "{{ lookup('env','AMQP_PASS') }}"
+    AMQP_HOST: "{{ lookup('env','AMQP_HOST') }}"
+    AMQP_PORT: "{{ lookup('env','AMQP_PORT') }}"
+    AMQP_VHOST: "{{ lookup('env','AMQP_VHOST') }}"
+    REDIS_PASS: "{{ lookup('env','REDIS_PASS') }}"
+    REDIS_PORT: "{{ lookup('env','REDIS_PORT') }}"
+    REDIS_HOST: "{{ lookup('env','REDIS_HOST') }}"
+    CYREST_SITE: "{{ lookup('env','CYREST_SITE') }}"
+    CYREST_PROTO: "{{ lookup('env','CYREST_PROTO') }}"
+    CYREST_TELEGRAM_API_KEY: "{{ lookup('env','CYREST_TELEGRAM_API_KEY') }}"
+    CYREST_TELEGRAM_BOT_ID: "{{ lookup('env','CYREST_TELEGRAM_BOT_ID') }}"
+    CYREST_TELEGRAM_BOT_NAME: "{{ lookup('env','CYREST_TELEGRAM_BOT_NAME') }}"
+    VIRTUAL_HOST: "{{ lookup('env','VIRTUAL_HOST') }}"
 
   tasks:
     - name: make sure docker compose installed and ready
@@ -120,8 +141,6 @@
     - shell: docker-compose up -d
       args:
         chdir: "/home/cy/compose-{{ mode }}/"
-      environment:
-        - EXTERNAL_IP={{ external_ip }}
 
     - shell: docker-compose restart app cyborg got
       args:
