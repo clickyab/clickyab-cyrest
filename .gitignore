@@ -10,3 +10,8 @@ pkg/
 /src
 /node_modules
 .vscode
+3rd
+bin
+contrib
+db
+front
