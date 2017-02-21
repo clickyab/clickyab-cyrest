@@ -15,6 +15,7 @@ ADD ./init-script.sh /sbin/entry-point.sh
 RUN chmod a+x /sbin/entry-point.sh
 VOLUME /app
 
+EXPOSE 80
 ENTRYPOINT ["/sbin/entry-point.sh"]
 
 CMD ["/app/bin/server"]
