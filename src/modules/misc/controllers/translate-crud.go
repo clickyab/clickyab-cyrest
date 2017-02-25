@@ -42,3 +42,24 @@ func (u *Controller) translate(ctx echo.Context) error {
 	return u.OKResponse(ctx, translation)
 
 }
+
+//	transDump
+//	@Route	{
+//	url	=	/dump/:lang
+//	method	= get
+//	resource = trans_dump:global
+//	middleware = authz.Authenticate
+//	200 = t9n.Mixed
+//	400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) transDump(ctx echo.Context) error {
+	lang := ctx.Param("lang")
+	if lang != trans.PersianLang && lang != trans.EnglishLang {
+		return u.NotFoundResponse(ctx, trans.E("language not supported"))
+	}
+
+	result := t9n.NewT9nManager().DumpAll(lang)
+
+	return u.OKResponse(ctx, result)
+
+}
