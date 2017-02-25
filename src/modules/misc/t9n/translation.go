@@ -31,9 +31,25 @@ type Translations struct {
 	Translated string `db:"translated" json:"translated"`
 }
 
-type mixed struct {
-	Text       string         `db:"text"`
-	Translated sql.NullString `db:"translated"`
+// Mixed returns text and its translated
+type Mixed struct {
+	Text       string         `db:"text" json:"text"`
+	Translated sql.NullString `db:"translated" json:"translated"`
+}
+
+// DumpAll dump all the translated data from repo
+func (m *Manager) DumpAll(lang string) []Mixed {
+	query := fmt.Sprintf(
+		"SELECT text, translated from %[1]s LEFT JOIN strings ON %[1]s.string_id = %[2]s.id "+
+			"WHERE lang=?",
+		TranslationsTableFull,
+		StringsTableFull)
+	var result []Mixed
+	_, err := m.GetDbMap().Select(&result, query, lang)
+	if err != nil {
+		assert.Nil(err)
+	}
+	return result
 }
 
 var (
@@ -51,7 +67,7 @@ func (m *Manager) LoadAllInMap(lang string) map[string]string {
 		StringsTableFull,
 		TranslationsTableFull,
 	)
-	var tmp []mixed
+	var tmp []Mixed
 	_, err := m.GetDbMap().Select(&tmp, query, lang)
 	assert.Nil(err)
 
