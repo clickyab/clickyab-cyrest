@@ -53,10 +53,9 @@
         chdir: "/home/cy/cyrest-{{ mode }}"
 
     - name: make config file
-      blockinfile:
-        path: "/home/cy/cyrest-{{ mode }}/front/.env.js"
-        block: |
-          module.exports.webpack = {baseUrl: '{{ CYREST_PROTO }}://{{ CYREST_SITE }}'};
+      copy:
+        content: "module.exports.webpack = {baseUrl: '{{ CYREST_PROTO }}://{{ CYREST_SITE }}'};"
+        dest: "/home/cy/cyrest-{{ mode }}/front/.env.js"
 
     - name: build front end
       make:
