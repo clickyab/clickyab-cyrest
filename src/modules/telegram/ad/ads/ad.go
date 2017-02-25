@@ -535,6 +535,81 @@ func (m *Manager) PieChartAdvertiser(userID int64) ([]PieChart, error) {
 	return res, nil
 }
 
+// AdDashboard AdDashboard
+type AdDashboard struct {
+	AdName    string `json:"ad_name" db:"name"`
+	Viewed    int64  `json:"viewed" db:"viewed"`
+	Remaining int64  `json:"remaining" db:"remaining"`
+}
+
+// PieChartAd return the ads
+func (m *Manager) PieChartAd(userID int64, scope base.UserScope) []AdDashboard {
+	var where string
+	var params []interface{}
+	switch scope {
+	case base.ScopeGlobal:
+		where = ""
+		params = []interface{}{AdPayStatusYes}
+	case base.ScopeParent:
+		where = " AND ( u.id = ? OR u.parent_id = ? )"
+		params = []interface{}{AdPayStatusYes, userID, userID}
+	case base.ScopeSelf:
+		where = " AND u.id = ?"
+		params = []interface{}{AdPayStatusYes, userID}
+	}
+	res := []AdDashboard{}
+	_, err := m.GetDbMap().Select(
+		&res,
+		fmt.Sprintf("SELECT a.name,a.view AS viewed,(p.view-a.view) AS remaining FROM %s AS a "+
+			"INNER JOIN %s AS u ON u.id=a.user_id "+
+			"INNER JOIN %s AS p ON p.id=a.plan_id "+
+			"WHERE a.pay_status=? %s", AdTableFull, aaa.UserTableFull, PlanTableFull, where),
+		params...,
+	)
+	assert.Nil(err)
+	return res
+}
+
+// AdDashboardPerChannel AdDashboardPerChannel
+type AdDashboardPerChannel struct {
+	ChannelName string  `json:"channel_name" db:"channel_name"`
+	Spent       float64 `json:"spent" db:"spent"`
+}
+
+// PieChartAdPerChannel return the ads
+func (m *Manager) PieChartAdPerChannel(userID int64, scope base.UserScope) []AdDashboardPerChannel {
+	var where string
+	var params []interface{}
+	switch scope {
+	case base.ScopeGlobal:
+		where = ""
+		params = []interface{}{AdPayStatusYes}
+	case base.ScopeParent:
+		where = " AND ( u.id = ? OR u.parent_id = ? )"
+		params = []interface{}{AdPayStatusYes, userID, userID}
+	case base.ScopeSelf:
+		where = " AND u.id = ?"
+		params = []interface{}{AdPayStatusYes, userID}
+	}
+
+	res := []AdDashboardPerChannel{}
+	_, err := m.GetDbMap().Select(
+		&res,
+		fmt.Sprintf("SELECT SUM(cha.view)*(p.price/p.view) AS spent,"+
+			"ch.name AS channel_name "+
+			"FROM %s AS cha "+
+			"INNER JOIN %s AS a ON a.id=cha.ad_id "+
+			"INNER JOIN %s AS u ON u.id=a.user_id "+
+			"INNER JOIN %s AS p ON p.id=a.plan_id "+
+			"INNER JOIN %s AS ch ON ch.id=cha.channel_id "+
+			"WHERE a.pay_status=? %s "+
+			"GROUP BY cha.channel_id", ChannelAdTableFull, AdTableFull, aaa.UserTableFull, PlanTableFull, ChannelTableFull, where),
+		params...,
+	)
+	assert.Nil(err)
+	return res
+}
+
 // UpdateAdView update ad view
 func (m *Manager) UpdateAdView(ID, view int64) error {
 	q := fmt.Sprintf("UPDATE %s SET view = ? WHERE id = ?", AdTableFull)
