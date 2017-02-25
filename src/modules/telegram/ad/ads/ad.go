@@ -545,3 +545,42 @@ func (m *Manager) UpdateAdView(ID, view int64) error {
 	)
 	return err
 }
+
+// PubDashboardTotalView AdDashboard
+type PubDashboardTotalView struct {
+	ChannelName string `json:"channel_name" db:"name"`
+	Viewed      int64  `json:"viewed" db:"viewed"`
+}
+
+// PubDashboardTotalView return the pub ad
+func (m *Manager) PubDashboardTotalView(userID int64, scope base.UserScope) []PubDashboardTotalView {
+	var where string
+	var params []interface{}
+	switch scope {
+	case base.ScopeGlobal:
+		where = ""
+		params = []interface{}{}
+	case base.ScopeParent:
+		where = " AND ( u.id = ? OR u.parent_id = ? )"
+		params = []interface{}{userID, userID}
+	case base.ScopeSelf:
+		where = " AND u.id = ?"
+		params = []interface{}{userID}
+	}
+	res := []PubDashboardTotalView{}
+	_, err := m.GetDbMap().Select(
+		&res,
+		fmt.Sprintf("SELECT ch.name AS name,SUM(cha.view) AS viewed FROM %s AS cha "+
+			"INNER JOIN %s AS ch ON ch.id=cha.channel_id "+
+			"INNER JOIN %s AS u ON u.id=ch.user_id "+
+			"WHERE cha.start IS NOT NULL %s GROUP BY cha.channel_id",
+			ChannelAdTableFull,
+			ChannelTableFull,
+			aaa.UserTableFull,
+			where,
+		),
+		params...,
+	)
+	assert.Nil(err)
+	return res
+}
