@@ -3,6 +3,9 @@
   hosts: vagrant
   vars:
     mode: "{{ lookup('env','MODE') }}"
+  environment:
+    CYREST_SITE: "{{ lookup('env','CYREST_SITE') }}"
+    CYREST_PROTO: "{{ lookup('env','CYREST_PROTO') }}"
 
   tasks:
     - name: clone the code
@@ -48,6 +51,12 @@
       make:
         target: all
         chdir: "/home/cy/cyrest-{{ mode }}"
+
+    - name: make config file
+      blockinfile:
+        path: "/home/cy/cyrest-{{ mode }}/front/.env.js"
+        block: |
+          module.exports.webpack = {baseUrl: '{{ CYREST_PROTO }}://{{ CYREST_SITE }}'};
 
     - name: build front end
       make:
