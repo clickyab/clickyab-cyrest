@@ -14,6 +14,8 @@ import (
 	"modules/misc/base"
 	"modules/telegram/teleuser/tlu"
 
+	"modules/misc/trans"
+
 	"gopkg.in/telegram-bot-api.v4"
 )
 
@@ -33,12 +35,12 @@ func (bb *bot) confirm(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 	u, err := tlu.NewTluManager().GetUser(m.Chat.ID)
 	if err != nil {
 		// No action
-		doMessage(bot, m.Chat.ID, "<b>Not authorized</b> #1001")
+		doMessage(bot, m.Chat.ID, fmt.Sprintf("<b>%s</b> #1001", trans.T("Not authorized").String()))
 		return
 	}
 	if _, ok := u.HasPerm(base.ScopeGlobal, "confirm_ad"); !ok {
 		// No action
-		doMessage(bot, m.Chat.ID, "<b>Not authorized</b> #1002")
+		doMessage(bot, m.Chat.ID, fmt.Sprintf("<b>%s</b> #1002", trans.T("Not authorized").String()))
 		return
 	}
 	var (
@@ -55,36 +57,36 @@ func (bb *bot) confirm(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 	if command == "accept" {
 		ad, err := mm.FindAdByID(param)
 		if err != nil || ad.AdActiveStatus != ads.AdActiveStatusYes || ad.AdAdminStatus != ads.AdAdminStatusPending || ad.AdPayStatus != ads.AdPayStatusYes {
-			doMessage(bot, m.Chat.ID, "<b>Invalid ad</b>")
+			doMessage(bot, m.Chat.ID, fmt.Sprintf("<b>%s</b>", trans.T("Invalid ad").String()))
 			return
 		}
 		ad.AdAdminStatus = ads.AdAdminStatusAccepted
 		assert.Nil(mm.UpdateAd(ad))
-		resp = fmt.Sprintf("Ad %s is accepted", ad.Name)
+		resp = trans.T("Ad %s is accepted", ad.Name).String()
 	} else if command == "reject" {
 		ad, err := mm.FindAdByID(param)
 		if err != nil || ad.AdActiveStatus != ads.AdActiveStatusYes || ad.AdAdminStatus != ads.AdAdminStatusPending || ad.AdPayStatus != ads.AdPayStatusYes {
-			doMessage(bot, m.Chat.ID, "<b>Invalid ad</b>")
+			doMessage(bot, m.Chat.ID, fmt.Sprintf("<b>%s</b>", trans.T("Invalid ad").String()))
 			return
 		}
 		ad.AdAdminStatus = ads.AdAdminStatusRejected
 		assert.Nil(mm.UpdateAd(ad))
-		resp = fmt.Sprintf("Ad %s is rejected", ad.Name)
+		resp = trans.T("Ad %s is rejected", ad.Name).String()
 	} else {
 		ad, err := mm.LoadNextAd(param)
 		if err != nil {
-			doMessage(bot, m.Chat.ID, "<b>No ad available at this time</b>")
+			doMessage(bot, m.Chat.ID, fmt.Sprintf("<b>%s</b>", trans.T("No ad available at this time").String()))
 			return
 		}
 
 		RenderMessage(bot, m.Chat.ID, ad)
-		doMessage(bot, m.Chat.ID, fmt.Sprintf("Accept /confirm_%s_%d", "accept", ad.ID))
-		doMessage(bot, m.Chat.ID, fmt.Sprintf("Reject /confirm_%s_%d", "reject", ad.ID))
-		doMessage(bot, m.Chat.ID, fmt.Sprintf("Next /confirm_%s_%d", "next", ad.ID))
+		doMessage(bot, m.Chat.ID, fmt.Sprintf("%s /confirm_%s_%d", trans.T("Accept").String(), "accept", ad.ID))
+		doMessage(bot, m.Chat.ID, fmt.Sprintf("%s /confirm_%s_%d", trans.T("Reject").String(), "reject", ad.ID))
+		doMessage(bot, m.Chat.ID, fmt.Sprintf("%s /confirm_%s_%d", trans.T("Next").String(), "next", ad.ID))
 		return
 	}
 	doMessage(bot, m.Chat.ID, resp)
-	doMessage(bot, m.Chat.ID, "<i>OK</i>")
+	doMessage(bot, m.Chat.ID, fmt.Sprintf("<i>%s</i>", trans.T("OK")))
 }
 
 func init() {
