@@ -535,6 +535,30 @@ func (m *Manager) PieChartAdvertiser(userID int64) ([]PieChart, error) {
 	return res, nil
 }
 
+// AdDashboard AdDashboard
+type AdDashboard struct {
+	AdName    string `json:"ad_name" db:"name"`
+	Viewed    int64  `json:"viewed" db:"viewed"`
+	Remaining int64  `json:"remaining" db:"remaining"`
+}
+
+// PieChartAd return the ads
+func (m *Manager) PieChartAd(userID int64) []AdDashboard {
+	res := []AdDashboard{}
+	_, err := m.GetDbMap().Select(
+		&res,
+		fmt.Sprintf("SELECT a.name,a.view AS viewed,(p.view-a.view) AS remaining FROM %s AS a "+
+			"INNER JOIN %s AS u ON u.id=a.user_id "+
+			"INNER JOIN %s AS p ON p.id=a.plan_id "+
+			"WHERE a.pay_status=? AND ( u.id = ? OR u.parent_id = ? )", AdTableFull, aaa.UserTableFull, PlanTableFull),
+		AdPayStatusYes,
+		userID,
+		userID,
+	)
+	assert.Nil(err)
+	return res
+}
+
 // UpdateAdView update ad view
 func (m *Manager) UpdateAdView(ID, view int64) error {
 	q := fmt.Sprintf("UPDATE %s SET view = ? WHERE id = ?", AdTableFull)
