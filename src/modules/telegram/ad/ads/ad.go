@@ -538,9 +538,9 @@ func (m *Manager) PieChartAdvertiser(userID int64) ([]PieChart, error) {
 
 // AdDashboard AdDashboard
 type AdDashboard struct {
-	AdName    string `json:"ad_name" db:"name"`
-	Viewed    int64  `json:"viewed" db:"viewed"`
-	Remaining int64  `json:"remaining" db:"remaining"`
+	AdName    string               `json:"ad_name" db:"name"`
+	Viewed    common.ZeroNullInt64 `json:"viewed" db:"viewed"`
+	Remaining common.ZeroNullInt64 `json:"remaining" db:"remaining"`
 }
 
 // PieChartAd return the ads

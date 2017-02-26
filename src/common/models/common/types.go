@@ -32,6 +32,12 @@ type NullTime struct {
 	Valid bool // Valid is true if Time is not NULL
 }
 
+// ZeroNullInt64 is ZeroNullInt64 zero if null
+type ZeroNullInt64 struct {
+	Int64 int64
+	Valid bool // Valid is true if num is not NULL
+}
+
 // NullInt64 is null int64 for json in null
 type NullInt64 struct {
 	Int64 int64
@@ -189,6 +195,53 @@ func (nt *NullInt64) Scan(value interface{}) error {
 
 // Value implements the driver Valuer interface.
 func (nt NullInt64) Value() (driver.Value, error) {
+	if !nt.Valid {
+		return nil, nil
+	}
+	return nt.Int64, nil
+}
+
+// MarshalJSON try to marshaling to json
+func (nt ZeroNullInt64) MarshalJSON() ([]byte, error) {
+	if nt.Valid {
+		return []byte(fmt.Sprint(nt.Int64)), nil
+	}
+
+	return []byte("0"), nil
+}
+
+// UnmarshalJSON try to unmarshal dae from input
+func (nt *ZeroNullInt64) UnmarshalJSON(b []byte) error {
+	text := strings.ToLower(string(b))
+	if text == "0" {
+		nt.Valid = false
+
+		return nil
+	}
+
+	err := json.Unmarshal(b, &nt.Int64)
+	if err != nil {
+		return err
+	}
+
+	nt.Valid = true
+	return nil
+}
+
+// Scan implements the Scanner interface.
+func (nt *ZeroNullInt64) Scan(value interface{}) error {
+	inn := &sql.NullInt64{}
+	err := inn.Scan(value)
+	if err != nil {
+		return err
+	}
+	nt.Int64 = inn.Int64
+	nt.Valid = inn.Valid
+	return nil
+}
+
+// Value implements the driver Valuer interface.
+func (nt ZeroNullInt64) Value() (driver.Value, error) {
 	if !nt.Valid {
 		return nil, nil
 	}
