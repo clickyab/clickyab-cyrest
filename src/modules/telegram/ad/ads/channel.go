@@ -486,7 +486,7 @@ func (m *Manager) GetChanStat(userID int64, scope base.UserScope) (result []Chan
 
 	q += where
 
-	_, err := m.GetDbMap().Select(&result, q, userID)
+	_, err := m.GetDbMap().Select(&result, q)
 	assert.Nil(err)
 
 	return
