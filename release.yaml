@@ -84,6 +84,11 @@
     CYREST_TELEGRAM_BOT_ID: "{{ lookup('env','CYREST_TELEGRAM_BOT_ID') }}"
     CYREST_TELEGRAM_BOT_NAME: "{{ lookup('env','CYREST_TELEGRAM_BOT_NAME') }}"
     VIRTUAL_HOST: "{{ lookup('env','CYREST_SITE') }}"
+    CYREST_FILE_SERVER_PATH:  "{{ lookup('env','CYREST_FILE_SERVER_PATH') }}"
+    CYREST_FILE_UPLOAD_PATH:  "{{ lookup('env','CYREST_FILE_UPLOAD_PATH') }}"
+    CYREST_FILE_UPLOAD_UI_PATH:  "{{ lookup('env','CYREST_FILE_UPLOAD_UI_PATH') }}"
+    CYREST_FILE_SAME_UPLOAD_PATH:  "{{ lookup('env','CYREST_FILE_SAME_UPLOAD_PATH') }}"
+
 
   tasks:
     - name: make sure docker compose installed and ready
