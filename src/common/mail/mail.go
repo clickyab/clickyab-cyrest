@@ -3,10 +3,12 @@ package mail
 import (
 	"common/config"
 	"common/initializer"
+	"time"
 
 	"bytes"
 	"common/assert"
-	"text/template"
+
+	"html/template"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/go-gomail/gomail"
@@ -21,6 +23,16 @@ var (
 type mailInitializer struct {
 }
 
+type MailTemplateData struct {
+	content interface{}
+	date    time.Time
+}
+
+func (t *MailTemplateData) newMail(data interface{}) {
+	t.date = time.Now()
+	t.content = data
+}
+
 // Initialize try to connect to mail server
 func (mailInitializer) Initialize() {
 
@@ -28,6 +40,26 @@ func (mailInitializer) Initialize() {
 
 func (mailInitializer) Finalize() {
 	logrus.Debug("Mail is done")
+}
+
+func templateFiller(templ []byte, data interface{}) []byte {
+	tmpl := template.Must(template.New("tmpl").Parse(string(templ)))
+	buf := &bytes.Buffer{}
+	assert.Nil(tmpl.Execute(buf, data))
+	return buf.Bytes()
+}
+
+func masterTemplate(content []byte) []byte {
+	src, err := Asset("resource/email-master.html")
+	assert.Nil(err)
+	ctn := template.HTML(content)
+	return templateFiller(src, struct {
+		Date    time.Time
+		Content template.HTML
+	}{
+		time.Now(),
+		ctn,
+	})
 }
 
 // SendTemplate is a simple email sender with text/html
@@ -39,10 +71,9 @@ func SendByTemplateName(subject string, TemplateName string, data interface{}, f
 
 // SendTemplate is a simple email sender with text/html
 func SendByTemplate(subject string, EmailTemplate []byte, data interface{}, from string, to ...string) error {
-	tmpl := template.Must(template.New("email").Parse(string(EmailTemplate)))
-	buf := &bytes.Buffer{}
-	assert.Nil(tmpl.Execute(buf, data))
-	return Send(subject, buf.String(), from, to...)
+	content := templateFiller(EmailTemplate, data)
+	body := masterTemplate(content)
+	return Send(subject, string(body), from, to...)
 }
 
 // Send is a simple email sender with text/html
