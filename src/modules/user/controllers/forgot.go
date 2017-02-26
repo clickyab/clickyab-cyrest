@@ -5,12 +5,12 @@ import (
 	"common/mail"
 	"common/redis"
 	"common/utils"
-	"gopkg.in/labstack/echo.v3"
 	"modules/misc/trans"
 	"modules/user/aaa"
 
 	"common/config"
-	"fmt"
+
+	"gopkg.in/labstack/echo.v3"
 )
 
 // @Validate {
@@ -54,17 +54,17 @@ func (u *Controller) forgotPassword(ctx echo.Context) error {
 	)
 }
 
-func sendEmailCodeGen(usr *aaa.User, key string) {
-	link := fmt.Sprintf("%s://%s/v1/new-password/%s", config.Config.Proto, config.Config.Site, key)
-
-	mail.SendByTemplateName(trans.T("بازیابی کلمه عبور").String(), "recoverCode", struct {
-		Name string
-		Link string
-	}{
-		usr.Email,
-		link,
-	}, "info@rubikad.com", usr.Email)
-}
+//func sendEmailCodeGen(usr *aaa.User, key string) {
+//	link := fmt.Sprintf("%s://%s/v1/new-password/%s", config.Config.Proto, config.Config.Site, key)
+//
+//	mail.SendByTemplateName(trans.T("Password recovery").Translate("fa_IR"), "recoverCode", struct {
+//		Name string
+//		Link string
+//	}{
+//		usr.Email,
+//		link,
+//	}, config.Config.Mail.From, usr.Email)
+//}
 
 // forgotGeneratePassword get email
 // @Route {
@@ -94,11 +94,11 @@ func (u *Controller) forgotGeneratePassword(ctx echo.Context) error {
 }
 
 func sendEmailPasswordGen(usr *aaa.User, pass string) {
-	mail.SendByTemplateName(trans.T("بازیابی کلمه عبور").String(), "forgotNewPassword", struct {
+	mail.SendByTemplateName(trans.T("Password recovery").Translate("fa_IR"), "forgotNewPassword", struct {
 		Name string
 		Pass string
 	}{
 		usr.Email,
 		pass,
-	}, "info@rubikad.com", usr.Email)
+	}, config.Config.Mail.From, usr.Email)
 }

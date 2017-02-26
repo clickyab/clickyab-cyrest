@@ -10,9 +10,10 @@ import (
 	"html/template"
 
 	"fmt"
+	"strings"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/go-gomail/gomail"
-	"strings"
 )
 
 var (
@@ -27,7 +28,7 @@ type mailInitializer struct {
 
 // Initialize try to connect to mail server
 func (mailInitializer) Initialize() {
-
+	loadTemplates()
 }
 
 func (mailInitializer) Finalize() {
@@ -77,13 +78,9 @@ func loadTemplates() {
 		assert.Nil(err)
 
 		mailTemplate.New(partialTemplate).Parse(string(data))
-
 	}
-
 }
 
 func init() {
-	loadTemplates()
-
 	initializer.Register(&mailInitializer{})
 }
