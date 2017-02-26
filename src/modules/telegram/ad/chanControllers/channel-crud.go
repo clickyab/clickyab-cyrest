@@ -443,3 +443,23 @@ func (u *Controller) getLast(ctx echo.Context) error {
 	}
 	return u.BadResponse(ctx, trans.E("failed job"))
 }
+
+//	activeAd show count active & wait channel
+//	@Route	{
+//	url	=	/dashboard/count-active
+//	method	= get
+//	resource = get_ad_chart:self
+//	middleware = authz.Authenticate
+//	200 = ads.Channel
+//	400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) activeAd(ctx echo.Context) error {
+	m := ads.NewAdsManager()
+	currentUser := authz.MustGetUser(ctx)
+	scope, _ := currentUser.HasPerm(base.ScopeGlobal, "get_ad_chart")
+	active, wait := m.CountActiveChannel(currentUser.ID, scope)
+	return u.OKResponse(ctx, struct {
+		Active int64 `json:"active"`
+		Wait   int64 `json:"wait"`
+	}{active, wait})
+}
