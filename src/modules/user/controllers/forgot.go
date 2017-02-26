@@ -2,13 +2,15 @@ package user
 
 import (
 	"common/assert"
+	"common/mail"
 	"common/redis"
 	"common/utils"
+	"gopkg.in/labstack/echo.v3"
 	"modules/misc/trans"
 	"modules/user/aaa"
-	"modules/user/config"
 
-	"gopkg.in/labstack/echo.v3"
+	"common/config"
+	"fmt"
 )
 
 // @Validate {
@@ -26,6 +28,7 @@ type forgotPayload struct {
 //		400	=	base.ErrorResponseSimple
 // }
 func (u *Controller) forgotPassword(ctx echo.Context) error {
+
 	pl := u.MustGetPayload(ctx).(*forgotPayload)
 	//generate key for email
 
@@ -35,18 +38,32 @@ func (u *Controller) forgotPassword(ctx echo.Context) error {
 		return u.BadResponse(ctx, trans.E("email not found"))
 	}
 
-	key := <-utils.ID
-	assert.Nil(aredis.StoreKey(key, usr.Email, ucfg.Cfg.TokenTimeout))
+	// TODO we need this three lines later for better recovery workflow
+	//key := <-utils.ID
+	//assert.Nil(aredis.StoreKey(key, usr.Email, ucfg.Cfg.TokenTimeout))
+	//sendEmailCodeGen(usr,key)
 
-	sendEmailCodeGen()
+	pass := utils.PasswordGenerate(8)
+	usr.Password = pass
+	assert.Nil(m.UpdateUser(usr))
+	sendEmailPasswordGen(usr, pass)
+
 	return u.OKResponse(
 		ctx,
 		nil,
 	)
 }
 
-func sendEmailCodeGen() {
-	//todo send email to user
+func sendEmailCodeGen(usr *aaa.User, key string) {
+	link := fmt.Sprintf("%s://%s/v1/new-password/%s", config.Config.Proto, config.Config.Site, key)
+
+	mail.SendByTemplateName(trans.T("بازیابی کلمه عبور").String(), "recoverCode", struct {
+		Name string
+		Link string
+	}{
+		usr.Email,
+		link,
+	}, "info@rubikad.com", usr.Email)
 }
 
 // forgotGeneratePassword get email
@@ -69,13 +86,19 @@ func (u *Controller) forgotGeneratePassword(ctx echo.Context) error {
 	// TODO : change password to string when we are ready for it
 	user.Password = pass
 	assert.Nil(m.UpdateUser(user))
-	sendEmailPasswordGen()
+	sendEmailPasswordGen(user, pass)
 	return u.OKResponse(
 		ctx,
 		nil,
 	)
 }
 
-func sendEmailPasswordGen() {
-	//todo send email to user
+func sendEmailPasswordGen(usr *aaa.User, pass string) {
+	mail.SendByTemplateName(trans.T("بازیابی کلمه عبور").String(), "forgotNewPassword", struct {
+		Name string
+		Pass string
+	}{
+		usr.Email,
+		pass,
+	}, "info@rubikad.com", usr.Email)
 }

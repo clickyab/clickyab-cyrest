@@ -21,12 +21,12 @@ type changePasswordPayload struct {
 
 // changePassword
 // @Route {
-//		url	=	/change-password
-//		method	=	post
-//		payload	= changePasswordPayload
+//		url	   =	/change-password
+//		method	   =	post
+//		payload	   = changePasswordPayload
 //		middleware = authz.Authenticate
-//		200	=	base.NormalResponse
-//		400	=	base.ErrorResponseSimple
+//		200	   =	base.NormalResponse
+//		400	   =	base.ErrorResponseSimple
 // }
 func (u *Controller) changePassword(ctx echo.Context) error {
 	pl := u.MustGetPayload(ctx).(*changePasswordPayload)

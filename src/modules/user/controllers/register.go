@@ -38,13 +38,13 @@ func (u *Controller) registerUser(ctx echo.Context) error {
 
 	token := m.GetNewToken(usr, ctx.Request().UserAgent(), ctx.RealIP())
 
-	mail.SendByTemplateName(trans.T("شما با موفقیت در روبیک اد ثبت شدید").String(), "resource/register.html", struct {
+	mail.SendByTemplateName(trans.T("شما با موفقیت در روبیک اد ثبت شدید").String(), "register", struct {
 		Date time.Time
 		Name string
 	}{
 		Date: time.Now(),
 		Name: pl.Email,
-	}, "info@rubikad.com", "guest@sdfs.com")
+	}, "info@rubikad.com", usr.Email)
 
 	return u.OKResponse(
 		ctx,

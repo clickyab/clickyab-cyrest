@@ -3,34 +3,26 @@ package mail
 import (
 	"common/config"
 	"common/initializer"
-	"time"
 
 	"bytes"
 	"common/assert"
 
 	"html/template"
 
+	"fmt"
 	"github.com/Sirupsen/logrus"
 	"github.com/go-gomail/gomail"
+	"strings"
 )
 
 var (
 	// Client the object connect to mail server
 	Client *gomail.Dialer
 	//once   = &sync.Once{}
+	mailTemplate = template.New("mail")
 )
 
 type mailInitializer struct {
-}
-
-type MailTemplateData struct {
-	content interface{}
-	date    time.Time
-}
-
-func (t *MailTemplateData) newMail(data interface{}) {
-	t.date = time.Now()
-	t.content = data
 }
 
 // Initialize try to connect to mail server
@@ -42,42 +34,17 @@ func (mailInitializer) Finalize() {
 	logrus.Debug("Mail is done")
 }
 
-func templateFiller(templ []byte, data interface{}) []byte {
-	tmpl := template.Must(template.New("tmpl").Parse(string(templ)))
-	buf := &bytes.Buffer{}
-	assert.Nil(tmpl.Execute(buf, data))
-	return buf.Bytes()
-}
-
-func masterTemplate(content []byte) []byte {
-	src, err := Asset("resource/email-master.html")
-	assert.Nil(err)
-	ctn := template.HTML(content)
-	return templateFiller(src, struct {
-		Date    time.Time
-		Content template.HTML
-	}{
-		time.Now(),
-		ctn,
-	})
-}
-
-// SendTemplate is a simple email sender with text/html
+// SendByTemplateName is a simple email sender with text/html
 func SendByTemplateName(subject string, TemplateName string, data interface{}, from string, to ...string) error {
-	src, err := Asset(TemplateName)
-	assert.Nil(err)
-	return SendByTemplate(subject, src, data, from, to...)
-}
+	buff := &bytes.Buffer{}
 
-// SendTemplate is a simple email sender with text/html
-func SendByTemplate(subject string, EmailTemplate []byte, data interface{}, from string, to ...string) error {
-	content := templateFiller(EmailTemplate, data)
-	body := masterTemplate(content)
-	return Send(subject, string(body), from, to...)
+	err := mailTemplate.Lookup(TemplateName).Execute(buff, data)
+	assert.Nil(err)
+	return Send(subject, buff.Bytes(), from, to...)
 }
 
 // Send is a simple email sender with text/html
-func Send(subject string, body string, from string, to ...string) error {
+func Send(subject string, body []byte, from string, to ...string) error {
 	Client := gomail.NewDialer(config.Config.Mail.Host, config.Config.Mail.Port, config.Config.Mail.UserName, config.Config.Mail.Password)
 	m := gomail.NewMessage()
 	if from == "" {
@@ -86,7 +53,7 @@ func Send(subject string, body string, from string, to ...string) error {
 	m.SetHeader("From", from)
 	m.SetHeader("To", to...)
 	m.SetHeader("Subject", subject)
-	m.SetBody("text/html", body)
+	m.SetBody("text/html", string(body))
 	//m.Attach("/home/Alex/lolcat.jpg")
 
 	logrus.Infof("%+v", Client)
@@ -95,10 +62,28 @@ func Send(subject string, body string, from string, to ...string) error {
 	return err
 }
 
-func CreateBody() {
+func loadTemplates() {
+	for t := range _bindata {
+		lastSlash := strings.LastIndexAny(t, "/") + 1
+		fileName := t[lastSlash:strings.LastIndexAny(t, ".")]
+
+		for i, c := range fileName {
+			if (fmt.Sprintf("%c", c) == "-") && len(fileName) > i+1 {
+				fileName = fileName[:i] + strings.ToUpper(fileName[i:i+2]) + fileName[i+2:]
+			}
+		}
+		partialTemplate := strings.Replace(fileName, "-", "", -1)
+		data, err := Asset(t)
+		assert.Nil(err)
+
+		mailTemplate.New(partialTemplate).Parse(string(data))
+
+	}
 
 }
 
 func init() {
+	loadTemplates()
+
 	initializer.Register(&mailInitializer{})
 }
