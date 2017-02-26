@@ -1,15 +1,12 @@
 package user
 
 import (
-	"html/template"
 	"modules/user/aaa"
 
 	"modules/misc/trans"
 
 	"common/mail"
 
-	"bytes"
-	"common/assert"
 	"time"
 
 	"gopkg.in/labstack/echo.v3"
@@ -40,19 +37,15 @@ func (u *Controller) registerUser(ctx echo.Context) error {
 	}
 
 	token := m.GetNewToken(usr, ctx.Request().UserAgent(), ctx.RealIP())
-	src, err := mail.Asset("resource/register.html")
-	assert.Nil(err)
 
-	tmpl := template.Must(template.New("register").Parse(string(src)))
-	buf := &bytes.Buffer{}
-	assert.Nil(tmpl.Execute(buf, struct {
+	mail.SendByTemplateName(trans.T("شما با موفقیت در روبیک اد ثبت شدید").String(), "resource/register.html", struct {
 		Date time.Time
 		Name string
 	}{
 		Date: time.Now(),
 		Name: pl.Email,
-	}))
-	mail.Send(trans.T("شما با موفقیت در روبیک اد ثبت شدید").String(), buf.String(), "info@rubikad.com", "guest@sdfs.com")
+	}, "info@rubikad.com", "guest@sdfs.com")
+
 	return u.OKResponse(
 		ctx,
 		createLoginResponse(usr, token),
