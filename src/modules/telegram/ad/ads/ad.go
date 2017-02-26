@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"common/utils"
+	"database/sql"
 	"database/sql/driver"
 	"time"
 )
@@ -544,4 +545,98 @@ func (m *Manager) UpdateAdView(ID, view int64) error {
 		ID,
 	)
 	return err
+}
+
+//AdDetailDataTable is the ad full data in data table, after join with other field
+// @DataTable {
+//		url = /detail
+//		entity = AdDetailDataTable
+//		view = ad_detail:self
+//		controller = modules/telegram/ad/adControllers
+//		fill = FillAdDetailDataTableArray
+// }
+type AdDetailDataTable struct {
+	Name        common.NullString `json:"name" db:"name" search:"true"`
+	Active      ActiveStatus      `json:"active" db:"active"`
+	Src         common.NullString `db:"src" json:"src"`
+	Description common.NullString `db:"description" json:"description"`
+	Paid        sql.NullBool      `db:"paid" json:"paid"`
+	PlanType    PlanType          `db:"type" json:"plantype"`
+	Start       common.NullTime   `db:"start" json:"start"`
+	PlanView    common.NullInt64  `db:"planview" json:"plan_view" sort:"true" title:"PlanView"`
+	View        common.NullInt64  `json:"view" db:"view" visible:"true" title:"View"`
+	ParentID    common.NullInt64  `db:"-" json:"parent_id" visible:"false"`
+	OwnerID     common.NullInt64  `db:"-" json:"owner_id" visible:"false"`
+	Actions     string            `db:"-" json:"_actions" visible:"false"`
+}
+
+// FillAdDetailDataTableArray is the function to handle
+func (m *Manager) FillAdDetailDataTableArray(u base.PermInterfaceComplete,
+	filters map[string]string,
+	search map[string]string,
+	sort, order string, p, c int) (AdDetailDataTableArray, int64) {
+	var params []interface{}
+	var res AdDetailDataTableArray
+	var where []string
+
+	countQuery := fmt.Sprintf("SELECT COUNT(%[2]s.name) from %[1]s "+
+		"LEFT JOIN %[2]s ON %[1]s.ad_id = %[2]s.id "+
+		"LEFT JOIN %[4]s ON %[2]s.plan_id = %[4]s.id "+
+		"LEFT JOIN %[3]s ON %[2]s.user_id = %[3]s.id ",
+		ChannelAdTableFull,
+		AdTableFull,
+		aaa.UserTableFull,
+		PlanTableFull,
+	)
+	query := fmt.Sprintf("SELECT %[2]s.name, %[1]s.active, src, %[2]s.description, pay_status AS paid,"+
+		"type, start, %[4]s.view as planview, %[1]s.view from %[1]s "+
+		"LEFT JOIN %[2]s ON %[1]s.ad_id = %[2]s.id "+
+		"LEFT JOIN %[4]s ON %[2]s.plan_id = %[4]s.id "+
+		"LEFT JOIN %[3]s ON %[2]s.user_id = %[3]s.id ",
+		ChannelAdTableFull,
+		AdTableFull,
+		aaa.UserTableFull,
+		PlanTableFull,
+	)
+	for field, value := range filters {
+		where = append(where, fmt.Sprintf("%s.%s=?", ChannelAdTableFull, field))
+		params = append(params, value)
+	}
+
+	for column, val := range search {
+		where = append(where, fmt.Sprintf("%s LIKE ?", column))
+		params = append(params, "%"+val+"%")
+	}
+
+	currentUserID := u.GetID()
+	highestScope := u.GetCurrentScope()
+
+	if highestScope == base.ScopeSelf {
+		where = append(where, fmt.Sprintf("%s.user_id=?", AdTableFull))
+		params = append(params, currentUserID)
+	} else if highestScope == base.ScopeParent {
+		where = append(where, fmt.Sprintf("%s.parent_id=?", aaa.UserTableFull))
+		params = append(params, currentUserID)
+	}
+
+	//check for perm
+	if len(where) > 0 {
+		query += " WHERE "
+		countQuery += " WHERE "
+	}
+	query += strings.Join(where, " AND ")
+	countQuery += strings.Join(where, " AND ")
+	limit := c
+	offset := (p - 1) * c
+	if sort != "" {
+		query += fmt.Sprintf(" ORDER BY %s %s ", sort, order)
+	}
+	query += fmt.Sprintf(" LIMIT %d OFFSET %d ", limit, offset)
+	count, err := m.GetDbMap().SelectInt(countQuery, params...)
+	assert.Nil(err)
+
+	_, err = m.GetDbMap().Select(&res, query, params...)
+	assert.Nil(err)
+
+	return res, count
 }
