@@ -39,10 +39,6 @@ export CYREST_TELEGRAM_BOT_ID=${CYREST_TELEGRAM_BOT_ID:-'$0100000007f9b71480cc4d
 export CYREST_TELEGRAM_BOT_NAME=${CYREST_TELEGRAM_BOT_NAME:-'rubikaddemobot'}
 export CYREST_TELEGRAM_CLI_HOST=${CYREST_TELEGRAM_CLI_HOST:-tgcli}
 export CYREST_TELEGRAM_CLI_PORT=${CYREST_TELEGRAM_CLI_PORT:-9999}
-export CYREST_FILE_SERVER_PATH=console.rubikad.com
-export CYREST_FILE_UPLOAD_PATH=http://console.rubikad.com/statics/
-export CYREST_FILE_UPLOAD_UI_PATH=http://console.rubikad.com
-export CYREST_FILE_SAME_UPLOAD_PATH=console.rubikad.com
 
 
 if [ "$1" = '/app/bin/server' ];
