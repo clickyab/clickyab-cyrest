@@ -5,6 +5,10 @@ import (
 
 	"modules/misc/trans"
 
+	"common/mail"
+
+	"time"
+
 	"gopkg.in/labstack/echo.v3"
 )
 
@@ -33,6 +37,15 @@ func (u *Controller) registerUser(ctx echo.Context) error {
 	}
 
 	token := m.GetNewToken(usr, ctx.Request().UserAgent(), ctx.RealIP())
+
+	mail.SendByTemplateName(trans.T("شما با موفقیت در روبیک اد ثبت شدید").String(), "resource/register.html", struct {
+		Date time.Time
+		Name string
+	}{
+		Date: time.Now(),
+		Name: pl.Email,
+	}, "info@rubikad.com", "guest@sdfs.com")
+
 	return u.OKResponse(
 		ctx,
 		createLoginResponse(usr, token),

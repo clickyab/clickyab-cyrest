@@ -149,6 +149,9 @@ migcp:
 migration: migcp tools-gobindata
 	cd $(ROOT) && $(BIN)/go-bindata -o ./src/migration/migration.gen.go -nomemcopy=true -pkg=main ./db/migrations/...
 
+mail: tools-gobindata
+	cd $(ROOT) && $(BIN)/go-bindata -o ./src/common/mail/mail.tmp.go -nomemcopy=true -pkg=mail ./resource/...
+
 tools-migrate: $(BIN)/gb migration
 	$(BUILD) migration
 
