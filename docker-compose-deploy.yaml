@@ -34,6 +34,11 @@ services:
       - CYREST_TELEGRAM_BOT_ID
       - CYREST_TELEGRAM_BOT_NAME
       - VIRTUAL_HOST=${CYREST_SITE}
+      - CYREST_FILE_SERVER_PATH
+      - CYREST_FILE_UPLOAD_PATH
+      - CYREST_FILE_UPLOAD_UI_PATH
+      - CYREST_FILE_SAME_UPLOAD_PATH
+
     networks:
       - rubik
   got:
