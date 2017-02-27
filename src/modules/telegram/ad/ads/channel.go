@@ -3,6 +3,7 @@ package ads
 import (
 	"common/assert"
 	"common/models/common"
+	"database/sql"
 	"fmt"
 	"modules/misc/base"
 	"modules/telegram/teleuser/tlu"
@@ -256,7 +257,7 @@ func (m *Manager) FillChannelDataTableArray(u base.PermInterfaceComplete, filter
 //ChannelDetailDataTable is the role full data in data table, after join with other field
 // @DataTable {
 //		url = /detail
-//		entity = channelDetail
+//		entity = ChannelDetailDataTable
 //		view = channel_list:self
 //		controller = modules/telegram/ad/chanControllers
 //		fill = FillChannelDetailDataTableArray
@@ -266,15 +267,15 @@ func (m *Manager) FillChannelDataTableArray(u base.PermInterfaceComplete, filter
 //		_active = active_channel:global
 // }
 type ChannelDetailDataTable struct {
-	ChanID   int64            `json:"name" search:"true" db:"name" visible:"false" title:"Name"`
+	ChanID   sql.NullInt64    `db:"channel_id" json:"channel_id" search:"true"`
 	View     int64            `db:"view" json:"view"`
-	AdName   string           `db:"warning" json:"warning" search:"true"`
+	AdName   string           `db:"name" json:"adname" search:"true"`
 	Active   ActiveStatus     `db:"active" json:"active" filter:"true"`
 	Start    common.NullTime  `db:"start" json:"start"`
 	End      common.NullTime  `db:"end" json:"end"`
 	Warning  int64            `db:"warning" json:"warning"`
-	ParentID common.NullInt64 `db:"parent_id" json:"parent_id" visible:"false"`
-	OwnerID  int64            `db:"owner_id" json:"owner_id" visible:"false"`
+	ParentID common.NullInt64 `db:"-" json:"parent_id" visible:"false"`
+	OwnerID  int64            `db:"-" json:"owner_id" visible:"false"`
 	Actions  string           `db:"-" json:"_actions" visible:"false"`
 }
 
@@ -289,16 +290,22 @@ func (m *Manager) FillChannelDetailDataTableArray(u base.PermInterfaceComplete,
 	var res ChannelDetailDataTableArray
 	var where []string
 
-	countQuery := fmt.Sprintf("SELECT COUNT(%[1]s.id) FROM %[1]s "+
+	countQuery := fmt.Sprintf("SELECT COUNT(channel_id) FROM %[1]s "+
 		"LEFT JOIN %[2]s ON %[1]s.ad_id=%[2]s.id "+
-		"LEFT JOIN %[3]s ON %[3]s.id=%[2]s.user_id", ChannelAdTableFull, AdTableFull, aaa.UserTableFull)
-	query := fmt.Sprintf("SELECT %[2]s.name, %[1]s.view, %[1]s.active,"+
-		" %[1]s.start, %[1]send ,%[3]s.id AS owner_id, %[3]s.parent_id as parent_id "+
-		"FROM %[1]s LEFT JOIN %[2]s ON %[1]s.id=%[2]s.ad_id "+
-		"LEFT JOIN %[3]s ON %[3]s.id=%[2]s.user_id", ChannelAdTableFull, AdTableFull, aaa.UserTableFull)
+		"LEFT JOIN %[3]s ON %[2]s.user_id = %[3]s.id",
+		ChannelAdTableFull,
+		AdTableFull,
+		aaa.UserTableFull)
+
+	query := fmt.Sprintf("SELECT ads.name, channel_ad.view, active, start, end FROM %[1]s "+
+		"LEFT JOIN %[2]s ON %[2]s.id=%[1]s.ad_id "+
+		"LEFT JOIN %[3]s ON %[2]s.user_id = %[3]s.id",
+		ChannelAdTableFull,
+		AdTableFull,
+		aaa.UserTableFull)
 
 	for field, value := range filters {
-		where = append(where, fmt.Sprintf(ChannelTableFull+".%s=%s", field, "?"))
+		where = append(where, fmt.Sprintf(ChannelTableFull+".%s=?", field))
 		params = append(params, value)
 	}
 
@@ -314,8 +321,8 @@ func (m *Manager) FillChannelDetailDataTableArray(u base.PermInterfaceComplete,
 		where = append(where, fmt.Sprintf("%s.user_id=?", ChannelTableFull))
 		params = append(params, currentUserID)
 	} else if highestScope == base.ScopeParent {
-		where = append(where, "%s.parent_id=?", aaa.UserTableFull)
-		params = append(params, currentUserID)
+		where = append(where, fmt.Sprintf("%[1]s.parent_id=? OR %[1]s.user_id=?", aaa.UserTableFull))
+		params = append(params, currentUserID, currentUserID)
 	}
 
 	//check for perm
