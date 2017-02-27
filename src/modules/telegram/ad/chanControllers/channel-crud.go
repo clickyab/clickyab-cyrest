@@ -75,10 +75,10 @@ func (u *Controller) createChannel(ctx echo.Context) error {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
 	ch := &ads.Channel{
-		Name:          pl.Name,
+		Name:          pl.Link,
 		ArchiveStatus: ads.ArchiveStatusNo,
 		AdminStatus:   ads.AdminStatusPending,
-		Link:          common.MakeNullString(pl.Link),
+		Title:         common.MakeNullString(pl.Name),
 		Active:        ads.ActiveStatusYes,
 		UserID:        currentUser.ID,
 	}
@@ -174,8 +174,8 @@ func (u *Controller) editChannel(ctx echo.Context) error {
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
-	channel.Name = pl.Name
-	channel.Link = common.MakeNullString(pl.Link)
+	channel.Name = pl.Link
+	channel.Title = common.MakeNullString(pl.Name)
 
 	m.UpdateChannel(channel)
 

@@ -54,7 +54,7 @@ type Channel struct {
 	ID            int64             `db:"id" json:"id" sort:"true" title:"ID"`
 	UserID        int64             `json:"user_id" db:"user_id" title:"UserID"`
 	Name          string            `json:"name" db:"name" search:"true" title:"Name"`
-	Link          common.NullString `json:"link" db:"link" search:"true" title:"Link"`
+	Title         common.NullString `json:"link" db:"link" search:"true" title:"Title"`
 	AdminStatus   AdminStatus       `json:"admin_status" db:"admin_status" filter:"true" title:"AdminStatus"`
 	ArchiveStatus ArchiveStatus     `json:"archive_status" db:"archive_status" filter:"true" title:"ArchiveStatus"`
 	Active        ActiveStatus      `json:"active" db:"active" filter:"true" title:"Active"`
@@ -72,7 +72,7 @@ type ChanStat struct {
 func (m *Manager) ChannelCreate(link, name string, status AdminStatus, archive ArchiveStatus, active ActiveStatus, userID int64) *Channel {
 
 	ch := &Channel{
-		Link:        common.MakeNullString(link),
+		Title:       common.MakeNullString(link),
 		Name:        name,
 		AdminStatus: status,
 		Active:      active,
@@ -351,7 +351,7 @@ func (m *Manager) EditChannel(link, name string, status AdminStatus, activeStatu
 	ch := &Channel{
 		ID:          id,
 		UserID:      userID,
-		Link:        common.NullString{Valid: link != "", String: link},
+		Title:       common.NullString{Valid: link != "", String: link},
 		AdminStatus: status,
 		Active:      activeStatus,
 		Name:        name,
@@ -367,7 +367,7 @@ func (m *Manager) ChangeActive(ID int64, userID int64, name string, link string,
 		ID:          ID,
 		UserID:      userID,
 		Name:        name,
-		Link:        common.NullString{Valid: link != "", String: link},
+		Title:       common.NullString{Valid: link != "", String: link},
 		AdminStatus: status,
 		CreatedAt:   createdAt,
 	}
