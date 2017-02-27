@@ -674,3 +674,21 @@ func (u *Controller) getSpecificAd(ctx echo.Context) error {
 
 	return u.OKResponse(ctx, report)
 }
+
+//	callIdentifyAd call identify
+//	@Route	{
+//		url	=	/identify/:id
+//		method	= get
+//		resource = get_ad:global
+//		middleware = authz.Authenticate
+//		200 = base.NormalResponse
+//		400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) callIdentifyAd(ctx echo.Context) error {
+	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
+	assert.Nil(err)
+	rabbit.MustPublish(&commands.IdentifyAD{
+		AdID: id,
+	})
+	return u.OKResponse(ctx, nil)
+}
