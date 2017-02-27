@@ -63,8 +63,8 @@ type Channel struct {
 
 // ChanStat returns channels and their status by provider
 type ChanStat struct {
-	Name string      `json:"name" db:"name"`
-	Stat AdminStatus `json:"status" db:"status"`
+	Count int64       `json:"count" db:"count"`
+	Stat  AdminStatus `json:"status" db:"status"`
 }
 
 // ChannelCreate a new channel
@@ -472,8 +472,9 @@ func (m *Manager) FillActiveAdReportDataTableArray(
 
 // GetChanStat returns channels and admin statuss'
 func (m *Manager) GetChanStat(userID int64, scope base.UserScope) (result []ChanStat) {
-	q := fmt.Sprintf("SELECT name, admin_status AS status from %[1]s "+
-		"LEFT JOIN %[2]s ON %[1]s.user_id = %[2]s.id",
+	q := fmt.Sprintf("SELECT COUNT(%[1]s.id) AS count, admin_status AS status from %[1]s "+
+		"LEFT JOIN %[2]s ON %[1]s.user_id = %[2]s.id "+
+		"GROUP BY admin_status",
 		ChannelTableFull,
 		aaa.UserTableFull)
 
