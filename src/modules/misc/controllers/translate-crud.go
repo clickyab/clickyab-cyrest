@@ -63,3 +63,22 @@ func (u *Controller) transDump(ctx echo.Context) error {
 	return u.OKResponse(ctx, result)
 
 }
+
+type getTranslatePayload struct {
+	Translate string `json:"translate" validate:"translate"`
+}
+
+//	callIdentifyAd call identify
+//	@Route	{
+//		url	=	/post_translate
+//		method	= post
+//		payload	= transPayload
+//		middleware = authz.Authenticate
+//		200 = base.NormalResponse
+//		400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) getTranslate(ctx echo.Context) error {
+	pl := u.MustGetPayload(ctx).(*getTranslatePayload)
+	trans.T(pl.Translate)
+	return u.OKResponse(ctx, nil)
+}
