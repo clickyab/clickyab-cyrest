@@ -64,8 +64,8 @@ type Channel struct {
 
 // ChanStat returns channels and their status by provider
 type ChanStat struct {
-	Count int64       `json:"count" db:"count"`
 	Stat  AdminStatus `json:"status" db:"status"`
+	Count int         `json:"count" db:"count"`
 }
 
 // ChannelCreate a new channel
@@ -479,22 +479,29 @@ func (m *Manager) FillActiveAdReportDataTableArray(
 
 // GetChanStat returns channels and admin statuss'
 func (m *Manager) GetChanStat(userID int64, scope base.UserScope) (result []ChanStat) {
-	q := fmt.Sprintf("SELECT COUNT(%[1]s.id) AS count, admin_status AS status from %[1]s "+
-		"LEFT JOIN %[2]s ON %[1]s.user_id = %[2]s.id "+
-		"GROUP BY admin_status",
-		ChannelTableFull,
-		aaa.UserTableFull)
-
+	var params []interface{}
 	where := ""
 	if scope == base.ScopeSelf {
-		where = fmt.Sprintf("WHERE user_id=%s", userID)
+		where = "WHERE user_id=?"
+		params = append(params, userID)
 	} else if scope == base.ScopeParent {
-		where = fmt.Sprintf("WHERE user_id=%[1]s OR parent_id=%[1]s", userID)
+		where = "WHERE user_id=? OR parent_id=?"
+		params = append(params, userID, userID)
 	}
 
-	q += where
+	q := fmt.Sprintf("SELECT COUNT(%[1]s.id) AS count, admin_status AS status from %[1]s "+
+		"LEFT JOIN %[2]s ON %[1]s.user_id = %[2]s.id "+
+		"%[3]s"+
+		" GROUP BY admin_status",
+		ChannelTableFull,
+		aaa.UserTableFull,
+		where)
 
-	_, err := m.GetDbMap().Select(&result, q)
+	_, err := m.GetDbMap().Select(
+		&result,
+		q,
+		params...,
+	)
 	assert.Nil(err)
 
 	return
