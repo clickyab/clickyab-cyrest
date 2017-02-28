@@ -199,15 +199,11 @@ func (u *Controller) changeArchiveStatus(ctx echo.Context) error {
 	currentUser := authz.MustGetUser(ctx)
 	owner, err := aaa.NewAaaManager().FindUserByID(currentAd.UserID)
 	assert.Nil(err)
-	_, b := currentUser.HasPermOn("change_admin_ad", owner.ID, owner.DBParentID.Int64)
+	_, b := currentUser.HasPermOn("change_archive_ad", owner.ID, owner.DBParentID.Int64)
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
-	if pl.AdArchiveStatus == ads.AdArchiveStatusNo && currentAd.AdArchiveStatus == ads.AdArchiveStatusYes {
-		currentAd.AdArchiveStatus = ads.AdArchiveStatusNo
-	} else if pl.AdArchiveStatus == ads.AdArchiveStatusYes && currentAd.AdArchiveStatus == ads.AdArchiveStatusNo {
-		currentAd.AdArchiveStatus = ads.AdArchiveStatusYes
-	}
+	currentAd.AdArchiveStatus = pl.AdArchiveStatus
 	assert.Nil(m.UpdateAd(currentAd))
 	return u.OKResponse(ctx, currentAd)
 }
