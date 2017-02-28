@@ -511,11 +511,11 @@ func (m *Manager) CountActiveChannel(userID int64, scope base.UserScope) (int64,
 		params1 = []interface{}{ActiveStatusYes}
 		params2 = []interface{}{ActiveStatusNo}
 	case base.ScopeParent:
-		where = " AND ( u.id = ? OR u.parent_id = ? )"
+		where = fmt.Sprintf(" AND ( %[1]s.id = ? OR %[1]s.parent_id = ? )", aaa.UserTableFull)
 		params1 = []interface{}{ActiveStatusYes, userID, userID}
 		params2 = []interface{}{ActiveStatusNo, userID, userID}
 	case base.ScopeSelf:
-		where = " AND u.id = ?"
+		where = fmt.Sprintf(" AND %[1]s.id = ?", aaa.UserTableFull)
 		params1 = []interface{}{ActiveStatusYes, userID}
 		params2 = []interface{}{ActiveStatusNo, userID}
 	}
