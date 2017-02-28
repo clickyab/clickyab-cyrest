@@ -100,14 +100,36 @@ func (u *Controller) createChannel(ctx echo.Context) error {
 //		400 = base.ErrorResponseSimple
 //	}
 func (u *Controller) channelStat(ctx echo.Context) error {
-
 	currentUser := authz.MustGetUser(ctx)
-	scope, ok := currentUser.HasPerm(base.ScopeGlobal, "get_ad_chart")
+	scope, ok := currentUser.HasPerm(base.ScopeSelf, "get_ad_chart")
 	if !ok {
 		u.BadResponse(ctx, errors.New(trans.T("not authorized").String()))
 	}
-	result := ads.NewAdsManager().GetChanStat(currentUser.ID, scope)
-	return u.OKResponse(ctx, result)
+	temp := ads.NewAdsManager().GetChanStat(currentUser.ID, scope)
+	result := []ads.ChanStat{
+		ads.ChanStat{
+			Stat:  ads.AdminStatusAccepted,
+			Count: 0,
+		},
+		ads.ChanStat{
+			Stat:  ads.AdminStatusPending,
+			Count: 0,
+		},
+		ads.ChanStat{
+			Stat:  ads.AdminStatusRejected,
+			Count: 0,
+		},
+	}
+	if len(temp) != 3 {
+		for i := range temp {
+			for j := range result {
+				if temp[i].Stat == result[j].Stat {
+					result[j].Count = temp[i].Count
+				}
+			}
+		}
+	}
+	return u.OKResponse(ctx, nil)
 }
 
 //	getChannel
