@@ -65,7 +65,7 @@ type Verifycode struct {
 //		view = teleuser_list:self
 //		controller = modules/telegram/teleuser/controllers
 //		fill = FillTeleuserDataTableArray
-//		_edit = teleuser_edit:self
+//		_delete = add_teleuser:self
 // }
 type TeleuserDataTable struct {
 	TeleUser
@@ -139,4 +139,13 @@ func (m *Manager) GetUser(chatID int64) (*aaa.User, error) {
 	}
 
 	return &res, nil
+}
+
+// DeleteTelegramUser delete a role by id
+func (m *Manager) DeleteTelegramUser(telegramUserID int64) error {
+	tele, err := m.FindTeleUserByID(telegramUserID)
+	assert.Nil(err)
+	_, err = m.GetDbMap().Delete(tele)
+	assert.Nil(err)
+	return err
 }
