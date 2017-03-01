@@ -129,7 +129,7 @@ func (u *Controller) channelStat(ctx echo.Context) error {
 			}
 		}
 	}
-	return u.OKResponse(ctx, nil)
+	return u.OKResponse(ctx, result)
 }
 
 //	getChannel
