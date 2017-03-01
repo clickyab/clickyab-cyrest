@@ -97,7 +97,12 @@ type PlanDataTable struct {
 }
 
 // FillPlanDataTableArray is the function to handle
-func (m *Manager) FillPlanDataTableArray(u base.PermInterfaceComplete, filters map[string]string, search map[string]string, sort, order string, p, c int) (PlanDataTableArray, int64) {
+func (m *Manager) FillPlanDataTableArray(
+	u base.PermInterfaceComplete,
+	filters map[string]string,
+	search map[string]string,
+	contextparams []string,
+	sort, order string, p, c int) (PlanDataTableArray, int64) {
 	var params []interface{}
 	var res PlanDataTableArray
 	var where []string

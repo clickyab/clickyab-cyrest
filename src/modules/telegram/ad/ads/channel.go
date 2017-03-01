@@ -200,7 +200,13 @@ type ChannelDataTable struct {
 }
 
 // FillChannelDataTableArray is the function to handle
-func (m *Manager) FillChannelDataTableArray(u base.PermInterfaceComplete, filters map[string]string, search map[string]string, sort, order string, p, c int) (ChannelDataTableArray, int64) {
+func (m *Manager) FillChannelDataTableArray(
+	u base.PermInterfaceComplete,
+	filters map[string]string,
+	search map[string]string,
+	contextparams []string,
+	sort, order string,
+	p, c int) (ChannelDataTableArray, int64) {
 	var params []interface{}
 	var res ChannelDataTableArray
 	var where []string
@@ -283,6 +289,7 @@ type ChannelDetailDataTable struct {
 func (m *Manager) FillChannelDetailDataTableArray(u base.PermInterfaceComplete,
 	filters map[string]string,
 	search map[string]string,
+	contextparams []string,
 	sort,
 	order string,
 	p, c int) (ChannelDetailDataTableArray, int64) {
@@ -406,6 +413,7 @@ func (m *Manager) FillActiveAdReportDataTableArray(
 	u base.PermInterfaceComplete,
 	filters map[string]string,
 	search map[string]string,
+	contextparams []string,
 	sort, order string, p, c int) (ReportActiveAdDataTableArray, int64) {
 	var params []interface{}
 	var res ReportActiveAdDataTableArray

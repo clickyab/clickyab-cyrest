@@ -76,7 +76,12 @@ type TeleuserDataTable struct {
 }
 
 // FillTeleuserDataTableArray is the function to handle the user data table
-func (m *Manager) FillTeleuserDataTableArray(u base.PermInterfaceComplete, filters map[string]string, search map[string]string, sort, order string, p, c int) (TeleuserDataTableArray, int64) {
+func (m *Manager) FillTeleuserDataTableArray(
+	u base.PermInterfaceComplete,
+	filters map[string]string,
+	search map[string]string,
+	contextparams []string,
+	sort, order string, p, c int) (TeleuserDataTableArray, int64) {
 	var params []interface{}
 	var res TeleuserDataTableArray
 	var where []string
