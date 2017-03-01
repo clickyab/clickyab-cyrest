@@ -9,8 +9,7 @@ import (
 
 	"html/template"
 
-	"fmt"
-	"strings"
+	"errors"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/go-gomail/gomail"
@@ -64,20 +63,15 @@ func Send(subject string, body []byte, from string, to ...string) error {
 }
 
 func loadTemplates() {
-	for t := range _bindata {
-		lastSlash := strings.LastIndexAny(t, "/") + 1
-		fileName := t[lastSlash:strings.LastIndexAny(t, ".")]
+	if len(_bindata) < 1 {
+		assert.Nil(errors.New("There is no template to compile"))
+		return
+	}
 
-		for i, c := range fileName {
-			if (fmt.Sprintf("%c", c) == "-") && len(fileName) > i+1 {
-				fileName = fileName[:i] + strings.ToUpper(fileName[i:i+2]) + fileName[i+2:]
-			}
-		}
-		partialTemplate := strings.Replace(fileName, "-", "", -1)
+	for t := range _bindata {
 		data, err := Asset(t)
 		assert.Nil(err)
-
-		mailTemplate.New(partialTemplate).Parse(string(data))
+		mailTemplate.New(t).Parse(string(data))
 	}
 }
 
