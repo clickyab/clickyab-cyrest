@@ -36,6 +36,8 @@ func createMessage(bot *tgbotapi.BotAPI, chatID int64, ad *ads.Ad) tgbotapi.Mess
 		vd := tgbotapi.NewVideoUpload(chatID, f)
 		vd.Caption = string(ad.Description)
 		chat = vd
+	} else if ad.Src.Valid {
+		chat = tgbotapi.NewMessage(chatID, string(ad.Description))
 	}
 
 	assert.NotNil(chat, "[BUG] Unhandled ext ")
