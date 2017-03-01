@@ -67,8 +67,8 @@ type (
 // }
 type Ad struct {
 	ID              int64             `db:"id" json:"id" sort:"true" title:"ID"`
-	UserID          int64             `json:"user_id" db:"user_id" title:"UserID"`
-	PlanID          common.NullInt64  `json:"plan_id" db:"plan_id" title:"PlanID"`
+	UserID          int64             `json:"user_id" db:"user_id" title:"UserID" visible:"false"`
+	PlanID          common.NullInt64  `json:"plan_id" db:"plan_id" title:"PlanID" visible:"false"`
 	Position        common.NullInt64  `json:"position" db:"position" visible:"false" title:"Position"`
 	Name            string            `json:"name" db:"name" title:"Name"`
 	Description     common.MB4String  `json:"description" db:"description" visible:"false" title:"Description"`
@@ -84,7 +84,7 @@ type Ad struct {
 	AdPayStatus     AdPayStatus       `json:"pay_status" db:"pay_status" filter:"true" title:"PayStatus"`
 	AdActiveStatus  AdActiveStatus    `json:"active_status" db:"active_status" filter:"true" title:"ActiveStatus"`
 	CreatedAt       time.Time         `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
-	UpdatedAt       time.Time         `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at"`
+	UpdatedAt       time.Time         `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at" visible:"false"`
 }
 
 //AdDataTable is the ad full data in data table, after join with other field
@@ -101,7 +101,7 @@ type Ad struct {
 // }
 type AdDataTable struct {
 	Ad
-	Email    string           `db:"email" json:"email" search:"true" title:"Email"`
+	Email    string           `db:"email" json:"email" search:"true" title:"Email" visible:"false"`
 	ParentID common.NullInt64 `db:"parent_id" json:"parent_id" visible:"false"`
 	OwnerID  int64            `db:"owner_id" json:"owner_id" visible:"false"`
 	Actions  string           `db:"-" json:"_actions" visible:"false"`
