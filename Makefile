@@ -78,6 +78,15 @@ run-cyborg: cyborg
 watch-cyborg:
 	make watch WATCH=cyborg
 
+reporter: $(BIN)/gb
+	$(BUILD) cmd/reporter
+
+run-reporter: reporter
+	$(BIN)/reporter
+
+watch-reporter:
+	make watch WATCH=reporter
+
 got: $(BIN)/gb
 	$(BUILD) cmd/got
 

@@ -1,0 +1,25 @@
+/* You can add global styles to this file, and also import other style files */
+@theme: #233445;
+@color: lighten(@theme,20%);
+@link: lighten(@theme,20%);
+@content-width:1000px;
+* {
+    box-sizing: content-box;
+}
+body {
+  display: flex;
+    margin: auto;
+   // background-color: darken( @theme,20%);
+    color: @color;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    a {
+        color: @link;
+        text-decoration: none;
+    }
+}
+
+.base-holder {
+    width: @content-width;
+    margin: auto;
+}
+

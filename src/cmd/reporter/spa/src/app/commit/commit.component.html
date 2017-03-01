@@ -1,0 +1,22 @@
+<div class="commit">
+  <div class="timeline">
+
+    <div class="icon icon-{{userId}}">
+      <div>EF</div>
+
+      <img #avtar src="https://www.gravatar.com/avatar/{{avatar}}" [class.imgh]="!isLoaded" alt="">
+
+    </div>
+  </div>
+  <div class="info">
+    <div class="tags">
+      <a href="https://tracker.clickyab.com/issues/{{tag}}" *ngFor="let tag of tags">#{{tag}}</a>
+    </div>
+    <div class="details">
+      <h2>{{viewMessage}}</h2>
+      <a href="https://github.com/okian/clickyab-cyrest/commit/{{commit}}">{{commit}}</a>
+      <div class="date">{{date | date:'short'}}</div>
+    </div>
+  </div>
+
+</div>
