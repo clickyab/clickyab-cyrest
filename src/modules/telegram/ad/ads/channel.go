@@ -482,10 +482,10 @@ func (m *Manager) GetChanStat(userID int64, scope base.UserScope) (result []Chan
 	var params []interface{}
 	where := ""
 	if scope == base.ScopeSelf {
-		where = "WHERE user_id=?"
+		where = "WHERE user_id=? "
 		params = append(params, userID)
 	} else if scope == base.ScopeParent {
-		where = "WHERE user_id=? OR parent_id=?"
+		where = "WHERE user_id=? OR parent_id=? "
 		params = append(params, userID, userID)
 	}
 
