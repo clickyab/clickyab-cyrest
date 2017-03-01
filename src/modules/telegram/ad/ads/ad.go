@@ -112,6 +112,7 @@ func (m *Manager) FillAdDataTableArray(
 	u base.PermInterfaceComplete,
 	filters map[string]string,
 	search map[string]string,
+	contextparams []string,
 	sort, order string, p, c int) (AdDataTableArray, int64) {
 	var params []interface{}
 	var res AdDataTableArray
@@ -273,6 +274,7 @@ func (m *Manager) FillUserAdDataTableArray(
 	u base.PermInterfaceComplete,
 	filters map[string]string,
 	search map[string]string,
+	contextparams []string,
 	sort, order string,
 	p, c int) (UserAdDataTableArray, int64) {
 	var params []interface{}
@@ -397,6 +399,7 @@ func (m *Manager) FillAdReportDataTableArray(
 	u base.PermInterfaceComplete,
 	filters map[string]string,
 	search map[string]string,
+	contextparams []string,
 	sort, order string, p, c int) (ReportAdDataTableArray, int64) {
 	var params []interface{}
 	var res ReportAdDataTableArray
@@ -688,6 +691,7 @@ type AdDetailDataTable struct {
 func (m *Manager) FillAdDetailDataTableArray(u base.PermInterfaceComplete,
 	filters map[string]string,
 	search map[string]string,
+	contextparams []string,
 	sort, order string, p, c int) (AdDetailDataTableArray, int64) {
 	var params []interface{}
 	var res AdDetailDataTableArray

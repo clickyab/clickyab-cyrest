@@ -344,6 +344,7 @@ func (m *Manager) FillChannelReportDataTableArray(
 	u base.PermInterfaceComplete,
 	filters map[string]string,
 	search map[string]string,
+	contextparams []string,
 	sort, order string, p, c int) (ReportChannelDataTableArray, int64) {
 	var params []interface{}
 	var res ReportChannelDataTableArray

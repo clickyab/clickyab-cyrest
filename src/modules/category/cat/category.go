@@ -70,7 +70,13 @@ func (m *Manager) Create(title string, description string, scope string) *Catego
 }
 
 // FillCategoryDataTableArray is the function to handle
-func (m *Manager) FillCategoryDataTableArray(u base.PermInterfaceComplete, filters map[string]string, search map[string]string, sort, order string, p, c int) (CategoryDataTableArray, int64) {
+func (m *Manager) FillCategoryDataTableArray(
+	u base.PermInterfaceComplete,
+	filters map[string]string,
+	search map[string]string,
+	contextparams []string,
+	sort, order string,
+	p, c int) (CategoryDataTableArray, int64) {
 	var params []interface{}
 	var res CategoryDataTableArray
 	var where []string
