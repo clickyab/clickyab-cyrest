@@ -103,6 +103,7 @@ func (m *Manager) FillBillingDataTableArray(
 	u base.PermInterfaceComplete,
 	filters map[string]string,
 	search map[string]string,
+	contextparams map[string]string,
 	sort, order string, p, c int) (BillingDataTableArray, int64) {
 	var params []interface{}
 	var res BillingDataTableArray

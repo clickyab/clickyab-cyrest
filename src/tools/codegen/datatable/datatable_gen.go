@@ -199,8 +199,14 @@ func (u *Controller) list{{ .Data.Entity|ucfirst }}(ctx echo.Context) error {
 	sort := ""
 	order := "ASC"
 	{{ end }}
+
+	params := make(map[string]string)
+	for _, i := range ctx.ParamNames() {
+		params[i] = ctx.Param(i)
+	}
+
 	pc := base.NewPermInterfaceComplete(usr, usr.ID, "{{ .Data.View.Perm }}", "{{ .Data.View.Scope }}")
-	dt, cnt := m.{{ .Data.Fill }}(pc, filter, search, sort, order, p, c)
+	dt, cnt := m.{{ .Data.Fill }}(pc, filter, search, params, sort, order, p, c)
 	res := 		list{{ .Data.Entity|ucfirst }}Response{
 		Total:   cnt,
 		Data:    dt.Filter(usr),
