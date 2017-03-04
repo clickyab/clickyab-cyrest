@@ -101,10 +101,7 @@ func (u *Controller) createChannel(ctx echo.Context) error {
 //	}
 func (u *Controller) channelStat(ctx echo.Context) error {
 	currentUser := authz.MustGetUser(ctx)
-	scope, ok := currentUser.HasPerm(base.ScopeSelf, "get_ad_chart")
-	if !ok {
-		u.BadResponse(ctx, errors.New(trans.T("not authorized").String()))
-	}
+	scope, _ := currentUser.HasPerm(base.ScopeSelf, "get_ad_chart")
 	temp := ads.NewAdsManager().GetChanStat(currentUser.ID, scope)
 	result := []ads.ChanStat{
 		ads.ChanStat{
