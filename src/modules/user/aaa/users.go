@@ -224,7 +224,12 @@ func (u *User) HasPermOn(perm base.Permission, ownerID, parentID int64, scopes .
 }
 
 // FillUserDataTableArray is the function to fill user data table array
-func (m *Manager) FillUserDataTableArray(u base.PermInterfaceComplete, filters map[string]string, search map[string]string, sort, order string, p, c int) (UserDataTableArray, int64) {
+func (m *Manager) FillUserDataTableArray(
+	u base.PermInterfaceComplete,
+	filters map[string]string,
+	search map[string]string,
+	contextparams map[string]string,
+	sort, order string, p, c int) (UserDataTableArray, int64) {
 	var params []interface{}
 	var count int64
 	var res UserDataTableArray

@@ -79,7 +79,12 @@ func (m *Manager) RegisterRole(name string, description string, perm map[base.Us
 }
 
 // FillRoleDataTableArray is the function to handle
-func (m *Manager) FillRoleDataTableArray(u base.PermInterfaceComplete, filters map[string]string, search map[string]string, sort, order string, p, c int) (RoleDataTableArray, int64) {
+func (m *Manager) FillRoleDataTableArray(
+	u base.PermInterfaceComplete,
+	filters map[string]string,
+	search map[string]string,
+	contextparams map[string]string,
+	sort, order string, p, c int) (RoleDataTableArray, int64) {
 	var params []interface{}
 	var res RoleDataTableArray
 	var where []string
