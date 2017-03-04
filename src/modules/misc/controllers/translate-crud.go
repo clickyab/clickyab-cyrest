@@ -70,9 +70,9 @@ type getTranslatePayload struct {
 
 //	callIdentifyAd call identify
 //	@Route	{
-//		url	=	/post_translate
+//		url	=	/translate
 //		method	= post
-//		payload	= transPayload
+//		payload	= getTranslatePayload
 //		middleware = authz.Authenticate
 //		200 = base.NormalResponse
 //		400 = base.ErrorResponseSimple
