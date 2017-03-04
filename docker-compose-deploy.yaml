@@ -38,6 +38,13 @@ services:
       - CYREST_FILE_UPLOAD_PATH
       - CYREST_FILE_UPLOAD_UI_PATH
       - CYREST_FILE_SAME_UPLOAD_PATH
+      - CYREST_MAIL_HOST
+      - CYREST_MAIL_PORT
+      - CYREST_MAIL_USER_NAME
+      - CYREST_MAIL_PASSWORD
+      - CYREST_MAIL_FROM
+      - CYREST_GATE_MERCHANT_ID
+
 
     networks:
       - rubik
