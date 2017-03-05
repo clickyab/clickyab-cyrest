@@ -1,7 +1,7 @@
 #!/usr/bin/dumb-init /bin/bash
 set -euo pipefail
 set -x
-
+env
 MYSQL_USER=${MYSQL_USER:-root}
 MYSQL_PASSWORD=${MYSQL_PASSWORD:-bita123}
 MYSQL_DB=${MYSQL_DB:-cyrest}
