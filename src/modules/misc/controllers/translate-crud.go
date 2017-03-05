@@ -48,7 +48,6 @@ func (u *Controller) translate(ctx echo.Context) error {
 //	url	=	/dump/:lang
 //	method	= get
 //	resource = trans_dump:global
-//	middleware = authz.Authenticate
 //	200 = t9n.Mixed
 //	400 = base.ErrorResponseSimple
 //	}
