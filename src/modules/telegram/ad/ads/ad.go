@@ -12,6 +12,7 @@ import (
 	"common/utils"
 	"database/sql"
 	"database/sql/driver"
+	"strconv"
 	"time"
 )
 
@@ -665,7 +666,7 @@ func (m *Manager) PubDashboardTotalView(userID int64, scope base.UserScope) []Pu
 
 //AdDetailDataTable is the ad full data in data table, after join with other field
 // @DataTable {
-//		url = /detail
+//		url = /detailtable/:id
 //		entity = AdDetailDataTable
 //		view = ad_detail:self
 //		controller = modules/telegram/ad/adControllers
@@ -696,10 +697,14 @@ func (m *Manager) FillAdDetailDataTableArray(u base.PermInterfaceComplete,
 	var res AdDetailDataTableArray
 	var where []string
 
+	id, err := strconv.ParseInt(contextparams["id"], 0, 64)
+	assert.Nil(err)
+
 	countQuery := fmt.Sprintf("SELECT COUNT(%[2]s.name) from %[1]s "+
 		"LEFT JOIN %[2]s ON %[1]s.ad_id = %[2]s.id "+
 		"LEFT JOIN %[4]s ON %[2]s.plan_id = %[4]s.id "+
-		"LEFT JOIN %[3]s ON %[2]s.user_id = %[3]s.id ",
+		"LEFT JOIN %[3]s ON %[2]s.user_id = %[3]s.id "+
+		"WHERE %[2]s.id=? ",
 		ChannelAdTableFull,
 		AdTableFull,
 		aaa.UserTableFull,
@@ -709,12 +714,15 @@ func (m *Manager) FillAdDetailDataTableArray(u base.PermInterfaceComplete,
 		"type, start, %[4]s.view as planview, %[1]s.view from %[1]s "+
 		"LEFT JOIN %[2]s ON %[1]s.ad_id = %[2]s.id "+
 		"LEFT JOIN %[4]s ON %[2]s.plan_id = %[4]s.id "+
-		"LEFT JOIN %[3]s ON %[2]s.user_id = %[3]s.id ",
+		"LEFT JOIN %[3]s ON %[2]s.user_id = %[3]s.id "+
+		"WHERE %[2]s.id=? ",
 		ChannelAdTableFull,
 		AdTableFull,
 		aaa.UserTableFull,
 		PlanTableFull,
 	)
+	params = append(params, id)
+
 	for field, value := range filters {
 		where = append(where, fmt.Sprintf("%s.%s=?", ChannelAdTableFull, field))
 		params = append(params, value)
