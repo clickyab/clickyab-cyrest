@@ -28,6 +28,8 @@ var listTranslatelistDefinition base.Columns
 //		resource = translate_list:global
 //		_lang_ = string, the language
 //		_def_ = bool, show definition in result?
+//		_c_ = int , count per page
+//		_p_ = int , page number
 //		200 = listTranslatelistResponse
 // }
 func (u *Controller) listTranslatelist(ctx echo.Context) error {
