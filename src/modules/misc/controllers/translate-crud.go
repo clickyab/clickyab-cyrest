@@ -65,7 +65,7 @@ func (u *Controller) transDump(ctx echo.Context) error {
 }
 
 type getTranslatePayload struct {
-	Translate string `json:"translate" validate:"translate"`
+	Translate string `json:"translate" validate:"required"`
 }
 
 //	callIdentifyAd call identify
