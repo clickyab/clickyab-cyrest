@@ -78,6 +78,15 @@ run-cyborg: cyborg
 watch-cyborg:
 	make watch WATCH=cyborg
 
+reporter: codegen-reporter $(BIN)/gb
+	$(BUILD) cmd/reporter
+
+run-reporter: reporter
+	$(BIN)/reporter
+
+watch-reporter:
+	make watch WATCH=reporter
+
 got: $(BIN)/gb
 	$(BUILD) cmd/got
 
@@ -206,6 +215,9 @@ codegen-file: tools-codegen
 codegen-mail: tools-gobindata
 	cd $(ROOT) && $(BIN)/go-bindata -o ./src/common/mail/mail.gen.go -nomemcopy=true -pkg=mail ./resource/...
 
+codegen-reporter: tools-gobindata
+	cd $(ROOT) && $(BIN)/go-bindata -o ./src/cmd/reporter/template.gen.go -nomemcopy=true -pkg=main ./src/cmd/reporter/resource/template/...
+
 codegen-billing: tools-codegen
 	$(BIN)/codegen -p modules/billing/controllers
 	$(BIN)/codegen -p modules/billing/bil
@@ -218,7 +230,7 @@ swagger-cleaner:
 swagger-client: tools-swagger
 	GOPATH=$(ROOT) cd $(ROOT)/src && $(BIN)/swagger generate client -f $(ROOT)/3rd/swagger/cyrest.yaml
 
-codegen: swagger-ui swagger-cleaner migration codegen-mail codegen-misc codegen-user codegen-category codegen-location codegen-ad codegen-teleuser codegen-file codegen-cyborg codegen-billing
+codegen: swagger-ui swagger-cleaner migration codegen-mail codegen-reporter  codegen-misc codegen-user codegen-category codegen-location codegen-ad codegen-teleuser codegen-file codegen-cyborg codegen-billing
 	@cp $(WORK_DIR)/swagger/out.yaml $(ROOT)/3rd/swagger/cyrest.yaml
 	@cp $(WORK_DIR)/swagger/out.json $(ROOT)/3rd/swagger/cyrest.json
 	@echo "Done"
