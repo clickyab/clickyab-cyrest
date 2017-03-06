@@ -40,7 +40,7 @@ type Mixed struct {
 }
 
 // DumpAll dump all the translated data from repo
-func (m *Manager) DumpAll(lang string) []Mixed {
+func (m *Manager) DumpAll(lang string) map[string]map[string]string {
 	query := fmt.Sprintf(
 		"SELECT text, translated from %[1]s LEFT JOIN strings ON %[1]s.string_id = %[2]s.id "+
 			"WHERE lang=?",
@@ -51,7 +51,13 @@ func (m *Manager) DumpAll(lang string) []Mixed {
 	if err != nil {
 		assert.Nil(err)
 	}
-	return result
+	mAp := map[string]string{}
+	for i := range result {
+		if result[i].Translated.Valid {
+			mAp[result[i].Text] = result[i].Translated.String
+		}
+	}
+	return map[string]map[string]string{lang: mAp}
 }
 
 var (
