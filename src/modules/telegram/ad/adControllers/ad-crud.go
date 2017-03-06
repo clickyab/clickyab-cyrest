@@ -632,45 +632,6 @@ func (u *Controller) pieChartAdvertiser(ctx echo.Context) error {
 
 }
 
-//	getSpecificAd shows ad with specific details
-//	@Route	{
-//		url	=	/detail/:id
-//		method	= get
-//		resource = get_ad:self
-//		middleware = authz.Authenticate
-//		200 = ads.AdReport
-//		400 = base.ErrorResponseSimple
-//	}
-func (u *Controller) getSpecificAd(ctx echo.Context) error {
-	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
-	if err != nil {
-		return u.NotFoundResponse(ctx, nil)
-	}
-	m := ads.NewAdsManager()
-	currentAd, err := m.FindAdByID(id)
-	if err != nil {
-		return u.NotFoundResponse(ctx, nil)
-	}
-	currentUser := authz.MustGetUser(ctx)
-	owner, err := aaa.NewAaaManager().FindUserByID(currentAd.UserID)
-	assert.Nil(err)
-	_, b := currentUser.HasPermOn("get_ad", owner.ID, owner.DBParentID.Int64)
-	if !b {
-		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
-	}
-
-	report, err := m.GetAdReport(id)
-	assert.Nil(err)
-
-	for k := range report {
-		if report[k].End.Valid {
-			//report[k].Price = func() TODO need price algorithm
-		}
-	}
-
-	return u.OKResponse(ctx, report)
-}
-
 //	callIdentifyAd call identify
 //	@Route	{
 //		url	=	/identify/:id
