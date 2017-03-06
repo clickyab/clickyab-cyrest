@@ -368,7 +368,7 @@ func (m *Manager) RegisterUser(email, password string) (u *User, err error) {
 		u = nil
 		return
 	}
-	role, err := m.FindRoleByName(config.Config.Role.Default)
+	role, err := m.FindRoleByID(config.Config.Role.Default)
 	if err != nil {
 		u = nil
 		return

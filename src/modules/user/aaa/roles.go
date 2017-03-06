@@ -5,9 +5,9 @@ import (
 	"common/config"
 	"common/models/common"
 	"common/utils"
-	"errors"
 	"fmt"
 	"modules/misc/base"
+	"modules/misc/trans"
 	"strings"
 	"time"
 )
@@ -135,7 +135,7 @@ func (m *Manager) CountRoleUserByID(roleID int64) (int64, error) {
 func (m *Manager) DeleteRoleByID(roleID int64) (*Role, error) {
 	role, err := m.FindRoleByID(roleID)
 	if err != nil {
-		return nil, errors.New("no role found")
+		return nil, trans.E("no role found")
 	}
 	_, err = m.GetDbMap().Delete(role)
 	return role, err
@@ -143,10 +143,10 @@ func (m *Manager) DeleteRoleByID(roleID int64) (*Role, error) {
 
 // DeleteRole in transaction try delete role
 func (m *Manager) DeleteRole(ID int64) (r *Role, err error) {
-	r, err = m.FindRoleByID(ID)
-	if r.Name == config.Config.Role.Default {
-		return r, fmt.Errorf("you cannot remove role <<%s>>", config.Config.Role.Default)
+	if ID == config.Config.Role.Default {
+		return r, trans.E("you cannot remove Default role")
 	}
+	r, err = m.FindRoleByID(ID)
 	err = m.Begin()
 	if err != nil {
 		return nil, err
@@ -209,18 +209,18 @@ func (m *Manager) UpdateRoleWithPerm(ID int64, name, description string, perm ma
 
 	err = m.UpdateRole(r)
 	if err != nil {
-		err = errors.New("cant update role")
+		err = trans.E("cant update role")
 	}
 
 	//delete role_permission
 	err = m.DeleteRolePermissionByRoleID(ID)
 	if err != nil {
-		err = errors.New("cant delete role permission")
+		err = trans.E("cant delete role permission")
 	}
 
 	err = m.RegisterRolePermission(ID, perm)
 	if err != nil {
-		err = errors.New("cant register role permission")
+		err = trans.E("cant register role permission")
 	}
 	return
 
