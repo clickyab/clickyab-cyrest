@@ -3,7 +3,6 @@ package ads
 import (
 	"common/assert"
 	"common/models/common"
-	"database/sql"
 	"fmt"
 	"modules/misc/base"
 	"modules/telegram/teleuser/tlu"
@@ -262,7 +261,7 @@ func (m *Manager) FillChannelDataTableArray(
 
 //ChannelDetailDataTable is the role full data in data table, after join with other field
 // @DataTable {
-//		url = /detail
+//		url = /detail/:id
 //		entity = ChannelDetailDataTable
 //		view = channel_list:self
 //		controller = modules/telegram/ad/chanControllers
@@ -273,7 +272,6 @@ func (m *Manager) FillChannelDataTableArray(
 //		_active = active_channel:global
 // }
 type ChannelDetailDataTable struct {
-	ChanID   sql.NullInt64    `db:"channel_id" json:"channel_id" search:"true"`
 	View     int64            `db:"view" json:"view"`
 	AdName   string           `db:"name" json:"adname" search:"true"`
 	Active   ActiveStatus     `db:"active" json:"active" filter:"true"`
@@ -296,20 +294,24 @@ func (m *Manager) FillChannelDetailDataTableArray(u base.PermInterfaceComplete,
 	var params []interface{}
 	var res ChannelDetailDataTableArray
 	var where []string
+	id := contextparams["id"]
 
 	countQuery := fmt.Sprintf("SELECT COUNT(channel_id) FROM %[1]s "+
 		"LEFT JOIN %[2]s ON %[1]s.ad_id=%[2]s.id "+
-		"LEFT JOIN %[3]s ON %[2]s.user_id = %[3]s.id",
+		"LEFT JOIN %[3]s ON %[2]s.user_id = %[3]s.id "+
+		"WHERE channel_id=?",
 		ChannelAdTableFull,
 		AdTableFull,
 		aaa.UserTableFull)
 
 	query := fmt.Sprintf("SELECT ads.name, channel_ad.view, active, start, end FROM %[1]s "+
 		"LEFT JOIN %[2]s ON %[2]s.id=%[1]s.ad_id "+
-		"LEFT JOIN %[3]s ON %[2]s.user_id = %[3]s.id",
+		"LEFT JOIN %[3]s ON %[2]s.user_id = %[3]s.id "+
+		"WHERE channel_id=?",
 		ChannelAdTableFull,
 		AdTableFull,
 		aaa.UserTableFull)
+	params = append(params, id)
 
 	for field, value := range filters {
 		where = append(where, fmt.Sprintf(ChannelTableFull+".%s=?", field))
