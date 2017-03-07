@@ -26,6 +26,12 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "github.com/alcortesm/tgz",
+			"repository": "https://github.com/alcortesm/tgz",
+			"revision": "9c5fe88206d7765837fed3732a42ef88fc51f1a1",
+			"branch": "master"
+		},
+		{
 			"importpath": "github.com/andybalholm/cascadia",
 			"repository": "https://github.com/andybalholm/cascadia",
 			"revision": "3ad29d1ad1c4f2023e355603324348cf1f4b2d48",
@@ -240,6 +246,12 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "github.com/jessevdk/go-flags",
+			"repository": "https://github.com/jessevdk/go-flags",
+			"revision": "460c7bb0abd6e927f2767cadc91aa6ef776a98b4",
+			"branch": "master"
+		},
+		{
 			"importpath": "github.com/jinzhu/inflection",
 			"repository": "https://github.com/jinzhu/inflection",
 			"revision": "3272df6c21d04180007eb3349844c89a3856bc25",
@@ -380,6 +392,24 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "github.com/okian/go-billy",
+			"repository": "https://github.com/okian/go-billy",
+			"revision": "24379ed71415e2cd15a8dfb01399786ed918c7af",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/okian/go-git",
+			"repository": "https://github.com/okian/go-git",
+			"revision": "f274744381fe25cb23409dde632d92874ed6dd38",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/okian/go-git-fixtures",
+			"repository": "https://github.com/okian/go-git-fixtures",
+			"revision": "b558b9fe7746c8d3d03ab660dc96b9ff55237085",
+			"branch": "master"
+		},
+		{
 			"importpath": "github.com/olebedev/emitter",
 			"repository": "https://github.com/olebedev/emitter",
 			"revision": "3e7ff9ab9e1ca04c4bd78354ca4c2bc5f6725f90",
@@ -396,6 +426,19 @@
 			"repository": "https://github.com/rubenv/sql-migrate",
 			"revision": "969836b11ea791ff8335d8142eb96904db12d593",
 			"branch": "master"
+		},
+		{
+			"importpath": "github.com/sergi/go-diff/diffmatchpatch",
+			"repository": "https://github.com/sergi/go-diff",
+			"revision": "24e2351369ec4949b2ed0dc5c477afdd4c4034e8",
+			"branch": "master",
+			"path": "/diffmatchpatch"
+		},
+		{
+			"importpath": "github.com/src-d/gcfg",
+			"repository": "https://github.com/src-d/gcfg",
+			"revision": "f187355171c936ac84a82793659ebb4936bc1c23",
+			"branch": "v1"
 		},
 		{
 			"importpath": "github.com/streadway/amqp",
@@ -532,6 +575,12 @@
 			"branch": "v1"
 		},
 		{
+			"importpath": "gopkg.in/check.v1",
+			"repository": "https://gopkg.in/check.v1",
+			"revision": "20d25e2804050c1cd24a7eea1e7a6447dd0e74ec",
+			"branch": "v1"
+		},
+		{
 			"importpath": "gopkg.in/fzerorubigd/onion.v2",
 			"repository": "https://gopkg.in/fzerorubigd/onion.v2",
 			"revision": "e687b557954d44e2b5c3b4b52bb9ffa8572d9cb0",
@@ -571,6 +620,12 @@
 			"importpath": "gopkg.in/telegram-bot-api.v4",
 			"repository": "https://gopkg.in/telegram-bot-api.v4",
 			"revision": "0a57807db79efce7f6719fbb2c0e0f83fda79aec",
+			"branch": "master"
+		},
+		{
+			"importpath": "gopkg.in/warnings.v0",
+			"repository": "https://gopkg.in/warnings.v0",
+			"revision": "8a331561fe74dadba6edfc59f3be66c22c3b065d",
 			"branch": "master"
 		},
 		{
