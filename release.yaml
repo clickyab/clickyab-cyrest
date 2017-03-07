@@ -68,7 +68,7 @@
     - name: copy reporter file
       synchronize:
         src: "/home/cy/cyrest-{{ mode }}/report.html"
-        dest: "/home/cy/cyrest/report.html"
+        dest: "/home/cy/cyrest/public/report.html"
         delete: yes
         checksum: yes
         times: no
