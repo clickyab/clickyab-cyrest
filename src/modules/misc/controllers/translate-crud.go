@@ -5,6 +5,9 @@ import (
 
 	"modules/misc/trans"
 
+	"common/rabbit"
+	"modules/telegram/bot/worker"
+
 	"gopkg.in/labstack/echo.v3"
 )
 
@@ -39,6 +42,8 @@ func (u *Controller) translate(ctx echo.Context) error {
 	if err != nil {
 		return u.NotFoundResponse(ctx, trans.E("error while inserting translation"))
 	}
+	trans.Clear()
+	rabbit.MustPublish(&bot.ClearTrans{})
 	return u.OKResponse(ctx, translation)
 
 }
