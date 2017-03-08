@@ -119,6 +119,11 @@ func init () {
 	{{ range $act, $perm := $m.Actions }}
 	base.RegisterPermission("{{ $perm.Perm }}", "{{ $perm.Perm }}");
 	{{ end }}
+	{{ range $c:= $m.Column }}
+		{{ if $c.Perm }}
+		base.RegisterPermission("{{ $c.Perm.Perm }}", "{{ $c.Perm.Perm }}");
+		{{ end }}
+	{{ end }}
 }
 
 {{end}}
