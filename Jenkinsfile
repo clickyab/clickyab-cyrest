@@ -2,7 +2,7 @@ node {
     stage('Dependency') {
         checkout scm
         sh "make clean"
-	    sh "make restore"
+        sh "make restore"
     }
     stage('CodeGen') {
         checkout scm
