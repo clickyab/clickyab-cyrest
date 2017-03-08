@@ -80,7 +80,7 @@ func (u *Controller) createChannel(ctx echo.Context) error {
 		AdminStatus:   ads.AdminStatusPending,
 		Title:         common.MakeNullString(pl.Name),
 		Active:        ads.ActiveStatusYes,
-		UserID:        currentUser.ID,
+		UserID:        pl.UserID,
 	}
 	err = m.CreateChannel(ch)
 	if err != nil {

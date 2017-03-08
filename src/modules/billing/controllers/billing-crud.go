@@ -13,6 +13,12 @@ import (
 	"common/models/common"
 	"time"
 
+	"modules/billing/config"
+
+	"modules/misc/middlewares"
+
+	"math"
+
 	"gopkg.in/labstack/echo.v3"
 )
 
@@ -133,4 +139,164 @@ func (u *Controller) payment(ctx echo.Context) error {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
 	return u.OKResponse(ctx, currentPayment)
+}
+
+// @Validate {
+// }
+type bilChangeStatusPayload struct {
+	status   bil.BillingStatus `json:"status" validate:"required" error:"status is required"`
+	describe string            `json:"describe"`
+}
+
+// Validate custom validation for billing status
+func (lp *bilChangeStatusPayload) ValidateExtra(ctx echo.Context) error {
+	if !lp.status.IsValid() {
+		return middlewares.GroupError{
+			"status": trans.E("status is invalid"),
+		}
+	}
+	return nil
+}
+
+//	changeStatus change status for withdrawal
+//	@Route	{
+//		url = /list/status/:id
+//		method = put
+//		resource = change_status_billing:global
+//		payload	= bilChangeStatusPayload
+//		middleware = authz.Authenticate
+//		200 = bil.Billing
+//		400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) changeStatus(ctx echo.Context) error {
+	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	pl := u.MustGetPayload(ctx).(*bilChangeStatusPayload)
+	m := bil.NewBilManager()
+	currentBil, err := m.FindBillingByID(id)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	currentUser := authz.MustGetUser(ctx)
+	owner, err := aaa.NewAaaManager().FindUserByID(currentBil.UserID)
+	assert.Nil(err)
+	_, b := currentUser.HasPermOn("change_status_billing", owner.ID, owner.DBParentID.Int64)
+	if !b {
+		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
+	}
+	currentBil.Status = pl.status
+	currentBil.Reason = common.MakeNullString(pl.describe)
+	assert.Nil(m.UpdateBilling(currentBil))
+	return u.OKResponse(ctx, currentBil)
+}
+
+// @Validate {
+// }
+type bilChangeDepositPayload struct {
+	deposit  bil.BillingDeposit `validate:"required" error:"deposit is required"`
+	describe string             `json:"describe"`
+}
+
+// Validate custom validation for billing status
+func (lp *bilChangeDepositPayload) ValidateExtra(ctx echo.Context) error {
+	if !lp.deposit.IsValid() {
+		return middlewares.GroupError{
+			"status": trans.E("deposit is invalid"),
+		}
+	}
+	return nil
+}
+
+//	changeDeposit change deposit for withdrawal
+//	@Route	{
+//		url = /list/deposit/:id
+//		method = put
+//		resource = change_deposit_billing:global
+//		payload	= bilChangeDepositPayload
+//		middleware = authz.Authenticate
+//		200 = bil.Billing
+//		400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) changeDeposit(ctx echo.Context) error {
+	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	pl := u.MustGetPayload(ctx).(*bilChangeDepositPayload)
+	m := bil.NewBilManager()
+	currentBil, err := m.FindBillingByID(id)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	if currentBil.Type != bil.BilTypeWithdrawal {
+		return ctx.JSON(http.StatusBadRequest, trans.E("this route just for withdrawal"))
+	}
+	currentUser := authz.MustGetUser(ctx)
+	owner, err := aaa.NewAaaManager().FindUserByID(currentBil.UserID)
+	assert.Nil(err)
+	_, b := currentUser.HasPermOn("change_deposit_billing", owner.ID, owner.DBParentID.Int64)
+	if !b {
+		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
+	}
+	currentBil.Deposit = pl.deposit
+	currentBil.Reason = common.MakeNullString(pl.describe)
+	assert.Nil(m.UpdateBilling(currentBil))
+	return u.OKResponse(ctx, currentBil)
+}
+
+// @Validate {
+// }
+type bilCreatePayload struct {
+	amount int64 `json:"amount" validate:"required" error:"amount is required"`
+	userID int64 `json:"user_id"`
+}
+
+//	createWithdrawal create withdrawal
+//	@Route	{
+//		url = /withdrawal
+//		method = post
+//		resource = request_withdrawal:self
+//		payload	= bilCreatePayload
+//		middleware = authz.Authenticate
+//		200 = bil.Billing
+//		400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) createWithdrawal(ctx echo.Context) error {
+	pl := u.MustGetPayload(ctx).(*bilCreatePayload)
+	if pl.amount < bcfg.Bcfg.Withdrawal.MinWithdrawal {
+		return ctx.JSON(http.StatusForbidden, trans.E("you can not withdrawal under %d", bcfg.Bcfg.Withdrawal.MinWithdrawal))
+	}
+	currentUser := authz.MustGetUser(ctx)
+	m := bil.NewBilManager()
+	sumBil, err := m.SumBilling(currentUser.ID)
+	assert.Nil(err)
+	if sumBil < pl.amount {
+		return ctx.JSON(http.StatusForbidden, trans.E("your withdrawal under your billing"))
+	}
+	if pl.userID == 0 {
+		pl.userID = currentUser.ID
+	}
+	owner, err := aaa.NewAaaManager().FindUserByID(pl.userID)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	_, b := currentUser.HasPermOn("create_channel", owner.ID, owner.DBParentID.Int64)
+	if !b {
+		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
+	}
+
+	withdrawal := bil.Billing{}
+	f := float64(pl.amount)
+	f = -math.Abs(f)
+	pl.amount = int64(f)
+	withdrawal.Amount = pl.amount
+	withdrawal.Type = bil.BilTypeWithdrawal
+	withdrawal.Status = bil.BilStatusPending
+	withdrawal.Deposit = bil.BilDepositNo
+	withdrawal.UserID = pl.userID
+
+	assert.Nil(m.CreateBilling(&withdrawal))
+	return u.OKResponse(ctx, withdrawal)
 }
