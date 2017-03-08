@@ -156,3 +156,10 @@ func EE(e error) T9Error {
 		return E(e.Error())
 	}
 }
+
+// Clear Clear
+func Clear() {
+	lock.Lock()
+	defer lock.Unlock()
+	translations = make(map[string]map[string]string)
+}

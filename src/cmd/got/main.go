@@ -28,6 +28,12 @@ func main() {
 		assert.Nil(err)
 	}()
 	go func() {
+		err := rabbit.RunWorker(
+			&bot.ClearTrans{}, bot.ClearTransAction, 10,
+		)
+		assert.Nil(err)
+	}()
+	go func() {
 
 		err := rabbit.RunWorker(
 			&worker.AdDelivery{},
