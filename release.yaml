@@ -57,17 +57,6 @@
         target: build-js
         chdir: "/home/cy/cyrest-{{ mode }}"
         
-    - name: build reporter
-      make:
-        target: reporter
-        chdir: "/home/cy/cyrest-{{ mode }}"
-        
-    - name: generate report.html
-      command: bin/reporter -i /home/cy/cyrest-deploy > report.html
-      args:
-        chdir: "/home/cy/cyrest-{{ mode }}"
-
-        
 # This is the staging build. it will build the app (using golang docker image) and run it with docker-compose
 - name: staging build
   hosts: staging
@@ -145,14 +134,6 @@
         checksum: yes
         times: no
       delegate_to: 192.168.88.8
-    
-    - name: copy reporter file
-      synchronize:
-        src: "/home/cy/cyrest-{{ mode }}/report.html"
-        dest: "/home/cy/cyrest/public/report.html"
-        delete: yes
-        checksum: yes
-        times: no
 
     - name: copy compose file to server
       synchronize:
