@@ -10,6 +10,42 @@ import (
 	"time"
 )
 
+const (
+	//BilTypeWithdrawal const billing type withdrawal
+	BilTypeWithdrawal BillingType = "withdrawal"
+	// BilTypeBilling const billing type billing
+	BilTypeBilling BillingType = "billing"
+
+	//BilStatusAccepted const status accepted
+	BilStatusAccepted BillingStatus = "accepted"
+	//BilStatusRejected const status rejected
+	BilStatusRejected BillingStatus = "rejected"
+	//BilStatusPending const billing status pending
+	BilStatusPending BillingStatus = "pending"
+
+	//BilDepositYes deposit yes
+	BilDepositYes BillingDeposit = "yes"
+	//BilDepositNo deposit No
+	BilDepositNo BillingDeposit = "no"
+)
+
+type (
+	//BillingType type billing
+	//@Enum{
+	//}
+	BillingType string
+
+	//BillingStatus status billing
+	//@Enum{
+	//}
+	BillingStatus string
+
+	//BillingDeposit deposit billing
+	//@Enum{
+	//}
+	BillingDeposit string
+)
+
 // Billing model
 // @Model {
 //		table = billings
@@ -23,8 +59,11 @@ type Billing struct {
 	PaymentID common.NullInt64  `json:"payment_id" db:"payment_id" title:"PaymentID"`
 	Amount    int64             `json:"amount" db:"amount" title:"Amount"`
 	Reason    common.NullString `json:"reason" db:"reason" title:"Reason"`
-	CreatedAt time.Time         `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
-	UpdatedAt time.Time         `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at" visible:"false"`
+	Type      BillingType       `json:"type" db:"type" title:"Type" filter:"true"`
+	Status    BillingStatus     `json:"status" db:"status" title:"Status" filter:"true"`
+	Deposit   BillingDeposit    `json:"deposit" db:"deposit" title:"Deposit" filter:"true"`
+	CreatedAt time.Time         `json:"created_at" db:"created_at" sort:"true" title:"Created at"`
+	UpdatedAt time.Time         `json:"updated_at" db:"updated_at" sort:"true" title:"Updated at" visible:"false"`
 }
 
 // FindPaymentByAuthority return the Payment base on its authority
@@ -83,12 +122,13 @@ func (m *Manager) RegisterBilling(authority string, refID int64, price int64, st
 
 //BillingDataTable is the ad full data in data table, after join with other field
 // @DataTable {
-//		url = /
+//		url = /list
 //		entity = billingList
 //		view = billing_list:self
 //		controller = modules/billing/controllers
 //		fill = FillBillingDataTableArray
-//		_change = billing_manage:global
+//		_change_status = change_status_billing:global
+//		_change_deposit = change_deposit_billing:global
 // }
 type BillingDataTable struct {
 	Billing
