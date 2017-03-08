@@ -6,7 +6,6 @@ import (
 	"modules/telegram/bot"
 	"modules/telegram/common/tgbot"
 
-	"fmt"
 	bot2 "modules/telegram/bot/worker"
 	"modules/telegram/config"
 
@@ -42,7 +41,7 @@ func AdDeliveryAction(in *AdDelivery) (bool, error) {
 		ChannelID: in.ChannelID,
 		AdID:      0,
 		ChatID:    in.ChatID,
-		Msg:       trans.T("please forward the following ad to your channel and dont send other messages until i confirmed your actions\n👇👇👇👇👇👇👇👇👇👇").String(),
+		Msg:       trans.T("please forward the following ad to your channel and dont send other messages until i confirmed your actions").String(),
 	})
 	time.Sleep(tcfg.Cfg.Telegram.SendDelay)
 	for adID := range in.AdsID {
@@ -66,7 +65,7 @@ func AdDeliveryAction(in *AdDelivery) (bool, error) {
 		assert.Nil(err)
 
 	}
-	msgx := fmt.Sprintf("after forward the ad/ads press done otherwise press reject\n/done_%[1]d\n/reject_%[1]d\n🖕🖕🖕🖕🖕🖕🖕🖕🖕🖕🖕", in.ChannelID)
+	msgx := trans.T("after forward the ad/ads press done otherwise press reject\n/done_%[1]d\n/reject_%[1]d", in.ChannelID).String()
 	userMsg := tgbotapi.NewMessage(in.ChatID, msgx)
 	userMsg.ParseMode = "HTML"
 	_, err := tgbot.Send(userMsg)

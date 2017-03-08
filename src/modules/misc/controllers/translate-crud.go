@@ -47,7 +47,6 @@ func (u *Controller) translate(ctx echo.Context) error {
 //	@Route	{
 //	url	=	/dump/:lang
 //	method	= get
-//	resource = trans_dump:global
 //	200 = t9n.Mixed
 //	400 = base.ErrorResponseSimple
 //	}
