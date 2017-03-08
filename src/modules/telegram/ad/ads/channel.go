@@ -267,8 +267,6 @@ func (m *Manager) FillChannelDataTableArray(
 //		controller = modules/telegram/ad/chanControllers
 //		fill = FillChannelDetailDataTableArray
 //		_edit = edit_channel:self
-//		_admin_status = status_channel:parent
-//		_archive_status = archive_channel:self
 //		_active = active_channel:global
 // }
 type ChannelDetailDataTable struct {
@@ -351,6 +349,92 @@ func (m *Manager) FillChannelDetailDataTableArray(u base.PermInterfaceComplete,
 
 	_, err = m.GetDbMap().Select(&res, query, params...)
 	assert.Nil(err)
+	return res, count
+}
+
+//ChannelSpecificDataTable is the role full data in data table, after join with other field
+// @DataTable {
+//		url = /specific/:id
+//		entity = ChannelSpecificDataTable
+//		view = channel_list:self
+//		controller = modules/telegram/ad/chanControllers
+//		fill = FillChannelSpecificDataTableArray
+//		_edit = edit_channel:self
+// }
+type ChannelSpecificDataTable struct {
+	AdName   string           `db:"name" json:"adname" search:"true"`
+	Start    common.NullTime  `db:"start" json:"start"`
+	End      common.NullTime  `db:"end" json:"end"`
+	Price    int64            `db:"-" json:"price"`
+	ParentID common.NullInt64 `db:"-" json:"parent_id" visible:"false"`
+	OwnerID  int64            `db:"-" json:"owner_id" visible:"false"`
+	Actions  string           `db:"-" json:"_actions" visible:"false"`
+}
+
+// FillChannelSpecificDataTableArray is the function to handle
+func (m *Manager) FillChannelSpecificDataTableArray(u base.PermInterfaceComplete,
+	filters map[string]string,
+	search map[string]string,
+	contextparams map[string]string,
+	sort,
+	order string,
+	p, c int) (ChannelSpecificDataTableArray, int64) {
+	var params []interface{}
+	var res ChannelSpecificDataTableArray
+	var where []string
+	id := contextparams["id"]
+
+	countQuery := fmt.Sprintf("SELECT COUNT(channel_id) FROM %[1]s "+
+		"LEFT JOIN %[2]s ON %[1]s.ad_id=%[2]s.id "+
+		"LEFT JOIN %[3]s ON %[2]s.user_id = %[3]s.id "+
+		"WHERE channel_id=?",
+		ChannelAdTableFull,
+		AdTableFull,
+		aaa.UserTableFull)
+
+	query := fmt.Sprintf("SELECT ads.name, start, end FROM %[1]s "+
+		"LEFT JOIN %[2]s ON %[2]s.id=%[1]s.ad_id "+
+		"LEFT JOIN %[3]s ON %[2]s.user_id = %[3]s.id "+
+		"WHERE channel_id=?",
+		ChannelAdTableFull,
+		AdTableFull,
+		aaa.UserTableFull)
+	params = append(params, id)
+
+	for column, val := range search {
+		where = append(where, fmt.Sprintf("%s LIKE ?", column))
+		params = append(params, fmt.Sprintf("%s"+val+"%s", "%", "%"))
+	}
+
+	currentUserID := u.GetID()
+	highestScope := u.GetCurrentScope()
+
+	if highestScope == base.ScopeSelf {
+		where = append(where, fmt.Sprintf("%s.user_id=?", ChannelTableFull))
+		params = append(params, currentUserID)
+	} else if highestScope == base.ScopeParent {
+		where = append(where, fmt.Sprintf("%[1]s.parent_id=? OR %[1]s.user_id=?", aaa.UserTableFull))
+		params = append(params, currentUserID, currentUserID)
+	}
+
+	//check for perm
+	if len(where) > 0 {
+		query += " WHERE "
+		countQuery += " WHERE "
+	}
+	query += strings.Join(where, " AND ")
+	countQuery += strings.Join(where, " AND ")
+	limit := c
+	offset := (p - 1) * c
+
+	query += fmt.Sprintf(" LIMIT %d OFFSET %d ", limit, offset)
+	fmt.Println(countQuery)
+	count, err := m.GetDbMap().SelectInt(countQuery, params...)
+	assert.Nil(err)
+
+	_, err = m.GetDbMap().Select(&res, query, params...)
+	assert.Nil(err)
+	// TODO price algorithm
 	return res, count
 }
 
