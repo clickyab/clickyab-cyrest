@@ -22,6 +22,9 @@ type Config struct {
 		Email            string `onion:"email"`
 		Description      string `onion:"description"`
 	} `onion:"gate"`
+	Withdrawal struct {
+		MinWithdrawal int64 `onion:min_withdrawal`
+	} `onion:"withdrawal"`
 }
 
 type configLoader struct {
@@ -41,6 +44,8 @@ func (c *configLoader) Initialize(o *onion.Onion) []onion.Layer {
 	_ = def.SetDefault("gate.mobile", "09375722346")
 	_ = def.SetDefault("gate.email", "dara51php@gmail.com")
 	_ = def.SetDefault("gate.description", "Plan Requested")
+
+	_ = def.SetDefault("withdrawal.min_withdrawal", 50000)
 	return []onion.Layer{def}
 }
 
