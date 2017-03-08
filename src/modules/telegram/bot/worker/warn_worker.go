@@ -9,6 +9,8 @@ import (
 
 	"common/assert"
 
+	"modules/misc/trans"
+
 	"gopkg.in/telegram-bot-api.v4"
 )
 
@@ -42,7 +44,7 @@ func SendWarnAction(in *SendWarn) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	baseMSg := fmt.Sprintf("Dear Admin of the <b>%s</b> channel:\n", channel.Name)
+	baseMSg := trans.T("Dear Admin of the <b>%s</b> channel:\n", channel.Name).String()
 	x := tgbotapi.NewMessage(in.ChatID, fmt.Sprintf("%s%s", baseMSg, in.Msg))
 	x.ParseMode = "HTML"
 	_, err = tgbot.Send(x)

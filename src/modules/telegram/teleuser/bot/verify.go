@@ -11,6 +11,8 @@ import (
 	"strings"
 	"time"
 
+	"modules/misc/trans"
+
 	"gopkg.in/telegram-bot-api.v4"
 )
 
@@ -22,7 +24,7 @@ type bot struct {
 func (bb *bot) verify(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 	//sample code  /verify-1:12123
 	if !strings.Contains(m.Text, "-") && !strings.Contains(m.Text, ":") {
-		msg := tgbotapi.NewMessage(m.Chat.ID, "your command is <b>not valid</b>")
+		msg := tgbotapi.NewMessage(m.Chat.ID, trans.T("your command is <b>not valid</b>").String())
 		msg.ParseMode = htmlMode
 		_, err := bot.Send(msg)
 		assert.Nil(err)
@@ -31,7 +33,7 @@ func (bb *bot) verify(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 	result := strings.Replace(m.Text, "/verify-", "", 1)
 	str, err := aredis.GetKey(result, false, time.Hour)
 	if str == "" || err != nil {
-		msg := tgbotapi.NewMessage(m.Chat.ID, "your command is <b>not valid</b>")
+		msg := tgbotapi.NewMessage(m.Chat.ID, trans.T("your command is <b>not valid</b>").String())
 		msg.ParseMode = htmlMode
 		_, err := bot.Send(msg)
 		assert.Nil(err)
@@ -40,7 +42,7 @@ func (bb *bot) verify(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 	user := strings.Split(result, ":")
 	id, err := strconv.ParseInt(user[0], 0, 10)
 	if err == nil {
-		msg := tgbotapi.NewMessage(m.Chat.ID, "your account is <b>accepted</b>")
+		msg := tgbotapi.NewMessage(m.Chat.ID, trans.T("your account is <b>accepted</b>").String())
 		n := tlu.NewTluManager()
 		tl := &tlu.TeleUser{
 			UserID:    id,
@@ -51,7 +53,7 @@ func (bb *bot) verify(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 		}
 		err := n.CreateTeleUser(tl)
 		if err != nil {
-			msg1 := tgbotapi.NewMessage(m.Chat.ID, "your account <b>cant</b> be accepted")
+			msg1 := tgbotapi.NewMessage(m.Chat.ID, trans.T("your account <b>cant</b> be accepted").String())
 			msg1.ParseMode = htmlMode
 			_, err = bot.Send(msg1)
 			assert.Nil(err)
