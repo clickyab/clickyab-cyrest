@@ -63,6 +63,48 @@ func (u *Controller) listTranslatelist(ctx echo.Context) error {
 	)
 }
 
+
+// @Route {
+// 		url = /milad
+//		method = get
+//		_lang_ = string, the language
+//		_def_ = bool, show definition in result?
+//		_c_ = int , count per page
+//		_p_ = int , page number
+//		200 = listTranslatelistResponse
+// }
+func (u *Controller) miladTranslatelist(ctx echo.Context) error {
+	panic("paniced")
+	m := t9n.NewT9nManager()
+	p, c := utils.GetPageAndCount(ctx.Request(), false)
+
+	filter := make(map[string]string)
+
+	search := make(map[string]string)
+	lang := ctx.Param("lang")
+	if lang != trans.PersianLang && lang != trans.EnglishLang {
+		return u.NotFoundResponse(ctx, trans.E("not valid language"))
+	}
+	sort := ""
+	order := "ASC"
+
+	//pc := base.NewPermInterfaceComplete(usr, usr.ID, "translate_list", "global")
+	dt, cnt := m.FillTranslateDataTableArray(lang, filter, search, sort, order, p, c)
+	res := listTranslatelistResponse{
+		Total:   cnt,
+		Data:    dt,
+		Page:    p,
+		PerPage: c,
+	}
+	if ctx.Request().URL.Query().Get("def") == "true" {
+		res.Definition = listTranslatelistDefinition
+	}
+	return u.OKResponse(
+		ctx,
+		res,
+	)
+}
+
 func init() {
 	tmp := []byte(` [
 		{
