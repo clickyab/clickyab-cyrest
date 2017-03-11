@@ -266,13 +266,13 @@ type bilCreatePayload struct {
 func (u *Controller) createWithdrawal(ctx echo.Context) error {
 	pl := u.MustGetPayload(ctx).(*bilCreatePayload)
 	if pl.Amount < bcfg.Bcfg.Withdrawal.MinWithdrawal {
-		return ctx.JSON(http.StatusForbidden, trans.E("you can not withdrawal under %d", bcfg.Bcfg.Withdrawal.MinWithdrawal))
+		return ctx.JSON(http.StatusBadRequest, trans.E("you can not withdrawal under %d", bcfg.Bcfg.Withdrawal.MinWithdrawal))
 	}
 	currentUser := authz.MustGetUser(ctx)
 	m := bil.NewBilManager()
 	sumBil, _ := m.SumBilling(currentUser.ID)
 	if sumBil < pl.Amount {
-		return ctx.JSON(http.StatusForbidden, trans.E("your withdrawal under your billing"))
+		return ctx.JSON(http.StatusBadRequest, trans.E("your withdrawal under your billing"))
 	}
 	if pl.UserID == 0 {
 		pl.UserID = currentUser.ID
