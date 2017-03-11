@@ -8,12 +8,12 @@ type ClearTrans struct {
 
 // GetTopic return this message topic
 func (ClearTrans) GetTopic() string {
-	return "cy.rubik.sendWarn"
+	return "cy.rubik.clearTrans"
 }
 
 // GetQueue is the request queue
 func (ClearTrans) GetQueue() string {
-	return "cy_rubik_sendWarn"
+	return "cy_rubik_clearTrans"
 }
 
 // ClearTransAction worker
