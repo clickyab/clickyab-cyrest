@@ -144,23 +144,23 @@ func (u *Controller) payment(ctx echo.Context) error {
 // @Validate {
 // }
 type bilChangeStatusPayload struct {
-	status   bil.BillingStatus `json:"status" validate:"required" error:"status is required"`
-	describe string            `json:"describe"`
+	Status   bil.BillingStatus `json:"status" validate:"required" error:"Status is required"`
+	Describe string            `json:"describe"`
 }
 
-// Validate custom validation for billing status
+// Validate custom validation for billing Status
 func (lp *bilChangeStatusPayload) ValidateExtra(ctx echo.Context) error {
-	if !lp.status.IsValid() {
+	if !lp.Status.IsValid() {
 		return middlewares.GroupError{
-			"status": trans.E("status is invalid"),
+			"Status": trans.E("Status is invalid"),
 		}
 	}
 	return nil
 }
 
-//	changeStatus change status for withdrawal
+//	changeStatus change Status for withdrawal
 //	@Route	{
-//		url = /list/status/:id
+//		url = /list/Status/:id
 //		method = put
 //		resource = change_status_billing:global
 //		payload	= bilChangeStatusPayload
@@ -186,8 +186,8 @@ func (u *Controller) changeStatus(ctx echo.Context) error {
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
-	currentBil.Status = pl.status
-	currentBil.Reason = common.MakeNullString(pl.describe)
+	currentBil.Status = pl.Status
+	currentBil.Reason = common.MakeNullString(pl.Describe)
 	assert.Nil(m.UpdateBilling(currentBil))
 	return u.OKResponse(ctx, currentBil)
 }
@@ -195,23 +195,23 @@ func (u *Controller) changeStatus(ctx echo.Context) error {
 // @Validate {
 // }
 type bilChangeDepositPayload struct {
-	deposit  bil.BillingDeposit `validate:"required" error:"deposit is required"`
-	describe string             `json:"describe"`
+	Deposit  bil.BillingDeposit `json:"deposit" validate:"required" error:"Deposit is required"`
+	Describe string             `json:"describe"`
 }
 
-// Validate custom validation for billing status
+// Validate custom validation for billing Status
 func (lp *bilChangeDepositPayload) ValidateExtra(ctx echo.Context) error {
-	if !lp.deposit.IsValid() {
+	if !lp.Deposit.IsValid() {
 		return middlewares.GroupError{
-			"status": trans.E("deposit is invalid"),
+			"Status": trans.E("Deposit is invalid"),
 		}
 	}
 	return nil
 }
 
-//	changeDeposit change deposit for withdrawal
+//	changeDeposit change Deposit for withdrawal
 //	@Route	{
-//		url = /list/deposit/:id
+//		url = /list/Deposit/:id
 //		method = put
 //		resource = change_deposit_billing:global
 //		payload	= bilChangeDepositPayload
@@ -240,8 +240,8 @@ func (u *Controller) changeDeposit(ctx echo.Context) error {
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
-	currentBil.Deposit = pl.deposit
-	currentBil.Reason = common.MakeNullString(pl.describe)
+	currentBil.Deposit = pl.Deposit
+	currentBil.Reason = common.MakeNullString(pl.Describe)
 	assert.Nil(m.UpdateBilling(currentBil))
 	return u.OKResponse(ctx, currentBil)
 }
@@ -249,8 +249,8 @@ func (u *Controller) changeDeposit(ctx echo.Context) error {
 // @Validate {
 // }
 type bilCreatePayload struct {
-	amount int64 `json:"amount" validate:"required" error:"amount is required"`
-	userID int64 `json:"user_id"`
+	Amount int64 `json:"amount" validate:"required" error:"Amount is required"`
+	UserID int64 `json:"user_id"`
 }
 
 //	createWithdrawal create withdrawal
@@ -265,20 +265,20 @@ type bilCreatePayload struct {
 //	}
 func (u *Controller) createWithdrawal(ctx echo.Context) error {
 	pl := u.MustGetPayload(ctx).(*bilCreatePayload)
-	if pl.amount < bcfg.Bcfg.Withdrawal.MinWithdrawal {
+	if pl.Amount < bcfg.Bcfg.Withdrawal.MinWithdrawal {
 		return ctx.JSON(http.StatusForbidden, trans.E("you can not withdrawal under %d", bcfg.Bcfg.Withdrawal.MinWithdrawal))
 	}
 	currentUser := authz.MustGetUser(ctx)
 	m := bil.NewBilManager()
 	sumBil, err := m.SumBilling(currentUser.ID)
 	assert.Nil(err)
-	if sumBil < pl.amount {
+	if sumBil < pl.Amount {
 		return ctx.JSON(http.StatusForbidden, trans.E("your withdrawal under your billing"))
 	}
-	if pl.userID == 0 {
-		pl.userID = currentUser.ID
+	if pl.UserID == 0 {
+		pl.UserID = currentUser.ID
 	}
-	owner, err := aaa.NewAaaManager().FindUserByID(pl.userID)
+	owner, err := aaa.NewAaaManager().FindUserByID(pl.UserID)
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
 	}
@@ -288,14 +288,14 @@ func (u *Controller) createWithdrawal(ctx echo.Context) error {
 	}
 
 	withdrawal := bil.Billing{}
-	f := float64(pl.amount)
+	f := float64(pl.Amount)
 	f = -math.Abs(f)
-	pl.amount = int64(f)
-	withdrawal.Amount = pl.amount
+	pl.Amount = int64(f)
+	withdrawal.Amount = pl.Amount
 	withdrawal.Type = bil.BilTypeWithdrawal
 	withdrawal.Status = bil.BilStatusPending
 	withdrawal.Deposit = bil.BilDepositNo
-	withdrawal.UserID = pl.userID
+	withdrawal.UserID = pl.UserID
 
 	assert.Nil(m.CreateBilling(&withdrawal))
 	return u.OKResponse(ctx, withdrawal)
