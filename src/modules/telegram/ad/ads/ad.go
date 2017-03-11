@@ -765,15 +765,15 @@ func (m *Manager) FillSpecificAdDataTableArray(u base.PermInterfaceComplete,
 	id, err := strconv.ParseInt(contextparams["id"], 0, 64)
 	assert.Nil(err)
 
-	countQuery := fmt.Sprintf("SELECT count(channel_id) from %s WHERE ad_id=?", ChannelAdTableFull)
+	countQuery := fmt.Sprintf("SELECT count(channel_id) from %[1]s "+
+		"LEFT JOIN %[2]s ON %[1]s.ad_id = %[2]s.id",
+		ChannelAdTableFull,
+		AdTableFull)
 
 	query := "SELECT %[3]s.name, %[1]s.view, end from %[2]s " +
 		"LEFT JOIN %[1]s on %[2]s.ad_id = %[1]s.id " +
-		"LEFT JOIN %[3]s ON %[2]s.channel_id = %[3]s.id " +
-		"WHERE ad_id=? AND NOW() > end"
+		"LEFT JOIN %[3]s ON %[2]s.channel_id = %[3]s.id "
 	query = fmt.Sprintf(query, AdTableFull, ChannelAdTableFull, ChannelTableFull)
-
-	params = append(params, id)
 
 	for field, value := range filters {
 		where = append(where, fmt.Sprintf("%s.%s=?", ChannelAdTableFull, field))
@@ -796,10 +796,13 @@ func (m *Manager) FillSpecificAdDataTableArray(u base.PermInterfaceComplete,
 		params = append(params, currentUserID, currentUserID)
 	}
 
+	where = append(where, "ad_id=?", "NOW() > end")
+
 	//check for perm
 	if len(where) > 0 {
 		query += " WHERE "
 		countQuery += " WHERE "
+		params = append(params, id)
 	}
 	query += strings.Join(where, " AND ")
 	countQuery += strings.Join(where, " AND ")
