@@ -160,7 +160,7 @@ func (lp *bilChangeStatusPayload) ValidateExtra(ctx echo.Context) error {
 
 //	changeStatus change Status for withdrawal
 //	@Route	{
-//		url = /list/Status/:id
+//		url = /list/status/:id
 //		method = put
 //		resource = change_status_billing:global
 //		payload	= bilChangeStatusPayload
@@ -211,7 +211,7 @@ func (lp *bilChangeDepositPayload) ValidateExtra(ctx echo.Context) error {
 
 //	changeDeposit change Deposit for withdrawal
 //	@Route	{
-//		url = /list/Deposit/:id
+//		url = /list/deposit/:id
 //		method = put
 //		resource = change_deposit_billing:global
 //		payload	= bilChangeDepositPayload
@@ -270,8 +270,7 @@ func (u *Controller) createWithdrawal(ctx echo.Context) error {
 	}
 	currentUser := authz.MustGetUser(ctx)
 	m := bil.NewBilManager()
-	sumBil, err := m.SumBilling(currentUser.ID)
-	assert.Nil(err)
+	sumBil, _ := m.SumBilling(currentUser.ID)
 	if sumBil < pl.Amount {
 		return ctx.JSON(http.StatusForbidden, trans.E("your withdrawal under your billing"))
 	}
@@ -299,4 +298,24 @@ func (u *Controller) createWithdrawal(ctx echo.Context) error {
 
 	assert.Nil(m.CreateBilling(&withdrawal))
 	return u.OKResponse(ctx, withdrawal)
+}
+
+type showBilling struct {
+	Billing int64
+}
+
+//	showBilling show billing
+//	@Route	{
+//		url = /billing/show
+//		method = get
+//		resource = get_billing:self
+//		middleware = authz.Authenticate
+//		200 = showBilling
+//		400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) showBilling(ctx echo.Context) error {
+	currentUser := authz.MustGetUser(ctx)
+	m := bil.NewBilManager()
+	sumBil, _ := m.SumBilling(currentUser.ID)
+	return u.OKResponse(ctx, showBilling{Billing: sumBil})
 }

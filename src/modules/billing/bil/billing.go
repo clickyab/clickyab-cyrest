@@ -127,8 +127,8 @@ func (m *Manager) RegisterBilling(authority string, refID int64, price int64, st
 //		view = billing_list:self
 //		controller = modules/billing/controllers
 //		fill = FillBillingDataTableArray
-//		_change_status = change_status_billing:global
-//		_change_deposit = change_deposit_billing:global
+//		_status = change_status_billing:global
+//		_deposit = change_deposit_billing:global
 // }
 type BillingDataTable struct {
 	Billing
