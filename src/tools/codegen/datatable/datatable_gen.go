@@ -61,6 +61,7 @@ type ColumnDef struct {
 	FilterValidMap  map[string]string `json:"filter_valid_map"`
 	FilterValid     template.HTML     `json:"-"`
 	Transform       string            `json:"-"`
+	Edit            *PermCode         `json:"-"`
 }
 
 var (
@@ -93,18 +94,23 @@ func ({{ $m.Type|getvar }}a {{ $m.Type }}Array) Filter(u base.PermInterface){{ $
 
 // Filter is for filtering base on permission
 func ({{ $m.Type|getvar }} {{ $m.Type }}) Filter(u base.PermInterface) {{ $m.Type }} {
+	action :=[]string{}
 	res := {{ $m.Type }}{}
 	{{ range $clm := $m.Column }}
 	{{ if not $clm.HasPerm }}res.{{ $clm.Name }} = {{ if $clm.Format }} {{ $m.Type|getvar }}.Format{{ $clm.Name}}(){{ else }}{{ $m.Type|getvar }}.{{ $clm.Name}}{{ end }}{{ end }}
 	{{ end }}
 	{{ range $clm := $m.Column }}
+	{{ if $clm.Edit }}
+	if _, ok := u.HasPermOn("{{ $clm.Edit.Perm }}", {{ $m.Type|getvar }}.OwnerID, {{ $m.Type|getvar }}.ParentID.Int64 {{ $clm.Edit.Scope|scopeArg }}); ok {
+		action = append(action, "inline_{{$clm.Name}}")
+	}
+	{{ end }}
 	{{ if $clm.HasPerm }}
 	if _, ok := u.HasPermOn("{{ $clm.Perm.Perm }}", {{ $m.Type|getvar }}.OwnerID, {{ $m.Type|getvar }}.ParentID.Int64 {{ $clm.Perm.Scope|scopeArg }}); ok {
 		res.{{ $clm.Name }} = {{ if $clm.Format }} {{ $m.Type|getvar }}.Format{{ $clm.Name}}()  {{ else }}{{ $m.Type|getvar }}.{{ $clm.Name}} {{ end }}
 	}
 	{{ end }}
 	{{ end }}
-	action := []string{}
 	{{ range $act, $perm := $m.Actions }}
 	if _, ok := u.HasPermOn("{{ $perm.Perm }}", {{ $m.Type|getvar }}.OwnerID, {{ $m.Type|getvar }}.ParentID.Int64 {{ $perm.Scope|scopeArg }}); ok {
 		action = append(action, "{{ $act }}")
@@ -122,6 +128,9 @@ func init () {
 	{{ range $c:= $m.Column }}
 		{{ if $c.Perm }}
 		base.RegisterPermission("{{ $c.Perm.Perm }}", "{{ $c.Perm.Perm }}");
+		{{ end }}
+		{{ if $c.Edit}}
+		base.RegisterPermission("{{ $c.Edit.Perm }}", "{{ $c.Edit.Perm }}");
 		{{ end }}
 	{{ end }}
 }
@@ -382,6 +391,14 @@ func handleField(p humanize.Package, f humanize.Field, mapPrefix string) (Column
 		}
 		clm.Perm = p
 		clm.HasPerm = true
+	}
+
+	if edit := f.Tags.Get("edit"); trim(edit) != "" {
+		p, err := NewPermCode(edit)
+		if err != nil {
+			return ColumnDef{}, err
+		}
+		clm.Edit = p
 	}
 
 	clm.FieldType = f.Type
