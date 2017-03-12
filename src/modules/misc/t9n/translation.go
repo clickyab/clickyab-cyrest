@@ -113,6 +113,14 @@ func (m *Manager) AddMissing(txt string) error {
 	return nil
 }
 
+// Clear clear
+func Clear() {
+	lock.Lock()
+	defer lock.Unlock()
+	allData = make(map[string]map[string]string)
+
+}
+
 // TranslateDataTable is data table version of translation
 type TranslateDataTable struct {
 	ID         int64             `db:"id" json:"id"`

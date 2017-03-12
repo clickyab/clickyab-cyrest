@@ -1,6 +1,9 @@
 package bot
 
-import "modules/misc/trans"
+import (
+	"modules/misc/t9n"
+	"modules/misc/trans"
+)
 
 // ClearTrans is the command for
 type ClearTrans struct {
@@ -19,5 +22,6 @@ func (ClearTrans) GetQueue() string {
 // ClearTransAction worker
 func ClearTransAction(in *ClearTrans) (bool, error) {
 	trans.Clear()
+	t9n.Clear()
 	return false, nil
 }
