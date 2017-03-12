@@ -62,9 +62,9 @@ func (bb *bot) wantAD(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 	if len(channels) == 0 {
 		send(bot, m.Chat.ID, trans.T("no channels for you"))
 	}
-	textMsg := trans.T("please choose one of the below channels\n").Translate(trans.PersianLang)
+	textMsg := trans.T("please choose one of the below channels").Translate(trans.PersianLang)
 	for i := range channels {
-		textMsg += fmt.Sprintf("/ad_%s\n", channels[i].Name)
+		textMsg += fmt.Sprintf("\n/ad_%s\n", channels[i].Name)
 	}
 	sendString(bot, m.Chat.ID, textMsg)
 	return

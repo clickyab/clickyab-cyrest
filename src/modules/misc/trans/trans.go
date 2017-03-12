@@ -162,4 +162,5 @@ func Clear() {
 	lock.Lock()
 	defer lock.Unlock()
 	translations = make(map[string]map[string]string)
+
 }
