@@ -2,6 +2,7 @@ package billing
 
 import (
 	"common/assert"
+	"encoding/json"
 	"modules/billing/bil"
 	"modules/misc/trans"
 	"modules/telegram/ad/ads"
@@ -264,12 +265,25 @@ type bilCreatePayload struct {
 //		400 = base.ErrorResponseSimple
 //	}
 func (u *Controller) createWithdrawal(ctx echo.Context) error {
+
+	m := bil.NewBilManager()
+	err := m.Begin()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			assert.Nil(m.Rollback())
+		} else {
+			err = m.Commit()
+		}
+
+	}()
 	pl := u.MustGetPayload(ctx).(*bilCreatePayload)
 	if pl.Amount < bcfg.Bcfg.Withdrawal.MinWithdrawal {
 		return ctx.JSON(http.StatusBadRequest, trans.E("you can not withdrawal under %d", bcfg.Bcfg.Withdrawal.MinWithdrawal))
 	}
 	currentUser := authz.MustGetUser(ctx)
-	m := bil.NewBilManager()
 	sumBil, _ := m.SumBilling(currentUser.ID)
 	if sumBil < pl.Amount {
 		return ctx.JSON(http.StatusBadRequest, trans.E("your withdrawal under your billing"))
@@ -281,14 +295,14 @@ func (u *Controller) createWithdrawal(ctx echo.Context) error {
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
 	}
-	_, b := currentUser.HasPermOn("create_channel", owner.ID, owner.DBParentID.Int64)
+	_, b := currentUser.HasPermOn("request_withdrawal", owner.ID, owner.DBParentID.Int64)
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
 
 	withdrawal := bil.Billing{}
 	f := float64(pl.Amount)
-	f = -math.Abs(f)
+	f = math.Abs(f) * -1
 	pl.Amount = int64(f)
 	withdrawal.Amount = pl.Amount
 	withdrawal.Type = bil.BilTypeWithdrawal
@@ -296,7 +310,24 @@ func (u *Controller) createWithdrawal(ctx echo.Context) error {
 	withdrawal.Deposit = bil.BilDepositNo
 	withdrawal.UserID = pl.UserID
 
-	assert.Nil(m.CreateBilling(&withdrawal))
+	err = m.CreateBilling(&withdrawal)
+	if err != nil {
+		return nil
+	}
+	jsonBilling, err := json.Marshal(withdrawal)
+	if err != nil {
+		return err
+	}
+	bilDetail := bil.BillingDetail{
+		UserID:    currentUser.ID,
+		BillingID: withdrawal.ID,
+		Reason:    common.MakeNullString(string(jsonBilling)),
+	}
+	err = m.CreateBillingDetail(&bilDetail)
+	if err != nil {
+		return nil
+	}
+
 	return u.OKResponse(ctx, withdrawal)
 }
 
