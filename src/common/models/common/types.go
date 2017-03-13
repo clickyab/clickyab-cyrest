@@ -392,3 +392,8 @@ func MakeNullString(s string) NullString {
 func MakeNullTime(t time.Time) NullTime {
 	return NullTime{Valid: !t.IsZero(), Time: t}
 }
+
+// MakeNullInt64 create a new null int64
+func MakeNullInt64(t int64) NullInt64 {
+	return NullInt64{Valid: t != 0, Int64: t}
+}

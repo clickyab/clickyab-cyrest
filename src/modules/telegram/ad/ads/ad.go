@@ -213,14 +213,41 @@ func (m *Manager) UpdateIndividualViewCount() {
 	assert.Nil(err)
 }
 
+// FinishedActiveAds struct finished ad
+type FinishedActiveAds struct {
+	Ad
+	Price int64 `db:"price" json:"price"`
+	Share int64 `db:"share" json:"share"`
+}
+
 // FinishedActiveAds return all finished ads
-func (m *Manager) FinishedActiveAds() []Ad {
-	q := `SELECT a.* FROM %s AS a LEFT JOIN %s AS p ON a.plan_id = p.id
+func (m *Manager) FinishedActiveAds() []FinishedActiveAds {
+	q := `SELECT a.*,p.pice,p.share FROM %s AS a LEFT JOIN %s AS p ON a.plan_id = p.id
 		WHERE p.view < a.view AND a.admin_status = ?
 		AND a.active_status = ? AND a.pay_status = ?`
 	q = fmt.Sprintf(q, AdTableFull, PlanTableFull)
-	var res []Ad
+	var res []FinishedActiveAds
 	_, err := m.GetDbMap().Select(&res, q, AdminStatusAccepted, ActiveStatusYes, AdPayStatusYes)
+	assert.Nil(err)
+	return res
+}
+
+//FinishedActiveChannels struct finished ad
+type FinishedActiveChannels struct {
+	ChannelAd
+	UserID int64 `db:"user_id" json:"user_id"`
+}
+
+// FinishedActiveChannels return all finished ChannelAd
+func (m *Manager) FinishedActiveChannels(adID int64, warning int64) []FinishedActiveChannels {
+	q := `SELECT ca.*,c.user_id FROM %s AS ca
+		LEFT JOIN %s AS c ON ca.channel_id = c.id
+		WHERE ca.ad_id = ?
+		AND ca.warning < ?
+		AND ca.view > 0`
+	q = fmt.Sprintf(q, ChannelAdTableFull, ChannelTableFull)
+	var res []FinishedActiveChannels
+	_, err := m.GetDbMap().Select(&res, q, adID, warning)
 	assert.Nil(err)
 	return res
 }

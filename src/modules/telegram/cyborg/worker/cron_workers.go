@@ -4,6 +4,7 @@ import (
 	"common/assert"
 	"common/models/common"
 	"common/rabbit"
+	"modules/billing/bil"
 	"modules/misc/trans"
 	"modules/telegram/ad/ads"
 	bot2 "modules/telegram/bot/worker"
@@ -20,7 +21,11 @@ func (mw *MultiWorker) cronReview() error {
 	// TODO : transaction
 	for key := range finishedAds {
 		finishedAds[key].AdActiveStatus = ads.AdActiveStatusNo
-		assert.Nil(m.UpdateAd(&finishedAds[key]))
+		ca := m.FinishedActiveChannels(finishedAds[key].ID, tcfg.Cfg.Telegram.LimitCountWarning)
+		b := bil.NewBilManager()
+		err := b.ChannelAdBilling(ca, finishedAds[key])
+		assert.Nil(err)
+		//assert.Nil(m.UpdateAd(&finishedAds[key]))
 		channelAd, err := m.FindChannelAdActiveByAdID(finishedAds[key].ID, ads.ActiveStatusYes)
 		assert.Nil(err)
 		for c := range channelAd {

@@ -3,18 +3,24 @@ package bil
 import (
 	"common/assert"
 	"common/models/common"
+	"encoding/json"
 	"fmt"
 	"modules/misc/base"
+	"modules/telegram/ad/ads"
 	"modules/user/aaa"
 	"strings"
 	"time"
 )
 
 const (
-	//BilTypeWithdrawal const billing type withdrawal
+	//BilTypeWithdrawal const withdrawal type withdrawal
 	BilTypeWithdrawal BillingType = "withdrawal"
 	// BilTypeBilling const billing type billing
 	BilTypeBilling BillingType = "billing"
+	// BilTypeIncome const income type billing
+	BilTypeIncome BillingType = "income"
+	// BilTypeCampaign const campaign type billing
+	BilTypeCampaign BillingType = "campaign"
 
 	//BilStatusAccepted const status accepted
 	BilStatusAccepted BillingStatus = "accepted"
@@ -56,8 +62,10 @@ type (
 type Billing struct {
 	ID        int64             `db:"id" json:"id" sort:"true" title:"ID" visible:"false"`
 	UserID    int64             `json:"user_id" db:"user_id" title:"UserID" visible:"false"`
+	ChannelID common.NullInt64  `db:"channel_id" json:"channel_id"  title:"ChannelID"`
+	AdID      common.NullInt64  `db:"ad_id" json:"ad_id"   title:"AdID"`
 	PaymentID common.NullInt64  `json:"payment_id" db:"payment_id" title:"PaymentID"`
-	Amount    int64             `json:"amount" db:"amount" title:"Amount"`
+	Amount    int64             `json:"amount" db:"amount" sort:"true" title:"Amount"`
 	Reason    common.NullString `json:"reason" db:"reason" title:"Reason"`
 	Type      BillingType       `json:"type" db:"type" title:"Type" filter:"true"`
 	Status    BillingStatus     `json:"status" db:"status" title:"Status" filter:"true"`
@@ -83,7 +91,7 @@ func (m *Manager) FindPaymentByAuthority(a common.NullString) (*Payment, error) 
 }
 
 // RegisterBilling is try to register billing
-func (m *Manager) RegisterBilling(authority string, refID int64, price int64, statusCode int64) (*Billing, error) {
+func (m *Manager) RegisterBilling(currentUser *aaa.User, authority string, refID int64, price int64, statusCode int64, adID int64) (*Billing, error) {
 	payment, err := m.FindPaymentByAuthority(common.MakeNullString(authority))
 	if err != nil {
 		return nil, err
@@ -115,12 +123,107 @@ func (m *Manager) RegisterBilling(authority string, refID int64, price int64, st
 		Amount:    price,
 		Reason:    common.MakeNullString("for buying our plan"),
 		UserID:    payment.UserID,
+		AdID:      common.MakeNullInt64(adID),
+		Type:      BilTypeBilling,
+		Deposit:   BilDepositNo,
+		Status:    BilStatusPending,
 	}
 	err = m.CreateBilling(billing)
 	if err != nil {
 		return nil, err
 	}
+	b, err := json.Marshal(billing)
+	if err != nil {
+		return nil, err
+	}
+	bilDetail := &BillingDetail{
+		BillingID: billing.ID,
+		UserID:    currentUser.ID,
+		Reason:    common.MakeNullString(string(b)),
+	}
+	err = m.CreateBillingDetail(bilDetail)
+	if err != nil {
+		return nil, err
+	}
 	return billing, err
+}
+
+// ChannelAdBilling insert income & campaign billing
+func (m *Manager) ChannelAdBilling(channelAds []ads.FinishedActiveChannels, ad ads.FinishedActiveAds) error {
+	err := m.Begin()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			assert.Nil(m.Rollback())
+		} else {
+			err = m.Commit()
+		}
+
+	}()
+	//insert campaign into billing
+	billing := Billing{
+		Status:  BilStatusPending,
+		Deposit: BilDepositNo,
+		Type:    BilTypeCampaign,
+		AdID:    common.MakeNullInt64(ad.ID),
+		Amount:  ad.Price * -1,
+		UserID:  ad.UserID,
+	}
+	err = m.CreateBilling(&billing)
+	if err != nil {
+		return err
+	}
+
+	jsonBilling, err := json.Marshal(billing)
+	if err != nil {
+		return err
+	}
+	bilDetail := BillingDetail{
+		UserID:    ad.UserID,
+		BillingID: billing.ID,
+		Reason:    common.MakeNullString(string(jsonBilling)),
+	}
+	err = m.CreateBillingDetail(&bilDetail)
+
+	//insert income billing
+	for k := range channelAds {
+		//calculate amount
+		amount := channelAds[k].View * ad.Share
+		fAmount := float64(amount) * 0.1
+		amount = int64(fAmount)
+
+		billing.UserID = channelAds[k].UserID
+		billing.ChannelID = common.MakeNullInt64(channelAds[k].ChannelID)
+		billing.AdID = common.MakeNullInt64(ad.ID)
+		billing.Amount = amount
+		billing.Type = BilTypeIncome
+		billing.Status = BilStatusPending
+		billing.Deposit = BilDepositNo
+
+		err = m.CreateBilling(&billing)
+		if err != nil {
+			return err
+		}
+
+		jsonBilling, err = json.Marshal(billing)
+		if err != nil {
+			return err
+		}
+		bilDetail = BillingDetail{
+			UserID:    channelAds[k].UserID,
+			BillingID: billing.ID,
+			Reason:    common.MakeNullString(string(jsonBilling)),
+		}
+		err = m.CreateBillingDetail(&bilDetail)
+		if err != nil {
+			return err
+		}
+
+	}
+
+	return err
 }
 
 //BillingDataTable is the ad full data in data table, after join with other field

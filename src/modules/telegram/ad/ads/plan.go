@@ -23,6 +23,7 @@ type Plan struct {
 	Price       int64        `db:"price" json:"price" title:"Price"`
 	View        int64        `db:"view" json:"view" title:"View"`
 	Position    int64        `db:"position" json:"position" title:"Position"`
+	Share       int64        `db:"share" json:"share" title:"Share" perm:"plan_list:global"`
 	Type        PlanType     `json:"type" db:"type" filter:"true" title:"Type"`
 	Active      ActiveStatus `json:"active" db:"active" filter:"true" title:"Active"`
 	CreatedAt   *time.Time   `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
