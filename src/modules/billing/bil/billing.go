@@ -117,9 +117,6 @@ func (m *Manager) RegisterBilling(currentUser *aaa.User, authority string, refID
 	}
 	billing := &Billing{
 		PaymentID: common.NullInt64{Valid: true, Int64: payment.ID},
-		Deposit:   BilDepositNo,
-		Status:    BilStatusPending,
-		Type:      BilTypeBilling,
 		Amount:    price,
 		Reason:    common.MakeNullString("for buying our plan"),
 		UserID:    payment.UserID,
@@ -307,8 +304,16 @@ func (m *Manager) FillBillingDataTableArray(
 	return res, count
 }
 
+// SumBil SumBil
+type SumBil struct {
+	Balance common.ZeroNullInt64 `json:"balance" db:"balance"`
+}
+
 // SumBilling sum billing
-func (m *Manager) SumBilling(userID int64) (int64, error) {
-	q := fmt.Sprintf("SELECT SUM(amount) FROM %s WHERE user_id = ?", BillingTableFull)
-	return m.GetDbMap().SelectInt(q, userID)
+func (m *Manager) SumBilling(userID int64) SumBil {
+	q := fmt.Sprintf("SELECT SUM(amount) AS balance FROM %s WHERE user_id = ?", BillingTableFull)
+	var res SumBil
+	_, err := m.GetDbMap().Select(&res, q, userID)
+	assert.Nil(err)
+	return res
 }
