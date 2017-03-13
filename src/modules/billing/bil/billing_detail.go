@@ -17,5 +17,5 @@ type BillingDetail struct {
 	BillingID int64             `json:"billing_id" db:"billing_id" title:"BillingID"`
 	UserID    int64             `json:"user_id" db:"user_id" title:"UserID" `
 	Reason    common.NullString `json:"reason" db:"reason" title:"Reason"`
-	CreatedAt time.Time         `json:"created_at" db:"created_at" sort:"true" title:"Created at"`
+	CreatedAt *time.Time        `json:"created_at" db:"created_at" sort:"true" title:"Created at"`
 }

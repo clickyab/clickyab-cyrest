@@ -14,8 +14,6 @@ import (
 	"common/models/common"
 	"time"
 
-	"modules/billing/config"
-
 	"modules/misc/middlewares"
 
 	"math"
@@ -280,12 +278,13 @@ func (u *Controller) createWithdrawal(ctx echo.Context) error {
 
 	}()
 	pl := u.MustGetPayload(ctx).(*bilCreatePayload)
-	if pl.Amount < bcfg.Bcfg.Withdrawal.MinWithdrawal {
+	/*if pl.Amount < bcfg.Bcfg.Withdrawal.MinWithdrawal {
 		return ctx.JSON(http.StatusBadRequest, trans.E("you can not withdrawal under %d", bcfg.Bcfg.Withdrawal.MinWithdrawal))
-	}
+	}*/
 	currentUser := authz.MustGetUser(ctx)
-	sumBil, _ := m.SumBilling(currentUser.ID)
-	if sumBil < pl.Amount {
+	sumBil := m.SumBilling(currentUser.ID)
+
+	if sumBil.Balance.Int64 < pl.Amount {
 		return ctx.JSON(http.StatusBadRequest, trans.E("your withdrawal under your billing"))
 	}
 	if pl.UserID == 0 {
@@ -347,6 +346,6 @@ type showBilling struct {
 func (u *Controller) showBilling(ctx echo.Context) error {
 	currentUser := authz.MustGetUser(ctx)
 	m := bil.NewBilManager()
-	sumBil, _ := m.SumBilling(currentUser.ID)
-	return u.OKResponse(ctx, showBilling{Billing: sumBil})
+	sumBil := m.SumBilling(currentUser.ID)
+	return u.OKResponse(ctx, showBilling{Billing: sumBil.Balance.Int64})
 }
