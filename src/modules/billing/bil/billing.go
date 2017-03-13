@@ -109,6 +109,9 @@ func (m *Manager) RegisterBilling(authority string, refID int64, price int64, st
 	}
 	billing := &Billing{
 		PaymentID: common.NullInt64{Valid: true, Int64: payment.ID},
+		Deposit:   BilDepositNo,
+		Status:    BilStatusPending,
+		Type:      BilTypeBilling,
 		Amount:    price,
 		Reason:    common.MakeNullString("for buying our plan"),
 		UserID:    payment.UserID,
