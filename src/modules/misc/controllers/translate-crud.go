@@ -8,6 +8,10 @@ import (
 	"common/rabbit"
 	"modules/telegram/bot/worker"
 
+	"strconv"
+
+	"common/assert"
+
 	"gopkg.in/labstack/echo.v3"
 )
 
@@ -45,6 +49,29 @@ func (u *Controller) translate(ctx echo.Context) error {
 	trans.Clear()
 	rabbit.MustPublish(&bot.ClearTrans{})
 	return u.OKResponse(ctx, translation)
+
+}
+
+//	delete
+//	@Route	{
+//	url	=	/delete/:id
+//	method	= delete
+//	resource = delete_trans:global
+//	middleware = authz.Authenticate
+//	400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) delete(ctx echo.Context) error {
+	idString := ctx.Param("id")
+	id, err := strconv.ParseInt(idString, 10, 0)
+	if err != nil {
+		u.NotFoundResponse(ctx, err)
+	}
+
+	m := t9n.NewT9nManager()
+	err = m.DeleteStringByID(id)
+	assert.Nil(err)
+
+	return u.OKResponse(ctx, "Deleted successfully")
 
 }
 

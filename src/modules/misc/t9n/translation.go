@@ -145,6 +145,19 @@ func (m *Manager) CreateOnDuplicateUpdateTranslations(t *Translations) error {
 	return err
 }
 
+// DeleteStringByID delete a row from translation and strings db
+func (m *Manager) DeleteStringByID(ID int64) error {
+	_, err := m.GetDbMap().Delete(&Strings{ID: ID})
+	if err != nil {
+		return err
+	}
+	_, err = m.GetDbMap().Delete(&Translations{StringID: ID})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // FillTranslateDataTableArray is the function to handle
 func (m *Manager) FillTranslateDataTableArray(
 	lang string,
