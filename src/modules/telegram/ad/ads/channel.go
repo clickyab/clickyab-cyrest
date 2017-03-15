@@ -50,15 +50,15 @@ type DailyView struct {
 //		list = yes
 // }
 type Channel struct {
-	ID            int64             `db:"id" json:"id" sort:"true" title:"ID" perm:"view_channel:global"`
-	UserID        int64             `json:"user_id" db:"user_id" title:"UserID" perm:"view_channel:global"`
+	ID            int64             `db:"id" json:"id,omitempty" sort:"true" title:"ID" perm:"view_channel:global"`
+	UserID        int64             `json:"user_id,omitempty" db:"user_id" title:"UserID" perm:"view_channel:global"`
 	Name          string            `json:"name" db:"name" search:"true" title:"Name"`
 	Title         common.NullString `json:"link" db:"link" search:"true" title:"Title"`
 	AdminStatus   AdminStatus       `json:"admin_status" db:"admin_status" filter:"true" title:"AdminStatus"`
 	ArchiveStatus ArchiveStatus     `json:"archive_status" db:"archive_status" filter:"true" title:"ArchiveStatus"`
 	Active        ActiveStatus      `json:"active" db:"active" filter:"true" title:"Active"`
-	CreatedAt     time.Time         `db:"created_at" json:"created_at" sort:"true" title:"Created at" perm:"view_channel:global"`
-	UpdatedAt     time.Time         `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at" perm:"view_channel:global"`
+	CreatedAt     *time.Time        `db:"created_at" json:"created_at,omitempty" sort:"true" title:"Created at" perm:"view_channel:global"`
+	UpdatedAt     *time.Time        `db:"updated_at" json:"updated_at,omitempty" sort:"true" title:"Updated at" perm:"view_channel:global"`
 }
 
 // ChanStat returns channels and their status by provider
@@ -192,7 +192,7 @@ func (m *Manager) FindChannelsByChatIDName(chatID int64, name string) (*Channel,
 // }
 type ChannelDataTable struct {
 	Channel
-	Email    string           `db:"email" json:"email" search:"true" title:"Email" perm:"view_channel:global"`
+	Email    string           `db:"email" json:"email,omitempty" search:"true" title:"Email" perm:"view_channel:global"`
 	ParentID common.NullInt64 `db:"parent_id" json:"parent_id" visible:"false"`
 	OwnerID  int64            `db:"owner_id" json:"owner_id" visible:"false"`
 	Actions  string           `db:"-" json:"_actions" visible:"false"`
@@ -448,7 +448,7 @@ func (m *Manager) EditChannel(link, name string, status AdminStatus, activeStatu
 		AdminStatus: status,
 		Active:      activeStatus,
 		Name:        name,
-		CreatedAt:   createdAt,
+		CreatedAt:   &createdAt,
 	}
 	assert.Nil(m.UpdateChannel(ch))
 	return ch
@@ -462,7 +462,7 @@ func (m *Manager) ChangeActive(ID int64, userID int64, name string, link string,
 		Name:        name,
 		Title:       common.NullString{Valid: link != "", String: link},
 		AdminStatus: status,
-		CreatedAt:   createdAt,
+		CreatedAt:   &createdAt,
 	}
 	if currentStat == ActiveStatusYes {
 		ch.Active = ActiveStatusNo

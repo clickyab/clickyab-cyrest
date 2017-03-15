@@ -22,8 +22,8 @@ type RolePermission struct {
 	RoleID     int64           `json:"role_id" db:"role_id"`
 	Permission base.Permission `json:"permission" db:"permission"`
 	Scope      base.UserScope  `json:"scope" db:"scope"`
-	CreatedAt  time.Time       `json:"created_at" db:"created_at"`
-	UpdatedAt  time.Time       `json:"updated_at" db:"updated_at"`
+	CreatedAt  *time.Time      `json:"created_at" db:"created_at"`
+	UpdatedAt  *time.Time      `json:"updated_at" db:"updated_at"`
 }
 
 // GetPermissionMap return resource map for some roles
@@ -68,8 +68,8 @@ func (m *Manager) RegisterRolePermission(roleID int64, perm map[base.UserScope][
 				Permission: val[i],
 				RoleID:     roleID,
 				Scope:      scope,
-				CreatedAt:  now,
-				UpdatedAt:  now,
+				CreatedAt:  &now,
+				UpdatedAt:  &now,
 			}
 			rolePermission = append(rolePermission, role)
 		}

@@ -61,7 +61,7 @@ bigLoop:
 			ChannelID:    chads[i].ChannelID,
 			BotChatID:    chads[i].BotChatID,
 			BotMessageID: chads[i].BotMessageID,
-			CreatedAt:    chads[i].CreatedAt,
+			CreatedAt:    &chads[i].CreatedAt,
 			PossibleView: chads[i].PossibleView,
 			View:         chads[i].View,
 			Warning:      chads[i].Warning,

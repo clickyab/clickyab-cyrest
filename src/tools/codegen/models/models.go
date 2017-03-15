@@ -83,8 +83,8 @@ package {{ .PackageName }}
 // Create{{ $m.StructName }} try to save a new {{ $m.StructName }} in database
 func (m *Manager) Create{{ $m.StructName }}({{ $m.StructName|getvar }} *{{ $m.StructName }}) error {
 	{{ if $m.CreatedAt }}now := time.Now(){{ else if $m.UpdatedAt }}now := time.Now(){{ end }}
-	{{ if $m.CreatedAt }}{{ $m.StructName|getvar }}.CreatedAt = now{{ end }}
-	{{ if $m.UpdatedAt }}{{ $m.StructName|getvar }}.UpdatedAt = now{{ end }}
+	{{ if $m.CreatedAt }}{{ $m.StructName|getvar }}.CreatedAt = &now{{ end }}
+	{{ if $m.UpdatedAt }}{{ $m.StructName|getvar }}.UpdatedAt = &now{{ end }}
 	func(in interface{}) {
 		if ii, ok := in.(common.Initializer); ok {
 			ii.Initialize()
@@ -96,7 +96,8 @@ func (m *Manager) Create{{ $m.StructName }}({{ $m.StructName|getvar }} *{{ $m.St
 
 // Update{{ $m.StructName }} try to update {{ $m.StructName }} in database
 func (m *Manager) Update{{ $m.StructName }}({{ $m.StructName|getvar }} *{{ $m.StructName }}) error {
-	{{ if $m.UpdatedAt }}{{ $m.StructName|getvar }}.UpdatedAt = time.Now(){{ end }}
+	{{ if $m.UpdatedAt }}now := time.Now(){{ end }}
+	{{ if $m.UpdatedAt }}{{ $m.StructName|getvar }}.UpdatedAt = &now{{ end }}
 	func(in interface{}) {
 		if ii, ok := in.(common.Initializer); ok {
 			ii.Initialize()

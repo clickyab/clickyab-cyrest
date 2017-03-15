@@ -136,6 +136,7 @@ func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error)
 	var ChannelAdDetailArr []*ads.ChannelAdDetail
 	var ChannelAdArr []ads.ChannelAd
 	var reshot bool
+	now := time.Now()
 	for j := range chads {
 		defaultPosition := chads[j].PlanPosition
 		if t, ok := channelAdStat[chads[j].AdID]; !ok || t.pos > defaultPosition {
@@ -145,7 +146,7 @@ func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error)
 				View:      0,
 				Position:  common.NullInt64{Valid: t.pos != 0, Int64: t.pos},
 				Warning:   1,
-				CreatedAt: time.Now(),
+				CreatedAt: &now,
 			})
 			ChannelAdArr = append(ChannelAdArr, ads.ChannelAd{
 
@@ -173,7 +174,7 @@ func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error)
 			View:      currentView,
 			Position:  common.NullInt64{Valid: channelAdStat[chads[j].AdID].pos != 0, Int64: channelAdStat[chads[j].AdID].pos},
 			Warning:   channelAdStat[chads[j].AdID].warning,
-			CreatedAt: time.Now(),
+			CreatedAt: &now,
 		})
 		ChannelAdArr = append(ChannelAdArr, ads.ChannelAd{
 

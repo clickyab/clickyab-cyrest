@@ -63,8 +63,8 @@ type User struct {
 	DBParentID  common.NullInt64                            `db:"parent_id" json:"-"`
 	Avatar      common.NullString                           `db:"avatar" json:"avatar" visible:"false"`
 	Status      UserStatus                                  `db:"status" json:"status" filter:"true" title:"User status"`
-	CreatedAt   time.Time                                   `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
-	UpdatedAt   time.Time                                   `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at"`
+	CreatedAt   *time.Time                                  `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
+	UpdatedAt   *time.Time                                  `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at"`
 	resources   map[base.UserScope]map[base.Permission]bool `db:"-"`
 	roles       []Role                                      `db:"-"`
 	//LastLogin   common.NullTime `db:"last_login" json:"last_login"`

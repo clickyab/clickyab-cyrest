@@ -23,8 +23,8 @@ type Role struct {
 	ID          int64             `db:"id" json:"id" sort:"true"`
 	Name        string            `json:"name" db:"name" search:"true"`
 	Description common.NullString `db:"description" json:"description"`
-	CreatedAt   time.Time         `db:"created_at" json:"created_at" sort:"true"`
-	UpdatedAt   time.Time         `db:"updated_at" json:"updated_at" sort:"true"`
+	CreatedAt   *time.Time        `db:"created_at" json:"created_at" sort:"true"`
+	UpdatedAt   *time.Time        `db:"updated_at" json:"updated_at" sort:"true"`
 }
 
 //RoleDataTable is the role full data in data table, after join with other field

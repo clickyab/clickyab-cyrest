@@ -25,8 +25,8 @@ type Plan struct {
 	Position    int64        `db:"position" json:"position" title:"Position"`
 	Type        PlanType     `json:"type" db:"type" filter:"true" title:"Type"`
 	Active      ActiveStatus `json:"active" db:"active" filter:"true" title:"Active"`
-	CreatedAt   time.Time    `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
-	UpdatedAt   time.Time    `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at"`
+	CreatedAt   *time.Time   `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
+	UpdatedAt   *time.Time   `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at"`
 }
 
 // GetAllActivePlans return all the active plans

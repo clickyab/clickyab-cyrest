@@ -20,6 +20,6 @@ type UserFinancial struct {
 	CardNumber    common.NullString `db:"card_number" json:"card_number"`
 	AccountNumber common.NullString `db:"account_number" json:"account_number"`
 	ShebaNumber   common.NullString `db:"sheba_number" json:"sheba_number"`
-	CreatedAt     time.Time         `db:"created_at" json:"created_at"`
-	UpdatedAt     time.Time         `db:"updated_at" json:"updated_at"`
+	CreatedAt     *time.Time        `db:"created_at" json:"created_at"`
+	UpdatedAt     *time.Time        `db:"updated_at" json:"updated_at"`
 }
