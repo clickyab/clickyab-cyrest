@@ -20,8 +20,8 @@ type KnownChannel struct {
 	UserCount     int64            `db:"user_count" json:"user_count"`
 	CliTelegramID string           `db:"cli_telegram_id" json:"cli_telegram_id"`
 	RawData       *tgo.ChannelInfo `db:"raw_data" json:"raw_data"`
-	CreatedAt     time.Time        `db:"created_at" json:"created_at" sort:"true"`
-	UpdatedAt     time.Time        `db:"updated_at" json:"updated_at" sort:"true"`
+	CreatedAt     *time.Time       `db:"created_at" json:"created_at" sort:"true"`
+	UpdatedAt     *time.Time       `db:"updated_at" json:"updated_at" sort:"true"`
 }
 
 // CreateChannelByRawData try to create a record per channel for all channele we visiting

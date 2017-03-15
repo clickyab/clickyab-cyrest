@@ -48,15 +48,15 @@ type (
 //		list = yes
 // }
 type File struct {
-	ID        int64     `db:"id" json:"id" sort:"true" title:"ID"`
-	UserID    int64     `json:"user_id" db:"user_id" title:"UserID"`
-	Src       string    `json:"src" db:"src" title:"Src"`
-	RealName  string    `json:"real_name" db:"real_name" title:"RealName"`
-	DBName    string    `json:"db_name" db:"db_name" title:"DBName"`
-	Type      FileType  `json:"type" db:"type" title:"Type"`
-	Size      int64     `json:"size" db:"size" title:"Size"`
-	CreatedAt time.Time `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
-	UpdatedAt time.Time `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at"`
+	ID        int64      `db:"id" json:"id" sort:"true" title:"ID"`
+	UserID    int64      `json:"user_id" db:"user_id" title:"UserID"`
+	Src       string     `json:"src" db:"src" title:"Src"`
+	RealName  string     `json:"real_name" db:"real_name" title:"RealName"`
+	DBName    string     `json:"db_name" db:"db_name" title:"DBName"`
+	Type      FileType   `json:"type" db:"type" title:"Type"`
+	Size      int64      `json:"size" db:"size" title:"Size"`
+	CreatedAt *time.Time `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
+	UpdatedAt *time.Time `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at"`
 }
 
 var (

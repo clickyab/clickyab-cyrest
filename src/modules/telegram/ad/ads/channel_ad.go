@@ -48,8 +48,8 @@ type ChannelAd struct {
 	End          common.NullTime   `db:"end" json:"end"`
 	Warning      int64             `db:"warning" json:"warning"`
 	PossibleView int64             `db:"possible_view" json:"possible_view"`
-	CreatedAt    time.Time         `db:"created_at" json:"created_at" sort:"true"`
-	UpdatedAt    time.Time         `db:"updated_at" json:"updated_at" sort:"true"`
+	CreatedAt    *time.Time        `db:"created_at" json:"created_at" sort:"true"`
+	UpdatedAt    *time.Time        `db:"updated_at" json:"updated_at" sort:"true"`
 }
 
 //SelectAd choose ad
@@ -418,8 +418,8 @@ func (m *Manager) SetCLIMessageID(channelID, adID int64, cliMessageID string) er
 // UpdateOnDuplicateChanDetail try to save a new ChanDetail or update in database
 func (m *Manager) UpdateOnDuplicateChanDetail(cd *ChanDetail) error {
 	now := time.Now()
-	cd.CreatedAt = now
-	cd.UpdatedAt = now
+	cd.CreatedAt = &now
+	cd.UpdatedAt = &now
 	_, err := m.GetDbMap().Exec(fmt.Sprintf("INSERT INTO %s "+
 		"(id,name, channel_id, title, info, cli_telegram_id, user_count, admin_count, post_count, total_view,created_at,updated_at)"+
 		" VALUES (NULL,?,?,?,?,?,?,?,?,?,?,?)"+

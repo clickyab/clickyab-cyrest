@@ -36,6 +36,6 @@ type Payment struct {
 	Authority  common.NullString `json:"authority" db:"authority" title:"Authority"`
 	RefID      common.NullInt64  `json:"ref_id" db:"ref_id" title:"RefID"`
 	StatusCode common.NullInt64  `json:"status_code" db:"status_code" title:"StatusCode"`
-	CreatedAt  time.Time         `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
-	UpdatedAt  time.Time         `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at"`
+	CreatedAt  *time.Time        `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
+	UpdatedAt  *time.Time        `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at"`
 }

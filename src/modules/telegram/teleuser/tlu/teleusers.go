@@ -49,8 +49,8 @@ type TeleUser struct {
 	Username  common.NullString `json:"username" db:"username" title:"UserName"`
 	Resolve   ResolveStatus     `json:"resolve" db:"resolve" title:"Resolve"`
 	Remove    RemoveStatus      `json:"remove" db:"remove" title:"Remove"`
-	CreatedAt time.Time         `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
-	UpdatedAt time.Time         `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at"`
+	CreatedAt *time.Time        `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
+	UpdatedAt *time.Time        `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at"`
 }
 
 // Verifycode is the verify code payload

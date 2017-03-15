@@ -84,8 +84,8 @@ type Ad struct {
 	AdArchiveStatus AdArchiveStatus   `json:"archive_status" db:"archive_status" filter:"true" title:"ArchiveStatus"`
 	AdPayStatus     AdPayStatus       `json:"pay_status" db:"pay_status" filter:"true" title:"PayStatus"`
 	AdActiveStatus  AdActiveStatus    `json:"active_status" db:"active_status" filter:"true" title:"ActiveStatus"`
-	CreatedAt       time.Time         `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
-	UpdatedAt       time.Time         `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at" visible:"false"`
+	CreatedAt       *time.Time        `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
+	UpdatedAt       *time.Time        `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at" visible:"false"`
 }
 
 //AdDataTable is the ad full data in data table, after join with other field

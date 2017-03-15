@@ -41,8 +41,8 @@ type UserProfilePersonal struct {
 	CountryID    common.NullInt64  `db:"country_id" json:"country_id"`
 	ProvinceID   common.NullInt64  `db:"province_id" json:"province_id"`
 	CityID       common.NullInt64  `db:"city_id" json:"city_id"`
-	CreatedAt    time.Time         `db:"created_at" json:"created_at"`
-	UpdatedAt    time.Time         `db:"updated_at" json:"updated_at"`
+	CreatedAt    *time.Time        `db:"created_at" json:"created_at"`
+	UpdatedAt    *time.Time        `db:"updated_at" json:"updated_at"`
 }
 
 // NewUserProfilePersonal is the minimum user profile

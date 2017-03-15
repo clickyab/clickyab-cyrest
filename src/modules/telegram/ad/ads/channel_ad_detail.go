@@ -19,7 +19,7 @@ type ChannelAdDetail struct {
 	View      int64            `db:"view" json:"view"`
 	Position  common.NullInt64 `db:"position" json:"position"`
 	Warning   int64            `db:"warning" json:"warning"`
-	CreatedAt time.Time        `db:"created_at" json:"created_at" sort:"true"`
+	CreatedAt *time.Time       `db:"created_at" json:"created_at" sort:"true"`
 }
 
 // FindChannelIDAdIDDetail return the ChannelAdDetail base on its ad_id , channel_id

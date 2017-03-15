@@ -62,8 +62,8 @@ type Billing struct {
 	Type      BillingType       `json:"type" db:"type" title:"Type" filter:"true"`
 	Status    BillingStatus     `json:"status" db:"status" title:"Status" filter:"true"`
 	Deposit   BillingDeposit    `json:"deposit" db:"deposit" title:"Deposit" filter:"true"`
-	CreatedAt time.Time         `json:"created_at" db:"created_at" sort:"true" title:"Created at"`
-	UpdatedAt time.Time         `json:"updated_at" db:"updated_at" sort:"true" title:"Updated at" visible:"false"`
+	CreatedAt *time.Time        `json:"created_at" db:"created_at" sort:"true" title:"Created at"`
+	UpdatedAt *time.Time        `json:"updated_at" db:"updated_at" sort:"true" title:"Updated at" visible:"false"`
 }
 
 // FindPaymentByAuthority return the Payment base on its authority

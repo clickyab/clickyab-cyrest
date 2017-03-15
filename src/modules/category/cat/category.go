@@ -21,12 +21,12 @@ import (
 //		list = yes
 // }
 type Category struct {
-	ID          int64     `db:"id" json:"id" sort:"true" title:"ID"`
-	Scope       string    `db:"scope" json:"scope" search:"true" title:"Scope"`
-	Title       string    `db:"title" json:"title" search:"true" title:"Title"`
-	Description string    `db:"description" json:"description" title:"Description"`
-	CreatedAt   time.Time `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
-	UpdatedAt   time.Time `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at"`
+	ID          int64      `db:"id" json:"id" sort:"true" title:"ID"`
+	Scope       string     `db:"scope" json:"scope" search:"true" title:"Scope"`
+	Title       string     `db:"title" json:"title" search:"true" title:"Title"`
+	Description string     `db:"description" json:"description" title:"Description"`
+	CreatedAt   *time.Time `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
+	UpdatedAt   *time.Time `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at"`
 }
 
 //type (
