@@ -3,7 +3,6 @@ package main
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"fmt"
 	"io"
 	"regexp"
 	"strconv"
@@ -43,11 +42,10 @@ type tag struct {
 	Type string `json:"t"`
 }
 
-func commits() []commitInfo {
-	repo, err := git.PlainOpen(getPath())
-	fError(err, fmt.Sprintf("No git repository in %s!", getPath()))
+func commits(repo *git.Repository) []commitInfo {
 	head, _ := repo.Head()
 	commit, _ := repo.Commit(head.Hash())
+
 	h, _ := commit.History()
 
 	commits := make([]commitInfo, 0)
