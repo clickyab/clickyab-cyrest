@@ -2,6 +2,8 @@ package worker
 
 import (
 	"common/assert"
+	"common/config"
+	"common/mail"
 	"common/models/common"
 	"common/rabbit"
 	"modules/billing/bil"
@@ -18,6 +20,15 @@ func (mw *MultiWorker) cronReview() error {
 	m.UpdateIndividualViewCount()
 
 	finishedAds := m.FinishedActiveAds()
+	mail.SendByTemplateName(trans.T("your ad has been finished ").Translate("fa_IR"), "activeAd", struct {
+		Date time.Time
+		Name string
+		Ad   string
+	}{
+		Date: time.Now(),
+		Name: owner.Email,
+		Ad:   currentAd.Name,
+	}, config.Config.Mail.From, owner.Email)
 	// TODO : transaction
 	for key := range finishedAds {
 		finishedAds[key].AdActiveStatus = ads.AdActiveStatusNo

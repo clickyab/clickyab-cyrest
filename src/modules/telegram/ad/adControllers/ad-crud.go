@@ -374,6 +374,19 @@ func (u *Controller) changeActiveStatus(ctx echo.Context) error {
 		rabbit.MustPublish(&commands.IdentifyAD{
 			AdID: currentAd.ID,
 		})
+		/*mail.SendByTemplateName(trans.T("your ad is active and start ").Translate("fa_IR"), "activeAd", struct {
+			Date      time.Time
+			Name      string
+			Ad        string
+			StartDate time.Time
+			EndDate   time.Time
+			EndTime   string
+			Date      string
+		}{
+			Date: time.Now(),
+			Name: owner.Email,
+			Ad:   currentAd.Name,
+		}, config.Config.Mail.From, owner.Email)*/
 	}
 	assert.Nil(m.UpdateAd(currentAd))
 	return u.OKResponse(ctx, currentAd)

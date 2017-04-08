@@ -1,0 +1,13 @@
+{{define "withdrawal"}}
+{{template "masterHeader" }}
+<div style="direction:rtl;text-align:right;font-family:tahoma,arial,helvetica,sans-serif">
+    <div style="direction:rtl;font-family:tahoma;padding:30px">
+        <!--Start-->
+        <p>{{.Name}}<span lang="fa"> عزیز سلام،</span></p>
+        <p><span lang="fa">درخواست برداشت شما با مبلغ {{Price.}} مورد تایید قرار گرفته است و جهت واریز به واحد مالی ارجاع داده شد. شایان ذکر است برای دریافت این مبلغ میبایست اطلاعات فردی شما در سایت روبیک اد توسط شما تکمیل شده باشد.</span></p>
+        <p><span lang="fa">موفق باشید</span></p>
+        <!--END-->
+    </div>
+</div>
+{{template "masterFooter" }}
+{{end}}
