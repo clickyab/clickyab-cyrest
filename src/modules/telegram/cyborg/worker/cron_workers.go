@@ -11,6 +11,7 @@ import (
 	"modules/telegram/ad/ads"
 	bot2 "modules/telegram/bot/worker"
 	"modules/telegram/config"
+	"modules/user/aaa"
 	"time"
 )
 
@@ -20,15 +21,6 @@ func (mw *MultiWorker) cronReview() error {
 	m.UpdateIndividualViewCount()
 
 	finishedAds := m.FinishedActiveAds()
-	mail.SendByTemplateName(trans.T("your ad has been finished ").Translate("fa_IR"), "activeAd", struct {
-		Date time.Time
-		Name string
-		Ad   string
-	}{
-		Date: time.Now(),
-		Name: owner.Email,
-		Ad:   currentAd.Name,
-	}, config.Config.Mail.From, owner.Email)
 	// TODO : transaction
 	for key := range finishedAds {
 		finishedAds[key].AdActiveStatus = ads.AdActiveStatusNo
@@ -56,6 +48,22 @@ func (mw *MultiWorker) cronReview() error {
 				})
 			}
 		}
+		//send mail
+		currentUser, err := aaa.NewAaaManager().FindUserByID(finishedAds[key].UserID)
+		assert.Nil(err)
+		mail.SendByTemplateName(trans.T("your ad is end").Translate("fa_IR"), "endAd", struct {
+			Name      string
+			Ad        string
+			StartDate time.Time
+			EndDate   time.Time
+			EndTime   int
+		}{
+			Name:      currentUser.Email,
+			Ad:        finishedAds[key].Name,
+			StartDate: *finishedAds[key].CreatedAt,
+			EndDate:   *finishedAds[key].UpdatedAt,
+			EndTime:   finishedAds[key].UpdatedAt.Hour(),
+		}, config.Config.Mail.From, currentUser.Email)
 	}
 
 	for _, chad := range m.GetWarningLimited(tcfg.Cfg.Telegram.LimitCountWarning) {

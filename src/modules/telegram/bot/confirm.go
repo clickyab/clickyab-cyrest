@@ -16,6 +16,10 @@ import (
 
 	"modules/misc/trans"
 
+	"common/config"
+	"common/mail"
+	"modules/user/aaa"
+
 	"gopkg.in/telegram-bot-api.v4"
 )
 
@@ -74,8 +78,20 @@ func (bb *bot) confirm(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 			doMessage(bot, m.Chat.ID, trans.T("Invalid ad"))
 			return
 		}
+		owner, err := aaa.NewAaaManager().FindUserByID(ad.UserID)
+		if err != nil {
+			return
+		}
 		ad.AdAdminStatus = ads.AdAdminStatusRejected
 		assert.Nil(mm.UpdateAd(ad))
+		//send email
+		mail.SendByTemplateName(trans.T("ad rejected").Translate("fa_IR"), "rejectAd", struct {
+			Name     string
+			Campaign string
+		}{
+			Name:     owner.Email,
+			Campaign: ad.Name,
+		}, config.Config.Mail.From, owner.Email)
 		resp = trans.T("Ad %s is rejected", ad.Name)
 	} else {
 		ad, err := mm.LoadNextAd(param)

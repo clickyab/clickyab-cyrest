@@ -9,6 +9,9 @@ import (
 	"modules/user/aaa"
 	"strconv"
 
+	"common/config"
+	"common/mail"
+
 	"github.com/Sirupsen/logrus"
 	"gopkg.in/telegram-bot-api.v4"
 )
@@ -69,6 +72,18 @@ func (bb *bot) doneORReject(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 		return
 	}
 	send(bot, m.Chat.ID, trans.T("ads reject in <b>%s</b> channel", channel.Name))
+	//send mail
+	owner, err := aaa.NewAaaManager().FindUserByID(channel.UserID)
+	if err != nil {
+		return
+	}
+	mail.SendByTemplateName(trans.T("channel rejected").Translate("fa_IR"), "rejectChannel", struct {
+		Name    string
+		Channel string
+	}{
+		Name:    owner.Email,
+		Channel: channel.Name,
+	}, config.Config.Mail.From, owner.Email)
 	return
 
 }
