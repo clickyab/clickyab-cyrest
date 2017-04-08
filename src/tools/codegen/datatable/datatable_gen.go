@@ -361,6 +361,7 @@ func extractValidFilter(p humanize.Package, t humanize.Type) (map[string]string,
 func handleField(p humanize.Package, f humanize.Field, mapPrefix string) (ColumnDef, error) {
 	clm := ColumnDef{}
 	tag := f.Tags.Get("json")
+	tag = strings.Trim(strings.Split(tag, ",")[0], " \t\n")
 	if tag == "" {
 		tag = f.Name
 	}
