@@ -205,6 +205,11 @@ func (m *Manager) FillTranslateDataTableArray(
 	fmt.Println(query)
 	_, err = m.GetDbMap().Select(&res, query, params...)
 	assert.Nil(err)
+
+	for i := range res {
+		res[i].Actions = "delete"
+	}
+
 	return res, count
 }
 
