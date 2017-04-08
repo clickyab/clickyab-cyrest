@@ -222,7 +222,7 @@ type FinishedActiveAds struct {
 
 // FinishedActiveAds return all finished ads
 func (m *Manager) FinishedActiveAds() []FinishedActiveAds {
-	q := `SELECT a.*,p.pice,p.share FROM %s AS a LEFT JOIN %s AS p ON a.plan_id = p.id
+	q := `SELECT a.*,p.price,p.share FROM %s AS a LEFT JOIN %s AS p ON a.plan_id = p.id
 		WHERE p.view < a.view AND a.admin_status = ?
 		AND a.active_status = ? AND a.pay_status = ?`
 	q = fmt.Sprintf(q, AdTableFull, PlanTableFull)
