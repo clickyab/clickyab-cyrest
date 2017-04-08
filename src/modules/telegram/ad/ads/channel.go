@@ -50,7 +50,7 @@ type DailyView struct {
 //		list = yes
 // }
 type Channel struct {
-	ID            int64             `db:"id" json:"id,omitempty" sort:"true" title:"ID" perm:"view_channel:global"`
+	ID            int64             `db:"id" json:"id,omitempty" sort:"true" title:"ID"`
 	UserID        int64             `json:"user_id,omitempty" db:"user_id" title:"UserID" perm:"view_channel:global"`
 	Name          string            `json:"name" db:"name" search:"true" title:"Name"`
 	Title         common.NullString `json:"link" db:"link" search:"true" title:"Title"`
