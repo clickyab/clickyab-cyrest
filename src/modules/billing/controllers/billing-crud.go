@@ -147,7 +147,7 @@ func (u *Controller) payment(ctx echo.Context) error {
 // }
 type bilChangeStatusPayload struct {
 	Status   bil.BillingStatus `json:"status" validate:"required" error:"Status is required"`
-	Describe string            `json:"describe"`
+	Describe string            `json:"reason"`
 }
 
 // Validate custom validation for billing Status
@@ -214,7 +214,7 @@ func (u *Controller) changeStatus(ctx echo.Context) error {
 // }
 type bilChangeDepositPayload struct {
 	Deposit  bil.BillingDeposit `json:"deposit" validate:"required" error:"Deposit is required"`
-	Describe string             `json:"describe"`
+	Describe string             `json:"reason"`
 }
 
 // Validate custom validation for billing Status
