@@ -223,6 +223,58 @@ func (m *Manager) ChannelAdBilling(channelAds []ads.FinishedActiveChannels, ad a
 	return err
 }
 
+// ChannelBilling insert income & channel billing
+func (m *Manager) ChannelBilling(adActive *ads.ChannelAdActive) error {
+	err := m.Begin()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			assert.Nil(m.Rollback())
+		} else {
+			err = m.Commit()
+		}
+
+	}()
+	//insert campaign into billing
+	billing := Billing{}
+	bilDetail := BillingDetail{}
+	//calculate amount
+	amount := adActive.View * adActive.Share
+	fAmount := float64(amount) * 0.1
+	amount = int64(fAmount)
+
+	billing.UserID = adActive.UserID
+	billing.ChannelID = common.MakeNullInt64(adActive.ChannelID)
+	billing.AdID = common.MakeNullInt64(adActive.AdID)
+	billing.Amount = amount
+	billing.Type = BilTypeIncome
+	billing.Status = BilStatusPending
+	billing.Deposit = BilDepositNo
+
+	err = m.CreateBilling(&billing)
+	if err != nil {
+		return err
+	}
+
+	jsonBilling, err := json.Marshal(billing)
+	if err != nil {
+		return err
+	}
+	bilDetail = BillingDetail{
+		UserID:    adActive.UserID,
+		BillingID: billing.ID,
+		Reason:    common.MakeNullString(string(jsonBilling)),
+	}
+	err = m.CreateBillingDetail(&bilDetail)
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
 //BillingDataTable is the ad full data in data table, after join with other field
 // @DataTable {
 //		url = /list
