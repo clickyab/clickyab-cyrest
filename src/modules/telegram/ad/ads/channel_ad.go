@@ -92,6 +92,46 @@ func (m *Manager) FindChannelIDAdByAdID(channelID int64, addID int64) (*ChannelA
 	return &res, nil
 }
 
+// ChannelAdActive type active ad
+type ChannelAdActive struct {
+	ChannelAd
+	UserID int64 `db:"user_id"`
+	Share  int64 `db:"share"`
+}
+
+// FindChannelIDAdByAdIDByActive return the ChannelAd base on its ad_id
+func (m *Manager) FindChannelIDAdByAdIDByActive(channelID int64, addID int64, userID int64) (*ChannelAdActive, error) {
+	var res ChannelAdActive
+	err := m.GetDbMap().SelectOne(
+		&res,
+		fmt.Sprintf("SELECT ca.*,u.id AS user_id, p.share AS share"+
+			"FROM %s AS ca "+
+			"INNER JOIN %s AS c "+
+			"ON ca.channel_id = c.id "+
+			"INNER JOIN %s AS u "+
+			"ON u.id = c.user_id"+
+			"INNER JOIN %s as a "+
+			"ON ca.ad_id = a.id  "+
+			"INNER JOIN %s AS p "+
+			"ON p.id = a.plan_id"+
+			"WHERE c.user_id = u.id "+
+			"AND ca.active = ? "+
+			"AND u.id = ? "+
+			"AND ca.channel_id = ? "+
+			"AND ca.ad_id = ?", ChannelAdTableFull, ChannelTableFull, aaa.UserTableFull, AdTableFull, PlanTableFull),
+		ActiveStatusYes,
+		userID,
+		channelID,
+		addID,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 // FindChannelAdActiveByChannelID return the ChannelAd base on its channel_id,active
 func (m *Manager) FindChannelAdActiveByChannelID(channelID int64, status ActiveStatus) ([]ChannelAd, error) {
 	res := []ChannelAd{}
@@ -455,6 +495,37 @@ func (m *Manager) FindActiveChannelAdByChannelID(channelID int64) []ChannelAd {
 		q,
 		channelID,
 		ActiveStatusYes,
+	)
+	assert.Nil(err)
+	return res
+}
+
+// ActiveAdUser struct active ad user
+type ActiveAdUser struct {
+	Ad
+	ChannelID int64 `db:"channel_id"`
+}
+
+// FindActiveChannelAdByUserID try to find by user id
+func (m *Manager) FindActiveChannelAdByUserID(userID int64) []ActiveAdUser {
+	var res []ActiveAdUser
+	q := fmt.Sprintf(
+		"SELECT a.*,c.id AS channel_id "+
+			"FROM %s AS ca "+
+			"INNER JOIN %s AS c "+
+			"ON ca.channel_id = c.id "+
+			"INNER JOIN %s AS u "+
+			"ON u.id = c.user_id"+
+			"INNER JOIN %s as a "+
+			"ON ca.ad_id = a.id "+
+			"WHERE c.user_id = u.id "+
+			"AND ca.active = ? "+
+			"AND u.id = ?", ChannelAdTableFull, ChannelTableFull, aaa.UserTableFull, AdTableFull)
+	_, err := m.GetDbMap().Select(
+		&res,
+		q,
+		ActiveStatusYes,
+		userID,
 	)
 	assert.Nil(err)
 	return res

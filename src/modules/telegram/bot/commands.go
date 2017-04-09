@@ -16,7 +16,10 @@ type bot struct {
 
 const htmlMode = "HTML"
 
-var doneRejectReg = regexp.MustCompile("/(done|reject)_([0-9]+)")
+var (
+	doneRejectReg = regexp.MustCompile("/(done|reject)_([0-9]+)")
+	completeAd    = regexp.MustCompile("/complete_([0-9]+)_([0-9]+)")
+)
 
 func sendString(bot *tgbotapi.BotAPI, chatID int64, message string) {
 	msg := tgbotapi.NewMessage(chatID, message)
@@ -37,6 +40,8 @@ func (bb *bot) Initialize() {
 	tgbot.RegisterMessageHandler("/done", bb.doneORReject)
 	tgbot.RegisterMessageHandler("/reject", bb.doneORReject)
 	tgbot.RegisterMessageHandler("/reshot", bb.reshot)
+	tgbot.RegisterMessageHandler("/activead", bb.activeAd)
+	tgbot.RegisterMessageHandler("/complete", bb.complete)
 }
 
 func init() {
