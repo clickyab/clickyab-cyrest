@@ -605,7 +605,8 @@ func (u *Controller) verify(ctx echo.Context) error {
 		return ctx.Redirect(http.StatusMovedPermanently, frontNOk)
 	}
 	if resp.Status == bcfg.Bcfg.Gate.MerchantOkStatus {
-		currentUser := authz.MustGetUser(ctx)
+		currentUser, err := aaa.NewAaaManager().FindUserByID(currentAd.UserID)
+		assert.Nil(err)
 		billing, err := bil.NewBilManager().RegisterBilling(currentUser, ctx.FormValue("Authority"), resp.RefID, plan.Price, resp.Status, id)
 		if err != nil {
 			return ctx.Redirect(http.StatusMovedPermanently, frontNOk)
