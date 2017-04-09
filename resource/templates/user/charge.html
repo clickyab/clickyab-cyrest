@@ -1,0 +1,13 @@
+{{define "charge"}}
+{{template "masterHeader" }}
+<div style="direction:rtl;text-align:right;font-family:tahoma,arial,helvetica,sans-serif">
+    <div style="direction:rtl;font-family:tahoma;padding:30px">
+        <!--Start-->
+        <p>{{.Name}}<span lang="fa"> عزیز سلام،</span></p>
+        <p><span lang="fa">مبلغ <span>{{.Price}}</span> ریال جهت شارژ کمپین <span>{{.Campaign}}</span> به حساب شما منظور و عملیات بانکی شما با موفقیت انجام شد. برای شروع نمایش تبلیغات به پنل کاربری خود در سایت روبیک اد مراجعه نمایید. از اینکه روبیک اد را انتخاب کرده اید از شما سپاسگذاریم.</span></p>
+        <p><span lang="fa">موفق باشید</span></p>
+        <!--END-->
+    </div>
+</div>
+{{template "masterFooter" }}
+{{end}}

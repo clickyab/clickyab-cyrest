@@ -2,6 +2,8 @@ package worker
 
 import (
 	"common/assert"
+	"common/config"
+	"common/mail"
 	"common/models/common"
 	"common/rabbit"
 	"modules/billing/bil"
@@ -9,6 +11,7 @@ import (
 	"modules/telegram/ad/ads"
 	bot2 "modules/telegram/bot/worker"
 	"modules/telegram/config"
+	"modules/user/aaa"
 	"time"
 )
 
@@ -45,6 +48,22 @@ func (mw *MultiWorker) cronReview() error {
 				})
 			}
 		}
+		//send mail
+		currentUser, err := aaa.NewAaaManager().FindUserByID(finishedAds[key].UserID)
+		assert.Nil(err)
+		mail.SendByTemplateName(trans.T("your ad is end").Translate("fa_IR"), "endAd", struct {
+			Name      string
+			Ad        string
+			StartDate time.Time
+			EndDate   time.Time
+			EndTime   int
+		}{
+			Name:      currentUser.Email,
+			Ad:        finishedAds[key].Name,
+			StartDate: *finishedAds[key].CreatedAt,
+			EndDate:   *finishedAds[key].UpdatedAt,
+			EndTime:   finishedAds[key].UpdatedAt.Hour(),
+		}, config.Config.Mail.From, currentUser.Email)
 	}
 
 	for _, chad := range m.GetWarningLimited(tcfg.Cfg.Telegram.LimitCountWarning) {

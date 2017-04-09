@@ -33,6 +33,9 @@ import (
 
 	"common/redis"
 
+	"common/config"
+	"common/mail"
+
 	"gopkg.in/labstack/echo.v3"
 )
 
@@ -374,6 +377,14 @@ func (u *Controller) changeActiveStatus(ctx echo.Context) error {
 		rabbit.MustPublish(&commands.IdentifyAD{
 			AdID: currentAd.ID,
 		})
+		// send mail
+		mail.SendByTemplateName(trans.T("AD activated").Translate("fa_IR"), "activeAd", struct {
+			Ad   string
+			Name string
+		}{
+			Ad:   currentAd.Name,
+			Name: owner.Email,
+		}, config.Config.Mail.From, owner.Email)
 	}
 	assert.Nil(m.UpdateAd(currentAd))
 	return u.OKResponse(ctx, currentAd)
@@ -608,6 +619,16 @@ func (u *Controller) verify(ctx echo.Context) error {
 				AdID: currentAd.ID,
 			})
 		}()
+		// send mail
+		mail.SendByTemplateName(trans.T("new plan bought").Translate("fa_IR"), "charge", struct {
+			Name     string
+			Price    int64
+			Campaign string
+		}{
+			Name:     currentUser.Email,
+			Price:    plan.Price,
+			Campaign: currentAd.Name,
+		}, config.Config.Mail.From, currentUser.Email)
 		return ctx.Redirect(http.StatusMovedPermanently, fmt.Sprintf("%s%d", frontOk, billing.PaymentID.Int64))
 	}
 	return ctx.Redirect(http.StatusMovedPermanently, frontNOk)
