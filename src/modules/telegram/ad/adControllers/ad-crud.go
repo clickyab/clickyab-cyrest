@@ -580,18 +580,18 @@ func (u *Controller) verify(ctx echo.Context) error {
 	frontNOk := fmt.Sprintf("%s%s", frontURL, "?success=no")
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
 	if err != nil {
-		return ctx.Redirect(http.StatusMovedPermanently, frontNOk)
+		return ctx.Redirect(http.StatusFound, frontNOk)
 	}
 	currentAd, err := adManager.FindAdByID(id)
 	if err != nil {
-		return ctx.Redirect(http.StatusMovedPermanently, frontNOk)
+		return ctx.Redirect(http.StatusFound, frontNOk)
 	}
 	plan, err := adManager.FindPlanByID(currentAd.PlanID.Int64)
 	if err != nil {
-		return ctx.Redirect(http.StatusMovedPermanently, frontNOk)
+		return ctx.Redirect(http.StatusFound, frontNOk)
 	}
 	if strings.ToLower(ctx.FormValue("Status")) != "ok" {
-		return ctx.Redirect(http.StatusMovedPermanently, frontNOk)
+		return ctx.Redirect(http.StatusFound, frontNOk)
 	}
 	client := payment.NewPaymentGatewayImplementationServicePortType("", false, nil)
 	// Create a new payment request to Zarinpal
@@ -602,14 +602,14 @@ func (u *Controller) verify(ctx echo.Context) error {
 	})
 	// Check if response is error free
 	if err != nil {
-		return ctx.Redirect(http.StatusMovedPermanently, frontNOk)
+		return ctx.Redirect(http.StatusFound, frontNOk)
 	}
 	if resp.Status == bcfg.Bcfg.Gate.MerchantOkStatus {
 		currentUser, err := aaa.NewAaaManager().FindUserByID(currentAd.UserID)
 		assert.Nil(err)
 		billing, err := bil.NewBilManager().RegisterBilling(currentUser, ctx.FormValue("Authority"), resp.RefID, plan.Price, resp.Status, id)
 		if err != nil {
-			return ctx.Redirect(http.StatusMovedPermanently, frontNOk)
+			return ctx.Redirect(http.StatusFound, frontNOk)
 		}
 		//update ad pay status
 		currentAd.AdPayStatus = ads.AdPayStatusYes
@@ -621,15 +621,17 @@ func (u *Controller) verify(ctx echo.Context) error {
 			})
 		}()
 		// send mail
-		mail.SendByTemplateName(trans.T("new plan bought").Translate("fa_IR"), "charge", struct {
-			Name     string
-			Price    int64
-			Campaign string
-		}{
-			Name:     currentUser.Email,
-			Price:    plan.Price,
-			Campaign: currentAd.Name,
-		}, config.Config.Mail.From, currentUser.Email)
+		go func() {
+			mail.SendByTemplateName(trans.T("new plan bought").Translate("fa_IR"), "charge", struct {
+				Name     string
+				Price    int64
+				Campaign string
+			}{
+				Name:     currentUser.Email,
+				Price:    plan.Price,
+				Campaign: currentAd.Name,
+			}, config.Config.Mail.From, currentUser.Email)
+		}()
 		return ctx.Redirect(http.StatusMovedPermanently, fmt.Sprintf("%s%d", frontOk, billing.PaymentID.Int64))
 	}
 	return ctx.Redirect(http.StatusMovedPermanently, frontNOk)
