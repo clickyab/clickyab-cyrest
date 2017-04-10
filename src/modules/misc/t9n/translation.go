@@ -147,7 +147,7 @@ func (m *Manager) CreateOnDuplicateUpdateTranslations(t *Translations) error {
 
 // DeleteStringByID delete a row from translation and strings db
 func (m *Manager) DeleteStringByID(ID int64) error {
-	q := `DELETE from %s where id=?`
+	q := `DELETE from %s where string_id=?`
 	query := fmt.Sprintf(q, TranslationsTableFull)
 	_, err := m.GetDbMap().Exec(query, ID)
 	if err != nil {
