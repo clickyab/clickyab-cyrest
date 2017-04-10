@@ -15,6 +15,13 @@ func Logger(next echo.HandlerFunc) echo.HandlerFunc {
 		// Start timer
 		start := time.Now()
 		// Process request
+		logrus.WithFields(
+			logrus.Fields{
+				"Method":   c.Request().Method,
+				"Path":     c.Request().URL.Path,
+				"ClientIP": c.RealIP(),
+			},
+		).Debug("STARTED")
 		err := next(c)
 		latency := time.Since(start)
 		statusCode := c.Response().Status
@@ -27,7 +34,7 @@ func Logger(next echo.HandlerFunc) echo.HandlerFunc {
 				"Status":   statusCode,
 				"Err":      err,
 			},
-		).Debug(http.StatusText(statusCode))
+		).Debug("DONE WITH: " + http.StatusText(statusCode))
 
 		return err
 	}
