@@ -37,12 +37,13 @@ func (u *Controller) registerUser(ctx echo.Context) error {
 	}
 
 	token := m.GetNewToken(usr, ctx.Request().UserAgent(), ctx.RealIP())
-
-	mail.SendByTemplateName(trans.T("Welcome to Rubbic ADS").Translate("fa_IR"), "register", struct {
-		Name string
-	}{
-		Name: pl.Email,
-	}, config.Config.Mail.From, usr.Email)
+	go func() {
+		mail.SendByTemplateName(trans.T("Welcome to Rubbic ADS").Translate("fa_IR"), "register", struct {
+			Name string
+		}{
+			Name: pl.Email,
+		}, config.Config.Mail.From, usr.Email)
+	}()
 
 	return u.OKResponse(
 		ctx,

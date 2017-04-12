@@ -77,13 +77,15 @@ func (bb *bot) doneORReject(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 	if err != nil {
 		return
 	}
-	mail.SendByTemplateName(trans.T("channel rejected").Translate("fa_IR"), "rejectChannel", struct {
-		Name    string
-		Channel string
-	}{
-		Name:    owner.Email,
-		Channel: channel.Name,
-	}, config.Config.Mail.From, owner.Email)
+	go func() {
+		mail.SendByTemplateName(trans.T("channel rejected").Translate("fa_IR"), "reject-channel", struct {
+			Name    string
+			Channel string
+		}{
+			Name:    owner.Email,
+			Channel: channel.Name,
+		}, config.Config.Mail.From, owner.Email)
+	}()
 	return
 
 }
