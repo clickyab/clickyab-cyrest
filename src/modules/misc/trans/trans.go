@@ -69,6 +69,7 @@ func (t9 t9Base) GetParams() []interface{} {
 
 func (t9 t9Base) Translate(lang string) string {
 	lock.RLock()
+	defer lock.RUnlock()
 	t, ok := translations[lang]
 	if !ok {
 		lock.RUnlock()
