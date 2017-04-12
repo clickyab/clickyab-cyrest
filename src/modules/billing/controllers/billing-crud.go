@@ -201,7 +201,7 @@ func (u *Controller) changeStatus(ctx echo.Context) error {
 		}, config.Config.Mail.From, owner.Email)
 	}
 	if currentBil.Status == bil.BilStatusRejected && currentBil.Type == bil.BilTypeWithdrawal {
-		mail.SendByTemplateName(trans.T("withdrawal rejected").Translate("fa_IR"), "rejectWitdrawal", struct {
+		mail.SendByTemplateName(trans.T("withdrawal rejected").Translate("fa_IR"), "reject-witdrawal", struct {
 			Name string
 		}{
 			Name: owner.Email,

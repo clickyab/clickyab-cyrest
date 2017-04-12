@@ -348,8 +348,6 @@ func (u *Controller) promoteAd(ctx echo.Context) error {
 //		url = /list/active_status/:id
 //		method = put
 //		payload	= adActiveStatusPayload
-//		resource = change_active_ad:self
-//		middleware = authz.Authenticate
 //		200 = ads.Ad
 //		400 = base.ErrorResponseSimple
 //	}
@@ -364,27 +362,23 @@ func (u *Controller) changeActiveStatus(ctx echo.Context) error {
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
 	}
-	currentUser := authz.MustGetUser(ctx)
+	//currentUser := authz.MustGetUser(ctx)
+	assert.Nil(err)
 	owner, err := aaa.NewAaaManager().FindUserByID(currentAd.UserID)
 	assert.Nil(err)
-	_, b := currentUser.HasPermOn("change_active_ad", owner.ID, owner.DBParentID.Int64)
-	if !b {
-		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
-	}
 	//check everything is good
 	if currentAd.AdPayStatus == ads.AdPayStatusYes && currentAd.AdAdminStatus == ads.AdAdminStatusPending {
 		currentAd.AdActiveStatus = pl.AdActiveStatus
-		rabbit.MustPublish(&commands.IdentifyAD{
-			AdID: currentAd.ID,
-		})
 		// send mail
-		mail.SendByTemplateName(trans.T("AD activated").Translate("fa_IR"), "activeAd", struct {
-			Ad   string
-			Name string
-		}{
-			Ad:   currentAd.Name,
-			Name: owner.Email,
-		}, config.Config.Mail.From, owner.Email)
+		go func() {
+			mail.SendByTemplateName(trans.T("AD activated").Translate("fa_IR"), "active-ad", struct {
+				Ad   string
+				Name string
+			}{
+				Ad:   currentAd.Name,
+				Name: owner.Email,
+			}, config.Config.Mail.From, owner.Email)
+		}()
 	}
 	assert.Nil(m.UpdateAd(currentAd))
 	return u.OKResponse(ctx, currentAd)
@@ -578,6 +572,8 @@ func (u *Controller) verify(ctx echo.Context) error {
 	frontURL := fmt.Sprintf("%s%s", ctx.Scheme()+"://", path.Join(ctx.Request().Host, bcfg.Bcfg.Gate.FrontCallbackURL))
 	frontOk := fmt.Sprintf("%s%s", frontURL, "?success=yes&payment=")
 	frontNOk := fmt.Sprintf("%s%s", frontURL, "?success=no")
+	println("//////////")
+	fmt.Println(ctx.Param("id"))
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
 	if err != nil {
 		return ctx.Redirect(http.StatusFound, frontNOk)

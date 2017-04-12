@@ -85,13 +85,15 @@ func (bb *bot) confirm(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 		ad.AdAdminStatus = ads.AdAdminStatusRejected
 		assert.Nil(mm.UpdateAd(ad))
 		//send email
-		mail.SendByTemplateName(trans.T("ad rejected").Translate("fa_IR"), "rejectAd", struct {
-			Name     string
-			Campaign string
-		}{
-			Name:     owner.Email,
-			Campaign: ad.Name,
-		}, config.Config.Mail.From, owner.Email)
+		go func() {
+			mail.SendByTemplateName(trans.T("ad rejected").Translate("fa_IR"), "reject-ad", struct {
+				Name     string
+				Campaign string
+			}{
+				Name:     owner.Email,
+				Campaign: ad.Name,
+			}, config.Config.Mail.From, owner.Email)
+		}()
 		resp = trans.T("Ad %s is rejected", ad.Name)
 	} else {
 		ad, err := mm.LoadNextAd(param)

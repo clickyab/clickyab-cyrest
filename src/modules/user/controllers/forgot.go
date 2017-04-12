@@ -94,7 +94,7 @@ func (u *Controller) forgotGeneratePassword(ctx echo.Context) error {
 }
 
 func sendEmailPasswordGen(usr *aaa.User, pass string) {
-	mail.SendByTemplateName(trans.T("Password recovery").Translate("fa_IR"), "forgotNewPassword", struct {
+	mail.SendByTemplateName(trans.T("Password recovery").Translate("fa_IR"), "forgot-new-password", struct {
 		Name string
 		Pass string
 	}{
