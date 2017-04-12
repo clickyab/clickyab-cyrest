@@ -7,6 +7,8 @@ import (
 
 	"modules/misc/base"
 
+	"modules/telegram/teleuser/tlu"
+
 	"gopkg.in/labstack/echo.v3"
 )
 
@@ -14,6 +16,7 @@ type responseLoginOK struct {
 	UserID      int64                                `json:"user_id"`
 	Email       string                               `json:"email"`
 	AccessToken string                               `json:"token"`
+	Resolve     string                               `json:"resolve,omitempty"`
 	Permissions map[base.UserScope][]base.Permission `json:"perm"`
 	Personal    *aaa.UserProfilePersonal             `json:"personal,omitempty"`
 	Corporation *aaa.UserProfileCorporation          `json:"corporation,omitempty"`
@@ -91,9 +94,16 @@ func (u *Controller) loginUser(ctx echo.Context) error {
 func (u *Controller) pingUser(ctx echo.Context) error {
 	usr := authz.MustGetUser(ctx)
 	token := authz.MustGetToken(ctx)
-
+	result := createLoginResponse(usr, token)
+	//find if user has been resolved
+	count := tlu.NewTluManager().GetActiveCountByUserID(usr.ID)
+	if count >= 1 {
+		result.Resolve = "yes"
+	} else {
+		result.Resolve = "no"
+	}
 	return u.OKResponse(
 		ctx,
-		createLoginResponse(usr, token),
+		result,
 	)
 }

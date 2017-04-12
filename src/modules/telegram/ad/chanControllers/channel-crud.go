@@ -28,6 +28,8 @@ import (
 
 	"modules/misc/base"
 
+	"modules/telegram/teleuser/tlu"
+
 	echo "gopkg.in/labstack/echo.v3"
 )
 
@@ -73,6 +75,11 @@ func (u *Controller) createChannel(ctx echo.Context) error {
 	_, b := currentUser.HasPermOn("create_channel", owner.ID, owner.DBParentID.Int64)
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
+	}
+	//check active teleuser
+	count := tlu.NewTluManager().GetActiveCountByUserID(owner.ID)
+	if count < 1 {
+		return u.NotFoundResponse(ctx, errors.New("cant register channel"))
 	}
 	ch := &ads.Channel{
 		Name:          pl.Link,

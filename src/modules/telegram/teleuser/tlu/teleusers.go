@@ -146,6 +146,14 @@ func (m *Manager) GetUser(chatID int64) (*aaa.User, error) {
 	return &res, nil
 }
 
+// GetActiveCountByUserID get count of active tele users
+func (m *Manager) GetActiveCountByUserID(userID int64) int64 {
+	query := fmt.Sprintf("SELECT COUNT(id) FROM %s AS tl WHERE tl.resolve=? AND tl.user_id=? AND tl.remove=?", TeleUserTableFull)
+	count, err := m.GetDbMap().SelectInt(query, ResolveStatusYes, userID, RemoveStatusNo)
+	assert.Nil(err)
+	return count
+}
+
 // DeleteTelegramUser delete a role by id
 func (m *Manager) DeleteTelegramUser(telegramUserID int64) error {
 	tele, err := m.FindTeleUserByID(telegramUserID)
