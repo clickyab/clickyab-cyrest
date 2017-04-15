@@ -4,6 +4,8 @@ import (
 	"common/redis"
 	"fmt"
 	"time"
+
+	"github.com/mssola/user_agent"
 )
 
 // Session is the active session for a user
@@ -11,7 +13,9 @@ type Session struct {
 	Value       string        `json:"-"`
 	Current     bool          `json:"current"`
 	Key         string        `json:"key"`
-	UserAgent   string        `json:"user_agent"`
+	OS          string        `json:"os"`
+	Browser     string        `json:"browser"`
+	Version     string        `json:"version"`
 	IP          string        `json:"ip"`
 	ExpireAfter time.Duration `json:"expire_after"`
 	CreatedAt   time.Time     `json:"created_at"`
@@ -26,7 +30,12 @@ func getSession(st string) Session {
 		Key: st,
 	}
 	s.Value, _ = aredis.GetHashKey(s.Key, "token", false, 0)
-	s.UserAgent, _ = aredis.GetHashKey(s.Key, "ua", false, 0)
+	agent, _ := aredis.GetHashKey(s.Key, "ua", false, 0)
+	ua := user_agent.New(agent)
+	browser, version := ua.Browser()
+	s.Browser = browser
+	s.Version = version
+	s.OS = ua.OS()
 	s.IP, _ = aredis.GetHashKey(s.Key, "ip", false, 0)
 	tmp, _ := aredis.GetHashKey(s.Key, "date", false, 0)
 	s.CreatedAt, _ = time.Parse(time.RFC3339, tmp)

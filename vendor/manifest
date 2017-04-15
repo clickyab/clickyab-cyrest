@@ -386,6 +386,12 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "github.com/mssola/user_agent",
+			"repository": "https://github.com/mssola/user_agent",
+			"revision": "07efe2b857fb8c02d2dd85c12d0145f58554ec7c",
+			"branch": "master"
+		},
+		{
 			"importpath": "github.com/ogier/pflag",
 			"repository": "https://github.com/ogier/pflag",
 			"revision": "45c278ab3607870051a2ea9040bb85fcb8557481",
