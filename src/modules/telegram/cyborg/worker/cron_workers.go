@@ -23,12 +23,14 @@ func (mw *MultiWorker) cronReview() error {
 	finishedAds := m.FinishedActiveAds()
 	// TODO : transaction
 	for key := range finishedAds {
-		finishedAds[key].AdActiveStatus = ads.AdActiveStatusNo
+		ad := finishedAds[key].Ad
+		ad.AdActiveStatus = ads.AdActiveStatusNo
+		assert.Nil(m.UpdateAd(&ad))
 		ca := m.FinishedActiveChannels(finishedAds[key].ID, tcfg.Cfg.Telegram.LimitCountWarning)
 		b := bil.NewBilManager()
 		err := b.ChannelAdBilling(ca, finishedAds[key])
 		assert.Nil(err)
-		//assert.Nil(m.UpdateAd(&finishedAds[key]))
+
 		channelAd, err := m.FindChannelAdActiveByAdID(finishedAds[key].ID, ads.ActiveStatusYes)
 		assert.Nil(err)
 		for c := range channelAd {
