@@ -15,6 +15,7 @@ import (
 
 	"modules/misc/trans"
 
+	"github.com/Sirupsen/logrus"
 	"gopkg.in/telegram-bot-api.v4"
 )
 
@@ -28,8 +29,9 @@ func (bb *bot) updateAD(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 			currentAd, err := n.FindAdByID(id)
 			assert.Nil(err)
 			currentAd.BotChatID = common.NullInt64{Valid: true, Int64: m.Chat.ID}
+			logrus.Debug("bot chat ID", m.Chat.ID)
 			currentAd.BotMessageID = common.NullInt64{Valid: true, Int64: int64(m.MessageID)}
-
+			logrus.Debug("bot message ID", m.MessageID)
 			assert.Nil(n.UpdateAd(currentAd))
 
 		}, time.Minute)
