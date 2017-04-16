@@ -609,6 +609,7 @@ func (u *Controller) verify(ctx echo.Context) error {
 		}
 		//update ad pay status
 		currentAd.AdPayStatus = ads.AdPayStatusYes
+		currentAd.AdActiveStatus = ads.AdActiveStatusYes
 		assert.Nil(adManager.UpdateAd(currentAd))
 		//call worker
 		defer func() {
