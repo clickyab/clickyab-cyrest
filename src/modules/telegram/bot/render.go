@@ -11,6 +11,7 @@ import (
 	"modules/telegram/config"
 	"time"
 
+	"github.com/Sirupsen/logrus"
 	"gopkg.in/telegram-bot-api.v4"
 )
 
@@ -28,6 +29,8 @@ func createMessage(bot *tgbotapi.BotAPI, chatID int64, ad *ads.Ad) tgbotapi.Mess
 	f := filepath.Join(config.Config.StaticRoot, ad.Src.String)
 	ext := strings.ToLower(filepath.Ext(f))
 	var chat tgbotapi.Chattable
+	logrus.Debug("////")
+	logrus.Debug(ext)
 	if ext == ".jpg" || ext == ".jpeg" || ext == ".png" || ext == ".gif" {
 		ph := tgbotapi.NewPhotoUpload(chatID, f)
 		ph.Caption = string(ad.Description)
