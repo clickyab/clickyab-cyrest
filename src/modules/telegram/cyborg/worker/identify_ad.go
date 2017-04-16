@@ -2,6 +2,8 @@ package worker
 
 import (
 	"common/assert"
+	"common/models/common"
+	"encoding/json"
 	"fmt"
 	"modules/telegram/ad/ads"
 	"modules/telegram/config"
@@ -19,6 +21,12 @@ func (mw *MultiWorker) identifyAD(in *commands.IdentifyAD) (bool, error) {
 	_, err = mw.sendMessage(tcfg.Cfg.Telegram.BotID, fmt.Sprintf("/updatead-%d", in.AdID))
 	assert.Nil(err)
 	_, err = mw.fwdMessage(tcfg.Cfg.Telegram.BotID, ad.CliMessageID.String)
+	assert.Nil(err)
+	res, err := mw.getLastMessages(tcfg.Cfg.Telegram.BotID, 1, 0)
+	//update promote data
+	b, err := json.Marshal(res[0])
+	assert.Nil(err)
+	ad.PromoteData = common.MakeNullString(string(b))
 	assert.Nil(err)
 	return false, nil
 }
