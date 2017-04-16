@@ -25,8 +25,8 @@ func (mw *MultiWorker) identifyAD(in *commands.IdentifyAD) (bool, error) {
 	//update promote data
 	b, err := json.Marshal(t)
 	assert.Nil(err)
-	ad.PromoteData = common.MakeNullString(string(b))
-	err = ads.NewAdsManager().UpdateAd(ad)
+	promote := common.MakeNullString(string(b))
+	err = ads.NewAdsManager().UpdateAdPromote(ad.ID, promote)
 	assert.Nil(err)
 	return false, nil
 }

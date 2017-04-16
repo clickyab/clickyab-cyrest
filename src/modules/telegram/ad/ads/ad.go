@@ -850,3 +850,14 @@ func (m *Manager) FillSpecificAdDataTableArray(u base.PermInterfaceComplete,
 
 	return res, count
 }
+
+// UpdateAdPromote update ad view
+func (m *Manager) UpdateAdPromote(ID int64, data common.NullString) error {
+	q := fmt.Sprintf("UPDATE %s SET promote_data = ? WHERE id = ?", AdTableFull)
+	_, err := m.GetDbMap().Exec(
+		q,
+		data.String,
+		ID,
+	)
+	return err
+}
