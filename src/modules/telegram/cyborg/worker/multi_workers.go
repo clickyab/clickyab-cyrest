@@ -83,11 +83,6 @@ func (mw *MultiWorker) getLastMessages(telegramID string, count int, offset int)
 	logrus.Warn(count, offset)
 	return mw.client.MessageHistory(telegramID, count, offset)
 }
-func (mw *MultiWorker) fwdMessage(telegramID string, messageID string) (*tgo.SuccessResp, error) {
-	mw.lock.Lock()
-	defer mw.lock.Unlock()
-	return mw.client.FwdMsg(telegramID, messageID)
-}
 func (mw *MultiWorker) sendMessage(telegramID string, messageID string) (*tgo.SuccessResp, error) {
 	mw.lock.Lock()
 	defer mw.lock.Unlock()
@@ -132,4 +127,21 @@ func NewMultiWorker(ip net.IP, port int) (*MultiWorker, error) {
 	})
 
 	return res, nil
+}
+
+func (mw *MultiWorker) returnFwdMessage(telegramID string, messageID string) (*tgo.History, error) {
+	mw.lock.Lock()
+	defer mw.lock.Unlock()
+	_, err := mw.client.FwdMsg(telegramID, messageID)
+	if err != nil {
+		return nil, err
+	}
+	res, err := mw.client.MessageHistory(telegramID, 1, 0)
+	if err != nil {
+		return nil, err
+	}
+	if len(res) != 1 {
+		return nil, errors.New("invalid history resp")
+	}
+	return &res[0], nil
 }
