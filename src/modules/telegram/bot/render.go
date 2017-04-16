@@ -11,6 +11,7 @@ import (
 	"modules/telegram/config"
 	"time"
 
+	"github.com/Sirupsen/logrus"
 	"gopkg.in/telegram-bot-api.v4"
 )
 
@@ -18,6 +19,10 @@ func forwardCli(bot *tgbotapi.BotAPI, chatID int64, ad *ads.Ad) tgbotapi.Message
 	assert.True(ad.BotChatID.Valid, "[BUG] not yet checked by the bot")
 	assert.True(ad.BotMessageID.Valid, "[BUG] not yet checked by the bot")
 	msg := tgbotapi.NewForward(chatID, ad.BotChatID.Int64, int(ad.BotMessageID.Int64))
+	logrus.Debug("AAAAA")
+	logrus.Debug(chatID)
+	logrus.Debug(ad.BotChatID.Int64)
+	logrus.Debug(int(ad.BotMessageID.Int64))
 	time.Sleep(tcfg.Cfg.Telegram.SendDelay)
 	x, err := bot.Send(msg)
 	assert.Nil(err)
