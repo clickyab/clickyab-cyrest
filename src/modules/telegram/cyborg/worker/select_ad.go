@@ -9,9 +9,18 @@ import (
 	bot2 "modules/telegram/bot/worker"
 	"modules/telegram/cyborg/commands"
 	"sort"
-
-	"github.com/Sirupsen/logrus"
 )
+
+const (
+	promoNonPic selectAdType = "promoNonPic"
+	nonPic      selectAdType = "nonPic"
+)
+
+type selectAdType string
+type selectAd struct {
+	ids    []int64
+	adType selectAdType
+}
 
 func (mw *MultiWorker) selectAd(in *commands.SelectAd) (bool, error) {
 	b := ads.NewAdsManager()
@@ -36,23 +45,40 @@ func (mw *MultiWorker) selectAd(in *commands.SelectAd) (bool, error) {
 	}
 	sort.Sort(ads.ByAffectiveView(chooseAds))
 	var (
-		promoted int64
-		normal   int64
+		promoted     int64
+		normalPic    int64
+		normalNonPic int64
+		selectedAd   selectAd
 	)
 	for i := range chooseAds {
+
 		if promoted == 0 && chooseAds[i].CliMessageID.Valid {
 			promoted = chooseAds[i].ID
 		}
-		if normal == 0 && !chooseAds[i].CliMessageID.Valid {
-			normal = chooseAds[i].ID
+		if normalPic == 0 && !chooseAds[i].CliMessageID.Valid && chooseAds[i].Src.Valid {
+			normalPic = chooseAds[i].ID
+		}
+		if normalNonPic == 0 && !chooseAds[i].CliMessageID.Valid && !chooseAds[i].Src.Valid {
+			normalNonPic = chooseAds[i].ID
 		}
 
-		if promoted != 0 && normal != 0 {
+		if promoted != 0 && normalNonPic != 0 {
+			selectedAd = selectAd{
+				ids:    []int64{promoted, normalNonPic},
+				adType: promoNonPic,
+			}
+			break
+		}
+
+		if normalPic != 0 {
+			selectedAd = selectAd{
+				ids:    []int64{normalPic},
+				adType: nonPic,
+			}
 			break
 		}
 	}
-
-	if normal == 0 {
+	if len(selectedAd.ids) == 0 {
 		rabbit.MustPublish(&bot2.SendWarn{
 			AdID:      0,
 			ChannelID: in.ChannelID,
@@ -62,15 +88,9 @@ func (mw *MultiWorker) selectAd(in *commands.SelectAd) (bool, error) {
 		return false, nil
 	}
 
-	adList := []int64{}
-	if promoted != 0 {
-		adList = append(adList, promoted)
-	}
-	adList = append(adList, normal)
-	logrus.Warn(adList)
 	//todo send ad to user
 	rabbit.MustPublish(&bot3.AdDelivery{
-		AdsID:     adList,
+		AdsID:     selectedAd.ids,
 		ChannelID: in.ChannelID,
 		ChatID:    in.ChatID,
 	})
