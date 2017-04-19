@@ -46,6 +46,7 @@ func (mw *MultiWorker) discoverAd(in *commands.DiscoverAd) (bool, error) {
 				Msg:       trans.T("cant find your channel").String(),
 				ChatID:    in.ChatID,
 			})
+			return false, nil
 		}
 		c, err = bot.NewBotManager().CreateChannelByRawData(ch)
 		assert.Nil(err)
