@@ -27,6 +27,12 @@ func (mw *MultiWorker) selectAd(in *commands.SelectAd) (bool, error) {
 	chad, err := b.FindChannelAdActiveByChannelID(in.ChannelID, ads.ActiveStatusYes)
 	assert.Nil(err)
 	if len(chad) > 0 {
+		rabbit.MustPublish(&bot2.SendWarn{
+			AdID:      0,
+			ChannelID: in.ChannelID,
+			Msg:       trans.T("already have active ad for this channel").String(),
+			ChatID:    in.ChatID,
+		})
 		return false, nil
 	}
 	chooseAds, err := b.ChooseAd(in.ChannelID)
