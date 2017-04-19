@@ -39,7 +39,14 @@ func (mw *MultiWorker) discoverAd(in *commands.DiscoverAd) (bool, error) {
 	c, err := m.FindKnownChannelByName(channel.Name)
 	if err != nil {
 		ch, err := mw.discoverChannel(channel.Name)
-		assert.Nil(err)
+		if err != nil {
+			rabbit.MustPublish(&bot2.SendWarn{
+				AdID:      0,
+				ChannelID: channel.ID,
+				Msg:       trans.T("cant find your channel").String(),
+				ChatID:    in.ChatID,
+			})
+		}
 		c, err = bot.NewBotManager().CreateChannelByRawData(ch)
 		assert.Nil(err)
 	}
