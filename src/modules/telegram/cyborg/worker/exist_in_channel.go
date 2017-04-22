@@ -18,7 +18,7 @@ import (
 	"github.com/Sirupsen/logrus"
 )
 
-func (mw *MultiWorker) existChannelAdFor(h []tgo.History, adConfs []channelDetailStat) (map[int64]channelViewStat, int64) {
+func (mw *MultiWorker) existChannelAdFor(channelID int64, chatID int64, h []tgo.History, adConfs []channelDetailStat) (map[int64]channelViewStat, int64) {
 	var finalResult = make(map[int64]channelViewStat)
 	var sumIndividualView int64
 	var countIndividual int64
@@ -61,6 +61,13 @@ bigloop:
 				adID:    adConfs[i].adID,
 				pos:     0,
 			}
+			//send stop (warn message)
+			rabbit.MustPublish(&bot2.SendWarn{
+				AdID:      adConfs[i].adID,
+				ChannelID: channelID,
+				ChatID:    chatID,
+				Msg:       "please remove the following ad",
+			})
 		}
 	}
 
@@ -132,7 +139,7 @@ func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error)
 	/*channelDetails, err := m.FindChanDetailByChannelID(channel.ID)
 	assert.Nil(err)*/
 
-	channelAdStat, avg := mw.existChannelAdFor(h, adsConf)
+	channelAdStat, avg := mw.existChannelAdFor(in.ChannelID, in.ChatID, h, adsConf)
 	var ChannelAdDetailArr []*ads.ChannelAdDetail
 	var ChannelAdArr []ads.ChannelAd
 	var reshot bool
