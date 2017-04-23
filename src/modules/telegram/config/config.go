@@ -53,7 +53,7 @@ func (c *Config) Initialize(o *onion.Onion) []onion.Layer {
 	assert.Nil(d.SetDefault("telegram.cli_port", 9999))
 	assert.Nil(d.SetDefault("telegram.last_post_channel", 20))
 	assert.Nil(d.SetDefault("telegram.limit_count_warning", 5))
-	assert.Nil(d.SetDefault("telegram.time_requeue", 5*time.Minute))
+	assert.Nil(d.SetDefault("telegram.time_requeue", 2*time.Minute))
 	assert.Nil(d.SetDefault("telegram.position_ad_default", 10))
 	assert.Nil(d.SetDefault("telegram.send_delay", 2*time.Second))
 	return []onion.Layer{d}
