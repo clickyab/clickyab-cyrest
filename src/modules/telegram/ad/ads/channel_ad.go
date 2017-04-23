@@ -292,12 +292,38 @@ func (m *Manager) FindChannelAdActiveByAdID(adID int64, status ActiveStatus) ([]
 	return res, nil
 }
 
+// FindChannelAdActive return the adID base on its ad_id,ActiveStatus
+func (m *Manager) FindChannelAdActive() ([]ChannelAdD, error) {
+	res := []ChannelAdD{}
+	_, err := m.GetDbMap().Select(
+		&res,
+		fmt.Sprintf("SELECT %[1]s.*,%[2]s.cli_message_id AS cli_message_ad,%[2]s.promote_data,%[2]s.src, "+
+			"%[3]s.view AS plan_view,%[3]s.position AS plan_position"+
+			" FROM %[1]s INNER JOIN %[2]s ON %[2]s.id=%[1]s.ad_id "+
+			" INNER JOIN %[3]s ON %[3]s.id=%[2]s.plan_id "+
+			" AND %[1]s.active='yes' "+
+			" AND %[2]s.active_status='yes' "+
+			" AND end IS NULL",
+			ChannelAdTableFull,
+			AdTableFull,
+			PlanTableFull,
+		),
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
 // UpdateChannelAds update channel ads
 func (m *Manager) UpdateChannelAds(ca []ChannelAd) error {
-	var q = fmt.Sprintf("UPDATE %s SET warning=? , view=? WHERE channel_id=? AND ad_id=?", ChannelAdTableFull)
+	var q = fmt.Sprintf("UPDATE %s SET  updated_at=?,warning=? , view=? WHERE channel_id=? AND ad_id=?", ChannelAdTableFull)
 	for i := range ca {
 		_, err := m.GetDbMap().Exec(
 			q,
+			time.Now(),
 			ca[i].Warning,
 			ca[i].View,
 			ca[i].ChannelID,

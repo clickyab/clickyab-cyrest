@@ -654,3 +654,23 @@ func (m *Manager) CountActiveChannel(userID int64, scope base.UserScope) (int64,
 	assert.Nil(err)
 	return active, wait
 }
+
+// FindChannelByIDs return the Channels base on their ids
+func (m *Manager) FindChannelByIDs(ids []int64) ([]Channel, error) {
+	var input = make([]interface{}, len(ids))
+	for i, v := range ids {
+		input[i] = v
+	}
+	var res []Channel
+	_, err := m.GetDbMap().Select(
+		&res,
+		fmt.Sprintf("SELECT * FROM %s WHERE id IN (?)", ChannelTableFull),
+		input...,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
