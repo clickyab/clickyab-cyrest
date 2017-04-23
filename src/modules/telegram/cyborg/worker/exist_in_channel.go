@@ -79,6 +79,7 @@ bigloop:
 }
 
 func (mw *MultiWorker) existChannelAd(in *commands.ExistChannelAd) (bool, error) {
+	logrus.Debug("Exist Channel AD ...")
 	var adsConf []channelDetailStat
 	m := ads.NewAdsManager()
 
