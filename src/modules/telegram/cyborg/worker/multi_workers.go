@@ -31,6 +31,8 @@ type channelDetailStat struct {
 	frwrd          bool
 	cliChannelAdID common.NullString
 	adID           int64
+	channelID      int64
+	botChatID      int64
 }
 
 type channelViewStat struct {
@@ -112,7 +114,6 @@ func NewMultiWorker(ip net.IP, port int) (*MultiWorker, error) {
 	go rabbit.RunWorker(&commands.GetLastCommand{}, res.getLast, 1)
 	go rabbit.RunWorker(&commands.GetChanCommand{}, res.getChanStat, 1)
 	go rabbit.RunWorker(&commands.IdentifyAD{}, res.identifyAD, 1)
-	go rabbit.RunWorker(&commands.ExistChannelAd{}, res.existChannelAd, 1)
 	go rabbit.RunWorker(&commands.SelectAd{}, res.selectAd, 1)
 	go rabbit.RunWorker(&commands.DiscoverAd{}, res.discoverAd, 1)
 
@@ -122,6 +123,12 @@ func NewMultiWorker(ip net.IP, port int) (*MultiWorker, error) {
 			for {
 				assert.Nil(res.cronReview())
 				<-time.After(1 * time.Minute)
+			}
+		}, true)
+		go utils.SafeGO(func() {
+			for {
+				assert.Nil(res.existWorker())
+				<-time.After(tcfg.Cfg.Telegram.TimeReQueUe)
 			}
 		}, true)
 	})

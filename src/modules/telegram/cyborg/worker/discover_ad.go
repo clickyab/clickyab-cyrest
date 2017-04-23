@@ -11,7 +11,6 @@ import (
 	"modules/telegram/ad/ads"
 	bot2 "modules/telegram/bot/worker"
 	"modules/telegram/common/tgo"
-	"modules/telegram/config"
 	"modules/telegram/cyborg/bot"
 	"modules/telegram/cyborg/commands"
 	"time"
@@ -133,13 +132,6 @@ bigLoop:
 	} else {
 		err = adsManager.UpdateActiveEndChannelAds(cha)
 		assert.Nil(err)
-		rabbit.MustPublishAfter(
-			commands.ExistChannelAd{
-				ChannelID: channel.ID,
-				ChatID:    in.ChatID,
-			},
-			tcfg.Cfg.Telegram.TimeReQueUe,
-		)
 		//send ok message
 		if in.Reshot {
 			rabbit.MustPublish(&bot2.SendWarn{
