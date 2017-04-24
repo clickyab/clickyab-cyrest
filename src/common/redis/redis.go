@@ -89,6 +89,20 @@ func GetHashKey(key, subkey string, touch bool, expire time.Duration) (string, e
 	return cmd.Val(), nil
 }
 
+// HGetAllString Get a key and value from redis
+func HGetAllString(key string, touch bool, expire time.Duration) (map[string]string, error) {
+	cmd := Client.HGetAll(key)
+	if err := cmd.Err(); err != nil {
+		return nil, err
+	}
+
+	if touch {
+		Client.Expire(key, expire)
+	}
+
+	return cmd.Result()
+}
+
 // RemoveKey for removing a key in redis
 func RemoveKey(key string) error {
 	bCmd := Client.Del(key)

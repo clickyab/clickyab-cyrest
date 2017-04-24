@@ -23,7 +23,7 @@ export DB_HOST?=127.0.0.1
 export RUSER?=$(APPNAME)
 export RPASS?=$(DEFAULT_PASS)
 export WORK_DIR=$(ROOT)/tmp
-export LINTER=$(BIN)/gometalinter -e ".*.gen.go" --cyclo-over=17 --line-length=200 --deadline=100s --disable-all --enable=structcheck --enable=aligncheck --enable=deadcode --enable=gocyclo --enable=ineffassign --enable=golint --enable=goimports --enable=errcheck --enable=varcheck --enable=interfacer --enable=gosimple --enable=staticcheck --enable=unused --enable=misspell --enable=lll
+export LINTER=$(BIN)/gometalinter -e ".*.gen.go" --cyclo-over=20 --line-length=200 --deadline=100s --disable-all --enable=structcheck --enable=aligncheck --enable=deadcode --enable=gocyclo --enable=ineffassign --enable=golint --enable=goimports --enable=errcheck --enable=varcheck --enable=interfacer --enable=gosimple --enable=staticcheck --enable=unused --enable=misspell --enable=lll
 export CYREST_FRONT_PATH=$(ROOT)/front/public
 
 

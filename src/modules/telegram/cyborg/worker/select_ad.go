@@ -3,12 +3,16 @@ package worker
 import (
 	"common/assert"
 	"common/rabbit"
+	"common/redis"
+	"fmt"
 	"modules/misc/trans"
 	"modules/telegram/ad/ads"
 	bot3 "modules/telegram/ad/worker"
 	bot2 "modules/telegram/bot/worker"
 	"modules/telegram/cyborg/commands"
 	"sort"
+	"strconv"
+	"time"
 )
 
 const (
@@ -56,7 +60,20 @@ func (mw *MultiWorker) selectAd(in *commands.SelectAd) (bool, error) {
 		normalNonPic int64
 		selectedAd   selectAd
 	)
+	//find rejected ad for define channel
+	reject, err := aredis.HGetAllString(fmt.Sprintf("REJECT_%d", in.ChannelID), false, 10*time.Minute)
+	assert.Nil(err)
+bigLoop:
 	for i := range chooseAds {
+		for j := range reject {
+			blackID, err := strconv.ParseInt(reject[j], 10, 0)
+			if err != nil {
+				continue
+			}
+			if chooseAds[i].ID == blackID {
+				continue bigLoop
+			}
+		}
 
 		if promoted == 0 && chooseAds[i].CliMessageID.Valid {
 			promoted = chooseAds[i].ID

@@ -65,7 +65,7 @@ func AdDeliveryAction(in *AdDelivery) (bool, error) {
 		assert.Nil(err)
 
 	}
-	msgx := trans.T("after forward the ad/ads press done otherwise press reject\n/done_%[1]d\n/reject_%[1]d", in.ChannelID).String()
+	msgx := trans.T("after forward the ad/ads press done otherwise press reject\n/done_%[1]d\n/reject_%[1]d_%[2]d", in.ChannelID, in.AdsID[0]).String()
 	userMsg := tgbotapi.NewMessage(in.ChatID, msgx)
 	userMsg.ParseMode = "HTML"
 	_, err := tgbot.Send(userMsg)

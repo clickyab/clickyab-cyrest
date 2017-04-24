@@ -12,16 +12,20 @@ import (
 	"common/config"
 	"common/mail"
 
-	"github.com/Sirupsen/logrus"
+	"common/assert"
+	"common/redis"
+	"fmt"
+	"time"
+
 	"gopkg.in/telegram-bot-api.v4"
 )
 
 func (bb *bot) doneORReject(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 
 	b := ads.NewAdsManager()
-	doneSlice := doneRejectReg.FindStringSubmatch(m.Text)
-	logrus.Warn(doneSlice, len(doneSlice))
-	if len(doneSlice) != 3 {
+	doneSlice := doneReg.FindStringSubmatch(m.Text)
+	rejectSlice := rejectReg.FindStringSubmatch(m.Text)
+	if len(doneSlice) != 3 && len(rejectSlice) != 4 {
 		send(bot, m.Chat.ID, trans.T("your command is <b>not valid1</b>"))
 		return
 	}
@@ -51,7 +55,8 @@ func (bb *bot) doneORReject(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 
 	if doneSlice[1] == "done" {
 		channelAd, err := b.FindChannelAdActiveByChannelID(channel.ID, ads.ActiveStatusNo)
-		if err != nil || len(channelAd) == 0 {
+		assert.Nil(err)
+		if len(channelAd) == 0 {
 			send(bot, m.Chat.ID, trans.T("your command is <b>not valid</b>"))
 			return
 		}
@@ -66,25 +71,40 @@ func (bb *bot) doneORReject(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 		return
 	}
 	//reject command
+	channelOwner, err := aaa.NewAaaManager().FindUserByID(channel.UserID)
+	if err != nil || channelOwner.ID != user.ID {
+		return
+	}
 	err = b.DeleteChannelAdByChannelID(channel.ID)
+	assert.Nil(err)
+	adID, err := strconv.ParseInt(rejectSlice[3], 10, 0)
+	if err != nil {
+		return
+	}
+	currentAd, err := ads.NewAdsManager().FindAdByID(adID)
+	assert.Nil(err)
+	err = aredis.StoreHashKey(fmt.Sprintf("REJECT_%d", channel.ID), fmt.Sprintf("AD_%d", currentAd.ID), fmt.Sprintf("%d", currentAd.ID), 2*time.Hour)
+	assert.Nil(err)
 	if err != nil {
 		send(bot, m.Chat.ID, trans.T("your command is <b>not valid</b>"))
 		return
 	}
-	send(bot, m.Chat.ID, trans.T("ads reject in <b>%s</b> channel", channel.Name))
-	//send mail
-	owner, err := aaa.NewAaaManager().FindUserByID(channel.UserID)
 	if err != nil {
+		send(bot, m.Chat.ID, trans.T("your command is <b>not valid2</b>"))
 		return
 	}
+	//dont select the same rejected ad for him
+	send(bot, m.Chat.ID, trans.T("ads reject in <b>%s</b> channel", channel.Name))
+	//send mail
+
 	go func() {
 		mail.SendByTemplateName(trans.T("channel rejected").Translate("fa_IR"), "reject-channel", struct {
 			Name    string
 			Channel string
 		}{
-			Name:    owner.Email,
+			Name:    channelOwner.Email,
 			Channel: channel.Name,
-		}, config.Config.Mail.From, owner.Email)
+		}, config.Config.Mail.From, channelOwner.Email)
 	}()
 	return
 
