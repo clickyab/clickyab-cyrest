@@ -17,8 +17,9 @@ type bot struct {
 const htmlMode = "HTML"
 
 var (
-	doneRejectReg = regexp.MustCompile("/(done|reject)_([0-9]+)")
-	completeAd    = regexp.MustCompile("/complete_([0-9]+)_([0-9]+)")
+	doneReg    = regexp.MustCompile("/(done|reject)_([0-9]+)")
+	rejectReg  = regexp.MustCompile("/(done|reject)_([0-9]+)_([0-9]+)")
+	completeAd = regexp.MustCompile("/complete_([0-9]+)_([0-9]+)")
 )
 
 func sendString(bot *tgbotapi.BotAPI, chatID int64, message string) {
