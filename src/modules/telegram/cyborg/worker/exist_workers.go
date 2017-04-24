@@ -88,6 +88,9 @@ func (mw *MultiWorker) existWorker() error {
 		var reshot bool
 		now := time.Now()
 		for j := range chads {
+			if chads[i].ChannelID != channels[i].ID {
+				continue
+			}
 			defaultPosition := chads[j].PlanPosition
 			if t, ok := channelAdStat[chads[j].AdID]; !ok || t.pos > defaultPosition {
 				ChannelAdDetailArr = append(ChannelAdDetailArr, &ads.ChannelAdDetail{
