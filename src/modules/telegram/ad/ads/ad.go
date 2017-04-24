@@ -72,7 +72,7 @@ type Ad struct {
 	PlanID          common.NullInt64  `json:"plan_id" db:"plan_id" title:"PlanID" visible:"false"`
 	Position        common.NullInt64  `json:"position" db:"position" visible:"false" title:"Position"`
 	Name            string            `json:"name" db:"name" title:"Name" search:"true"`
-	Description     common.MB4String  `json:"description" db:"description" visible:"false" title:"Description"`
+	Description     common.MB4String  `json:"description" db:"description" title:"Description"`
 	Src             common.NullString `json:"src" db:"src" title:"Src"`
 	Extension       common.NullString `json:"extension,ommitempty" db:"-" visible:"false" title:"Extension"`
 	CliMessageID    common.NullString `json:"cli_message_id" db:"cli_message_id" visible:"false" title:"CliMessageID"`
@@ -101,6 +101,7 @@ type Ad struct {
 // }
 type AdDataTable struct {
 	Ad
+	Type     AdType           `json:"type" db:"type" title:"Type" filter:"true"`
 	Email    string           `db:"email" json:"email" search:"true" title:"Email" visible:"false"`
 	ParentID common.NullInt64 `db:"parent_id" json:"parent_id" visible:"false"`
 	OwnerID  int64            `db:"owner_id" json:"owner_id" visible:"false"`
@@ -121,7 +122,7 @@ func (m *Manager) FillAdDataTableArray(
 	countQuery := fmt.Sprintf("SELECT COUNT(%[1]s.id) FROM %[1]s LEFT JOIN %[2]s ON %[2]s.id=%[1]s.user_id",
 		AdTableFull,
 		aaa.UserTableFull)
-	query := fmt.Sprintf("SELECT %[1]s.*,%[2]s.email,%[2]s.id AS owner_id, %[2]s.parent_id as parent_id FROM %[1]s LEFT JOIN %[2]s ON %[2]s.id=%[1]s.user_id",
+	query := fmt.Sprintf("SELECT %[1]s.*,%[2]s.email,%[2]s.id AS owner_id, %[2]s.parent_id as parent_id,%[1]s.cli_message_id IS NULL AS type FROM %[1]s LEFT JOIN %[2]s ON %[2]s.id=%[1]s.user_id",
 		AdTableFull,
 		aaa.UserTableFull)
 	for field, value := range filters {
