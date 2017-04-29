@@ -74,6 +74,7 @@ type Ad struct {
 	Name            string            `json:"name" db:"name" title:"Name" search:"true"`
 	Description     common.MB4String  `json:"description" db:"description" title:"Description"`
 	Src             common.NullString `json:"src" db:"src" title:"Src"`
+	PromoSrc        common.NullString `json:"promo_src" db:"promo_src" title:"PromoSrc"`
 	Extension       common.NullString `json:"extension,ommitempty" db:"-" visible:"false" title:"Extension"`
 	CliMessageID    common.NullString `json:"cli_message_id" db:"cli_message_id" visible:"false" title:"CliMessageID"`
 	PromoteData     common.NullString `json:"promote_data" db:"promote_data" visible:"false" title:"PromoteData"`

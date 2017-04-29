@@ -340,6 +340,11 @@ func (u *Controller) promoteAd(ctx echo.Context) error {
 	currentAd.BotMessageID = common.NullInt64{}
 	currentAd.Description = nil
 	assert.Nil(m.UpdateAd(currentAd))
+	defer func() {
+		rabbit.MustPublish(&commands.IdentifyAD{
+			AdID: currentAd.ID,
+		})
+	}()
 	return u.OKResponse(ctx, currentAd)
 }
 
@@ -456,6 +461,16 @@ func (u *Controller) getAd(ctx echo.Context) error {
 		s := g.String()
 		currentAd.Src = common.MakeNullString(s)
 		currentAd.Extension = common.MakeNullString(filepath.Ext(currentAd.Src.String))
+	}
+	if currentAd.PromoSrc.Valid {
+		g, err := url.Parse(fcfg.Fcfg.File.UploadPath)
+		if err != nil {
+			return u.NotFoundResponse(ctx, nil)
+		}
+		g.Path = path.Join(g.Path, currentAd.PromoSrc.String)
+		s := g.String()
+		currentAd.PromoSrc = common.MakeNullString(s)
+		currentAd.Extension = common.MakeNullString(filepath.Ext(currentAd.PromoSrc.String))
 	}
 	return u.OKResponse(ctx, currentAd)
 }
@@ -612,11 +627,6 @@ func (u *Controller) verify(ctx echo.Context) error {
 		currentAd.AdActiveStatus = ads.AdActiveStatusYes
 		assert.Nil(adManager.UpdateAd(currentAd))
 		//call worker
-		defer func() {
-			rabbit.MustPublish(&commands.IdentifyAD{
-				AdID: currentAd.ID,
-			})
-		}()
 		// send mail
 		go func() {
 			mail.SendByTemplateName(trans.T("new plan bought").Translate("fa_IR"), "charge", struct {
