@@ -103,7 +103,6 @@ type getTranslatePayload struct {
 //		url	=	/translate
 //		method	= post
 //		payload	= getTranslatePayload
-//		middleware = authz.Authenticate
 //		200 = base.NormalResponse
 //		400 = base.ErrorResponseSimple
 //	}
