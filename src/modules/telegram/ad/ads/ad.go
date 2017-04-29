@@ -101,7 +101,7 @@ type Ad struct {
 // }
 type AdDataTable struct {
 	Ad
-	Type     AdType           `json:"type" db:"type" title:"Type" filter:"true"`
+	Type     AdType           `json:"type" db:"type" title:"Type"`
 	Email    string           `db:"email" json:"email" search:"true" title:"Email" visible:"false"`
 	ParentID common.NullInt64 `db:"parent_id" json:"parent_id" visible:"false"`
 	OwnerID  int64            `db:"owner_id" json:"owner_id" visible:"false"`
