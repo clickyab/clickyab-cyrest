@@ -78,6 +78,7 @@ CREATE TABLE user_profile
     user_id INT(11) UNIQUE NOT NULL,
     first_name VARCHAR(255),
     last_name VARCHAR(255),
+    birthday DATETIME,
     gender ENUM('male', 'female'),
     cellphone VARCHAR(255),
     phone VARCHAR(255),
