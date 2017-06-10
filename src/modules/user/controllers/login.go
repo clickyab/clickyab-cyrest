@@ -62,11 +62,11 @@ func (u *Controller) loginUser(ctx echo.Context) error {
 
 	usr, err := m.FindUserByEmail(pl.Email)
 	if err != nil {
-		return u.BadResponse(ctx, trans.E("user/password is invalid"))
+		return u.BadResponse(ctx, trans.E("user/password is invalid 1"))
 	}
 
 	if !usr.VerifyPassword(pl.Password) || usr.Status == aaa.UserStatusBlocked {
-		return u.BadResponse(ctx, trans.E("user/password is invalid"))
+		return u.BadResponse(ctx, trans.E("user/password is invalid 2"))
 	}
 
 	token := m.GetNewToken(usr, ctx.Request().UserAgent(), ctx.RealIP())

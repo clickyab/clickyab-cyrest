@@ -9,8 +9,6 @@ import (
 	"time"
 
 	"common/models/common"
-
-	"github.com/Sirupsen/logrus"
 )
 
 // Category model
@@ -21,8 +19,8 @@ import (
 //		list = yes
 // }
 type Category struct {
-	ID          int64      `db:"id" json:"id" sort:"true" title:"ID"`
-	Scope       string     `db:"scope" json:"scope" search:"true" title:"Scope"`
+	ID int64 `db:"id" json:"id" sort:"true" title:"ID"`
+	//Scope       string     `db:"scope" json:"scope" search:"true" title:"Scope"`
 	Title       string     `db:"title" json:"title" search:"true" title:"Title"`
 	Description string     `db:"description" json:"description" title:"Description"`
 	CreatedAt   *time.Time `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
@@ -53,20 +51,29 @@ type CategoryDataTable struct {
 
 // Initialize the mcategory
 func (c *Category) Initialize() {
-	if !IsValidScope(c.Scope) {
-		logrus.Panic("[BUG] you try to use a scope that is not valid in this app")
-	}
+	//if !IsValidScope(c.Scope) {
+	//	logrus.Panic("[BUG] you try to use a scope that is not valid in this app")
+	//}
 }
 
 // Create is for create category
-func (m *Manager) Create(title string, description string, scope string) *Category {
+func (m *Manager) Create(title string, description string) *Category {
 	c := &Category{
 		Title:       title,
 		Description: description,
-		Scope:       scope,
+		//Scope:       scope,
 	}
 	assert.Nil(m.CreateCategory(c))
 	return c
+}
+
+//FetchCategory get all categories query
+func (m *Manager) FetchCategory() []Category {
+	var res []Category
+	query := "SELECT * FROM categories"
+	_, err := m.GetDbMap().Select(&res, query)
+	assert.Nil(err)
+	return res
 }
 
 // FillCategoryDataTableArray is the function to handle
