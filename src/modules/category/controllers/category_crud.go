@@ -1,17 +1,12 @@
 package category
 
 import (
-	"common/assert"
 	"modules/category/cat"
-	"strings"
-
-	"modules/misc/trans"
-
-	"strconv"
 
 	"gopkg.in/labstack/echo.v3"
 )
 
+/*
 // @Validate {
 // }
 type categoryPayload struct {
@@ -98,4 +93,19 @@ func (u *Controller) getCategory(ctx echo.Context) error {
 	}
 
 	return u.OKResponse(ctx, category)
+}*/
+
+// GetCategory get category
+// @Route {
+//		url	=	/get
+//		method	=	post
+//		resource=	manage_category:global
+//		middleware = authz.Authenticate
+//		200	=	cat.Category
+//		400	=	base.ErrorResponseSimple
+// }
+func (u *Controller) GetCategory(ctx echo.Context) error {
+	m := cat.NewCatManager()
+	c := m.FetchCategory()
+	return u.OKResponse(ctx, c)
 }

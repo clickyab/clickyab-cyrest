@@ -1,9 +1,8 @@
 package main
 
 import (
-	_ "modules/billing"  // billing module
-	_ "modules/category" // category module
-	"modules/category/cat"
+	_ "modules/billing"           // billing module
+	_ "modules/category"          // category module
 	_ "modules/file"              // file module
 	_ "modules/location"          // location module
 	_ "modules/misc"              // misc controller
@@ -12,6 +11,6 @@ import (
 	_ "modules/user"              // user module
 )
 
-func init() {
-	cat.RegisterScopes("channel")
-}
+//func init() {
+//	cat.RegisterScopes("channel")
+//}

@@ -1,7 +1,6 @@
 package cat
 
-import "common/utils"
-
+/*
 var validScopes = make([]string, 0)
 
 // RegisterScopes is the function to register valid scopes
@@ -18,3 +17,4 @@ func IsValidScope(scope string) bool {
 func AllValidScopes() []string {
 	return validScopes
 }
+*/
