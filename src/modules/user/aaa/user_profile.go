@@ -21,13 +21,13 @@ const (
 	ProfileGenderFemale ProfileGender = "female"
 )
 
-// UserProfilePersonal model
+// UserProfile model
 // @Model {
-//		table = user_profile_personal
+//		table = user_profile
 //		primary = false, user_id
 //		find_by = user_id
 // }
-type UserProfilePersonal struct {
+type UserProfile struct {
 	UserID       int64             `db:"user_id" json:"user_id"`
 	FirstName    string            `db:"first_name" json:"first_name"`
 	LastName     string            `db:"last_name" json:"last_name"`
@@ -45,9 +45,9 @@ type UserProfilePersonal struct {
 	UpdatedAt    *time.Time        `db:"updated_at" json:"updated_at"`
 }
 
-// NewUserProfilePersonal is the minimum user profile
-func NewUserProfilePersonal(first, last string, gender ProfileGender, cell string) *UserProfilePersonal {
-	return &UserProfilePersonal{
+// NewUserProfile is the minimum user profile
+func NewUserProfile(first, last string, gender ProfileGender, cell string) *UserProfile {
+	return &UserProfile{
 		FirstName: first,
 		LastName:  last,
 		Gender:    gender,
@@ -58,15 +58,15 @@ func NewUserProfilePersonal(first, last string, gender ProfileGender, cell strin
 	}
 }
 
-// DeletePersonal delete the user personal profile
-func (m *Manager) DeletePersonal(upp *UserProfilePersonal) error {
+// DeleteProfile delete the user profile
+func (m *Manager) DeleteProfile(upp *UserProfile) error {
 	_, err := m.GetDbMap().Delete(upp)
 	assert.Nil(err)
 	return err
 }
 
-// RegisterPersonal is try to register personal
-func (m *Manager) RegisterPersonal(userID int64,
+// RegisterProfile is try to register profile
+func (m *Manager) RegisterProfile(userID int64,
 	firstName string,
 	lastName string,
 	birthday time.Time,
@@ -78,9 +78,9 @@ func (m *Manager) RegisterPersonal(userID int64,
 	nationalCode string,
 	countryID int64,
 	provinceID int64,
-	cityID int64) (upp *UserProfilePersonal, err error) {
+	cityID int64) (upp *UserProfile, err error) {
 
-	upp = &UserProfilePersonal{
+	upp = &UserProfile{
 		UserID:       userID,
 		FirstName:    firstName,
 		LastName:     lastName,
@@ -114,29 +114,14 @@ func (m *Manager) RegisterPersonal(userID int64,
 	}()
 
 	//delete user profile
-	fupp, err := m.FindUserProfilePersonalByUserID(userID)
+	fupp, err := m.FindUserProfileByUserID(userID)
 	if err == nil {
 		//delete the user profile row
-		m.DeletePersonal(fupp)
+		m.DeleteProfile(fupp)
 	}
 
-	//delete corporation profile row
-	fucp, err := m.FindUserProfileCorporationByUserID(userID)
-	if err == nil {
-		//delete the user profile row
-		m.DeleteCorporation(fucp)
-	}
-
-	//create user profile personal
-	err = m.CreateUserProfilePersonal(upp)
-	if err != nil {
-		upp = nil
-		return
-	}
-
-	//update user type
-	err = m.ChangeUserType(userID, UserTypePersonal)
-
+	//create user profile
+	err = m.CreateUserProfile(upp)
 	if err != nil {
 		upp = nil
 		return

@@ -9,7 +9,6 @@ CREATE TABLE users
     password VARCHAR(60)NOT NULL ,
     old_password VARCHAR(30),
     access_token VARCHAR(60) NOT NULL ,
-    user_type ENUM('personal', 'corporation'),
     parent_id INT(11),
     avatar VARCHAR(160),
     status ENUM('registered', 'verified', 'blocked') NOT NULL ,
@@ -73,32 +72,12 @@ CREATE TABLE user_financial
 CREATE UNIQUE INDEX user_financial_id_uindex ON user_financial (id);
 CREATE INDEX user_financial_user_id_fk ON user_financial (user_id);
 
-CREATE TABLE user_profile_corporation
-(
-    user_id INT(11) UNIQUE NOT NULL,
-    title VARCHAR(255) NOT NULL,
-    economic_code VARCHAR(20),
-    register_code VARCHAR(20) NOT NULL,
-    phone VARCHAR(13),
-    address VARCHAR(255),
-    country_id INT(11),
-    province_id INT(11),
-    city_id INT(11),
-    created_at DATETIME,
-    updated_at DATETIME,
-    CONSTRAINT user_profile_corporation_users_id_fk FOREIGN KEY (user_id) REFERENCES users (id)
-);
-CREATE INDEX corporation_profile_city_id_fk ON user_profile_corporation (city_id);
-CREATE INDEX corporation_profile_country_id_fk ON user_profile_corporation (country_id);
-CREATE INDEX corporation_profile_province_id_fk ON user_profile_corporation (province_id);
-CREATE UNIQUE INDEX corporation_profile_user_id_uindex ON user_profile_corporation (user_id);
 
-CREATE TABLE user_profile_personal
+CREATE TABLE user_profile
 (
     user_id INT(11) UNIQUE NOT NULL,
     first_name VARCHAR(255),
     last_name VARCHAR(255),
-    birthday DATETIME,
     gender ENUM('male', 'female'),
     cellphone VARCHAR(255),
     phone VARCHAR(255),
@@ -110,12 +89,12 @@ CREATE TABLE user_profile_personal
     city_id INT(11),
     created_at DATETIME NOT NULL,
     updated_at DATETIME NOT NULL,
-    CONSTRAINT user_profile_personal_users_id_fk FOREIGN KEY (user_id) REFERENCES users (id)
+    CONSTRAINT user_profile_users_id_fk FOREIGN KEY (user_id) REFERENCES users (id)
 );
-CREATE INDEX personal_profile_city_id_fk ON user_profile_personal (city_id);
-CREATE INDEX personal_profile_country_id_fk ON user_profile_personal (country_id);
-CREATE INDEX personal_profile_province_id_fk ON user_profile_personal (province_id);
-CREATE UNIQUE INDEX personal_profile_user_id_uindex ON user_profile_personal (user_id);
+CREATE INDEX profile_city_id_fk ON user_profile (city_id);
+CREATE INDEX profile_country_id_fk ON user_profile (country_id);
+CREATE INDEX profile_province_id_fk ON user_profile (province_id);
+CREATE UNIQUE INDEX profile_user_id_uindex ON user_profile (user_id);
 
 
 CREATE TABLE user_role
@@ -129,7 +108,7 @@ CREATE TABLE user_role
 CREATE INDEX user_role_role_id_fk ON user_role (role_id);
 CREATE INDEX user_role_users_id_fk ON user_role (user_id);
 
-INSERT INTO users (id,email,password,access_token,user_type,status,created_at,updated_at) VALUES (NULL,"root@rubik.com","$2a$10$6WeBOWQn2CwYzosiPK0ii.6XiW1rt0hZD3iXDsaySGo.RLoJUFwdq","92d80885abad94e24d3ffaea7501331fc7701135","personal","registered",NOW(),NOW());
+INSERT INTO users (id,email,password,access_token,status,created_at,updated_at) VALUES (NULL,"root@rubik.com","$2a$10$6WeBOWQn2CwYzosiPK0ii.6XiW1rt0hZD3iXDsaySGo.RLoJUFwdq","92d80885abad94e24d3ffaea7501331fc7701135","registered",NOW(),NOW());
 INSERT INTO roles (id,name,description,created_at,updated_at) VALUES (1,"root","all access granted",NOW(),NOW());
 INSERT INTO roles (id,name,description,created_at,updated_at) VALUES (2,"user","only some perm",NOW(),NOW());
 INSERT INTO role_permission (id,role_id,permission,scope,created_at,updated_at) VALUES (NULL,(SELECT id FROM roles WHERE name="root"),"god","global",NOW(),NOW());
@@ -138,8 +117,7 @@ INSERT INTO user_role (user_id,role_id,created_at) VALUES ((SELECT id FROM users
 -- SQL section 'Down' is executed when this migration is rolled back
 
 DROP TABLE user_role;
-DROP TABLE user_profile_personal;
-DROP TABLE user_profile_corporation;
+DROP TABLE user_profile;
 DROP TABLE user_financial;
 DROP TABLE user_attributes;
 DROP TABLE role_permission;

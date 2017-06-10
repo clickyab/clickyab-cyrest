@@ -1,35 +1,21 @@
 package user
 
 import (
-	"modules/misc/middlewares"
 	"modules/misc/trans"
 	"modules/user/aaa"
 	"modules/user/middlewares"
 	"time"
 
-	"gopkg.in/go-playground/validator.v9"
 	"gopkg.in/labstack/echo.v3"
 )
 
 type profilePayload struct {
-	Personal    *personal    `json:"personal"`
-	Corporation *corporation `json:"corporation"`
-}
-
-// Validate custom validation for editing profile
-func (lp *profilePayload) Validate(ctx echo.Context) error {
-	if (lp.Personal == nil && lp.Corporation == nil) || (lp.Personal != nil && lp.Corporation != nil) {
-		return middlewares.GroupError{
-			"personal":    trans.E("invalid payload body"),
-			"corporation": trans.E("invalid payload body"),
-		}
-	}
-	return validator.New().Struct(lp)
+	Profile *profile `json:"profile"`
 }
 
 // @Validate {
 // }
-type personal struct {
+type profile struct {
 	FirstName    string            `json:"first_name" validate:"gt=2" error:"first name must be valid"`
 	LastName     string            `json:"last_name" validate:"gt=2" error:"last name must be valid"`
 	Birthday     time.Time         `json:"birthday"`
@@ -42,19 +28,6 @@ type personal struct {
 	CountryID    int64             `json:"country_id"`
 	ProvinceID   int64             `json:"province_id"`
 	CityID       int64             `json:"city_id"`
-}
-
-// @Validate {
-// }
-type corporation struct {
-	Title        string `json:"title" validate:"gt=3" error:"title must be valid"`
-	EconomicCode string `json:"economic_code"`
-	RegisterCode string `json:"register_code"`
-	Phone        string `json:"phone"`
-	Address      string `json:"address"`
-	CountryID    int64  `json:"country_id"`
-	ProvinceID   int64  `json:"province_id"`
-	CityID       int64  `json:"city_id"`
 }
 
 // editProfile
@@ -71,21 +44,21 @@ func (u *Controller) editProfile(ctx echo.Context) error {
 	m := aaa.NewAaaManager()
 	user := authz.MustGetUser(ctx)
 	token := authz.MustGetToken(ctx)
-	if pl.Personal != nil { //the personal profile has been selected
-		_, err := m.RegisterPersonal(
+	if pl.Profile != nil { //the profile has been selected
+		_, err := m.RegisterProfile(
 			user.ID,
-			pl.Personal.FirstName,
-			pl.Personal.LastName,
-			pl.Personal.Birthday,
-			pl.Personal.Gender,
-			pl.Personal.CellPhone,
-			pl.Personal.Phone,
-			pl.Personal.Address,
-			pl.Personal.ZipCode,
-			pl.Personal.NationalCode,
-			pl.Personal.CountryID,
-			pl.Personal.ProvinceID,
-			pl.Personal.CityID,
+			pl.Profile.FirstName,
+			pl.Profile.LastName,
+			pl.Profile.Birthday,
+			pl.Profile.Gender,
+			pl.Profile.CellPhone,
+			pl.Profile.Phone,
+			pl.Profile.Address,
+			pl.Profile.ZipCode,
+			pl.Profile.NationalCode,
+			pl.Profile.CountryID,
+			pl.Profile.ProvinceID,
+			pl.Profile.CityID,
 		)
 		if err != nil {
 			return u.BadResponse(ctx, trans.E("can not update profile"))
@@ -97,29 +70,5 @@ func (u *Controller) editProfile(ctx echo.Context) error {
 		)
 		return nil
 	}
-
-	if pl.Corporation != nil { ////the corporation profile has been selected
-		_, err := m.RegisterCorporation(
-			user.ID,
-			pl.Corporation.Title,
-			pl.Corporation.EconomicCode,
-			pl.Corporation.RegisterCode,
-			pl.Corporation.Phone,
-			pl.Corporation.Address,
-			pl.Corporation.CountryID,
-			pl.Corporation.ProvinceID,
-			pl.Corporation.CityID,
-		)
-		if err != nil {
-			return u.BadResponse(ctx, trans.E("can not update profile"))
-		}
-
-		return u.OKResponse(
-			ctx,
-			createLoginResponse(user, token),
-		)
-		return nil
-	}
-
 	return nil
 }
