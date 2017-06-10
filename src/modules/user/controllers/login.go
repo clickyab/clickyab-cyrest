@@ -18,8 +18,7 @@ type responseLoginOK struct {
 	AccessToken string                               `json:"token"`
 	Resolve     string                               `json:"resolve,omitempty"`
 	Permissions map[base.UserScope][]base.Permission `json:"perm"`
-	Personal    *aaa.UserProfilePersonal             `json:"personal,omitempty"`
-	Corporation *aaa.UserProfileCorporation          `json:"corporation,omitempty"`
+	Profile     *aaa.UserProfile                     `json:"profile,omitempty"`
 }
 
 // @Validate {
@@ -45,14 +44,7 @@ func createLoginResponse(u *aaa.User, t string) responseLoginOK {
 		AccessToken: t,
 		Permissions: res,
 	}
-	switch v := profile.(type) {
-	case *aaa.UserProfilePersonal:
-		result.Personal = v
-
-	case *aaa.UserProfileCorporation:
-		result.Corporation = v
-	}
-
+	result.Profile = profile
 	return result
 }
 

@@ -24,10 +24,6 @@ type (
 	// @Enum{
 	// }
 	UserStatus string
-	// UserType is the type of user
-	// @Enum{
-	// }
-	UserType string
 )
 
 const (
@@ -38,11 +34,6 @@ const (
 	UserStatusVerified UserStatus = "verified"
 	// UserStatusBlocked for banned user
 	UserStatusBlocked UserStatus = "blocked"
-
-	// UserTypePersonal is the personal profile
-	UserTypePersonal UserType = "personal"
-	// UserTypeCorporation is the corp profile
-	UserTypeCorporation UserType = "corporation"
 )
 
 // User model
@@ -59,7 +50,6 @@ type User struct {
 	Password    string                                      `db:"password" json:"-"`
 	OldPassword common.NullString                           `db:"old_password" json:"-"`
 	AccessToken string                                      `db:"access_token" json:"-"`
-	Type        UserType                                    `db:"user_type" json:"user_type" filter:"true" title:"User type"`
 	DBParentID  common.NullInt64                            `db:"parent_id" json:"-"`
 	Avatar      common.NullString                           `db:"avatar" json:"avatar" visible:"false"`
 	Status      UserStatus                                  `db:"status" json:"status" filter:"true" title:"User status"`
@@ -346,7 +336,6 @@ func (m *Manager) RegisterUser(email, password string) (u *User, err error) {
 		Email:    email,
 		Password: password,
 		Status:   UserStatusRegistered,
-		Type:     UserTypePersonal,
 	}
 	err = m.Begin()
 	if err != nil {
@@ -415,29 +404,12 @@ func (m *Manager) LogoutAllSession(u *User) error {
 	return m.UpdateUser(u)
 }
 
-// ChangeUserType change user type by user ID(personal-corporation)
-func (m *Manager) ChangeUserType(ID int64, userType UserType) error {
-	query := "UPDATE " + UserTableFull + " SET user_type=? WHERE id=?"
-	val, err := userType.Value()
-	assert.Nil(err)
-	_, err = m.GetDbMap().Exec(
-		query,
-		val,
-		ID,
-	)
-	return err
-}
-
 // GetProfile for this user
-func (u *User) GetProfile() interface{} {
+func (u *User) GetProfile() *UserProfile {
 	m := NewAaaManager()
-	personal, err := m.FindUserProfilePersonalByUserID(u.ID)
+	profile, err := m.FindUserProfileByUserID(u.ID)
 	if err != nil {
-		corporation, err := m.FindUserProfileCorporationByUserID(u.ID)
-		if err != nil {
-			return nil
-		}
-		return corporation
+		return nil
 	}
-	return personal
+	return profile
 }
