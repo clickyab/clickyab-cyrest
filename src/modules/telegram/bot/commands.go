@@ -33,6 +33,12 @@ func send(bot *tgbotapi.BotAPI, chatID int64, message trans.T9String) {
 	sendString(bot, chatID, message.Translate(trans.PersianLang))
 }
 
+func sendWithKeyboard(bot *tgbotapi.BotAPI, keyboard tgbotapi.ReplyKeyboardMarkup, chatID int64, message trans.T9String) {
+	msg := tgbotapi.NewMessage(chatID, "use get_ad to get a new ad\nor /fff to add a new channel")
+	msg.ReplyMarkup = keyboard
+	bot.Send(msg)
+}
+
 func (bb *bot) Initialize() {
 	tgbot.RegisterMessageHandler("/updatead", bb.updateAD)
 	tgbot.RegisterMessageHandler("/ad", bb.wantAD)
@@ -46,6 +52,8 @@ func (bb *bot) Initialize() {
 	tgbot.RegisterMessageHandler("/name", bb.getName)
 	tgbot.RegisterMessageHandler("/channel", bb.getChannel)
 	tgbot.RegisterMessageHandler("/secret", CheckUserExisted(bb.test))
+
+	tgbot.RegisterMessageHandler("/addchan", bb.addChan)
 }
 
 func init() {

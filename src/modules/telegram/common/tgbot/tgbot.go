@@ -26,12 +26,16 @@ type TelegramBot interface {
 	Start() error
 	// RegisterUserHandler redirect all user message to a chat
 	RegisterUserHandler(int64, HandleMessage, time.Duration)
+	// RegisterUserHandlerWithExp like above func but runs expired func
+	RegisterUserHandlerWithExp(int64, HandleMessage, func(), time.Duration)
 	// UnRegisterUserHandler redirect all user message to a chat
 	UnRegisterUserHandler(int64)
 	// Send a message using this interface to a user
 	Send(c tgbotapi.Chattable) (tgbotapi.Message, error)
 	// GetBot return the current bot
 	GetBot() *tgbotapi.BotAPI
+	// NewKeyboard shows keyboard
+	NewKeyboard([]string) tgbotapi.ReplyKeyboardMarkup
 }
 
 // HandleMessage is the callback for message with router
@@ -56,6 +60,16 @@ func NewTelegramBot(token string) TelegramBot {
 		users:    make(map[int64]HandleMessage),
 		sessions: make(map[int64]string),
 	}
+}
+
+// TODO just one row for now
+// ShowKeyboard shows keyboard to user
+func (tb *telegramBot) NewKeyboard(buttonsName []string) tgbotapi.ReplyKeyboardMarkup {
+	buttons := []tgbotapi.KeyboardButton{}
+	for i := range buttonsName {
+		buttons = append(buttons, tgbotapi.NewKeyboardButton(buttonsName[i]))
+	}
+	return tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(buttons...))
 }
 
 func (tb *telegramBot) RegisterMessageHandler(cmd string, handler HandleMessage) error {
@@ -88,6 +102,29 @@ func (tb *telegramBot) RegisterUserHandler(cid int64, hh HandleMessage, t time.D
 			delete(tb.sessions, cid)
 			delete(tb.users, cid)
 		}
+	}()
+}
+
+// RegisterUserHandlerWithExp redirect all user message to a chat
+func (tb *telegramBot) RegisterUserHandlerWithExp(cid int64, hh HandleMessage, exp func(), t time.Duration) {
+	tb.lock.Lock()
+	defer tb.lock.Unlock()
+
+	tb.users[cid] = hh
+	lockID := <-utils.ID
+	tb.sessions[cid] = lockID
+
+	go func() {
+		<-time.After(t)
+		tb.lock.Lock()
+		defer tb.lock.Unlock()
+
+		if tb.sessions[cid] == lockID {
+			delete(tb.sessions, cid)
+			delete(tb.users, cid)
+		}
+
+		exp()
 	}()
 }
 
@@ -139,7 +176,7 @@ bigLoop:
 		}
 		txt := strings.Trim(strings.ToLower(update.Message.Text), " \t\n")
 		for i := range tb.commands {
-			if strings.HasPrefix(txt, i) {
+			if hasPrefix(txt, i) {
 				wg.Add(1)
 				go func(cmd string) {
 					defer wg.Done()
@@ -158,6 +195,7 @@ bigLoop:
 							}
 						}
 					}()
+					logrus.Warn(cmd)
 					tb.commands[cmd](bot, update.Message)
 
 				}(i)
@@ -203,4 +241,9 @@ func (tb *telegramBot) Send(c tgbotapi.Chattable) (tgbotapi.Message, error) {
 
 func (tb *telegramBot) GetBot() *tgbotapi.BotAPI {
 	return tb.bot
+}
+
+func hasPrefix(cmd, base string) bool {
+	first := strings.Split(cmd, "_")[0]
+	return first == base
 }
