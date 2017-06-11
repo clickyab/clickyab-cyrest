@@ -68,7 +68,6 @@ func (u *Controller) editProfile(ctx echo.Context) error {
 			ctx,
 			createLoginResponse(user, token),
 		)
-		return nil
 	}
-	return nil
+	return u.BadResponse(ctx, trans.E("can not update profile"))
 }
