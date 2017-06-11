@@ -83,7 +83,7 @@ func (u *Controller) createChannel(ctx echo.Context) error {
 	}
 	ch := &ads.Channel{
 		Name:          pl.Link,
-		ArchiveStatus: ads.ArchiveStatusNo,
+		ArchiveStatus: ads.ActiveStatusNo,
 		AdminStatus:   ads.AdminStatusPending,
 		Title:         common.MakeNullString(pl.Name),
 		Active:        ads.ActiveStatusYes,
@@ -273,10 +273,10 @@ func (u *Controller) changeArchive(ctx echo.Context) error {
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
-	if pl.ArchiveStatus == ads.ArchiveStatusYes && channel.ArchiveStatus == ads.ArchiveStatusNo {
-		channel.ArchiveStatus = ads.ArchiveStatusYes
+	if pl.ArchiveStatus == ads.ActiveStatusYes && channel.ArchiveStatus == ads.ActiveStatusNo {
+		channel.ArchiveStatus = ads.ActiveStatusYes
 	} else {
-		channel.ArchiveStatus = ads.ArchiveStatusNo
+		channel.ArchiveStatus = ads.ActiveStatusNo
 	}
 	assert.Nil(m.UpdateChannel(channel))
 	return u.OKResponse(ctx, channel)
@@ -297,7 +297,7 @@ type activePayload struct {
 // @Validate {
 // }
 type archivePayload struct {
-	ArchiveStatus ads.ArchiveStatus `json:"archive_status" validate:"required"`
+	ArchiveStatus ads.ActiveStatus `json:"archive_status" validate:"required"`
 }
 
 // MsgInfo is msg info
