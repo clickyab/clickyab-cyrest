@@ -10,21 +10,12 @@ import (
 	"time"
 )
 
-// ActiveStatus is the channel_ad active
-// @Enum {
-// }
-type ActiveStatus string
-
 // PlanType is the plan type
 // @Enum {
 // }
 type PlanType string
 
 const (
-	//ActiveStatusYes is the yes status
-	ActiveStatusYes ActiveStatus = "yes"
-	// ActiveStatusNo is the no status
-	ActiveStatusNo ActiveStatus = "no"
 	// PlanTypePromotion is the promotion status
 	PlanTypePromotion PlanType = "promotion"
 	// PlanTypeIndividual is the individual status
@@ -371,7 +362,7 @@ func (m *Manager) ChooseAd(channelID int64) ([]SelectAd, error) {
 		channelID,
 		AdminStatusAccepted,
 		ActiveStatusYes,
-		AdPayStatusYes,
+		ActiveStatusYes,
 	)
 
 	if err != nil {

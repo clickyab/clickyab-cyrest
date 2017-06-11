@@ -60,7 +60,7 @@ type adUploadPayload struct {
 // @Validate {
 // }
 type adAdminStatusPayload struct {
-	AdAdminStatus ads.AdAdminStatus `json:"admin_status" validate:"required" error:"status is required"`
+	AdminStatus ads.AdminStatus `json:"admin_status" validate:"required" error:"status is required"`
 }
 
 // @Validate {
@@ -78,18 +78,18 @@ type adPlanPayLoad struct {
 // @Validate {
 // }
 type adArchiveStatusPayload struct {
-	AdArchiveStatus ads.AdArchiveStatus `json:"archive_status" validate:"required" error:"status is required"`
+	ActiveStatus ads.ActiveStatus `json:"archive_status" validate:"required" error:"status is required"`
 }
 
 // @Validate {
 // }
 type adActiveStatusPayload struct {
-	AdActiveStatus ads.AdActiveStatus `json:"active_status" validate:"required" error:"status is required"`
+	ActiveStatus ads.ActiveStatus `json:"active_status" validate:"required" error:"status is required"`
 }
 
 // Validate custom validation for user scope
 func (lp *adActiveStatusPayload) ValidateExtra(ctx echo.Context) error {
-	if !lp.AdActiveStatus.IsValid() {
+	if !lp.ActiveStatus.IsValid() {
 		return middlewares.GroupError{
 			"status": trans.E("status is invalid"),
 		}
@@ -99,7 +99,7 @@ func (lp *adActiveStatusPayload) ValidateExtra(ctx echo.Context) error {
 
 // Validate custom validation for user scope
 func (lp *adArchiveStatusPayload) ValidateExtra(ctx echo.Context) error {
-	if !lp.AdArchiveStatus.IsValid() {
+	if !lp.ActiveStatus.IsValid() {
 		return middlewares.GroupError{
 			"status": trans.E("status is invalid"),
 		}
@@ -109,7 +109,7 @@ func (lp *adArchiveStatusPayload) ValidateExtra(ctx echo.Context) error {
 
 // Validate custom validation for user scope
 func (lp *adAdminStatusPayload) ValidateExtra(ctx echo.Context) error {
-	if !lp.AdAdminStatus.IsValid() {
+	if !lp.AdminStatus.IsValid() {
 		return middlewares.GroupError{
 			"status": trans.E("status is invalid"),
 		}
@@ -133,10 +133,10 @@ func (u *Controller) create(ctx echo.Context) error {
 	currentUser := authz.MustGetUser(ctx)
 	newAd := &ads.Ad{
 		Name:            pl.Name,
-		AdArchiveStatus: ads.AdArchiveStatusNo,
-		AdPayStatus:     ads.AdPayStatusNo,
-		AdAdminStatus:   ads.AdAdminStatusPending,
-		AdActiveStatus:  ads.AdActiveStatusNo,
+		AdArchiveStatus: ads.ActiveStatusNo,
+		AdPayStatus:     ads.ActiveStatusNo,
+		AdAdminStatus:   ads.AdminStatusPending,
+		AdActiveStatus:  ads.ActiveStatusNo,
 		UserID:          currentUser.ID,
 	}
 	assert.Nil(m.CreateAd(newAd))
@@ -172,7 +172,7 @@ func (u *Controller) changeAdminStatus(ctx echo.Context) error {
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
-	currentAd.AdAdminStatus = pl.AdAdminStatus
+	currentAd.AdAdminStatus = pl.AdminStatus
 	assert.Nil(m.UpdateAd(currentAd))
 
 	return u.OKResponse(ctx, currentAd)
@@ -206,7 +206,7 @@ func (u *Controller) changeArchiveStatus(ctx echo.Context) error {
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
-	currentAd.AdArchiveStatus = pl.AdArchiveStatus
+	currentAd.AdArchiveStatus = pl.ActiveStatus
 	assert.Nil(m.UpdateAd(currentAd))
 	return u.OKResponse(ctx, currentAd)
 }
@@ -372,8 +372,8 @@ func (u *Controller) changeActiveStatus(ctx echo.Context) error {
 	owner, err := aaa.NewAaaManager().FindUserByID(currentAd.UserID)
 	assert.Nil(err)
 	//check everything is good
-	if currentAd.AdPayStatus == ads.AdPayStatusYes && currentAd.AdAdminStatus == ads.AdAdminStatusPending {
-		currentAd.AdActiveStatus = pl.AdActiveStatus
+	if currentAd.AdPayStatus == ads.ActiveStatusYes && currentAd.AdAdminStatus == ads.AdminStatusPending {
+		currentAd.AdActiveStatus = pl.ActiveStatus
 		// send mail
 		go func() {
 			mail.SendByTemplateName(trans.T("AD activated").Translate("fa_IR"), "active-ad", struct {
@@ -418,7 +418,7 @@ func (u *Controller) edit(ctx echo.Context) error {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
 	//check if it can be edited
-	if currentAd.AdActiveStatus == ads.AdActiveStatusYes || currentAd.AdAdminStatus == ads.AdAdminStatusAccepted {
+	if currentAd.AdActiveStatus == ads.ActiveStatusYes || currentAd.AdAdminStatus == ads.AdminStatusAccepted {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
 	currentAd.Name = pl.Name
@@ -509,7 +509,7 @@ func (u *Controller) assignPlan(ctx echo.Context) error {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
 	//check if he/she can assign plan (flow)
-	if currentAd.AdPayStatus != ads.AdPayStatusNo {
+	if currentAd.AdPayStatus != ads.ActiveStatusNo {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
 	currentAd.PlanID = common.NullInt64{Valid: true, Int64: plan.ID}
@@ -623,8 +623,8 @@ func (u *Controller) verify(ctx echo.Context) error {
 			return ctx.Redirect(http.StatusFound, frontNOk)
 		}
 		//update ad pay status
-		currentAd.AdPayStatus = ads.AdPayStatusYes
-		currentAd.AdActiveStatus = ads.AdActiveStatusYes
+		currentAd.AdPayStatus = ads.ActiveStatusYes
+		currentAd.AdActiveStatus = ads.ActiveStatusYes
 		assert.Nil(adManager.UpdateAd(currentAd))
 		//call worker
 		// send mail

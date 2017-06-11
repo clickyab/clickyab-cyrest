@@ -20,6 +20,8 @@ var (
 	doneReg    = regexp.MustCompile("/(done|reject)_([0-9]+)")
 	rejectReg  = regexp.MustCompile("/(done|reject)_([0-9]+)_([0-9]+)")
 	completeAd = regexp.MustCompile("/complete_([0-9]+)_([0-9]+)")
+	//send bundle to channel first bundle id & second channel id
+	//sendAd = regexp.MustCompile("/send_([0-9]+)_([0-9]+)")
 )
 
 func sendString(bot *tgbotapi.BotAPI, chatID int64, message string) {
@@ -55,6 +57,7 @@ func (bb *bot) Initialize() {
 
 	tgbot.RegisterMessageHandler("/addchan", bb.addChan)
 	tgbot.RegisterMessageHandler("/delchan", bb.delChan)
+	//tgbot.RegisterMessageHandler("/send", bb.sendAd)
 }
 
 func init() {
