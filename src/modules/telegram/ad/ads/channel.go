@@ -11,31 +11,6 @@ import (
 	"time"
 )
 
-//'pending', 'rejected','accepted','archive','yes','no'
-const (
-	// AdminStatusPending is the pending status
-	AdminStatusPending AdminStatus = "pending"
-	// AdminStatusRejected is the rejected status
-	AdminStatusRejected AdminStatus = "rejected"
-	// AdminStatusAccepted is the accepted status
-	AdminStatusAccepted AdminStatus = "accepted"
-
-	ArchiveStatusYes ArchiveStatus = "yes"
-	ArchiveStatusNo  ArchiveStatus = "no"
-)
-
-type (
-	// AdminStatus is the channel status
-	// @Enum{
-	// }
-	AdminStatus string
-
-	// ArchiveStatus is the channel active
-	// @Enum{
-	// }
-	ArchiveStatus string
-)
-
 // DailyView struct for dashboard
 type DailyView struct {
 	View int64 `db:"view" json:"view"`
@@ -55,7 +30,7 @@ type Channel struct {
 	Name          string            `json:"name" db:"name" search:"true" title:"Name"`
 	Title         common.NullString `json:"link" db:"link" search:"true" title:"Title"`
 	AdminStatus   AdminStatus       `json:"admin_status" db:"admin_status" filter:"true" title:"AdminStatus"`
-	ArchiveStatus ArchiveStatus     `json:"archive_status" db:"archive_status" filter:"true" title:"ArchiveStatus"`
+	ArchiveStatus ActiveStatus      `json:"archive_status" db:"archive_status" filter:"true" title:"AdminStatus"`
 	Active        ActiveStatus      `json:"active" db:"active" filter:"true" title:"Active"`
 	CreatedAt     *time.Time        `db:"created_at" json:"created_at,omitempty" sort:"true" title:"Created at" perm:"view_channel:global"`
 	UpdatedAt     *time.Time        `db:"updated_at" json:"updated_at,omitempty" sort:"true" title:"Updated at" perm:"view_channel:global"`
@@ -68,7 +43,7 @@ type ChanStat struct {
 }
 
 // ChannelCreate a new channel
-func (m *Manager) ChannelCreate(link, name string, status AdminStatus, archive ArchiveStatus, active ActiveStatus, userID int64) *Channel {
+func (m *Manager) ChannelCreate(link, name string, status AdminStatus, archive AdminStatus, active ActiveStatus, userID int64) *Channel {
 
 	ch := &Channel{
 		Title:       common.MakeNullString(link),
@@ -167,7 +142,7 @@ func (m *Manager) FindChannelsByChatIDName(chatID int64, name string) (*Channel,
 		tlu.RemoveStatusNo,
 		tlu.ResolveStatusYes,
 		AdminStatusAccepted,
-		ArchiveStatusNo,
+		ActiveStatusNo,
 		ActiveStatusYes,
 	)
 

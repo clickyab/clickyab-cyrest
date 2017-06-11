@@ -65,16 +65,16 @@ func (bb *bot) confirm(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 	mm := ads.NewAdsManager()
 	if command == "accept" {
 		ad, err := mm.FindAdByID(param)
-		if err != nil || ad.AdActiveStatus != ads.AdActiveStatusYes || ad.AdAdminStatus != ads.AdAdminStatusPending || ad.AdPayStatus != ads.AdPayStatusYes {
+		if err != nil || ad.AdActiveStatus != ads.ActiveStatusYes || ad.AdAdminStatus != ads.AdminStatusPending || ad.AdPayStatus != ads.ActiveStatusYes {
 			doMessage(bot, m.Chat.ID, trans.T("Invalid ad"))
 			return
 		}
-		ad.AdAdminStatus = ads.AdAdminStatusAccepted
+		ad.AdAdminStatus = ads.AdminStatusAccepted
 		assert.Nil(mm.UpdateAd(ad))
 		resp = trans.T("Ad %s is accepted", ad.Name)
 	} else if command == "reject" {
 		ad, err := mm.FindAdByID(param)
-		if err != nil || ad.AdActiveStatus != ads.AdActiveStatusYes || ad.AdAdminStatus != ads.AdAdminStatusPending || ad.AdPayStatus != ads.AdPayStatusYes {
+		if err != nil || ad.AdActiveStatus != ads.ActiveStatusYes || ad.AdAdminStatus != ads.AdminStatusPending || ad.AdPayStatus != ads.ActiveStatusYes {
 			doMessage(bot, m.Chat.ID, trans.T("Invalid ad"))
 			return
 		}
@@ -82,7 +82,7 @@ func (bb *bot) confirm(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 		if err != nil {
 			return
 		}
-		ad.AdAdminStatus = ads.AdAdminStatusRejected
+		ad.AdAdminStatus = ads.AdminStatusRejected
 		assert.Nil(mm.UpdateAd(ad))
 		//send email
 		go func() {

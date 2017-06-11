@@ -12,12 +12,12 @@ CREATE TABLE ads
   src TEXT,
   position INT(11),
   promote_data TEXT,
-  admin_status ENUM('pending', 'rejected','accepted'),
-  archive_status ENUM('yes', 'no'),
-  pay_status ENUM('yes', 'no'),
-  active_status ENUM('yes','no'),
+  admin_status ENUM('pending', 'rejected','accepted') NOT NULL,
+  archive_status ENUM('yes', 'no') NOT NULL,
+  pay_status ENUM('yes', 'no') NOT NULL,
+  active_status ENUM('yes','no') NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-  updated_at TIMESTAMP DEFAULT '0000-00-00 00:00:00' NOT NULL,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
   CONSTRAINT ads_id_users_id_fk FOREIGN KEY (user_id) REFERENCES users(id),
   CONSTRAINT plans_id_plan_id_fk FOREIGN KEY (plan_id) REFERENCES plans(id)
 

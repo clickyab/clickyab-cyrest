@@ -12,7 +12,7 @@ CREATE TABLE plans
     type ENUM('promotion','individual') NOT NULL,
     active ENUM('yes', 'no') NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP DEFAULT '0000-00-00 00:00:00' NOT NULL
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 -- +migrate Down

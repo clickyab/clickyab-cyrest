@@ -8,11 +8,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 )
 
 const sqlNull = "null"
+
+// CommaArray type is the hack to handle , splited text in our database
+type CommaArray string
 
 // Initializer is for model when the have need extra initialize on save/update
 type Initializer interface {
@@ -396,4 +400,56 @@ func MakeNullTime(t time.Time) NullTime {
 // MakeNullInt64 create a new null int64
 func MakeNullInt64(t int64) NullInt64 {
 	return NullInt64{Valid: t != 0, Int64: t}
+}
+
+// Scan convert the json array ino string slice
+func (pa *CommaArray) Scan(src interface{}) error {
+	s := &sql.NullString{}
+	err := s.Scan(src)
+	if err != nil {
+		return err
+	}
+
+	if s.Valid {
+		*pa = CommaArray(s.String)
+	} else {
+		*pa = ""
+	}
+	return nil
+
+}
+
+// Value try to get the string slice representation in database
+func (pa CommaArray) Value() (driver.Value, error) {
+	s := sql.NullString{}
+	s.Valid = pa != ""
+	s.String = string(pa)
+
+	return s.Value()
+}
+
+// Has check exist value in sharpArray
+func (pa CommaArray) Has(empty bool, in ...int64) (x bool) {
+	if len(in) == 0 || len(pa) == 0 {
+		return empty
+	}
+	if len(in) == 1 {
+		return strings.Contains(string(pa), fmt.Sprintf(",%d,", in[0]))
+	}
+
+	reg := []string{}
+	for i := range in {
+		reg = append(reg, fmt.Sprintf(",%d,", in[i]))
+	}
+
+	return regexp.MustCompile("(" + strings.Join(reg, "|") + ")").MatchString(string(pa))
+}
+
+// Match check for at least one match
+func (pa CommaArray) Match(empty bool, in CommaArray) bool {
+	if len(in) == 0 || len(pa) == 0 {
+		return empty
+	}
+	inTrim := strings.Trim(string(in), ", \n\t")
+	return regexp.MustCompile("(" + strings.Replace(inTrim, ",", ",|,", -1) + ")").MatchString(string(pa))
 }

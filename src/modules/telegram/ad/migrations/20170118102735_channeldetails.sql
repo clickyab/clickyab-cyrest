@@ -14,7 +14,7 @@ CREATE TABLE channel_details
   post_count INT(11),
   total_view INT(11),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-  updated_at TIMESTAMP DEFAULT '0000-00-00 00:00:00' NOT NULL,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
   CONSTRAINT channel_details_channels_id_fk FOREIGN KEY (channel_id) REFERENCES channels(id)
 );
 
