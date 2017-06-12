@@ -34,7 +34,6 @@ func send(bot *tgbotapi.BotAPI, chatID int64, message trans.T9String) {
 }
 
 func (bb *bot) Initialize() {
-
 	tgbot.RegisterMessageHandler("/updatead", bb.updateAD)
 	tgbot.RegisterMessageHandler("/ad", bb.wantAD)
 	tgbot.RegisterMessageHandler("/confirm", bb.confirm)
@@ -43,6 +42,10 @@ func (bb *bot) Initialize() {
 	tgbot.RegisterMessageHandler("/reshot", bb.reshot)
 	tgbot.RegisterMessageHandler("/activead", bb.activeAd)
 	tgbot.RegisterMessageHandler("/complete", bb.complete)
+
+	tgbot.RegisterMessageHandler("/name", bb.getName)
+	tgbot.RegisterMessageHandler("/channel", bb.getChannel)
+	tgbot.RegisterMessageHandler("/secret", CheckUserExisted(bb.test))
 }
 
 func init() {

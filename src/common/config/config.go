@@ -87,7 +87,8 @@ type AppConfig struct {
 		From     string `onion:"from"`
 	}
 	Role struct {
-		Default int64 `onion:"default"`
+		Default   int64 `onion:"default"`
+		Publisher int64 `onion:"publisher"`
 	}
 	Proxy struct {
 		Port string
@@ -170,6 +171,7 @@ func defaultLayer() onion.DefaultLayer {
 	assert.Nil(res.SetDefault("mail.password", ""))
 	assert.Nil(res.SetDefault("mail.from", "hello@clickyab.com"))
 	assert.Nil(res.SetDefault("role.default", 2))
+	assert.Nil(res.SetDefault("role.publisher", 3))
 
 	assert.Nil(res.SetDefault("proxy.port", ":8000"))
 	assert.Nil(res.SetDefault("proxy.url", "https://google.com"))

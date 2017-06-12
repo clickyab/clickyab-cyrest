@@ -47,6 +47,7 @@ const (
 type User struct {
 	ID          int64                                       `db:"id" json:"id" sort:"true" title:"ID" map:"users.id"`
 	Email       string                                      `db:"email" json:"email" search:"true" title:"Email"`
+	PubName     common.NullString                           `db:"pub_name" json:"pub_name" title:"PubName" visible:"false"`
 	Password    string                                      `db:"password" json:"-"`
 	OldPassword common.NullString                           `db:"old_password" json:"-"`
 	AccessToken string                                      `db:"access_token" json:"-"`
@@ -412,4 +413,26 @@ func (u *User) GetProfile() *UserProfile {
 		return nil
 	}
 	return profile
+}
+
+// RegisterPublisherUser register user by bot
+func (m *Manager) RegisterPublisherUser(name string, chatID int64) (*User, error) {
+	user := &User{
+		Email:       utils.Sha1(fmt.Sprintf("%d", chatID)),
+		Password:    utils.Sha1(fmt.Sprintf("%d", chatID)),
+		AccessToken: <-utils.ID,
+		PubName:     common.MakeNullString(name),
+		Status:      UserStatusRegistered,
+	}
+	err := m.CreateUser(user)
+	if err != nil {
+		return nil, err
+	}
+	role, err := m.FindRoleByID(config.Config.Role.Publisher)
+	if err != nil {
+		return nil, err
+	}
+	ur := &UserRole{RoleID: role.ID, UserID: user.ID}
+	return user, m.CreateUserRole(ur)
+
 }

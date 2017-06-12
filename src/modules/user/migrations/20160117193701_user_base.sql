@@ -6,6 +6,7 @@ CREATE TABLE users
 (
     id INT(11) PRIMARY KEY NOT NULL AUTO_INCREMENT,
     email VARCHAR(50) NOT NULL UNIQUE ,
+    pub_name VARCHAR(50),
     password VARCHAR(60)NOT NULL ,
     old_password VARCHAR(30),
     access_token VARCHAR(60) NOT NULL ,
@@ -112,6 +113,7 @@ CREATE INDEX user_role_users_id_fk ON user_role (user_id);
 INSERT INTO users (id,email,password,access_token,status,created_at,updated_at) VALUES (NULL,"root@rubik.com","$2a$10$6WeBOWQn2CwYzosiPK0ii.6XiW1rt0hZD3iXDsaySGo.RLoJUFwdq","92d80885abad94e24d3ffaea7501331fc7701135","registered",NOW(),NOW());
 INSERT INTO roles (id,name,description,created_at,updated_at) VALUES (1,"root","all access granted",NOW(),NOW());
 INSERT INTO roles (id,name,description,created_at,updated_at) VALUES (2,"user","only some perm",NOW(),NOW());
+INSERT INTO roles (id,name,description,created_at,updated_at) VALUES (3,"publisher","only publisher perm",NOW(),NOW());
 INSERT INTO role_permission (id,role_id,permission,scope,created_at,updated_at) VALUES (NULL,(SELECT id FROM roles WHERE name="root"),"god","global",NOW(),NOW());
 INSERT INTO user_role (user_id,role_id,created_at) VALUES ((SELECT id FROM users WHERE email="root@rubik.com"),(SELECT id FROM roles WHERE name="root"),NOW());
 -- +migrate Down

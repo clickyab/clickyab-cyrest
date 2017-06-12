@@ -28,13 +28,14 @@ type Config struct {
 		MsgCount  int    `onion:"message_count"`
 		MsgOffset int    `onion:"message_offset"`
 
-		CLIAddress        string        `onion:"cli_host"`
-		CLIPort           int           `onion:"cli_port"`
-		LastPostChannel   int           `onion:"last_post_channel"`
-		LimitCountWarning int64         `onion:"limit_count_warning"`
-		TimeReQueUe       time.Duration `onion:"time_requeue"`
-		PositionAdDefault int64         `onion:"position_ad_default"`
-		SendDelay         time.Duration `onion:"send_delay"`
+		CLIAddress         string        `onion:"cli_host"`
+		CLIPort            int           `onion:"cli_port"`
+		LastPostChannel    int           `onion:"last_post_channel"`
+		LimitCountWarning  int64         `onion:"limit_count_warning"`
+		TimeReQueUe        time.Duration `onion:"time_requeue"`
+		PositionAdDefault  int64         `onion:"position_ad_default"`
+		SendDelay          time.Duration `onion:"send_delay"`
+		PublisherAuthRedis time.Duration `onion:"publisher_auth_redis"`
 	}
 }
 
@@ -57,6 +58,7 @@ func (c *Config) Initialize(o *onion.Onion) []onion.Layer {
 	assert.Nil(d.SetDefault("telegram.time_requeue", 2*time.Minute))
 	assert.Nil(d.SetDefault("telegram.position_ad_default", 10))
 	assert.Nil(d.SetDefault("telegram.send_delay", 2*time.Second))
+	assert.Nil(d.SetDefault("telegram.publisher_auth_redis", 24*time.Hour))
 	return []onion.Layer{d}
 }
 
