@@ -122,9 +122,9 @@ func (tb *telegramBot) RegisterUserHandlerWithExp(cid int64, hh HandleMessage, e
 		if tb.sessions[cid] == lockID {
 			delete(tb.sessions, cid)
 			delete(tb.users, cid)
+			exp()
 		}
 
-		exp()
 	}()
 }
 
@@ -243,7 +243,13 @@ func (tb *telegramBot) GetBot() *tgbotapi.BotAPI {
 	return tb.bot
 }
 
-func hasPrefix(cmd, base string) bool {
-	first := strings.Split(cmd, "_")[0]
-	return first == base
+func hasPrefix(a, b string) bool {
+	if strings.HasPrefix(a, b) {
+		g := strings.Split(a, "_")
+		if len(g) > 0 && g[0] != b {
+			return false
+		}
+		return true
+	}
+	return false
 }

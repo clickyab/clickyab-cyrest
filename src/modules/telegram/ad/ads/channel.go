@@ -115,6 +115,21 @@ func (m *Manager) FindChannelByUserIDChannelID(userID int64, channelID int64) (*
 	return &res, nil
 }
 
+// DeleteChannelByUserIDChannelName return the Channel base on its user_id
+func (m *Manager) DeleteChannelByUserIDChannelName(userID int64, name string) (*Channel, error) {
+	var res Channel
+	_, err := m.GetDbMap().Exec(
+		fmt.Sprintf("UPDATE %s SET active='no' WHERE user_id=? AND name=?", ChannelTableFull),
+		userID,
+		name,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 // FindChannelsByUserID return the Channels owned by a user
 func (m *Manager) FindChannelsByUserID(userID int64) ([]Channel, error) {
 	channels := []Channel{}
@@ -122,6 +137,21 @@ func (m *Manager) FindChannelsByUserID(userID int64) ([]Channel, error) {
 		&channels,
 		fmt.Sprintf("SELECT * FROM %s WHERE user_id= ? ", ChannelTableFull),
 		userID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return channels, nil
+}
+
+// FindActiveChannelsByUserID return the Channels owned by a user
+func (m *Manager) FindActiveChannelsByUserID(userID int64) ([]Channel, error) {
+	channels := []Channel{}
+	_, err := m.GetDbMap().Select(
+		&channels,
+		fmt.Sprintf("SELECT * FROM %s WHERE user_id=? AND active=?", ChannelTableFull),
+		userID,
+		ActiveStatusYes,
 	)
 	if err != nil {
 		return nil, err

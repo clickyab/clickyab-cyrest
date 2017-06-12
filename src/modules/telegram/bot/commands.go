@@ -34,7 +34,7 @@ func send(bot *tgbotapi.BotAPI, chatID int64, message trans.T9String) {
 }
 
 func sendWithKeyboard(bot *tgbotapi.BotAPI, keyboard tgbotapi.ReplyKeyboardMarkup, chatID int64, message trans.T9String) {
-	msg := tgbotapi.NewMessage(chatID, "use get_ad to get a new ad\nor /fff to add a new channel")
+	msg := tgbotapi.NewMessage(chatID, message.Text)
 	msg.ReplyMarkup = keyboard
 	bot.Send(msg)
 }
@@ -54,6 +54,7 @@ func (bb *bot) Initialize() {
 	tgbot.RegisterMessageHandler("/secret", CheckUserExisted(bb.test))
 
 	tgbot.RegisterMessageHandler("/addchan", bb.addChan)
+	tgbot.RegisterMessageHandler("/delchan", bb.delChan)
 }
 
 func init() {
