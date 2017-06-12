@@ -162,3 +162,15 @@ func (m *Manager) DeleteTelegramUser(telegramUserID int64) error {
 	assert.Nil(err)
 	return err
 }
+
+// RegisterPublisherTeleUser register tele for publisher
+func (m *Manager) RegisterPublisherTeleUser(chatID, userID int64, userName string) error {
+	tu := &TeleUser{
+		UserID:    userID,
+		BotChatID: chatID,
+		Remove:    RemoveStatusNo,
+		Resolve:   ResolveStatusYes,
+		Username:  common.MakeNullString(userName),
+	}
+	return m.CreateTeleUser(tu)
+}

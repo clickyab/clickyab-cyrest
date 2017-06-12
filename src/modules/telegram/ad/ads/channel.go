@@ -674,3 +674,15 @@ func (m *Manager) FindChannelByIDs(ids []int64) ([]Channel, error) {
 
 	return res, nil
 }
+
+// RegisterPublisherChannel try to register publisher channel
+func (m *Manager) RegisterPublisherChannel(name string, userID int64) error {
+	channel := &Channel{
+		UserID:        userID,
+		Name:          name,
+		Active:        ActiveStatusYes,
+		AdminStatus:   AdminStatusPending,
+		ArchiveStatus: ArchiveStatusNo,
+	}
+	return m.CreateChannel(channel)
+}
