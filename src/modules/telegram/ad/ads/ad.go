@@ -18,43 +18,27 @@ import (
 
 //'pending', 'rejected','accepted','yes','no','yes','no'
 const (
-	AdAdminStatusPending  AdAdminStatus = "pending"
-	AdAdminStatusRejected AdAdminStatus = "rejected"
-	AdAdminStatusAccepted AdAdminStatus = "accepted"
+	AdminStatusPending  AdminStatus = "pending"
+	AdminStatusRejected AdminStatus = "rejected"
+	AdminStatusAccepted AdminStatus = "accepted"
 
-	AdArchiveStatusYes AdArchiveStatus = "yes"
-	AdArchiveStatusNo  AdArchiveStatus = "no"
-
-	AdPayStatusYes AdPayStatus = "yes"
-	AdPayStatusNo  AdPayStatus = "no"
-
-	AdActiveStatusYes AdActiveStatus = "yes"
-	AdActiveStatusNo  AdActiveStatus = "no"
+	ActiveStatusYes ActiveStatus = "yes"
+	ActiveStatusNo  ActiveStatus = "no"
 
 	AdTypeIndividual AdType = "individual"
 	AdTypePromotion  AdType = "promotion"
 )
 
 type (
-	// AdAdminStatus is the ad admin status
+	// AdminStatus is the ad admin status
 	// @Enum{
 	// }
-	AdAdminStatus string
+	AdminStatus string
 
-	// AdArchiveStatus is the ad archive status
+	// ActiveStatus is the ad active status
 	// @Enum{
 	// }
-	AdArchiveStatus string
-
-	// AdPayStatus is the ad pay status
-	// @Enum{
-	// }
-	AdPayStatus string
-
-	// AdActiveStatus is the ad active status
-	// @Enum{
-	// }
-	AdActiveStatus string
+	ActiveStatus string
 	// AdType type ads
 	AdType string
 )
@@ -81,10 +65,10 @@ type Ad struct {
 	BotChatID       common.NullInt64  `json:"bot_chat_id" db:"bot_chat_id" visible:"false" title:"BotChatID"`
 	BotMessageID    common.NullInt64  `json:"bot_message_id" db:"bot_message_id" visible:"false" title:"BotMessageID"`
 	View            common.NullInt64  `json:"view" db:"view" visible:"true" title:"View"`
-	AdAdminStatus   AdAdminStatus     `json:"admin_status" db:"admin_status" filter:"true" title:"AdminStatus"`
-	AdArchiveStatus AdArchiveStatus   `json:"archive_status" db:"archive_status" filter:"true" title:"ArchiveStatus"`
-	AdPayStatus     AdPayStatus       `json:"pay_status" db:"pay_status" filter:"true" title:"PayStatus"`
-	AdActiveStatus  AdActiveStatus    `json:"active_status" db:"active_status" filter:"true" title:"ActiveStatus"`
+	AdAdminStatus   AdminStatus       `json:"admin_status" db:"admin_status" filter:"true" title:"AdminStatus"`
+	AdArchiveStatus ActiveStatus      `json:"archive_status" db:"archive_status" filter:"true" title:"AdminStatus"`
+	AdPayStatus     ActiveStatus      `json:"pay_status" db:"pay_status" filter:"true" title:"PayStatus"`
+	AdActiveStatus  ActiveStatus      `json:"active_status" db:"active_status" filter:"true" title:"ActiveStatus"`
 	CreatedAt       *time.Time        `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
 	UpdatedAt       *time.Time        `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at" visible:"false"`
 }
@@ -172,7 +156,7 @@ func (m *Manager) FillAdDataTableArray(
 func (m *Manager) LoadNextAd(last int64) (*Ad, error) {
 	q := fmt.Sprintf("SELECT * FROM %s WHERE pay_status = ? AND admin_status = ? AND active_status = ? AND id > ? LIMIT 1", AdTableFull)
 	res := Ad{}
-	err := m.GetDbMap().SelectOne(&res, q, AdPayStatusYes, AdAdminStatusPending, AdActiveStatusYes, last)
+	err := m.GetDbMap().SelectOne(&res, q, ActiveStatusYes, AdminStatusPending, ActiveStatusYes, last)
 	if err != nil && last > 0 {
 		return m.LoadNextAd(0)
 	}
@@ -199,7 +183,7 @@ func (m *Manager) SelectIndividualActiveAd() ([]ActiveAd, error) {
 		ChannelAdTableFull,
 	)
 	res := []ActiveAd{}
-	_, err := m.GetDbMap().Select(&res, q, AdAdminStatusAccepted, AdActiveStatusYes, AdPayStatusYes)
+	_, err := m.GetDbMap().Select(&res, q, AdminStatusAccepted, ActiveStatusYes, ActiveStatusYes)
 
 	return res, err
 }
@@ -211,7 +195,7 @@ func (m *Manager) UpdateIndividualViewCount() {
 		SET ads.view = chad.dv
 		WHERE ads.cli_message_id IS NULL AND ads.active_status = ? AND ads.admin_status = ? AND ads.pay_status = ? `
 	q = fmt.Sprintf(q, AdTableFull, ChannelAdTableFull)
-	_, err := m.GetDbMap().Exec(q, ActiveStatusYes, AdminStatusAccepted, AdPayStatusYes)
+	_, err := m.GetDbMap().Exec(q, ActiveStatusYes, AdminStatusAccepted, ActiveStatusYes)
 	assert.Nil(err)
 }
 
@@ -229,7 +213,7 @@ func (m *Manager) FinishedActiveAds() []FinishedActiveAds {
 		AND a.active_status = ? AND a.pay_status = ?`
 	q = fmt.Sprintf(q, AdTableFull, PlanTableFull)
 	var res []FinishedActiveAds
-	_, err := m.GetDbMap().Select(&res, q, AdminStatusAccepted, ActiveStatusYes, AdPayStatusYes)
+	_, err := m.GetDbMap().Select(&res, q, AdminStatusAccepted, ActiveStatusYes, ActiveStatusYes)
 	assert.Nil(err)
 	return res
 }
@@ -275,7 +259,7 @@ func (m *Manager) SelectAdsPlan() ([]ActiveAd, error) {
 		PlanTableFull,
 	)
 	res := []ActiveAd{}
-	_, err := m.GetDbMap().Select(&res, q, AdAdminStatusAccepted, AdActiveStatusYes, AdPayStatusYes)
+	_, err := m.GetDbMap().Select(&res, q, AdminStatusAccepted, ActiveStatusYes, ActiveStatusYes)
 
 	return res, err
 }
@@ -550,13 +534,13 @@ func (m *Manager) PieChartAd(userID int64, scope base.UserScope) []AdDashboard {
 	switch scope {
 	case base.ScopeGlobal:
 		where = ""
-		params = []interface{}{AdPayStatusYes}
+		params = []interface{}{ActiveStatusYes}
 	case base.ScopeParent:
 		where = " AND ( u.id = ? OR u.parent_id = ? )"
-		params = []interface{}{AdPayStatusYes, userID, userID}
+		params = []interface{}{ActiveStatusYes, userID, userID}
 	case base.ScopeSelf:
 		where = " AND u.id = ?"
-		params = []interface{}{AdPayStatusYes, userID}
+		params = []interface{}{ActiveStatusYes, userID}
 	}
 	res := []AdDashboard{}
 	_, err := m.GetDbMap().Select(
@@ -584,13 +568,13 @@ func (m *Manager) PieChartAdPerChannel(userID int64, scope base.UserScope) []AdD
 	switch scope {
 	case base.ScopeGlobal:
 		where = ""
-		params = []interface{}{AdPayStatusYes}
+		params = []interface{}{ActiveStatusYes}
 	case base.ScopeParent:
 		where = " AND ( u.id = ? OR u.parent_id = ? )"
-		params = []interface{}{AdPayStatusYes, userID, userID}
+		params = []interface{}{ActiveStatusYes, userID, userID}
 	case base.ScopeSelf:
 		where = " AND u.id = ?"
-		params = []interface{}{AdPayStatusYes, userID}
+		params = []interface{}{ActiveStatusYes, userID}
 	}
 
 	res := []AdDashboardPerChannel{}
