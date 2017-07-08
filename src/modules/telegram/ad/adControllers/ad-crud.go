@@ -36,6 +36,8 @@ import (
 	"common/config"
 	"common/mail"
 
+	"modules/category/cat"
+
 	"gopkg.in/labstack/echo.v3"
 )
 
@@ -680,4 +682,47 @@ func (u *Controller) callIdentifyAd(ctx echo.Context) error {
 		AdID: id,
 	})
 	return u.OKResponse(ctx, nil)
+}
+
+type assignCat struct {
+	Categories []int64 `json:"categories"`
+}
+
+//	assignCategory assignCategory for ad
+//	@Route	{
+//		url	=	/category/:id
+//		method	= put
+//		payload	= assignCat
+//		resource = assign_category:self
+//		middleware = authz.Authenticate
+//		200 = ads.Ad
+//		400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) assignCategory(ctx echo.Context) error {
+	currentUser := authz.MustGetUser(ctx)
+	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	pl := u.MustGetPayload(ctx).(*assignCat)
+	adManager := ads.NewAdsManager()
+	currentAd, err := adManager.FindAdByID(id)
+	if err != nil {
+		return u.NotFoundResponse(ctx, trans.E("ad not found"))
+	}
+	owner, err := aaa.NewAaaManager().FindUserByID(currentAd.UserID)
+	assert.Nil(err)
+	_, b := currentUser.HasPermOn("assign_category", currentAd.UserID, owner.DBParentID.Int64)
+	if !b {
+		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
+	}
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	catManager := cat.NewCatManager()
+	err = catManager.AssignCat(currentAd.ID, pl.Categories)
+	if err != nil {
+		return u.BadResponse(ctx, trans.E("error while assigning role"))
+	}
+	return u.OKResponse(ctx, trans.T("category assigned successfully"))
 }
