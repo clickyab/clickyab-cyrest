@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"common/models/common"
+
+	"github.com/Sirupsen/logrus"
 )
 
 // Category model
@@ -19,12 +21,20 @@ import (
 //		list = yes
 // }
 type Category struct {
-	ID int64 `db:"id" json:"id" sort:"true" title:"ID"`
-	//Scope       string     `db:"scope" json:"scope" search:"true" title:"Scope"`
+	ID          int64      `db:"id" json:"id" sort:"true" title:"ID"`
 	Title       string     `db:"title" json:"title" search:"true" title:"Title"`
 	Description string     `db:"description" json:"description" title:"Description"`
 	CreatedAt   *time.Time `db:"created_at" json:"created_at" sort:"true" title:"Created at"`
 	UpdatedAt   *time.Time `db:"updated_at" json:"updated_at" sort:"true" title:"Updated at"`
+}
+
+// CategoryAd model
+// @Model {
+//		table = ad_category
+// }
+type CategoryAd struct {
+	AdID  int64 `db:"ad_id"`
+	CatID int64 `db:"category_id"`
 }
 
 //type (
@@ -49,19 +59,11 @@ type CategoryDataTable struct {
 	Actions  string           `db:"-" json:"_actions" visible:"false"`
 }
 
-// Initialize the mcategory
-func (c *Category) Initialize() {
-	//if !IsValidScope(c.Scope) {
-	//	logrus.Panic("[BUG] you try to use a scope that is not valid in this app")
-	//}
-}
-
 // Create is for create category
 func (m *Manager) Create(title string, description string) *Category {
 	c := &Category{
 		Title:       title,
 		Description: description,
-		//Scope:       scope,
 	}
 	assert.Nil(m.CreateCategory(c))
 	return c
@@ -119,4 +121,52 @@ func (m *Manager) FillCategoryDataTableArray(
 	_, err = m.GetDbMap().Select(&res, query, params...)
 	assert.Nil(err)
 	return res, count
+}
+
+// DeleteAdCatByAdID delete pivot by adID
+func (m *Manager) DeleteAdCatByAdID(id int64) error {
+	q := fmt.Sprintf("DELETE FROM %s WHERE ad_id=?", CategoryAdTableFull)
+	_, err := m.GetDbMap().Exec(q, id)
+	return err
+}
+
+// AddCat add category
+func (m *Manager) AddCat(adID int64, catIDs []int64) error {
+	var err error
+	for i := range catIDs {
+		catAd := &CategoryAd{
+			AdID:  adID,
+			CatID: catIDs[i],
+		}
+		err = m.GetDbMap().Insert(catAd)
+		logrus.Warn(err)
+		if err != nil {
+			return err
+		}
+	}
+	return err
+}
+
+// AssignCat assign category to ad (transaction)
+func (m *Manager) AssignCat(id int64, catIDs []int64) error {
+	var err error
+	err = m.Begin()
+	assert.Nil(err)
+	defer func() {
+		if err != nil {
+			err = m.Rollback()
+			assert.Nil(err)
+		} else {
+			m.Commit()
+		}
+	}()
+	err = m.DeleteAdCatByAdID(id)
+	if err != nil {
+		return err
+	}
+	err = m.AddCat(id, catIDs)
+	if err != nil {
+		return err
+	}
+	return nil
 }
