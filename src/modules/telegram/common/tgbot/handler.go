@@ -30,8 +30,8 @@ func NewKeyboard(buttonsName ...string) tgbotapi.ReplyKeyboardMarkup {
 }
 
 // RegisterUserHandler redirect all user message to a chat
-func RegisterUserHandler(i int64, u HandleMessage, t time.Duration) {
-	handler.RegisterUserHandler(i, u, t)
+func RegisterUserHandler(chatID int64, u HandleMessage, t time.Duration) {
+	handler.RegisterUserHandler(chatID, u, t)
 }
 
 // RegisterUserHandlerWithExp redirect all user message to a chat

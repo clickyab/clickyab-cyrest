@@ -14,7 +14,7 @@ import (
 type bot struct {
 }
 
-const htmlMode = "HTML"
+const htmlMode string = "HTML"
 
 var (
 	doneReg    = regexp.MustCompile("/(done|reject)_([0-9]+)")
@@ -57,7 +57,14 @@ func (bb *bot) Initialize() {
 
 	tgbot.RegisterMessageHandler("/addchan", bb.addChan)
 	tgbot.RegisterMessageHandler("/delchan", bb.delChan)
-	//tgbot.RegisterMessageHandler("/send", bb.sendAd)
+
+	tgbot.RegisterMessageHandler("/addCard", CheckUserExisted(bb.financial))
+
+	// lint hack
+	if false {
+		bb.getCard("")
+		bb.getAccount("")
+	}
 }
 
 func init() {
