@@ -21,3 +21,13 @@ type BundleChannelAdDetail struct {
 	Warning   int64            `db:"warning" json:"warning"`
 	CreatedAt *time.Time       `db:"created_at" json:"created_at" sort:"true"`
 }
+
+// CreateBundleChannelAdDetails create bundle channel ad details
+func (m *Manager) CreateBundleChannelAdDetails(cad []*BundleChannelAdDetail) error {
+	h := make([]interface{}, len(cad))
+	for i := range cad {
+		h[i] = cad[i]
+	}
+	return m.GetDbMap().Insert(h...)
+
+}

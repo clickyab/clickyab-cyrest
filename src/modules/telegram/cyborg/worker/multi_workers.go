@@ -32,6 +32,7 @@ type channelDetailStat struct {
 	cliChannelAdID common.NullString
 	adID           int64
 	channelID      int64
+	bundleID       int64
 	botChatID      int64
 }
 

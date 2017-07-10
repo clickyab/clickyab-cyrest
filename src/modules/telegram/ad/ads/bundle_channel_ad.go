@@ -75,3 +75,59 @@ func (m *Manager) FindBundleChannelAd(channelID, bundleID, adID int64) *BundleCh
 	assert.Nil(err)
 	return &res
 }
+
+//FindBundleChannelAdActiveType type bundle channel active ad
+type FindBundleChannelAdActiveType struct {
+	BundleChannelAd
+	TargetView   int64             `db:"target_view"`
+	Position     int64             `db:"position"`
+	CliMessageID common.NullString `db:"cli_message_id"`
+	PromoteData  common.NullString `db:"promote_data"`
+	Src          common.NullString `db:"src"`
+}
+
+// FindBundleChannelAdActive return the adID base on its ad_id,ActiveStatus
+func (m *Manager) FindBundleChannelAdActive() ([]FindBundleChannelAdActiveType, error) {
+	res := []FindBundleChannelAdActiveType{}
+	_, err := m.GetDbMap().Select(
+		&res,
+		fmt.Sprintf("SELECT %[1]s.*,%[2]s.cli_message_id,%[2]s.promote_data,%[2]s.src, "+
+			"(%[3]s.view -((%[3]s.view * %[3]s.percent_finish)/100)) AS target_view,%[3]s.position"+
+			" FROM %[1]s "+
+			" INNER JOIN %[2]s ON %[2]s.id=%[1]s.ad_id AND %[1]s.ad_id = %[3]s.target_ad "+
+			" INNER JOIN %[3]s ON %[3]s.id=%[1]s.bundle_id "+
+			" AND %[1]s.active=? ",
+			BundleChannelAdTableFull,
+			AdTableFull,
+			BundlesTableFull,
+		),
+		ActiveStatusYes,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
+// UpdateBundleChannelAds update bundle channel ads
+func (m *Manager) UpdateBundleChannelAds(ca []BundleChannelAd) error {
+	var q = fmt.Sprintf("UPDATE %s SET  updated_at=?,warning=? , view=? WHERE channel_id=? AND ad_id=? AND bundle_id = ?", BundleChannelAdTableFull)
+	for i := range ca {
+		_, err := m.GetDbMap().Exec(
+			q,
+			time.Now(),
+			ca[i].Warning,
+			ca[i].View,
+			ca[i].ChannelID,
+			ca[i].AdID,
+			ca[i].BundleID,
+		)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
