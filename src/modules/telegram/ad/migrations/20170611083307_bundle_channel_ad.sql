@@ -7,6 +7,7 @@ CREATE TABLE bundle_channel_ad
     bundle_id INT NOT NULL,
     ad_id INT NOT NULL,
     view INT DEFAULT 0,
+    shot VARCHAR(255),
     warning TINYINT DEFAULT 0,
     bot_message_id INT(11),
     bot_chat_id INT(11) NOT NULL,

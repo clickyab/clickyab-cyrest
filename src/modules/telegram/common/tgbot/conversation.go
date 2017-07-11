@@ -13,69 +13,94 @@ import (
 
 const (
 	htmlMode = "HTML"
+
+	//Financial is the key for financial conversation
+	Financial = iota
+	//Screenshot is the key for screen shot conversation
+	Screenshot
 )
+
+// ChatHandler ChatHandler
+type ChatHandler func(*tgbotapi.Message, map[int]interface{}) (string, bool)
 
 // Chatter consist of request and a func to handle response
 type Chatter struct {
-	Request  string
-	IsFilled bool
-	Handler  ChatHandler
+	StringRequest   string
+	KeyboardRequest *[]string
+	Handler         ChatHandler
 }
 
-// ChatHandler ChatHandler
-type ChatHandler func(string) (string, bool)
+type response struct {
+	keyboard *[]string
+	isFilled bool
+	response string
+}
 
-var (
-	combination = make(map[string][]Chatter)
-	clientState = make(map[string]int)
-	counter     int
-)
+var combination = make(map[int][]*Chatter)
 
 // RegisterConversation adds a chatter to a field
-func RegisterConversation(field string, c Chatter) {
-	combination[field] = append(combination[field], c)
-	combination[field][counter] = c
-	counter++
+func RegisterConversation(field int, c Chatter) {
+	combination[field] = append(combination[field], &c)
 }
 
-// NewConversation makes a new conversation for each chatID
-func NewConversation(field string, bot *tgbotapi.BotAPI, chatID int64) {
-	if len(combination[field]) == 0 {
+// StartConversion this will be called for each command
+func StartConversion(bot *tgbotapi.BotAPI, chatID int64, mode int) {
+	states := make([]response, len(combination[mode]))
+	data := map[int]interface{}{}
+	qSet := combination[mode]
+	if len(qSet) < 1 {
 		return
 	}
-	send(bot, chatID, trans.T(combination[field][0].Request))
-	RegisterUserHandler(chatID, func(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
-		for i := range combination[field] {
-			if !combination[field][i].IsFilled {
-				res, valid := combination[field][i].Handler(m.Text)
-				if !valid {
-					send(bot, chatID, trans.T(res))
-					return
-				}
-				a := &combination[field][clientState[string(chatID)]]
-				a.IsFilled = true
-				clientState[string(chatID)]++
-				if clientState[string(chatID)] < len(combination[field]) {
-					res = fmt.Sprintf("%s\n%s", res, combination[field][clientState[string(chatID)]].Request)
-				}
-				send(bot, chatID, trans.T(res))
-				clientState[string(chatID)] = 0
-				return
 
+	// asking first Q
+	send(bot, chatID, response{response: qSet[0].StringRequest})
+
+	RegisterUserHandler(chatID, func(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
+		for i := range qSet {
+			currentState := &states[i]
+
+			// pass if current state is filled
+			if currentState.isFilled {
+				continue
 			}
+
+			// getting response of first Q that haven't completed
+			res, valid := qSet[i].Handler(m, data)
+			currentState.response = res
+			currentState.isFilled = valid
+
+			// add next question to the current mode response
+			if i+1 < len(qSet) && currentState.isFilled {
+				currentState.response = fmt.Sprintf("%s\n%s", currentState.response, qSet[i+1].StringRequest)
+				if qSet[i+1].KeyboardRequest != nil {
+					currentState.keyboard = qSet[i+1].KeyboardRequest
+				}
+			}
+			send(bot, chatID, *currentState)
+			break
 		}
-		UnRegisterUserHandler(chatID)
-	}, time.Minute)
-	//TODO ^_^
+
+	}, time.Hour)
+}
+
+func send(bot *tgbotapi.BotAPI, chatID int64, r response) {
+	if r.keyboard == nil {
+		sendString(bot, chatID, trans.T(r.response).Translate(trans.PersianLang))
+		return
+	}
+	sendWithKeyboard(bot, NewKeyboard(*r.keyboard...), chatID, trans.T(r.response))
 }
 
 func sendString(bot *tgbotapi.BotAPI, chatID int64, message string) {
-	msg := tgbotapi.NewMessage(chatID, message)
+	translated := trans.T(message).Translate(trans.PersianLang)
+	msg := tgbotapi.NewMessage(chatID, translated)
 	msg.ParseMode = htmlMode
 	_, err := bot.Send(msg)
 	assert.Nil(err)
 }
 
-func send(bot *tgbotapi.BotAPI, chatID int64, message trans.T9String) {
-	sendString(bot, chatID, message.Translate(trans.PersianLang))
+func sendWithKeyboard(bot *tgbotapi.BotAPI, keyboard tgbotapi.ReplyKeyboardMarkup, chatID int64, message trans.T9String) {
+	msg := tgbotapi.NewMessage(chatID, message.Text)
+	msg.ReplyMarkup = keyboard
+	bot.Send(msg)
 }
