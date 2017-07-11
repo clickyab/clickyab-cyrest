@@ -33,14 +33,14 @@ type Bundles struct {
 	UserID        int64             `db:"user_id" json:"user_id"`
 	Place         int64             `db:"place" json:"place"`
 	View          int64             `db:"view" json:"view"`
-	Prive         int64             `db:"price" json:"price"`
+	Price         common.NullInt64  `db:"price" json:"price"`
 	PercentFinish int64             `db:"percent_finish" json:"percent_finish"`
 	BundleType    BType             `db:"bundle_type" json:"bundle_type"`
 	Rules         common.NullString `json:"rules" db:"rules"`
 	AdminStatus   ActiveStatus      `json:"admin_status" db:"admin_status"`
 	ActiveStatus  ActiveStatus      `json:"active_status" db:"active_status"`
 	Ads           common.CommaArray `json:"ads" db:"ads"`
-	TargetAd      int64             `json:"target_ad" db:"target_ad"`
+	TargetAd      common.NullInt64  `json:"target_ad" db:"target_ad"`
 	Start         common.NullTime   `json:"start" db:"start"`
 	End           common.NullTime   `json:"end" db:"end"`
 	CreatedAt     *time.Time        `json:"created_at" db:"created_at"`
