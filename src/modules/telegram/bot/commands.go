@@ -59,12 +59,7 @@ func (bb *bot) Initialize() {
 	tgbot.RegisterMessageHandler("/delchan", bb.delChan)
 	tgbot.RegisterMessageHandler("/addCard", CheckUserExisted(bb.financial))
 
-	// lint hack
-	if false {
-		bb.getCard("")
-		bb.getAccount("")
-	}
-	tgbot.RegisterMessageHandler("/send", bb.sendAd)
+	tgbot.RegisterMessageHandler("/upSS", CheckUserExisted(bb.uploadSS))
 }
 
 func init() {

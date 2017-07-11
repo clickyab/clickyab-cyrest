@@ -14,18 +14,19 @@ import (
 //		primary = false, channel_id,ad_id,bundle_id
 // }
 type BundleChannelAd struct {
-	ChannelID    int64            `db:"channel_id" json:"channel_id"`
-	AdID         int64            `db:"ad_id" json:"ad_id"`
-	BundleID     int64            `db:"bundle_id" json:"bundle_id"`
-	View         int64            `db:"view" json:"view"`
-	Warning      int64            `db:"warning" json:"warning"`
-	BotChatID    int64            `db:"bot_chat_id" json:"bot_chat_id"`
-	BotMessageID common.NullInt64 `db:"bot_message_id" json:"bot_message_id"`
-	Active       ActiveStatus     `db:"active" json:"active"`
-	Start        common.NullTime  `db:"start" json:"start"`
-	End          common.NullTime  `db:"end" json:"end"`
-	CreatedAt    *time.Time       `db:"created_at" json:"created_at" sort:"true"`
-	UpdatedAt    *time.Time       `db:"updated_at" json:"updated_at" sort:"true"`
+	ChannelID    int64             `db:"channel_id" json:"channel_id"`
+	AdID         int64             `db:"ad_id" json:"ad_id"`
+	BundleID     int64             `db:"bundle_id" json:"bundle_id"`
+	View         int64             `db:"view" json:"view"`
+	Shot         common.NullString `db:"shot" json:"shot"`
+	Warning      int64             `db:"warning" json:"warning"`
+	BotChatID    int64             `db:"bot_chat_id" json:"bot_chat_id"`
+	BotMessageID common.NullInt64  `db:"bot_message_id" json:"bot_message_id"`
+	Active       ActiveStatus      `db:"active" json:"active"`
+	Start        common.NullTime   `db:"start" json:"start"`
+	End          common.NullTime   `db:"end" json:"end"`
+	CreatedAt    *time.Time        `db:"created_at" json:"created_at" sort:"true"`
+	UpdatedAt    *time.Time        `db:"updated_at" json:"updated_at" sort:"true"`
 }
 
 // FindActiveChannelBundleByUserID try to find by user id
@@ -57,4 +58,19 @@ func (m *Manager) FindActiveChannelBundleByUserID(userID int64, channelID int64,
 	)
 	assert.Nil(err)
 	return res
+}
+
+// FindBundleChannelAd try to find by user id
+func (m *Manager) FindBundleChannelAd(channelID, bundleID int64) *BundleChannelAd {
+	var res BundleChannelAd
+	q := fmt.Sprintf(
+		"SELECT * FROM %s WHERE bundle_id=? AND channel_id=?", BundleChannelAdTableFull)
+	err := m.GetDbMap().SelectOne(
+		&res,
+		q,
+		bundleID,
+		channelID,
+	)
+	assert.Nil(err)
+	return &res
 }

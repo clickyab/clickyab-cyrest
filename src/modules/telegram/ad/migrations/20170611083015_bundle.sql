@@ -8,6 +8,7 @@ CREATE TABLE bundles
     place INT,
     view INT NOT NULL DEFAULT 0,
     price INT NOT NULL,
+    code VARCHAR(10) NOT NULL,
     percent_finish INT NOT NULL,
     bundle_type ENUM("banner", "banner+rep", "rep+banner", "rep+banner+rep") DEFAULT "banner" NOT NULL,
     rules TEXT,

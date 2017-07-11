@@ -119,6 +119,21 @@ func (m *Manager) FindChannelsByUserID(userID int64) ([]Channel, error) {
 	return channels, nil
 }
 
+// FindChannelByUserIDChannelName return the Channels owned by a user
+func (m *Manager) FindChannelByUserIDChannelName(userID int64, channelName string) (Channel, error) {
+	channel := Channel{}
+	err := m.GetDbMap().SelectOne(
+		&channel,
+		fmt.Sprintf("SELECT * FROM %s WHERE user_id= ? AND name=?", ChannelTableFull),
+		userID,
+		channelName,
+	)
+	if err != nil {
+		return channel, err
+	}
+	return channel, nil
+}
+
 // FindActiveChannelsByUserID return the Channels owned by a user
 func (m *Manager) FindActiveChannelsByUserID(userID int64) ([]Channel, error) {
 	channels := []Channel{}

@@ -25,7 +25,7 @@ type BType string
 // @Model {
 //		table = bundles
 //		primary = true, id
-//		find_by = id,user_id
+//		find_by = id,user_id,code
 //		list = yes
 //	}
 type Bundles struct {
@@ -33,10 +33,11 @@ type Bundles struct {
 	UserID        int64             `db:"user_id" json:"user_id"`
 	Place         int64             `db:"place" json:"place"`
 	View          int64             `db:"view" json:"view"`
-	Prive         int64             `db:"price" json:"price"`
+	Price         int64             `db:"price" json:"price"`
 	PercentFinish int64             `db:"percent_finish" json:"percent_finish"`
 	BundleType    BType             `db:"bundle_type" json:"bundle_type"`
 	Rules         common.NullString `json:"rules" db:"rules"`
+	Code          string            `json:"code" db:"code"`
 	AdminStatus   ActiveStatus      `json:"admin_status" db:"admin_status"`
 	ActiveStatus  ActiveStatus      `json:"active_status" db:"active_status"`
 	Ads           common.CommaArray `json:"ads" db:"ads"`
