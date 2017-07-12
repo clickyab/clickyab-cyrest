@@ -52,9 +52,5 @@ func (u *Controller) adDashboardChart(ctx echo.Context) error {
 //		400 = base.ErrorResponseSimple
 //	}
 func (u *Controller) adDashboardPerChannel(ctx echo.Context) error {
-	m := ads.NewAdsManager()
-	currentUser := authz.MustGetUser(ctx)
-	scope, _ := currentUser.HasPerm(base.ScopeGlobal, "get_ad_chart")
-	adChartData := m.PieChartAdPerChannel(currentUser.ID, scope)
-	return u.OKResponse(ctx, adChartData)
+	return u.OKResponse(ctx, nil)
 }

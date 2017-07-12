@@ -125,7 +125,7 @@ func (m *Manager) FillCategoryDataTableArray(
 
 // DeleteAdCatByAdID delete pivot by adID
 func (m *Manager) DeleteAdCatByAdID(id int64) error {
-	q := fmt.Sprintf("DELETE FROM %s WHERE ad_id=?", CategoryAdTableFull)
+	q := fmt.Sprintf("DELETE FROM %s WHERE ad_id=?", CategoryTableFull)
 	_, err := m.GetDbMap().Exec(q, id)
 	return err
 }
