@@ -8,6 +8,14 @@ import (
 	"modules/misc/middlewares"
 	"modules/misc/trans"
 
+	"common/assert"
+	"modules/user/aaa"
+	"net/http"
+	"strconv"
+
+	"fmt"
+	"strings"
+
 	"github.com/Sirupsen/logrus"
 	"gopkg.in/labstack/echo.v3"
 )
@@ -64,4 +72,54 @@ func (u *Controller) createBundle(ctx echo.Context) error {
 		return u.BadResponse(ctx, trans.E("error while creating bundle"))
 	}
 	return u.OKResponse(ctx, bundle)
+}
+
+// @Validate {
+// }
+type bundleAssignPayload struct {
+	Ads    []int64 `json:"ads" validate:"required" error:"ads is required"`
+	Target int64   `json:"target" validate:"required" error:"target is required"`
+}
+
+//	assignBundle assign bundle for admin
+//	@Route	{
+//		url	=	/bundle/assign/:id
+//		method	= put
+//		payload	= bundleAssignPayload
+//		resource = assign_bundle:global
+// 		middleware = authz.Authenticate
+//		200 = ads.Bundles
+//		400 = base.ErrorResponseSimple
+//	}
+func (u *Controller) assignBundle(ctx echo.Context) error {
+	currentUser := authz.MustGetUser(ctx)
+	pl := u.MustGetPayload(ctx).(*bundleAssignPayload)
+	id, err := strconv.ParseInt(ctx.Param("id"), 10, 0)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	m := ads.NewAdsManager()
+	currentBundle, err := m.FindBundlesByID(id)
+	if err != nil {
+		return u.NotFoundResponse(ctx, nil)
+	}
+	owner, err := aaa.NewAaaManager().FindUserByID(currentBundle.UserID)
+	assert.Nil(err)
+
+	_, b := currentUser.HasPermOn("assign_bundle", owner.ID, owner.DBParentID.Int64)
+	if !b {
+		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
+	}
+	// TODO  check all ads and target exists and are active one
+	var adIDs []string
+	for i := range pl.Ads {
+		adIDs = append(adIDs, fmt.Sprintf("%d", pl.Ads[i]))
+	}
+	currentBundle.Ads = common.CommaArray(strings.Join(adIDs, ","))
+	currentBundle.TargetAd = common.MakeNullInt64(pl.Target)
+	err = m.UpdateBundles(currentBundle)
+	if err != nil {
+		return u.BadResponse(ctx, trans.E("error while updating bundle"))
+	}
+	return u.OKResponse(ctx, currentBundle)
 }
