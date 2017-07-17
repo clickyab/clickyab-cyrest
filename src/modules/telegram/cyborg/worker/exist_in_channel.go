@@ -7,12 +7,11 @@ import (
 	"common/rabbit"
 
 	"fmt"
-	"modules/telegram/config"
 
 	"github.com/Sirupsen/logrus"
 )
 
-func (mw *MultiWorker) existChannelAdFor(channelID int64, channelName string, h []tgo.History, adConfs []channelDetailStat) map[int64]channelViewStat {
+func (mw *MultiWorker) existChannelAdFor(h []tgo.History, adConfs []channelDetailStat) map[int64]channelViewStat {
 	var finalResult = make(map[int64]channelViewStat)
 	var sumIndividualView int64
 	var countIndividual int64
@@ -58,9 +57,9 @@ bigloop:
 			//send stop (warn message)
 			rabbit.MustPublish(&bot2.SendWarn{
 				AdID:      adConfs[i].adID,
-				ChannelID: channelID,
-				ChatID:    tcfg.Cfg.Telegram.AdminBotName,
-				Msg:       fmt.Sprintf("please remove the following ad from your channel @%s", channelName),
+				ChannelID: adConfs[i].channelID,
+				ChatID:    adConfs[i].botChatID,
+				Msg:       fmt.Sprintf("please remove the following ad for bundle %s from your channel @%s", adConfs[i].code, adConfs[i].channelID),
 			})
 		}
 	}

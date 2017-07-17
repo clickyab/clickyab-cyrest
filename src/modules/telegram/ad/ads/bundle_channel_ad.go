@@ -84,6 +84,7 @@ type FindBundleChannelAdActiveType struct {
 	CliMessageID common.NullString `db:"cli_message_id"`
 	PromoteData  common.NullString `db:"promote_data"`
 	Src          common.NullString `db:"src"`
+	Code         string            `db:"code"`
 }
 
 // FindBundleChannelAdActive return the adID base on its ad_id,ActiveStatus
@@ -91,7 +92,7 @@ func (m *Manager) FindBundleChannelAdActive() ([]FindBundleChannelAdActiveType, 
 	res := []FindBundleChannelAdActiveType{}
 	_, err := m.GetDbMap().Select(
 		&res,
-		fmt.Sprintf("SELECT %[1]s.*,%[2]s.cli_message_id,%[2]s.promote_data,%[2]s.src, "+
+		fmt.Sprintf("SELECT %[1]s.*,%[2]s.cli_message_id,%[2]s.promote_data,%[2]s.src, %[3]s.code"+
 			"(%[3]s.view -((%[3]s.view * %[3]s.percent_finish)/100)) AS target_view,%[3]s.position"+
 			" FROM %[1]s "+
 			" INNER JOIN %[2]s ON %[2]s.id=%[1]s.ad_id AND %[1]s.ad_id = %[3]s.target_ad "+
