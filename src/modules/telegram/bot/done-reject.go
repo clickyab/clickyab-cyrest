@@ -21,7 +21,6 @@ import (
 )
 
 func (bb *bot) doneORReject(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
-
 	b := ads.NewAdsManager()
 	doneSlice := doneReg.FindStringSubmatch(m.Text)
 	rejectSlice := rejectReg.FindStringSubmatch(m.Text)
