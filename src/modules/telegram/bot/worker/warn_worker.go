@@ -55,7 +55,10 @@ func SendWarnAction(in *SendWarn) (bool, error) {
 			return false, err
 		}
 		msg := tgbotapi.NewForward(in.ChatID, channelAd.BotChatID, int(channelAd.BotMessageID))
-		tgbot.Send(msg)
+		_, err = tgbot.Send(msg)
+		if err != nil {
+			return false, err
+		}
 	}
 	return false, nil
 }

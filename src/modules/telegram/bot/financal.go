@@ -37,13 +37,13 @@ func (bb *bot) financial(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 		})
 
 		tgbot.NewConversation(financial, bot, m.Chat.ID)
-	} else {
-		/*keyboard := tgbot.NewKeyboard("/agree", "/change")
+	} /*else {
+		keyboard := tgbot.NewKeyboard("/agree", "/change")
 		sendWithKeyboard(bot, keyboard, m.Chat.ID, trans.T("you already have an account, agree or change it"))
 		var cardNumber string
 		getCardNumber(bot, m, user, &cardNumber)
-		getAccountNumber(bot, m, user, &cardNumber)*/
-	}
+		getAccountNumber(bot, m, user, &cardNumber)
+	}*/
 }
 
 func (bb *bot) getCard(response string) (string, bool) {

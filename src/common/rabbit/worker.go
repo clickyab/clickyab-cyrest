@@ -56,7 +56,7 @@ func goodFunc(fn reflect.Value, rtrn int, types ...reflect.Type) (e bool) {
 func RunWorker(
 	jobPattern Job,
 	function interface{},
-	prefetch int) error {
+	prefetch int) {
 
 	in := reflect.ValueOf(jobPattern)
 
@@ -72,9 +72,8 @@ func RunWorker(
 	}
 
 	c, err := conn.Channel()
-	if err != nil {
-		return err
-	}
+	assert.Nil(err)
+
 	err = c.ExchangeDeclare(
 		config.Config.AMQP.Exchange, // name
 		"topic",                     // type
@@ -84,15 +83,10 @@ func RunWorker(
 		false,                       // no-wait
 		nil,                         // arguments
 	)
-
-	if err != nil {
-		return err
-	}
+	assert.Nil(err)
 
 	q, err := c.QueueDeclare(jobPattern.GetQueue(), true, false, false, false, nil)
-	if err != nil {
-		return err
-	}
+	assert.Nil(err)
 
 	// prefetch count
 	// **WARNING**
@@ -100,9 +94,7 @@ func RunWorker(
 	// the next worker get nothing at all!
 	// **WARNING**
 	err = c.Qos(prefetch, 0, false)
-	if err != nil {
-		return err
-	}
+	assert.Nil(err)
 
 	err = c.QueueBind(
 		q.Name,                      // queue name
@@ -111,18 +103,14 @@ func RunWorker(
 		false,
 		nil,
 	)
-	if err != nil {
-		return err
-	}
+	assert.Nil(err)
+
 	consumerTag := <-utils.ID
 	delivery, err := c.Consume(q.Name, consumerTag, false, false, false, false, nil)
-	if err != nil {
-		return err
-	}
+	assert.Nil(err)
+
 	logrus.Debug("Worker started")
 	consume(delivery, jobPattern, fn, c, consumerTag)
-
-	return nil
 }
 
 func consume(

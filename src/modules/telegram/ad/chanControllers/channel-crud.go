@@ -203,7 +203,10 @@ func (u *Controller) editChannel(ctx echo.Context) error {
 	channel.Name = pl.Link
 	channel.Title = common.MakeNullString(pl.Name)
 
-	m.UpdateChannel(channel)
+	err = m.UpdateChannel(channel)
+	if err != nil {
+		return u.BadResponse(ctx, err)
+	}
 
 	return u.OKResponse(ctx, channel)
 }
@@ -464,7 +467,8 @@ func (u *Controller) getLast(ctx echo.Context) error {
 			Data:   finalRes,
 		})
 	} else if b == "failed" {
-		aredis.RemoveKey(hash)
+		err = aredis.RemoveKey(hash)
+		assert.Nil(err)
 		return u.BadResponse(ctx, trans.E("failed job"))
 	}
 	return u.BadResponse(ctx, trans.E("failed job"))

@@ -22,25 +22,21 @@ func main() {
 		assert.Nil(tgbot.Start())
 	}()
 	go func() {
-		err := rabbit.RunWorker(
+		rabbit.RunWorker(
 			&bot.SendWarn{}, bot.SendWarnAction, 10,
 		)
-		assert.Nil(err)
 	}()
 	go func() {
-		err := rabbit.RunWorker(
+		rabbit.RunWorker(
 			&bot.ClearTrans{}, bot.ClearTransAction, 10,
 		)
-		assert.Nil(err)
 	}()
 	go func() {
-
-		err := rabbit.RunWorker(
+		rabbit.RunWorker(
 			&worker.AdDelivery{},
 			worker.AdDeliveryAction,
 			10,
 		)
-		assert.Nil(err)
 	}()
 	utils.WaitExitSignal()
 

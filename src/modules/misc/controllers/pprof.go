@@ -14,7 +14,5 @@ import (
 //		200 = base.NormalResponse
 // }
 func (u *Controller) doPProf(ctx echo.Context) error {
-	pprof.Lookup("goroutine").WriteTo(ctx.Response(), 1)
-
-	return nil
+	return pprof.Lookup("goroutine").WriteTo(ctx.Response(), 1)
 }

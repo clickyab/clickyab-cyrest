@@ -37,7 +37,6 @@ func (bb *bot) getName(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 		}
 		tgbot.UnRegisterUserHandler(m.Chat.ID)
 		bb.getChannel(bot, m)
-		return
 	}, time.Minute)
 }
 

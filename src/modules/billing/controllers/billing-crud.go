@@ -21,6 +21,7 @@ import (
 	"common/config"
 	"common/mail"
 
+	"github.com/Sirupsen/logrus"
 	"gopkg.in/labstack/echo.v3"
 )
 
@@ -192,20 +193,22 @@ func (u *Controller) changeStatus(ctx echo.Context) error {
 	currentBil.Reason = common.MakeNullString(pl.Describe)
 	assert.Nil(m.UpdateBilling(currentBil))
 	if currentBil.Status == bil.BilStatusAccepted && currentBil.Type == bil.BilTypeWithdrawal {
-		mail.SendByTemplateName(trans.T("withdrawal accepted").Translate("fa_IR"), "withdrawal", struct {
+		err = mail.SendByTemplateName(trans.T("withdrawal accepted").Translate("fa_IR"), "withdrawal", struct {
 			Name  string
 			Price int64
 		}{
 			Name:  owner.Email,
 			Price: currentBil.Amount,
 		}, config.Config.Mail.From, owner.Email)
+		logrus.Debug(err)
 	}
 	if currentBil.Status == bil.BilStatusRejected && currentBil.Type == bil.BilTypeWithdrawal {
-		mail.SendByTemplateName(trans.T("withdrawal rejected").Translate("fa_IR"), "reject-witdrawal", struct {
+		err = mail.SendByTemplateName(trans.T("withdrawal rejected").Translate("fa_IR"), "reject-witdrawal", struct {
 			Name string
 		}{
 			Name: owner.Email,
 		}, config.Config.Mail.From, owner.Email)
+		logrus.Debug(err)
 	}
 	return u.OKResponse(ctx, currentBil)
 }

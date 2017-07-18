@@ -9,6 +9,8 @@ import (
 
 	"common/config"
 
+	"common/assert"
+
 	"gopkg.in/labstack/echo.v3"
 )
 
@@ -38,11 +40,12 @@ func (u *Controller) registerUser(ctx echo.Context) error {
 
 	token := m.GetNewToken(usr, ctx.Request().UserAgent(), ctx.RealIP())
 	go func() {
-		mail.SendByTemplateName(trans.T("Welcome to Rubbic ADS").Translate("fa_IR"), "register", struct {
+		err = mail.SendByTemplateName(trans.T("Welcome to Rubbic ADS").Translate("fa_IR"), "register", struct {
 			Name string
 		}{
 			Name: pl.Email,
 		}, config.Config.Mail.From, usr.Email)
+		assert.Nil(err)
 	}()
 
 	return u.OKResponse(

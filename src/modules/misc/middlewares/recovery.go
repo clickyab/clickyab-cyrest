@@ -9,6 +9,8 @@ import (
 
 	"net/http/httputil"
 
+	"common/assert"
+
 	"github.com/Sirupsen/logrus"
 	"gopkg.in/labstack/echo.v3"
 )
@@ -18,7 +20,7 @@ func Recovery(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		defer func() {
 			if err := recover(); err != nil {
-				ctx.JSON(
+				err := ctx.JSON(
 					http.StatusInternalServerError,
 					struct {
 						Error string `json:"error"`
@@ -26,6 +28,8 @@ func Recovery(next echo.HandlerFunc) echo.HandlerFunc {
 						Error: http.StatusText(http.StatusInternalServerError),
 					},
 				)
+				assert.Nil(err)
+
 				stack := debug.Stack()
 				dump, _ := httputil.DumpRequest(ctx.Request(), true)
 				data := fmt.Sprintf("Request : \n %s \n\nStack : \n %s", dump, stack)

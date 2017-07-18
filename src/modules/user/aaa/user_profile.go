@@ -117,7 +117,10 @@ func (m *Manager) RegisterProfile(userID int64,
 	fupp, err := m.FindUserProfileByUserID(userID)
 	if err == nil {
 		//delete the user profile row
-		m.DeleteProfile(fupp)
+		err := m.DeleteProfile(fupp)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	//create user profile

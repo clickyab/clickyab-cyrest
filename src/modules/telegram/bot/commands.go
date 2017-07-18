@@ -38,33 +38,49 @@ func send(bot *tgbotapi.BotAPI, chatID int64, message trans.T9String) {
 func sendWithKeyboard(bot *tgbotapi.BotAPI, keyboard tgbotapi.ReplyKeyboardMarkup, chatID int64, message trans.T9String) {
 	msg := tgbotapi.NewMessage(chatID, message.Text)
 	msg.ReplyMarkup = keyboard
-	bot.Send(msg)
+	_, err := bot.Send(msg)
+	assert.Nil(err)
 }
 
 func (bb *bot) Initialize() {
-	tgbot.RegisterMessageHandler("/updatead", bb.updateAD)
-	tgbot.RegisterMessageHandler("/ad", bb.wantAD)
-	tgbot.RegisterMessageHandler("/confirm", bb.confirm)
-	tgbot.RegisterMessageHandler("/done", bb.doneORReject)
-	tgbot.RegisterMessageHandler("/reject", bb.doneORReject)
-	tgbot.RegisterMessageHandler("/reshot", bb.reshot)
-	tgbot.RegisterMessageHandler("/activead", bb.activeAd)
-	tgbot.RegisterMessageHandler("/complete", bb.complete)
+	err := tgbot.RegisterMessageHandler("/updatead", bb.updateAD)
+	assert.Nil(err)
+	err = tgbot.RegisterMessageHandler("/ad", bb.wantAD)
+	assert.Nil(err)
+	err = tgbot.RegisterMessageHandler("/confirm", bb.confirm)
+	assert.Nil(err)
+	err = tgbot.RegisterMessageHandler("/done", bb.doneORReject)
+	assert.Nil(err)
+	err = tgbot.RegisterMessageHandler("/reject", bb.doneORReject)
+	assert.Nil(err)
+	err = tgbot.RegisterMessageHandler("/reshot", bb.reshot)
+	assert.Nil(err)
+	err = tgbot.RegisterMessageHandler("/activead", bb.activeAd)
+	assert.Nil(err)
+	err = tgbot.RegisterMessageHandler("/complete", bb.complete)
+	assert.Nil(err)
 
-	tgbot.RegisterMessageHandler("/name", bb.getName)
-	tgbot.RegisterMessageHandler("/channel", bb.getChannel)
-	tgbot.RegisterMessageHandler("/secret", CheckUserExisted(bb.test))
+	err = tgbot.RegisterMessageHandler("/name", bb.getName)
+	assert.Nil(err)
+	err = tgbot.RegisterMessageHandler("/channel", bb.getChannel)
+	assert.Nil(err)
+	err = tgbot.RegisterMessageHandler("/secret", CheckUserExisted(bb.test))
+	assert.Nil(err)
 
-	tgbot.RegisterMessageHandler("/addchan", bb.addChan)
-	tgbot.RegisterMessageHandler("/delchan", bb.delChan)
-	tgbot.RegisterMessageHandler("/addCard", CheckUserExisted(bb.financial))
+	err = tgbot.RegisterMessageHandler("/addchan", bb.addChan)
+	assert.Nil(err)
+	err = tgbot.RegisterMessageHandler("/delchan", bb.delChan)
+	assert.Nil(err)
+	err = tgbot.RegisterMessageHandler("/addCard", CheckUserExisted(bb.financial))
+	assert.Nil(err)
 
 	// lint hack
 	if false {
 		bb.getCard("")
 		bb.getAccount("")
 	}
-	tgbot.RegisterMessageHandler("/send", bb.sendAd)
+	err = tgbot.RegisterMessageHandler("/send", bb.sendAd)
+	assert.Nil(err)
 }
 
 func init() {

@@ -140,9 +140,7 @@ func T(translationID string, args ...interface{}) (res T9String) {
 // E is the error version of the T
 func E(translationID string, args ...interface{}) T9Error {
 	text := T(translationID, args...)
-	return T9Error{
-		t9Base: text.t9Base,
-	}
+	return T9Error(text)
 }
 
 // EE try to translate an already generated error
