@@ -86,6 +86,4 @@ func (bb *bot) wantAD(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 		textMsg += fmt.Sprintf("\n/ad_%s\n", channels[i].Name)
 	}
 	sendString(bot, m.Chat.ID, textMsg)
-	return
-
 }

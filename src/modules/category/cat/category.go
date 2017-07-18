@@ -149,15 +149,15 @@ func (m *Manager) AddCat(adID int64, catIDs []int64) error {
 
 // AssignCat assign category to ad (transaction)
 func (m *Manager) AssignCat(id int64, catIDs []int64) error {
-	var err error
-	err = m.Begin()
+	err := m.Begin()
 	assert.Nil(err)
 	defer func() {
 		if err != nil {
 			err = m.Rollback()
 			assert.Nil(err)
 		} else {
-			m.Commit()
+			err = m.Commit()
+			assert.Nil(err)
 		}
 	}()
 	err = m.DeleteAdCatByAdID(id)
@@ -165,8 +165,5 @@ func (m *Manager) AssignCat(id int64, catIDs []int64) error {
 		return err
 	}
 	err = m.AddCat(id, catIDs)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }

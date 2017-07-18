@@ -53,5 +53,4 @@ func (bb *bot) sendAd(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 		RenderMessage(bot, bundleChannel[i].ChannelID, &bundleChannel[i].Ad)
 	}
 	send(bot, m.Chat.ID, trans.T("after send ads enter /done_%d_%d", bundleID, channelID))
-	return
 }

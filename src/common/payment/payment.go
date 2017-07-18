@@ -2,6 +2,7 @@ package payment
 
 import (
 	"bytes"
+	"common/assert"
 	"crypto/tls"
 	"encoding/xml"
 	"io/ioutil"
@@ -388,7 +389,10 @@ func (s *SOAPClient) Call(soapAction string, request, response interface{}) erro
 	if err != nil {
 		return err
 	}
-	defer res.Body.Close()
+	defer func() {
+		err = res.Body.Close()
+		assert.Nil(err)
+	}()
 
 	rawbody, err := ioutil.ReadAll(res.Body)
 	if err != nil {

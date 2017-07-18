@@ -101,7 +101,7 @@ func PasswordGenerate(n int) string {
 // WaitExitSignal get os signal
 func WaitExitSignal() os.Signal {
 	quit := make(chan os.Signal, 6)
-	signal.Notify(quit, syscall.SIGABRT, syscall.SIGHUP, syscall.SIGTERM, syscall.SIGKILL, syscall.SIGQUIT, syscall.SIGINT)
+	signal.Notify(quit, syscall.SIGABRT, syscall.SIGHUP, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT)
 	return <-quit
 }
 

@@ -16,7 +16,10 @@ type handler struct{}
 func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	incData, err := ioutil.ReadAll(r.Body)
 	assert.Nil(err)
-	defer r.Body.Close()
+	defer func() {
+		err := r.Body.Close()
+		assert.Nil(err)
+	}()
 
 	req, err := http.NewRequest(r.Method, config.Config.Proxy.URL+r.RequestURI, r.Body)
 	assert.Nil(err)

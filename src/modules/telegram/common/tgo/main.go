@@ -288,7 +288,7 @@ func (t *telegram) Msg(peer string, msg string) (*SuccessResp, error) {
 }
 func (t *telegram) ContactList() ([]Contact, error) {
 	var data []Contact
-	cmd := fmt.Sprint("contact_list ")
+	cmd := "contact_list "
 	x, err := t.exec(cmd)
 	//fmt.Print(string(x))
 	if err != nil {

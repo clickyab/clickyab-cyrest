@@ -32,6 +32,5 @@ func CheckUserExisted(a tgbot.HandleMessage) tgbot.HandleMessage {
 		err = aredis.StoreKey(val, val, tcfg.Cfg.Telegram.PublisherAuthRedis)
 		assert.Nil(err)
 		a(bot1, m)
-		return
 	}
 }

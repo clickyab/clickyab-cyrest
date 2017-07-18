@@ -21,10 +21,14 @@ func (bb *bot) addChan(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 	send(bot, m.Chat.ID, trans.T("write down your channel tag"))
 	tgbot.RegisterUserHandlerWithExp(m.Chat.ID, func(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 		defer tgbot.UnRegisterUserHandler(m.Chat.ID)
-		ads.NewAdsManager().CreateChannel(&ads.Channel{
+		err = ads.NewAdsManager().CreateChannel(&ads.Channel{
 			UserID: tu.ID,
 			Name:   m.Text,
 		})
+		if err != nil {
+			send(bot, m.Chat.ID, trans.T("something is wrong, try again"))
+			return
+		}
 
 		keyboard := tgbot.NewKeyboard("/get_ad", "/fff")
 		sendWithKeyboard(bot, keyboard, m.Chat.ID, trans.T("use get_ad to get a new ad\nor /fff to add a new channel"))

@@ -56,8 +56,7 @@ func (mw *MultiWorker) getChanStat(in *commands.GetChanCommand) (bool, error) {
 	}
 	err = ads.NewAdsManager().UpdateOnDuplicateChanDetail(cd)
 	assert.Nil(err)
-	rabbit.PublishAfter(in, 24*time.Hour)
-	//ch, err := mw.discoverChannel(in.Channel)
-	return false, nil
+	err = rabbit.PublishAfter(in, 24*time.Hour)
+	return false, err
 
 }
