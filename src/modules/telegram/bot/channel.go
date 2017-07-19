@@ -9,6 +9,10 @@ import (
 
 	"github.com/Sirupsen/logrus"
 
+	"common/assert"
+
+	"common/models/common"
+
 	"gopkg.in/telegram-bot-api.v4"
 )
 
@@ -21,19 +25,20 @@ func (bb *bot) addChan(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 	send(bot, m.Chat.ID, trans.T("write down your channel tag"))
 	tgbot.RegisterUserHandlerWithExp(m.Chat.ID, func(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 		defer tgbot.UnRegisterUserHandler(m.Chat.ID)
-		err = ads.NewAdsManager().CreateChannel(&ads.Channel{
-			UserID: tu.ID,
-			Name:   m.Text,
+		err := ads.NewAdsManager().CreateChannel(&ads.Channel{
+			UserID:        tu.ID,
+			Name:          m.Text,
+			Title:         common.NullString{Valid: false},
+			AdminStatus:   ads.AdminStatusPending,
+			ArchiveStatus: ads.ActiveStatusNo,
+			Active:        ads.ActiveStatusNo,
 		})
-		if err != nil {
-			send(bot, m.Chat.ID, trans.T("something is wrong, try again"))
-			return
-		}
+		assert.Nil(err)
 
-		keyboard := tgbot.NewKeyboard("/get_ad", "/fff")
-		sendWithKeyboard(bot, keyboard, m.Chat.ID, trans.T("use get_ad to get a new ad\nor /fff to add a new channel"))
+		keyboard := tgbot.NewKeyboard("/get_ad", "/addchan", "/delchan")
+		sendWithKeyboard(bot, keyboard, m.Chat.ID, trans.T("use get_ad to get a new ad\nor /delchan to add a new channel"))
 	}, func() {
-		send(bot, m.Chat.ID, trans.T("times up\nenter /fff again"))
+		send(bot, m.Chat.ID, trans.T("times up\nenter /addchan again"))
 	}, 20*time.Second)
 }
 
@@ -46,15 +51,14 @@ func (bb *bot) delChan(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 
 	channels, err := ads.NewAdsManager().FindActiveChannelsByUserID(tu.UserID)
 	if err != nil {
-		send(bot, m.Chat.ID, trans.T("couldn't find your channels\ntry again with /adchan"))
+		send(bot, m.Chat.ID, trans.T("couldn't find your channels\ntry again with /addchan"))
 		return
 	}
 
-	channelsName := []string{}
+	var channelsName []string
 	for i := range channels {
 		channelsName = append(channelsName, channels[i].Name)
 	}
-
 	keyboard := tgbot.NewKeyboard(channelsName...)
 	sendWithKeyboard(bot, keyboard, m.Chat.ID, trans.T("choose one of these channels to be deleted"))
 	tgbot.RegisterUserHandlerWithExp(m.Chat.ID, func(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
