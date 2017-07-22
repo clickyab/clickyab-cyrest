@@ -5,7 +5,7 @@ CREATE TABLE bundles
 (
     id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
-    place INT,
+    position INT,
     view INT NOT NULL DEFAULT 0,
     price INT NOT NULL,
     code VARCHAR(10) NOT NULL,
