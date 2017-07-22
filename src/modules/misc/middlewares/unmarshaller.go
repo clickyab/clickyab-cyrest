@@ -81,7 +81,8 @@ func PayloadUnMarshallerGenerator(pattern interface{}) echo.MiddlewareFunc {
 					Error: trans.E("invalid request body"),
 				}
 
-				c.JSON(http.StatusBadRequest, e)
+				err1 := c.JSON(http.StatusBadRequest, e)
+				assert.Nil(err1)
 				return err
 			}
 			if valid, ok := cp.(Validator); ok {
@@ -89,9 +90,8 @@ func PayloadUnMarshallerGenerator(pattern interface{}) echo.MiddlewareFunc {
 					c.Set(ContextBody, cp)
 				} else {
 					c.Request().Header.Set("error", trans.T("invalid request body").String())
-					c.JSON(http.StatusBadRequest, translate(errs))
-
-					return trans.E("invalid request body")
+					err = c.JSON(http.StatusBadRequest, translate(errs))
+					return trans.E("invalid request body\n", err.Error())
 				}
 			} else {
 				// Just add it, no validation

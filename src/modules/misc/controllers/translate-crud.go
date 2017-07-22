@@ -64,7 +64,8 @@ func (u *Controller) delete(ctx echo.Context) error {
 	idString := ctx.Param("id")
 	id, err := strconv.ParseInt(idString, 10, 0)
 	if err != nil {
-		u.NotFoundResponse(ctx, err)
+		err = u.NotFoundResponse(ctx, err)
+		assert.Nil(err)
 	}
 
 	m := t9n.NewT9nManager()

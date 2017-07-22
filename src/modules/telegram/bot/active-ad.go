@@ -35,5 +35,4 @@ func (bb *bot) activeAd(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 		textMsg += fmt.Sprintf("\n/complete_%d_%d\n", channelAds[i].ChannelID, channelAds[i].ID)
 	}
 	sendString(bot, m.Chat.ID, textMsg)
-	return
 }

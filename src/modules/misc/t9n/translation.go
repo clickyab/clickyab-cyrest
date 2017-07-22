@@ -154,10 +154,7 @@ func (m *Manager) DeleteStringByID(ID int64) error {
 		return err
 	}
 	_, err = m.GetDbMap().Delete(&Strings{ID: ID})
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // FillTranslateDataTableArray is the function to handle

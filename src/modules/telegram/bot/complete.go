@@ -69,5 +69,4 @@ func (bb *bot) complete(botAPI *tgbotapi.BotAPI, m *tgbotapi.Message) {
 
 	textMsg := trans.T("you have %d view in channel \n please remove all ads from your channel", channelAdActive.View).Translate(trans.PersianLang)
 	sendString(botAPI, m.Chat.ID, textMsg)
-	return
 }

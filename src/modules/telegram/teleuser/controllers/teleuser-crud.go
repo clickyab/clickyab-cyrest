@@ -60,6 +60,9 @@ func (u *Controller) deleteTeleUser(ctx echo.Context) error {
 	if !b {
 		return ctx.JSON(http.StatusForbidden, trans.E("user can't access"))
 	}
-	m.DeleteTelegramUser(id)
+	err = m.DeleteTelegramUser(id)
+	if err != nil {
+		return err
+	}
 	return u.OKResponse(ctx, nil)
 }

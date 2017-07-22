@@ -1,6 +1,7 @@
 package main
 
 import (
+	"common/assert"
 	"common/config"
 	"common/initializer"
 	"common/utils"
@@ -16,7 +17,10 @@ func main() {
 
 	version.LogVersion().Infof("Application started")
 
-	go base.Initialize(config.Config.MountPoint).Start(config.Config.Port)
+	go func() {
+		err := base.Initialize(config.Config.MountPoint).Start(config.Config.Port)
+		assert.Nil(err)
+	}()
 
 	utils.WaitExitSignal()
 

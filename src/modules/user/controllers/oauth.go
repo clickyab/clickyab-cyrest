@@ -8,6 +8,8 @@ import (
 
 	"modules/misc/trans"
 
+	"common/assert"
+
 	"github.com/Sirupsen/logrus"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -114,7 +116,11 @@ func (u *Controller) oauthCallback(ctx echo.Context) error {
 	}
 	gp := googleResponse{}
 	decoder := json.NewDecoder(resp.Body)
-	defer resp.Body.Close()
+	defer func() {
+		err = resp.Body.Close()
+		assert.Nil(err)
+	}()
+
 	err = decoder.Decode(&gp)
 	if err != nil {
 		logrus.Panic(err)
@@ -143,7 +149,8 @@ func (u *Controller) oauthCallback(ctx echo.Context) error {
 		if err != nil {
 			return ctx.Redirect(http.StatusFound, redirect+"?error="+err.Error())
 		}
-		ctx.Redirect(http.StatusFound, redirect+"?token="+token)
+		err = ctx.Redirect(http.StatusFound, redirect+"?token="+token)
+		logrus.Debug(err)
 	case "register":
 		err = u.registerUser(ctx)
 		if err != nil {
@@ -153,6 +160,5 @@ func (u *Controller) oauthCallback(ctx echo.Context) error {
 		token := m.GetNewToken(usr, ctx.Request().UserAgent(), ctx.RealIP())
 		return ctx.Redirect(http.StatusFound, redirect+"?token="+token)
 	}
-
 	return nil
 }

@@ -148,11 +148,7 @@ func (m *Manager) DeleteChannelAdByChannelID(channelID int64) error {
 		channelID,
 	)
 
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 // ChannelAdD ChannelAdD

@@ -51,7 +51,8 @@ func (u *Controller) upload(ctx echo.Context) error {
 		os.MkdirAll(tmpPath, fila.DefaultDirPermissions)
 	}*/
 	if _, err := os.Stat(fcfg.Fcfg.File.TempDirectoryPath); os.IsNotExist(err) {
-		os.MkdirAll(fcfg.Fcfg.File.TempDirectoryPath, fila.DefaultDirPermissions)
+		err = os.MkdirAll(fcfg.Fcfg.File.TempDirectoryPath, fila.DefaultDirPermissions)
+		assert.Nil(err)
 	}
 	file, err := fila.ChunkUpload(fcfg.Fcfg.File.TempDirectoryPath, flowData, ctx)
 	if err != nil {
@@ -61,7 +62,11 @@ func (u *Controller) upload(ctx echo.Context) error {
 		return u.OKResponse(ctx, nil)
 	}
 	fileObj, err := os.Open(file)
-	defer fileObj.Close()
+	defer func() {
+		err = fileObj.Close()
+		assert.Nil(err)
+	}()
+
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)
 	}
@@ -92,17 +97,22 @@ func (u *Controller) upload(ctx echo.Context) error {
 
 	basePath := filepath.Join(config.Config.StaticRoot, fmt.Sprintf("%d", time.Now().Year()), time.Now().Month().String())
 	if _, err := os.Stat(basePath); os.IsNotExist(err) {
-		os.MkdirAll(basePath, fila.DefaultDirPermissions)
+		err = os.MkdirAll(basePath, fila.DefaultDirPermissions)
+		assert.Nil(err)
 	}
 
 	hash := utils.Sha1(fmt.Sprintf("%d", time.Now().UnixNano()))
 	newFilename := fmt.Sprintf("%s%s", hash, extension)
 	out, err := os.Create(path.Join(basePath, newFilename))
 	if err != nil {
-		os.Remove(path.Join(basePath, newFilename))
+		err = os.Remove(path.Join(basePath, newFilename))
+		assert.Nil(err)
 		return u.NotFoundResponse(ctx, nil)
 	}
-	defer out.Close()
+	defer func() {
+		err = out.Close()
+		assert.Nil(err)
+	}()
 	_, err = io.Copy(out, fileObj)
 	if err != nil {
 		return u.NotFoundResponse(ctx, nil)

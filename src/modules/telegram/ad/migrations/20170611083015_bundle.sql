@@ -22,6 +22,7 @@ CREATE TABLE bundles
     CONSTRAINT bundle_ads_id_fk FOREIGN KEY (target_ad) REFERENCES ads (id),
     CONSTRAINT bundle_user_id_fk FOREIGN KEY (user_id) REFERENCES users (id)
 );
+CREATE UNIQUE INDEX bundles_code_uindex ON bundles (code);
 
 -- +migrate Down
 -- SQL section 'Down' is executed when this migration is rolled back

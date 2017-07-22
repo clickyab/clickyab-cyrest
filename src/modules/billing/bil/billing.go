@@ -268,10 +268,6 @@ func (m *Manager) ChannelBilling(adActive *ads.ChannelAdActive) error {
 		Reason:    common.MakeNullString(string(jsonBilling)),
 	}
 	err = m.CreateBillingDetail(&bilDetail)
-	if err != nil {
-		return err
-	}
-
 	return err
 }
 

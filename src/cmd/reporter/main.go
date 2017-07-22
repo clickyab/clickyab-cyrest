@@ -13,6 +13,8 @@ import (
 	"text/template"
 	"time"
 
+	"common/assert"
+
 	git "github.com/okian/go-git"
 )
 
@@ -122,7 +124,8 @@ func templateBuilder(data []byte) []byte {
 
 	buf := bytes.Buffer{}
 
-	result.Execute(&buf, t)
+	err := result.Execute(&buf, t)
+	assert.Nil(err)
 	return buf.Bytes()
 
 }
@@ -137,7 +140,8 @@ type report struct {
 
 func copySubmodules() {
 	path := getPath() + "/.git/"
-	copyDir(path+"modules", path+"module")
+	err := copyDir(path+"modules", path+"module")
+	assert.Nil(err)
 }
 
 // CopyFile copies the contents of the file named src to the file named
@@ -150,7 +154,10 @@ func copyFile(src, dst string) (err error) {
 	if err != nil {
 		return
 	}
-	defer in.Close()
+	defer func() {
+		err := in.Close()
+		assert.Nil(err)
+	}()
 
 	out, err := os.Create(dst)
 	if err != nil {
@@ -177,11 +184,7 @@ func copyFile(src, dst string) (err error) {
 		return
 	}
 	err = os.Chmod(dst, si.Mode())
-	if err != nil {
-		return
-	}
-
-	return
+	return err
 }
 
 // CopyDir recursively copies a directory tree, attempting to preserve permissions.

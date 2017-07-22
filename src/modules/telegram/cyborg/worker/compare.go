@@ -9,14 +9,10 @@ import (
 
 func compareIndividual(src ads.ChannelAdD, dst tgo.History) bool {
 	// the chat is forwarded from our bot or not?
-	if dst.FwdFrom.Username != tcfg.Cfg.Telegram.BotName {
-		return false
-	}
+	return dst.FwdFrom.Username == tcfg.Cfg.Telegram.BotName
 
 	// TODO : compare text? if the text is comparable, and there is no link. the problem is that the telegram change
 	// the links
-
-	return true
 }
 
 func comparePromotion(src tgo.History, dst tgo.History) bool {
