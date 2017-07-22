@@ -26,7 +26,7 @@ const (
 	bundleData = iota
 )
 
-func (bb *bot) sendAd(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
+func (bb *bot) getBundle(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 	mainBot = bot
 
 	teleUser, err := tlu.NewTluManager().FindTeleUserByBotChatID(m.Chat.ID)
