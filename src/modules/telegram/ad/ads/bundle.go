@@ -30,7 +30,7 @@ type BType string
 // @Model {
 //		table = bundles
 //		primary = true, id
-//		find_by = id,user_id
+//		find_by = id,user_id,code
 //		list = yes
 //	}
 type Bundles struct {

@@ -54,7 +54,7 @@ func (mw *MultiWorker) cronReview() error {
 		currentUser, err := aaa.NewAaaManager().FindUserByID(finishedAds[key].UserID)
 		assert.Nil(err)
 		go func() {
-			mail.SendByTemplateName(trans.T("your ad is end").Translate("fa_IR"), "end-ad", struct {
+			err = mail.SendByTemplateName(trans.T("your ad is end").Translate("fa_IR"), "end-ad", struct {
 				Name      string
 				Ad        string
 				StartDate time.Time
@@ -67,6 +67,7 @@ func (mw *MultiWorker) cronReview() error {
 				EndDate:   *finishedAds[key].UpdatedAt,
 				EndTime:   finishedAds[key].UpdatedAt.Hour(),
 			}, config.Config.Mail.From, currentUser.Email)
+			assert.Nil(err)
 		}()
 	}
 

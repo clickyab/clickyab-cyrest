@@ -31,7 +31,8 @@ type Controller struct {
 
 // BadResponse is 400 request
 func (c Controller) BadResponse(ctx echo.Context, err error) error {
-	ctx.JSON(http.StatusBadRequest, ErrorResponseSimple{Error: trans.EE(err)})
+	err1 := ctx.JSON(http.StatusBadRequest, ErrorResponseSimple{Error: trans.EE(err)})
+	assert.Nil(err1)
 	return err
 }
 
@@ -44,7 +45,8 @@ func (c Controller) NotFoundResponse(ctx echo.Context, err error) error {
 		res.Error = trans.E(http.StatusText(http.StatusNotFound))
 	}
 	ctx.Response().Header().Add("error", res.Error.Error())
-	ctx.JSON(http.StatusNotFound, res)
+	err = ctx.JSON(http.StatusNotFound, res)
+	assert.Nil(err)
 
 	return res.Error
 }
@@ -58,7 +60,8 @@ func (c Controller) ForbiddenResponse(ctx echo.Context, err error) error {
 		res.Error = trans.E(http.StatusText(http.StatusForbidden))
 	}
 	ctx.Response().Header().Add("error", res.Error.Error())
-	ctx.JSON(http.StatusNotFound, res)
+	err = ctx.JSON(http.StatusNotFound, res)
+	assert.Nil(err)
 
 	return res.Error
 }

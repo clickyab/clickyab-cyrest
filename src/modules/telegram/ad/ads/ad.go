@@ -847,3 +847,18 @@ func (m *Manager) UpdateAdPromote(ID int64, data common.NullString) error {
 	)
 	return err
 }
+
+// FindAdsByIDs returns ads by IDs
+func (m *Manager) FindAdsByIDs(ids ...string) ([]Ad, error) {
+	var res []Ad
+	_, err := m.GetDbMap().Select(
+		&res,
+		fmt.Sprintf("SELECT * FROM %s WHERE id IN (%s)", AdTableFull, strings.Join(ids, ",")),
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}

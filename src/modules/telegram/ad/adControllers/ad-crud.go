@@ -378,13 +378,14 @@ func (u *Controller) changeActiveStatus(ctx echo.Context) error {
 		currentAd.AdActiveStatus = pl.ActiveStatus
 		// send mail
 		go func() {
-			mail.SendByTemplateName(trans.T("AD activated").Translate("fa_IR"), "active-ad", struct {
+			err = mail.SendByTemplateName(trans.T("AD activated").Translate("fa_IR"), "active-ad", struct {
 				Ad   string
 				Name string
 			}{
 				Ad:   currentAd.Name,
 				Name: owner.Email,
 			}, config.Config.Mail.From, owner.Email)
+			assert.Nil(err)
 		}()
 	}
 	assert.Nil(m.UpdateAd(currentAd))
@@ -631,7 +632,7 @@ func (u *Controller) verify(ctx echo.Context) error {
 		//call worker
 		// send mail
 		go func() {
-			mail.SendByTemplateName(trans.T("new plan bought").Translate("fa_IR"), "charge", struct {
+			err = mail.SendByTemplateName(trans.T("new plan bought").Translate("fa_IR"), "charge", struct {
 				Name     string
 				Price    int64
 				Campaign string
@@ -640,6 +641,7 @@ func (u *Controller) verify(ctx echo.Context) error {
 				Price:    plan.Price,
 				Campaign: currentAd.Name,
 			}, config.Config.Mail.From, currentUser.Email)
+			assert.Nil(err)
 		}()
 		return ctx.Redirect(http.StatusMovedPermanently, fmt.Sprintf("%s%d", frontOk, billing.PaymentID.Int64))
 	}

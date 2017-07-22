@@ -32,8 +32,6 @@ func doMessageString(bot *tgbotapi.BotAPI, chatID int64, m string) {
 	msg.ParseMode = "HTML"
 	_, err := bot.Send(msg)
 	assert.Nil(err)
-	return
-
 }
 
 func doMessage(bot *tgbotapi.BotAPI, chatID int64, m trans.T9String) {
@@ -86,13 +84,14 @@ func (bb *bot) confirm(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 		assert.Nil(mm.UpdateAd(ad))
 		//send email
 		go func() {
-			mail.SendByTemplateName(trans.T("ad rejected").Translate("fa_IR"), "reject-ad", struct {
+			err = mail.SendByTemplateName(trans.T("ad rejected").Translate("fa_IR"), "reject-ad", struct {
 				Name     string
 				Campaign string
 			}{
 				Name:     owner.Email,
 				Campaign: ad.Name,
 			}, config.Config.Mail.From, owner.Email)
+			assert.Nil(err)
 		}()
 		resp = trans.T("Ad %s is rejected", ad.Name)
 	} else {

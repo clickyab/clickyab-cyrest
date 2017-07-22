@@ -8,6 +8,7 @@ CREATE TABLE bundles
     position INT,
     view INT NOT NULL DEFAULT 0,
     price INT NOT NULL,
+    code VARCHAR(10) NOT NULL,
     percent_finish INT NOT NULL,
     bundle_type ENUM("banner", "banner+rep", "rep+banner", "rep+banner+rep") DEFAULT "banner" NOT NULL,
     rules TEXT,
@@ -22,6 +23,7 @@ CREATE TABLE bundles
     CONSTRAINT bundle_ads_id_fk FOREIGN KEY (target_ad) REFERENCES ads (id),
     CONSTRAINT bundle_user_id_fk FOREIGN KEY (user_id) REFERENCES users (id)
 );
+CREATE UNIQUE INDEX bundles_code_uindex ON bundles (code);
 
 -- +migrate Down
 -- SQL section 'Down' is executed when this migration is rolled back

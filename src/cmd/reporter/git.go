@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"common/assert"
+
 	"github.com/okian/go-git"
 )
 
@@ -81,7 +83,7 @@ func isOldestIssue(code int) {
 }
 
 func authorID(a author) int {
-	if i, exist := authorList[a.Hash]; exist == true {
+	if i, exist := authorList[a.Hash]; exist {
 		return i.ID
 	}
 	a.ID = len(authorList) + 1
@@ -99,7 +101,8 @@ func pureMessage(m string) string {
 
 func emailHash(e string) string {
 	h := md5.New()
-	io.WriteString(h, e)
+	_, err := io.WriteString(h, e)
+	assert.Nil(err)
 	return hex.EncodeToString(h.Sum(nil))
 }
 

@@ -113,7 +113,7 @@ func (mw *MultiWorker) existWorker() error {
 				continue
 			}
 			var currentView int64
-			if channelAdStat[chads[j].AdID].frwrd == true {
+			if channelAdStat[chads[j].AdID].frwrd {
 				currentView = avg
 				//update ad
 				assert.Nil(m.UpdateAdView(chads[j].AdID, channelAdStat[chads[j].AdID].view))
@@ -159,10 +159,8 @@ func (mw *MultiWorker) existWorker() error {
 		}
 
 		//transaction
-		res, _ := mw.transaction(m, ChannelAdArr, ChannelAdDetailArr, avg)
-		if res == true {
-			continue
-		}
+		_, err = mw.transaction(m, ChannelAdArr, ChannelAdDetailArr, avg)
+		logrus.Debug(err)
 
 	}
 	//check for promotion to be alone or not

@@ -71,7 +71,8 @@ func loadTemplates() {
 	for t := range _bindata {
 		data, err := Asset(t)
 		assert.Nil(err)
-		mailTemplate.New(t).Parse(string(data))
+		_, err = mailTemplate.New(t).Parse(string(data))
+		assert.Nil(err)
 	}
 }
 

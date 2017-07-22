@@ -155,7 +155,10 @@ func (rabbitInitializer) Initialize() {
 		assert.Nil(err)
 		chn, err := conn.Channel()
 		assert.Nil(err)
-		defer chn.Close()
+		defer func() {
+			err = chn.Close()
+			assert.Nil(err)
+		}()
 
 		assert.Nil(
 			chn.ExchangeDeclare(

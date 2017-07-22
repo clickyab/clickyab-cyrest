@@ -211,8 +211,8 @@ func ChunksCleanup(tempDir string, timeoutDur time.Duration) error {
 		}
 
 		log.Println(f.Name())
-		log.Println(time.Now().Sub(finfo.ModTime()))
-		if time.Now().Sub(finfo.ModTime()) > timeoutDur {
+		log.Println(time.Since(finfo.ModTime()))
+		if time.Since(finfo.ModTime()) > timeoutDur {
 			err = os.RemoveAll(fl)
 			if err != nil {
 				return err
@@ -285,10 +285,8 @@ func allChunksUploaded(tempDir string, ngfd NgFlowData) bool {
 		}
 		totalSize += fi.Size()
 	}
-	if totalSize == int64(ngfd.TotalSize) {
-		return true
-	}
-	return false
+
+	return totalSize == int64(ngfd.TotalSize)
 }
 
 // storeChunk puts the chunk in the request into the right place on disk
@@ -387,7 +385,8 @@ func UploadFromURL(link string, uID int64) (string, error) {
 	month := time.Now().Month().String()
 	basePath := filepath.Join(config.Config.StaticRoot, year, month)
 	if _, err := os.Stat(basePath); os.IsNotExist(err) {
-		os.MkdirAll(basePath, DefaultDirPermissions)
+		err = os.MkdirAll(basePath, DefaultDirPermissions)
+		assert.Nil(err)
 	}
 
 	extension := strings.ToLower(filepath.Ext(link))
@@ -413,32 +412,44 @@ func UploadFromURL(link string, uID int64) (string, error) {
 	newFileName := fmt.Sprintf("%s%s", hash, extension)
 	filePath := filepath.Join(basePath, newFileName)
 	out, err := os.Create(filePath)
-	defer out.Close()
+	defer func() {
+		err = out.Close()
+		assert.Nil(err)
+	}()
 	if err != nil {
-		os.Remove(filePath)
+		err = os.Remove(filePath)
+		assert.Nil(err)
 		return "", errors.New("error while uploading file")
 	}
 	resp, err := http.Get(link)
 	if err != nil {
-		os.Remove(filePath)
+		err = os.Remove(filePath)
+		assert.Nil(err)
 		return "", errors.New("error while uploading file")
 	}
 	if err != nil {
-		os.Remove(filePath)
+		err = os.Remove(filePath)
+		assert.Nil(err)
 		return "", errors.New("error while uploading file")
 	}
-	defer resp.Body.Close()
+	defer func() {
+		err = resp.Body.Close()
+		assert.Nil(err)
+	}()
 	if err != nil {
-		os.Remove(filePath)
+		err = os.Remove(filePath)
+		assert.Nil(err)
 		return "", errors.New("error while uploading file")
 	}
 	downSize, err := io.Copy(out, resp.Body)
 	if err != nil {
-		os.Remove(filePath)
+		err = os.Remove(filePath)
+		assert.Nil(err)
 		return "", errors.New("error while uploading file")
 	}
 	if downSize > fcfg.Fcfg.Size.MaxDownload {
-		os.Remove(filePath)
+		err = os.Remove(filePath)
+		assert.Nil(err)
 		return "", errors.New("size not valid")
 	}
 	fpath := filepath.Join(year, month, newFileName)

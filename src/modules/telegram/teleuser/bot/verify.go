@@ -67,7 +67,8 @@ func (bb *bot) verify(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 
 func (bb *bot) Initialize() {
 
-	tgbot.RegisterMessageHandler("/verify", bb.verify)
+	err := tgbot.RegisterMessageHandler("/verify", bb.verify)
+	assert.Nil(err)
 }
 
 func init() {

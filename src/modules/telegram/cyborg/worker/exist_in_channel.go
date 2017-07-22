@@ -17,7 +17,7 @@ func (mw *MultiWorker) existChannelAdFor(channelID int64, chatID int64, h []tgo.
 	historyLen := len(h)
 bigloop:
 	for k := historyLen - 1; k >= 0; k-- {
-		if h[k].Event == "message" && h[k].Service == false {
+		if h[k].Event == "message" && !h[k].Service {
 			if h[k].FwdFrom != nil {
 				for i := range adConfs {
 					if h[k].ID == adConfs[i].cliChannelAdID.String {
