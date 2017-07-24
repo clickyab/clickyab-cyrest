@@ -12,7 +12,7 @@ CREATE TABLE bundles
     percent_finish INT NOT NULL,
     bundle_type ENUM("banner", "banner+rep", "rep+banner", "rep+banner+rep") DEFAULT "banner" NOT NULL,
     rules TEXT,
-    code VARCHAR(10) NOT NULL,
+    code VARCHAR(10) NULL,
     admin_status ENUM("on", "off") DEFAULT "off" NOT NULL,
     active_status ENUM("on", "off") DEFAULT "on" NOT NULL,
     ads VARCHAR(50) NOT NULL,
