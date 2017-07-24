@@ -121,7 +121,7 @@ bigLoop:
 
 }
 
-func (mw *MultiWorker) transaction(m *ads.Manager, chad []ads.ChannelAd, channelAdDetail []*ads.ChannelAdDetail, avg int64) (bool, error) {
+func (mw *MultiWorker) transaction(m *ads.Manager, chad []ads.BundleChannelAd, channelAdDetail []*ads.BundleChannelAdDetail) (bool, error) {
 	err := m.Begin()
 	if err != nil {
 		return true, err
@@ -137,12 +137,14 @@ func (mw *MultiWorker) transaction(m *ads.Manager, chad []ads.ChannelAd, channel
 			chad = nil
 		}
 	}()
-	err = m.CreateChannelAdDetails(channelAdDetail)
+	//todo change to bundle
+	err = m.CreateBundleChannelAdDetails(channelAdDetail)
 	assert.Nil(err)
 	if err != nil {
 		return true, err
 	}
-	err = m.UpdateChannelAds(chad)
+	//todo change to bundle
+	err = m.UpdateBundleChannelAds(chad)
 	assert.Nil(err)
 	if err != nil {
 		return true, err

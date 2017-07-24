@@ -32,7 +32,10 @@ type channelDetailStat struct {
 	cliChannelAdID common.NullString
 	adID           int64
 	channelID      int64
+	bundleID       int64
 	botChatID      int64
+	targetView     int64
+	code           string
 }
 
 type channelViewStat struct {
@@ -119,12 +122,12 @@ func NewMultiWorker(ip net.IP, port int) (*MultiWorker, error) {
 
 	once.Do(func() {
 
-		go utils.SafeGO(func() {
-			for {
-				assert.Nil(res.cronReview())
-				<-time.After(1 * time.Minute)
-			}
-		}, true)
+		//go utils.SafeGO(func() {
+		//	for {
+		//		assert.Nil(res.cronReview())
+		//		<-time.After(1 * time.Minute)
+		//	}
+		//}, true)
 		go utils.SafeGO(func() {
 			for {
 				assert.Nil(res.existWorker())

@@ -22,11 +22,12 @@ type Config struct {
 	verify []int64
 
 	Telegram struct {
-		APIKey    string `onion:"api_key"`
-		BotID     string `onion:"bot_id"`
-		BotName   string `onion:"bot_name"`
-		MsgCount  int    `onion:"message_count"`
-		MsgOffset int    `onion:"message_offset"`
+		APIKey       string `onion:"api_key"`
+		BotID        string `onion:"bot_id"`
+		BotName      string `onion:"bot_name"`
+		AdminBotName int64  `onion:"admin_bot_name"`
+		MsgCount     int    `onion:"message_count"`
+		MsgOffset    int    `onion:"message_offset"`
 
 		CLIAddress         string        `onion:"cli_host"`
 		CLIPort            int           `onion:"cli_port"`
@@ -51,6 +52,7 @@ func (c *Config) Initialize(o *onion.Onion) []onion.Layer {
 	assert.Nil(d.SetDefault("telegram.api_key", "313258830:AAGqYHUGkTjpJqoRGXet7519pluxlZdteyU"))
 	assert.Nil(d.SetDefault("telegram.bot_id", "$010000004ef3ab12b44329c368608396"))
 	assert.Nil(d.SetDefault("telegram.bot_name", "rubikaddemobot"))
+	assert.Nil(d.SetDefault("telegram.admin_bot_name", 0))
 	assert.Nil(d.SetDefault("telegram.cli_host", "localhost"))
 	assert.Nil(d.SetDefault("telegram.cli_port", 9999))
 	assert.Nil(d.SetDefault("telegram.last_post_channel", 20))

@@ -6,10 +6,12 @@ import (
 
 	"common/rabbit"
 
+	"fmt"
+
 	"github.com/Sirupsen/logrus"
 )
 
-func (mw *MultiWorker) existChannelAdFor(channelID int64, chatID int64, h []tgo.History, adConfs []channelDetailStat) (map[int64]channelViewStat, int64) {
+func (mw *MultiWorker) existChannelAdFor(h []tgo.History, adConfs []channelDetailStat) map[int64]channelViewStat {
 	var finalResult = make(map[int64]channelViewStat)
 	var sumIndividualView int64
 	var countIndividual int64
@@ -55,16 +57,13 @@ bigloop:
 			//send stop (warn message)
 			rabbit.MustPublish(&bot2.SendWarn{
 				AdID:      adConfs[i].adID,
-				ChannelID: channelID,
-				ChatID:    chatID,
-				Msg:       "please remove the following ad",
+				ChannelID: adConfs[i].channelID,
+				ChatID:    adConfs[i].botChatID,
+				Msg:       fmt.Sprintf("please remove the following ad for bundle %s from your channel @%s", adConfs[i].code, adConfs[i].channelID),
 			})
 		}
 	}
 
-	if countIndividual == 0 {
-		return finalResult, 0
-	}
 	logrus.Warnf("%+v", finalResult, sumIndividualView, countIndividual)
-	return finalResult, (sumIndividualView) / (countIndividual)
+	return finalResult
 }

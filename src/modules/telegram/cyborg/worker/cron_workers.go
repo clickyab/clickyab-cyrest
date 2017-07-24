@@ -1,5 +1,7 @@
 package worker
 
+/*
+
 import (
 	"common/assert"
 	"common/config"
@@ -86,3 +88,4 @@ func (mw *MultiWorker) cronReview() error {
 
 	return nil
 }
+*/
