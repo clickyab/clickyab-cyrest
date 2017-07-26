@@ -58,6 +58,11 @@ func StartConversion(bot *tgbotapi.BotAPI, chatID int64, mode int) {
 	send(bot, chatID, response{response: qSet[0].StringRequest})
 
 	RegisterUserHandler(chatID, func(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
+		if m.Text == "/cancel" {
+			UnRegisterUserHandler(chatID)
+			send(bot, chatID, response{response: "process canceled"})
+			return
+		}
 		for i := range qSet {
 			currentState := &states[i]
 
@@ -80,9 +85,11 @@ func StartConversion(bot *tgbotapi.BotAPI, chatID int64, mode int) {
 				}
 			}
 			send(bot, chatID, *currentState)
-			break
+			if len(qSet)-1 == i {
+				UnRegisterUserHandler(chatID)
+			}
+			return
 		}
-		UnRegisterUserHandler(chatID)
 	}, time.Hour)
 }
 
@@ -91,7 +98,7 @@ func send(bot *tgbotapi.BotAPI, chatID int64, r response) {
 		sendString(bot, chatID, trans.T(r.response).Translate(trans.PersianLang))
 		return
 	}
-	sendWithKeyboard(bot, NewKeyboard(*r.keyboard...), chatID, trans.T(r.response))
+	sendWithKeyboard(bot, NewKeyboard(*r.keyboard), chatID, trans.T(r.response))
 }
 
 func sendString(bot *tgbotapi.BotAPI, chatID int64, message string) {

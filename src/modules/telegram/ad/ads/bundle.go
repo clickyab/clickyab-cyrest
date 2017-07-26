@@ -31,7 +31,7 @@ type BType string
 type Bundles struct {
 	ID            int64             `db:"id" json:"id"`
 	UserID        int64             `db:"user_id" json:"user_id"`
-	Position      int64             `db:"position" json:"position"`
+	Place         int64             `db:"place" json:"place"`
 	View          int64             `db:"view" json:"view"`
 	Price         int64             `db:"price" json:"price"`
 	PercentFinish int64             `db:"percent_finish" json:"percent_finish"`

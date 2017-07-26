@@ -17,9 +17,8 @@ type bot struct {
 const htmlMode string = "HTML"
 
 var (
-	doneReg              = regexp.MustCompile(`/done_(\w+)`)
-	channelBundleIDRegex = regexp.MustCompile(`(\d+)_(\d+)`)
-	completeAd           = regexp.MustCompile("/complete_([0-9]+)_([0-9]+)")
+	doneReg    = regexp.MustCompile(`/done_(\w+)`)
+	completeAd = regexp.MustCompile("/complete_([0-9]+)_([0-9]+)")
 	//send bundle to channel first bundle id & second channel id
 	//sendAd = regexp.MustCompile("/send_([0-9]+)_([0-9]+)")
 
@@ -39,6 +38,7 @@ func send(bot *tgbotapi.BotAPI, chatID int64, message trans.T9String) {
 
 func sendWithKeyboard(bot *tgbotapi.BotAPI, keyboard tgbotapi.ReplyKeyboardMarkup, chatID int64, message trans.T9String) {
 	msg := tgbotapi.NewMessage(chatID, message.Text)
+	keyboard.OneTimeKeyboard = true
 	msg.ReplyMarkup = keyboard
 	_, err := bot.Send(msg)
 	assert.Nil(err)
