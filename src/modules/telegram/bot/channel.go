@@ -9,9 +9,9 @@ import (
 
 	"github.com/Sirupsen/logrus"
 
-	"common/assert"
-
 	"common/models/common"
+
+	"fmt"
 
 	"gopkg.in/telegram-bot-api.v4"
 )
@@ -22,23 +22,41 @@ func (bb *bot) addChan(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 		send(bot, m.Chat.ID, trans.T("couldn't find your user"))
 		return
 	}
-	send(bot, m.Chat.ID, trans.T("write down your channel tag"))
-	tgbot.RegisterUserHandlerWithExp(m.Chat.ID, func(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
+	send(bot, m.Chat.ID, trans.T("write down your channel tag\nor /cancel to exit process"))
+	tgbot.RegisterUserHandler(m.Chat.ID, func(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 		defer tgbot.UnRegisterUserHandler(m.Chat.ID)
+
+		if m.Text == "/cancel" {
+			request := "adding channel process canceled\n" +
+				"Enter /getbundle to get a bundle\n" +
+				"Enter /addchan to add your new channel\n" +
+				"Enter /delchan to delete one of your channels\n" +
+				"Enter /report to get your financial report\n"
+
+			keyboard := tgbot.NewKeyboard([]string{"/getbundle", "/addchan", "/delchan", "/report"})
+			sendWithKeyboard(bot, keyboard, m.Chat.ID, trans.T(request))
+			return
+		}
+
 		err := ads.NewAdsManager().CreateChannel(&ads.Channel{
-			UserID:        tu.ID,
+			UserID:        tu.UserID,
 			Name:          m.Text,
 			Title:         common.NullString{Valid: false},
 			AdminStatus:   ads.AdminStatusPending,
 			ArchiveStatus: ads.ActiveStatusNo,
-			Active:        ads.ActiveStatusNo,
+			Active:        ads.ActiveStatusYes,
 		})
-		assert.Nil(err)
+		if err != nil {
+			send(bot, m.Chat.ID, trans.T("couldn't add ur channel\ntry /addchan again"))
+		}
 
-		keyboard := tgbot.NewKeyboard("/get_ad", "/addchan", "/delchan")
-		sendWithKeyboard(bot, keyboard, m.Chat.ID, trans.T("use get_ad to get a new ad\nor /delchan to add a new channel"))
-	}, func() {
-		send(bot, m.Chat.ID, trans.T("times up\nenter /addchan again"))
+		request := fmt.Sprintf("ur channel added successfully\n" +
+			"Enter /getbundle to get a bundle\n" +
+			"Enter /addchan to add your new channel\n" +
+			"Enter /delchan to delete one of your channels\n" +
+			"Enter /report to get your financial report")
+		keyboard := tgbot.NewKeyboard([]string{"/getbundle", "/addchan", "/delchan", "/report"})
+		sendWithKeyboard(bot, keyboard, m.Chat.ID, trans.T(request))
 	}, 20*time.Second)
 }
 
@@ -55,14 +73,29 @@ func (bb *bot) delChan(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 		return
 	}
 
-	var channelsName []string
+	var channelsName = make([]string, 0)
 	for i := range channels {
+		logrus.Warn(channels[i].Name)
 		channelsName = append(channelsName, channels[i].Name)
 	}
-	keyboard := tgbot.NewKeyboard(channelsName...)
+
+	keyboard := tgbot.NewKeyboard(append(channelsName, "/cancel"))
 	sendWithKeyboard(bot, keyboard, m.Chat.ID, trans.T("choose one of these channels to be deleted"))
-	tgbot.RegisterUserHandlerWithExp(m.Chat.ID, func(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
+
+	tgbot.RegisterUserHandler(m.Chat.ID, func(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 		defer tgbot.UnRegisterUserHandler(m.Chat.ID)
+
+		if m.Text == "/cancel" {
+			request := `deleting channel process canceled\n` +
+				`Enter /getbundle to get a bundle\n` +
+				`Enter /addchan to add your new channel\n` +
+				`Enter /delchan to delete one of your channels\n` +
+				`Enter /report to get your financial report\n`
+
+			keyboard := tgbot.NewKeyboard([]string{"/getbundle", "/addchan", "/delchan", "/report"})
+			sendWithKeyboard(bot, keyboard, m.Chat.ID, trans.T(request))
+			return
+		}
 
 		if ok := containsString(channelsName, m.Text); !ok {
 			send(bot, m.Chat.ID, trans.T("couldn't find this channel\nenter /delchan to try again"))
@@ -75,10 +108,14 @@ func (bb *bot) delChan(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 			return
 		}
 
-		keyboard := tgbot.NewKeyboard("/delchan", "/ad")
-		sendWithKeyboard(bot, keyboard, m.Chat.ID, trans.T("channel deleted successfully"))
-	}, func() {
-		send(bot, m.Chat.ID, trans.T("times up\nenter /delchan to try again"))
+		request := `Your channel added successfully\n` +
+			`Enter /getbundle to get a bundle\n` +
+			`Enter /addchan to add your new channel\n` +
+			`Enter /delchan to delete one of your channels\n` +
+			`Enter /report to get your financial report\n`
+
+		keyboard := tgbot.NewKeyboard([]string{"/getbundle", "/addchan", "/delchan", "/report"})
+		sendWithKeyboard(bot, keyboard, m.Chat.ID, trans.T("channel deleted successfully\n"+request))
 	}, 20*time.Second)
 }
 

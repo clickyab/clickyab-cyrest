@@ -51,7 +51,8 @@ func init() {
 		Handler: func(message *tgbotapi.Message, data map[int]interface{}) (string, bool) {
 			bundle, err := ads.NewAdsManager().FindBundlesByCode(message.Text)
 			if err != nil {
-				return "this bundle code were not found/ntry again", false
+				println(err.Error())
+				return "this bundle code were not found\ntry /getbundle again", false
 			}
 			data[bundleData] = bundle
 			return "", true
@@ -85,7 +86,6 @@ func init() {
 			// added to redis
 			err = aredis.StoreKey(hash, key, time.Hour)
 			assert.Nil(err)
-
 			response := fmt.Sprintf("use /done_%s when you're done", hash)
 			return response, true
 		},

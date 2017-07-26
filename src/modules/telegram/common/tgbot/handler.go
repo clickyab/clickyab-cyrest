@@ -25,18 +25,13 @@ func RegisterMessageHandler(s string, hm HandleMessage) error {
 }
 
 // NewKeyboard shows keyboard to user
-func NewKeyboard(buttonsName ...string) tgbotapi.ReplyKeyboardMarkup {
+func NewKeyboard(buttonsName []string) tgbotapi.ReplyKeyboardMarkup {
 	return handler.NewKeyboard(buttonsName)
 }
 
 // RegisterUserHandler redirect all user message to a chat
 func RegisterUserHandler(chatID int64, u HandleMessage, t time.Duration) {
 	handler.RegisterUserHandler(chatID, u, t)
-}
-
-// RegisterUserHandlerWithExp redirect all user message to a chat
-func RegisterUserHandlerWithExp(i int64, u HandleMessage, expiredFunc func(), t time.Duration) {
-	handler.RegisterUserHandlerWithExp(i, u, expiredFunc, t)
 }
 
 // UnRegisterUserHandler redirect all user message to a chat

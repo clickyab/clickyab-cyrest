@@ -11,11 +11,18 @@ import (
 	"modules/telegram/ad/ads"
 	"strconv"
 
+	"strings"
+
+	"modules/telegram/teleuser/tlu"
+
 	"github.com/Sirupsen/logrus"
 	"gopkg.in/telegram-bot-api.v4"
 )
 
 func (bb *bot) doneORReject(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
+	teleUser, err := tlu.NewTluManager().FindTeleUserByBotChatID(m.Chat.ID)
+	assert.Nil(err)
+
 	doneSlice := doneReg.FindStringSubmatch(m.Text)
 	if len(doneSlice) != 2 {
 		send(bot, m.Chat.ID, trans.T("your command is <b>not valid1</b>"))
@@ -29,18 +36,16 @@ func (bb *bot) doneORReject(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 		return
 	}
 
-	channelBundleID := channelBundleIDRegex.FindStringSubmatch(value)
-	if len(channelBundleID) != 3 {
+	// bundleID,ChannelName
+	channelBundleID := strings.Split(value, ",")
+	if len(channelBundleID) != 2 {
 		logrus.Panic("wrong redis insert in /getBundle command")
 	}
 
-	channelID, err := strconv.ParseInt(channelBundleID[1], 10, 0)
+	channel, err := ads.NewAdsManager().FindChannelByUserIDChannelName(teleUser.UserID, channelBundleID[1])
 	assert.Nil(err)
 
-	/*channel, err := ads.NewAdsManager().FindChannelByID(channelID)
-	assert.Nil(err)*/
-
-	bundleID, err := strconv.ParseInt(channelBundleID[2], 10, 0)
+	bundleID, err := strconv.ParseInt(channelBundleID[0], 10, 0)
 	assert.Nil(err)
 
 	bundle, err := ads.NewAdsManager().FindBundlesByID(bundleID)
@@ -49,10 +54,12 @@ func (bb *bot) doneORReject(bot *tgbotapi.BotAPI, m *tgbotapi.Message) {
 	adID := bundle.TargetAd
 
 	err = ads.NewAdsManager().UpdateBundleChannelAd(&ads.BundleChannelAd{
-		ChannelID: channelID,
+		ChannelID: channel.ID,
 		BundleID:  bundleID,
 		AdID:      adID,
-		Active:    ads.ActiveStatusYes,
+		Active:    ads.ActiveStatusNo,
 	})
 	assert.Nil(err)
+
+	send(bot, m.Chat.ID, trans.T("successfully done"))
 }

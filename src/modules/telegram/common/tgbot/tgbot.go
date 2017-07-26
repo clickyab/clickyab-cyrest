@@ -65,11 +65,11 @@ func NewTelegramBot(token string) TelegramBot {
 // TODO just one row for now
 // ShowKeyboard shows keyboard to user
 func (tb *telegramBot) NewKeyboard(buttonsName []string) tgbotapi.ReplyKeyboardMarkup {
-	buttons := []tgbotapi.KeyboardButton{}
+	buttons := make([][]tgbotapi.KeyboardButton, (len(buttonsName)+2)/3)
 	for i := range buttonsName {
-		buttons = append(buttons, tgbotapi.NewKeyboardButton(buttonsName[i]))
+		buttons[i/3] = append(buttons[i/3], tgbotapi.NewKeyboardButton(buttonsName[i]))
 	}
-	return tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(buttons...))
+	return tgbotapi.NewReplyKeyboard(buttons...)
 }
 
 func (tb *telegramBot) RegisterMessageHandler(cmd string, handler HandleMessage) error {
